@@ -384,20 +384,27 @@ pre.mermaid {
 <h3>Chapter 15: DDPO — 디퓨전의 정책 그래디언트</h3>
 <p>Ch14에서 디퓨전 모델에 DPO를 적용하는 법을 배웠다. 핵심은 쌍비교 데이터 — &quot;이 이미지가 저 이미지보다 낫다&quot;는 인간 레이블이 있으면, 보상 모델 없이도 디퓨전 모델을 정렬할 수 있다는 것이었다.</p>
 <p>하지만 현실에서는 쌍비교 데이터가 없고, 대신 <strong>보상 모델</strong>이 있는 경우가 훨씬 많다.</p>
-<pre><code>쌍비교 데이터가 없는 상황들:
-
-  1. CLIP 점수 — &quot;이 이미지가 프롬프트에 얼마나 맞는가?&quot;를 0~1로 매겨준다.
-     → 쌍이 아니라 개별 점수다.
-
-  2. 미학 점수(aesthetic score) — &quot;이 이미지가 얼마나 아름다운가?&quot;
-     → 역시 개별 점수다.
-
-  3. 미분불가능한 보상 — 외부 검출기(&quot;얼굴이 있는가?&quot;), 물리 시뮬레이터(&quot;이 설계가 안정한가?&quot;)
-     → 이런 것들은 쌍비교로 수집하기 어렵거나 불가능하다.
-
-  4. 인간 피드백을 이미 보상 모델로 증류해 둔 경우 (ImageReward, HPS, PickScore)
-     → 원본 쌍비교 데이터 없이 점수만 남아 있다.
-</code></pre>
+<blockquote>
+<p><strong>쌍비교 데이터가 없는 상황들:</strong></p>
+<ol>
+<li>
+<p>CLIP 점수 — &quot;이 이미지가 프롬프트에 얼마나 맞는가?&quot;를 0~1로 매겨준다.<br>
+→ 쌍이 아니라 개별 점수다.</p>
+</li>
+<li>
+<p>미학 점수(aesthetic score) — “이 이미지가 얼마나 아름다운가?”<br>
+→ 역시 개별 점수다.</p>
+</li>
+<li>
+<p>미분불가능한 보상 — 외부 검출기(“얼굴이 있는가?”), 물리 시뮬레이터(“이 설계가 안정한가?”)<br>
+→ 이런 것들은 쌍비교로 수집하기 어렵거나 불가능하다.</p>
+</li>
+<li>
+<p>인간 피드백을 이미 보상 모델로 증류해 둔 경우 (ImageReward, HPS, PickScore)<br>
+→ 원본 쌍비교 데이터 없이 점수만 남아 있다.</p>
+</li>
+</ol>
+</blockquote>
 <p>이런 상황에서 디퓨전 모델을 개선하고 싶다면? DPO는 쓸 수 없다 — 쌍이 없으니까. 그렇다면 Part I에서 배운 전통적인 RL 방식, 즉 <strong>보상 모델 + 정책 그래디언트</strong>로 돌아가야 한다. LLM에서는 PPO(Ch4)가 이 역할을 했다. 디퓨전에서도 같은 일을 할 수 있을까?</p>
 <h4>의문: 디퓨전에서 정책 그래디언트가 가능한가?</h4>
 <p>디퓨전 모델에서 RL의 정책 그래디언트를 직접 쓸 수 있는가? 로그확률이 없는데?</p>
@@ -409,14 +416,42 @@ pre.mermaid {
 <li><strong>각 스텝이 가우시안이므로 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">\log p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span></span></span></span></eq>를 닫힌 형태로 정확 계산 가능</strong></li>
 </ul>
 <h4>DDPO vs D3PO 비교</h4>
-<pre><code>| 항목         | DDPO (RL)              | D3PO (DPO 변형)          |
-|--------------|------------------------|--------------------------|
-| 패러다임     | 정책 그래디언트          | 직접 선호 최적화          |
-| 보상 모델    | 필요 (CLIP, 미학 점수)  | 불필요 (쌍비교)           |
-| 로그확률     | 스텝별 정확 계산         | ELBO 근사                |
-| 미분불가 보상 | 가능                   | 불가                     |
-| 온라인 생성  | 필수                   | 불필요                    |
-</code></pre>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>DDPO (RL)</th>
+<th>D3PO (DPO 변형)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>패러다임</td>
+<td>정책 그래디언트</td>
+<td>직접 선호 최적화</td>
+</tr>
+<tr>
+<td>보상 모델</td>
+<td>필요 (CLIP, 미학 점수)</td>
+<td>불필요 (쌍비교)</td>
+</tr>
+<tr>
+<td>로그확률</td>
+<td>스텝별 정확 계산</td>
+<td>ELBO 근사</td>
+</tr>
+<tr>
+<td>미분불가 보상</td>
+<td>가능</td>
+<td>불가</td>
+</tr>
+<tr>
+<td>온라인 생성</td>
+<td>필수</td>
+<td>불필요</td>
+</tr>
+</tbody>
+</table>
 <p>같은 시작점(x_T)에서 서로 다른 노이즈가 서로 다른 궤적과 보상을 만드는 것을 아래 그림이 보여준다:</p>
 <svg viewBox="0 0 520 280" xmlns="http://www.w3.org/2000/svg" style="max-width:520px; font-family:'Noto Sans KR',sans-serif">
   <!-- 타이틀 -->
@@ -455,102 +490,109 @@ pre.mermaid {
   <text x="260" y="275" text-anchor="middle" font-size="11" fill="#333">→ 고보상 궤적의 μ_θ 강화, 저보상 궤적의 μ_θ 약화</text>
 </svg>
 <h4>노이즈는 탐색이고, <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mi>θ</mi></msub></mrow><annotation encoding="application/x-tex">\mu_\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">μ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>는 학습이다</h4>
-<pre><code>같은 x_T에서 다른 노이즈 → 다른 궤적 → 다른 이미지 → 다른 보상
-→ 보상 좋은 궤적의 μ_θ 판단을 강화
-→ 보상 나쁜 궤적의 μ_θ 판단을 약화
-
-이것은 로봇 RL의 가우시안 정책 π(a|s) = N(μ_θ(s), σ²)과 동형:
-  σ = 탐색 (노이즈)
-  μ_θ = 학습된 판단 (모델)
-</code></pre>
+<blockquote>
+<p>같은 x_T에서 다른 노이즈 → 다른 궤적 → 다른 이미지 → 다른 보상<br>
+→ 보상 좋은 궤적의 μ_θ 판단을 강화<br>
+→ 보상 나쁜 궤적의 μ_θ 판단을 약화</p>
+<p>이것은 로봇 RL의 가우시안 정책 π(a|s) = N(μ_θ(s), σ²)과 동형:\</p>
+<ul>
+<li>σ = 탐색 (노이즈)\</li>
+<li>μ_θ = 학습된 판단 (모델)</li>
+</ul>
+</blockquote>
 <h4>DDPO의 한계 — 보상 모델이라는 아킬레스건</h4>
 <p>DDPO는 D3PO(디퓨전 DPO)와 달리 쌍비교 데이터가 필요 없다는 장점이 있지만, 그 대가로 <strong>보상 모델에 전적으로 의존</strong>한다. 이것이 실무에서 심각한 문제를 만든다.</p>
-<pre><code>DDPO의 보상 모델 의존성:
-
-  DDPO의 학습 루프:
-    이미지 생성 → 보상 모델이 점수 매김 → 점수에 비례하여 정책 업데이트
-
-  보상 모델의 선택지:
-    - CLIP 점수: 텍스트-이미지 정합도
-    - 미학 점수 (aesthetic score): 이미지의 시각적 품질
-    - BLIP 점수: 캡션 일치도
-    - 인간 선호 모델 (HPS, PickScore, ImageReward 등)
-
-  문제: 이 보상 모델들은 모두 불완전하다.
-  보상 모델이 &quot;좋은 이미지&quot;라고 판단하는 것과
-  인간이 &quot;좋은 이미지&quot;라고 판단하는 것 사이에 간극이 있다.
-</code></pre>
+<blockquote>
+<p><strong>DDPO의 보상 모델 의존성:</strong></p>
+<p><strong>DDPO의 학습 루프:</strong><br>
+이미지 생성 → 보상 모델이 점수 매김 → 점수에 비례하여 정책 업데이트</p>
+<p><strong>보상 모델의 선택지:</strong>\</p>
+<ul>
+<li>CLIP 점수: 텍스트-이미지 정합도\</li>
+<li>미학 점수 (aesthetic score): 이미지의 시각적 품질\</li>
+<li>BLIP 점수: 캡션 일치도\</li>
+<li>인간 선호 모델 (HPS, PickScore, ImageReward 등)</li>
+</ul>
+<p><strong>문제:</strong> 이 보상 모델들은 모두 불완전하다.<br>
+보상 모델이 &quot;좋은 이미지&quot;라고 판단하는 것과<br>
+인간이 &quot;좋은 이미지&quot;라고 판단하는 것 사이에 간극이 있다.</p>
+</blockquote>
 <p><strong>리워드 해킹(Reward Hacking)</strong>: DDPO의 가장 심각한 문제.</p>
-<pre><code>리워드 해킹이란:
-  모델이 보상 모델의 빈틈을 찾아서,
-  보상은 높지만 실제로는 좋지 않은 이미지를 생성하는 것.
-
-실제 관찰된 사례들:
-
-  [CLIP 점수 해킹]
-  프롬프트: &quot;a cat sitting on a mat&quot;
-  → DDPO가 CLIP 점수를 최대화하도록 학습하면:
-    이미지에 텍스트 &quot;cat&quot;이 직접 쓰여 있는 이미지를 생성하기 시작한다.
-    → CLIP은 이미지 안의 텍스트도 &quot;cat&quot;이라는 개념의 증거로 인식
-    → 점수는 올라가지만, 이것은 고양이 사진이 아니다.
-    → &quot;시험 답안지에 정답을 미리 적어놓는&quot; 것과 같다.
-
-  [미학 점수 해킹]
-  → 극단적으로 채도가 높고 대비가 강한 이미지를 생성
-  → 미학 모델이 &quot;선명함&quot;을 높은 점수로 매기는 편향을 이용
-  → 결과: 보기에는 화려하지만 프롬프트와 무관한 이미지
-  → &quot;시험에서 글씨를 예쁘게 쓰면 점수를 더 주는&quot; 채점자를 이용
-
-  [인간 선호 모델 해킹]
-  → 특정 스타일(고대비 인물 사진 등)에 과도하게 수렴
-  → 학습 데이터셋에서 선호 점수가 높았던 패턴을 반복 생성
-  → 다양성이 사라지고, 모든 프롬프트에 비슷한 이미지가 나온다
-  → Ch11에서 배운 &quot;모드 붕괴&quot;의 시각적 버전
-</code></pre>
+<blockquote>
+<p><strong>리워드 해킹이란:</strong><br>
+모델이 보상 모델의 빈틈을 찾아서,<br>
+보상은 높지만 실제로는 좋지 않은 이미지를 생성하는 것.</p>
+<p><strong>실제 관찰된 사례들:</strong></p>
+<p><strong>CLIP 점수 해킹:</strong><br>
+프롬프트: “a cat sitting on a mat”<br>
+→ DDPO가 CLIP 점수를 최대화하도록 학습하면:<br>
+이미지에 텍스트 &quot;cat&quot;이 직접 쓰여 있는 이미지를 생성하기 시작한다.<br>
+→ CLIP은 이미지 안의 텍스트도 &quot;cat&quot;이라는 개념의 증거로 인식<br>
+→ 점수는 올라가지만, 이것은 고양이 사진이 아니다.<br>
+→ “시험 답안지에 정답을 미리 적어놓는” 것과 같다.</p>
+<p><strong>미학 점수 해킹:</strong><br>
+→ 극단적으로 채도가 높고 대비가 강한 이미지를 생성<br>
+→ 미학 모델이 &quot;선명함&quot;을 높은 점수로 매기는 편향을 이용<br>
+→ 결과: 보기에는 화려하지만 프롬프트와 무관한 이미지<br>
+→ “시험에서 글씨를 예쁘게 쓰면 점수를 더 주는” 채점자를 이용</p>
+<p><strong>인간 선호 모델 해킹:</strong><br>
+→ 특정 스타일(고대비 인물 사진 등)에 과도하게 수렴<br>
+→ 학습 데이터셋에서 선호 점수가 높았던 패턴을 반복 생성<br>
+→ 다양성이 사라지고, 모든 프롬프트에 비슷한 이미지가 나온다<br>
+→ Ch11에서 배운 &quot;모드 붕괴&quot;의 시각적 버전</p>
+</blockquote>
 <p>왜 리워드 해킹이 DDPO에서 특히 심각한가:</p>
-<pre><code>DPO(Ch14)에서는 리워드 해킹이 덜 심각하다:
-  → 보상 모델 자체가 없다 (쌍비교 데이터가 보상 역할)
-  → 모델이 해킹할 &quot;보상 함수&quot;가 존재하지 않는다
-  → 오프라인 데이터의 범위 밖으로 벗어나기도 어렵다
-
-DDPO에서 리워드 해킹이 심각한 이유:
-  1. 온라인 생성: 모델이 자유롭게 탐색할 수 있으므로
-     보상 모델이 예상하지 못한 영역을 발견할 수 있다
-  2. 보상 최대화: 정책 그래디언트는 보상을 최대화하는 방향으로 밀기만 한다
-     → 보상 모델의 빈틈 방향으로도 밀린다
-  3. KL 제약의 한계: β가 줄 역할을 하지만,
-     줄이 닿는 범위 안에서도 해킹이 가능하다
-     → &quot;줄에 묶여 있어도 뒷마당에서 구멍을 파는 개&quot;
-
-비유로 정리:
-  DDPO = 학생이 자유롭게 답안을 쓰고, 자동채점기가 점수를 매긴다.
-  → 학생이 자동채점기의 패턴을 학습해서 점수만 높이는 답안을 쓸 수 있다.
-  → 채점기가 완벽하지 않으면 반드시 이런 일이 벌어진다.
-  → Ch13의 RLVR에서 &quot;정답이 있으면 리워드 해킹이 불가능하다&quot;와 대비:
-    수학 문제는 &quot;42가 맞는가?&quot;에 빈틈이 없다.
-    하지만 &quot;이 이미지가 아름다운가?&quot;에는 빈틈이 가득하다.
-</code></pre>
+<blockquote>
+<p><strong>DPO(Ch14)에서는 리워드 해킹이 덜 심각하다:</strong><br>
+→ 보상 모델 자체가 없다 (쌍비교 데이터가 보상 역할)<br>
+→ 모델이 해킹할 &quot;보상 함수&quot;가 존재하지 않는다<br>
+→ 오프라인 데이터의 범위 밖으로 벗어나기도 어렵다</p>
+<p><strong>DDPO에서 리워드 해킹이 심각한 이유:</strong>\</p>
+<ol>
+<li>온라인 생성: 모델이 자유롭게 탐색할 수 있으므로<br>
+보상 모델이 예상하지 못한 영역을 발견할 수 있다\</li>
+<li>보상 최대화: 정책 그래디언트는 보상을 최대화하는 방향으로 밀기만 한다<br>
+→ 보상 모델의 빈틈 방향으로도 밀린다\</li>
+<li>KL 제약의 한계: β가 줄 역할을 하지만,<br>
+줄이 닿는 범위 안에서도 해킹이 가능하다<br>
+→ “줄에 묶여 있어도 뒷마당에서 구멍을 파는 개”</li>
+</ol>
+<p><strong>비유로 정리:</strong><br>
+DDPO = 학생이 자유롭게 답안을 쓰고, 자동채점기가 점수를 매긴다.<br>
+→ 학생이 자동채점기의 패턴을 학습해서 점수만 높이는 답안을 쓸 수 있다.<br>
+→ 채점기가 완벽하지 않으면 반드시 이런 일이 벌어진다.<br>
+→ Ch13의 RLVR에서 &quot;정답이 있으면 리워드 해킹이 불가능하다&quot;와 대비:<br>
+수학 문제는 &quot;42가 맞는가?&quot;에 빈틈이 없다.<br>
+하지만 &quot;이 이미지가 아름다운가?&quot;에는 빈틈이 가득하다.</p>
+</blockquote>
 <p>현재까지의 완화(mitigation) 시도:</p>
-<pre><code>  1. KL 제약 강화: β를 높여서 레퍼런스에서 멀어지지 못하게
-     → 효과: 해킹 감소, 하지만 학습 자체도 느려짐 (보수적)
-
-  2. 보상 앙상블: 여러 보상 모델의 평균으로 보상
-     → 효과: 한 모델의 빈틈을 다른 모델이 보완
-     → 한계: 모든 모델이 공유하는 편향은 해결 불가
-
-  3. 보상 클리핑: 보상이 일정 값 이상이면 잘라냄
-     → &quot;더 좋아지는 것&quot;에 상한을 둬서 극단적 최적화 방지
-     → 효과적이지만, 최적 클리핑 값을 찾는 것이 또 다른 문제
-
-  4. DPO로 전환: 보상 모델 자체를 제거 (Ch14)
-     → 리워드 해킹 문제를 구조적으로 회피
-     → 하지만 탐색 능력을 포기해야 한다는 대가
-
-  → 근본적 해결은 아직 없다.
-    &quot;불완전한 보상 모델로 온라인 RL을 돌리면 해킹은 필연적이다&quot;
-    이것이 DDPO 계열 연구의 가장 큰 미해결 문제이고,
-    Ch16에서 다룰 DanceGRPO, B²-DiffuRL 등이 이 문제에 다양한 각도로 접근한다.
-</code></pre>
+<blockquote>
+<ol>
+<li>
+<p>KL 제약 강화: β를 높여서 레퍼런스에서 멀어지지 못하게<br>
+→ 효과: 해킹 감소, 하지만 학습 자체도 느려짐 (보수적)</p>
+</li>
+<li>
+<p>보상 앙상블: 여러 보상 모델의 평균으로 보상<br>
+→ 효과: 한 모델의 빈틈을 다른 모델이 보완<br>
+→ 한계: 모든 모델이 공유하는 편향은 해결 불가</p>
+</li>
+<li>
+<p>보상 클리핑: 보상이 일정 값 이상이면 잘라냄<br>
+→ &quot;더 좋아지는 것&quot;에 상한을 둬서 극단적 최적화 방지<br>
+→ 효과적이지만, 최적 클리핑 값을 찾는 것이 또 다른 문제</p>
+</li>
+<li>
+<p>DPO로 전환: 보상 모델 자체를 제거 (Ch14)<br>
+→ 리워드 해킹 문제를 구조적으로 회피<br>
+→ 하지만 탐색 능력을 포기해야 한다는 대가</p>
+</li>
+</ol>
+<p>→ 근본적 해결은 아직 없다.<br>
+“불완전한 보상 모델로 온라인 RL을 돌리면 해킹은 필연적이다”<br>
+이것이 DDPO 계열 연구의 가장 큰 미해결 문제이고,<br>
+Ch16에서 다룰 DanceGRPO, B²-DiffuRL 등이 이 문제에 다양한 각도로 접근한다.</p>
+</blockquote>
 <h4>시각화 계획</h4>
 <ul>
 <li>궤적 분기 다이어그램: 같은 시작 → 다른 노이즈 → 10개 궤적 → 보상별 색</li>

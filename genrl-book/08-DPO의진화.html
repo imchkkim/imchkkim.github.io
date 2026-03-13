@@ -389,152 +389,143 @@ pre.mermaid {
 <p>CNN이 LeNet(1998)에서 AlexNet, VGG, GoogLeNet을 거쳐 다양한 시행착오를 겪었듯이, DPO(2023)도 하나의 씨앗에서 출발해서 각 약점을 고치는 과정에서 가계도를 만들어냈다. 이 장은 그 진화의 서사를 따라간다.</p>
 <p>(CNN의 비유를 이어가자면: 이 장에서 다루는 DPO 변형들은 AlexNet, VGG, GoogLeNet에 해당한다 — 각각 의미 있는 개선이지만, 근본 패러다임은 같다. 진짜 “ResNet 모먼트” — 잔차 연결이 그래디언트 소실이라는 딥러닝 자체의 근본 문제를 해결했듯이, 패러다임 자체를 바꾸는 전환 — 는 Ch13의 GRPO에서 온다.)</p>
 <h4>세대 0: DPO (2023) — “보상 모델이 필요 없다”</h4>
-<pre><code>DPO 이전의 세계 (RLHF/PPO):
-  정책 모델 + 레퍼런스 모델 + 보상 모델 + 가치 모델 = 4개 모델
-  → 메모리, 구현 복잡도, 하이퍼파라미터 튜닝의 지옥
-
-DPO의 혁명:
-  정책 모델 + 레퍼런스 모델 = 2개 모델
-  보상 모델을 수학적으로 제거 (재매개변수화)
-  → 코드 4–6줄로 기존 SFT 파이프라인에 붙일 수 있다
-  → 학계와 오픈소스에서 폭발적 채택 (Zephyr, Tulu 2 등)
-
-하지만 DPO에는 다섯 가지 약점이 숨어 있었다.
-각 약점을 발견하고 고치는 과정이 곧 변형 알고리즘의 역사다.
-</code></pre>
+<blockquote>
+<p><strong>DPO 이전의 세계 (RLHF/PPO):</strong><br>
+정책 모델 + 레퍼런스 모델 + 보상 모델 + 가치 모델 = 4개 모델<br>
+→ 메모리, 구현 복잡도, 하이퍼파라미터 튜닝의 지옥</p>
+<p><strong>DPO의 혁명:</strong><br>
+정책 모델 + 레퍼런스 모델 = 2개 모델<br>
+보상 모델을 수학적으로 제거 (재매개변수화)<br>
+→ 코드 4–6줄로 기존 SFT 파이프라인에 붙일 수 있다<br>
+→ 학계와 오픈소스에서 폭발적 채택 (Zephyr, Tulu 2 등)</p>
+<p>하지만 DPO에는 다섯 가지 약점이 숨어 있었다.<br>
+각 약점을 발견하고 고치는 과정이 곧 변형 알고리즘의 역사다.</p>
+</blockquote>
 <h4>1세대: 이론적 약점을 고치다</h4>
 <p><strong>문제 1: BT 과적합 — 마진을 끝없이 벌리려 한다</strong></p>
-<pre><code>DPO의 BT(시그모이드) 손실은 마진이 아무리 커져도 손실이 0에 도달하지 않는다.
-→ 학습이 계속되면 마진을 끝없이 벌리려 한다
-→ 선호/비선호 응답에 극단적 확률을 할당
-→ 과적합: 학습 데이터의 선호 패턴을 달달 외운다
-
-IPO (Identity Preference Optimization, Azar et al. 2024):
-  σ(시그모이드)를 MSE(평균제곱오차)로 교체
-  L = (마진 − 1/(2β))²
-
-  효과:
-  → 마진이 타깃(1/(2β))에 도달하면 양쪽으로 밀어내는 힘이 생긴다
-  → &quot;충분히 벌렸으면 그만&quot; — 자동 조절
-  → BT 모델을 가정하지 않으므로 이론적으로 더 일반적
-
-  비유: DPO가 &quot;항상 더 벌려!&quot;라면, IPO는 &quot;딱 이만큼만 벌려.&quot;
-</code></pre>
+<blockquote>
+<p>DPO의 BT(시그모이드) 손실은 마진이 아무리 커져도 손실이 0에 도달하지 않는다.<br>
+→ 학습이 계속되면 마진을 끝없이 벌리려 한다<br>
+→ 선호/비선호 응답에 극단적 확률을 할당<br>
+→ 과적합: 학습 데이터의 선호 패턴을 달달 외운다</p>
+<p><strong>IPO (Identity Preference Optimization, Azar et al. 2024):</strong><br>
+σ(시그모이드)를 MSE(평균제곱오차)로 교체<br>
+L = (마진 − 1/(2β))²</p>
+<p><strong>효과:</strong><br>
+→ 마진이 타깃(1/(2β))에 도달하면 양쪽으로 밀어내는 힘이 생긴다<br>
+→ “충분히 벌렸으면 그만” — 자동 조절<br>
+→ BT 모델을 가정하지 않으므로 이론적으로 더 일반적</p>
+<p><strong>비유:</strong> DPO가 &quot;항상 더 벌려!&quot;라면, IPO는 “딱 이만큼만 벌려.”</p>
+</blockquote>
 <p><strong>문제 2: 노이즈 라벨에 취약하다</strong></p>
-<pre><code>현실의 선호 데이터에는 노이즈가 있다:
-  → 평가자가 실수로 비선호를 선호로 표기
-  → 두 응답이 거의 같은 품질인데 억지로 순서를 매김
-  → 평가자 간 불일치 (한 명은 A, 다른 한 명은 B를 선호)
-
-DPO는 이 노이즈를 그대로 학습한다 — 모든 쌍을 동등하게 믿으니까.
-
-cDPO (Conservative DPO, 2024):
-  라벨에 보수적 스무딩(smoothing)을 적용
-  &quot;이 쌍의 라벨이 틀렸을 확률 ε&quot;을 도입
-  → 노이즈가 있는 쌍의 영향력을 줄인다
-
-  비유: DPO가 &quot;모든 증인의 증언을 100% 믿는 판사&quot;라면,
-       cDPO는 &quot;증인이 거짓말할 확률을 고려하는 판사&quot;
-</code></pre>
+<blockquote>
+<p>현실의 선호 데이터에는 노이즈가 있다:<br>
+→ 평가자가 실수로 비선호를 선호로 표기<br>
+→ 두 응답이 거의 같은 품질인데 억지로 순서를 매김<br>
+→ 평가자 간 불일치 (한 명은 A, 다른 한 명은 B를 선호)</p>
+<p>DPO는 이 노이즈를 그대로 학습한다 — 모든 쌍을 동등하게 믿으니까.</p>
+<p><strong>cDPO (Conservative DPO, 2024):</strong><br>
+라벨에 보수적 스무딩(smoothing)을 적용<br>
+&quot;이 쌍의 라벨이 틀렸을 확률 ε&quot;을 도입<br>
+→ 노이즈가 있는 쌍의 영향력을 줄인다</p>
+<p><strong>비유:</strong> DPO가 &quot;모든 증인의 증언을 100% 믿는 판사&quot;라면,<br>
+cDPO는 “증인이 거짓말할 확률을 고려하는 판사”</p>
+</blockquote>
 <h4>2세대: 데이터 요구를 줄이다</h4>
 <p><strong>문제 3: 꼭 쌍(pair)이 필요하다</strong></p>
-<pre><code>DPO의 데이터 형식: (프롬프트, 선호 응답, 비선호 응답)
-  → 같은 프롬프트에 대해 두 응답이 필요
-  → 현실에서 수집하기 어렵고 비싸다
-  → 기존 피드백 데이터(&quot;이 응답 좋다/나쁘다&quot;)를 못 쓴다
-
-KTO (Kahneman-Tversky Optimization, Ethayarajh et al. 2024):
-  쌍 없이, 개별 응답에 &quot;좋다(1)/나쁘다(0)&quot; 이진 라벨만 있으면 된다.
-
-  핵심 아이디어: 행동경제학의 전망 이론(Prospect Theory)
-  → 인간은 이득과 손실을 비대칭적으로 느낀다
-  → 같은 크기라도 손실이 이득보다 약 2배 더 아프다
-  → KTO 손실함수에 이 비대칭을 내장
-
-  효과:
-  → 기존 &quot;좋아요/싫어요&quot; 데이터를 그대로 활용 가능
-  → 쌍 구성 비용 제거
-  → 트레이드오프: 쌍비교의 &quot;상대적 우열&quot; 시그널을 포기
-</code></pre>
+<blockquote>
+<p><strong>DPO의 데이터 형식:</strong> (프롬프트, 선호 응답, 비선호 응답)<br>
+→ 같은 프롬프트에 대해 두 응답이 필요<br>
+→ 현실에서 수집하기 어렵고 비싸다<br>
+→ 기존 피드백 데이터(“이 응답 좋다/나쁘다”)를 못 쓴다</p>
+<p><strong>KTO (Kahneman-Tversky Optimization, Ethayarajh et al. 2024):</strong><br>
+쌍 없이, 개별 응답에 “좋다(1)/나쁘다(0)” 이진 라벨만 있으면 된다.</p>
+<p><strong>핵심 아이디어:</strong> 행동경제학의 전망 이론(Prospect Theory)<br>
+→ 인간은 이득과 손실을 비대칭적으로 느낀다<br>
+→ 같은 크기라도 손실이 이득보다 약 2배 더 아프다<br>
+→ KTO 손실함수에 이 비대칭을 내장</p>
+<p><strong>효과:</strong><br>
+→ 기존 “좋아요/싫어요” 데이터를 그대로 활용 가능<br>
+→ 쌍 구성 비용 제거<br>
+→ 트레이드오프: 쌍비교의 “상대적 우열” 시그널을 포기</p>
+</blockquote>
 <h4>3세대: 레퍼런스 모델을 제거하다</h4>
 <p><strong>문제 4: 레퍼런스 모델이 메모리를 잡아먹는다</strong></p>
-<pre><code>DPO는 매 순전파마다 두 모델을 돌려야 한다:
-  π_θ (학습 중인 모델)와 π_ref (고정된 원본 모델)
-  → 7B 모델 기준, 메모리 사용량이 거의 2배
-  → GPU가 부족한 환경에서 치명적
-
-CPO (Contrastive Preference Optimization, Xu et al. 2024):
-  레퍼런스 모델을 제거하고, SFT 손실로 암묵적 정규화
-  L = L_선호 + α × L_SFT(선호 응답)
-  → L_SFT가 &quot;원래 잘하던 것을 유지해라&quot;의 역할 — 암묵적 줄
-
-ORPO (Odds Ratio Preference Optimization, Hong et al. 2024):
-  Ch4에서 배웠다 — 비교 공간을 로그확률에서 로그오즈로 전환.
-  L = L_SFT + λ × L_OR(오즈 비율)
-  → 레퍼런스 모델 불필요
-  → SFT와 선호 정렬을 하나의 학습 루프로 통합 (monolithic)
-  → &quot;비선호에 약한 벌점만 주면 충분하다&quot;는 실험적 발견
-</code></pre>
+<blockquote>
+<p>DPO는 매 순전파마다 두 모델을 돌려야 한다:<br>
+π_θ (학습 중인 모델)와 π_ref (고정된 원본 모델)<br>
+→ 7B 모델 기준, 메모리 사용량이 거의 2배<br>
+→ GPU가 부족한 환경에서 치명적</p>
+<p><strong>CPO (Contrastive Preference Optimization, Xu et al. 2024):</strong><br>
+레퍼런스 모델을 제거하고, SFT 손실로 암묵적 정규화<br>
+L = L_선호 + α × L_SFT(선호 응답)<br>
+→ L_SFT가 &quot;원래 잘하던 것을 유지해라&quot;의 역할 — 암묵적 줄</p>
+<p><strong>ORPO (Odds Ratio Preference Optimization, Hong et al. 2024):</strong><br>
+Ch4에서 배웠다 — 비교 공간을 로그확률에서 로그오즈로 전환.<br>
+L = L_SFT + λ × L_OR(오즈 비율)<br>
+→ 레퍼런스 모델 불필요<br>
+→ SFT와 선호 정렬을 하나의 학습 루프로 통합 (monolithic)<br>
+→ &quot;비선호에 약한 벌점만 주면 충분하다&quot;는 실험적 발견</p>
+</blockquote>
 <h4>4세대: 학습과 생성의 불일치를 해소하다</h4>
 <p><strong>문제 5: 학습 목표와 생성 목표가 다르다</strong></p>
-<pre><code>DPO가 최적화하는 것: log(π_θ(y)/π_ref(y))의 합 — 레퍼런스 대비 로그비율
-모델이 생성할 때 쓰는 것: log π_θ(y)의 합 — 절대 로그확률
-
-이 둘은 같지 않다.
-→ DPO의 보상 모델(암묵적)과 실제 생성 지표 사이에 괴리
-→ 학습에서 &quot;좋다&quot;고 판단한 응답이 실제 생성 시 나오지 않을 수 있다
-→ 실험적으로 reward accuracy가 ~52%까지 떨어지는 경우도
-
-SimPO (Simple Preference Optimization, Meng et al. 2024, NeurIPS):
-  보상을 &quot;평균 로그확률&quot;로 재정의
-  r(y|x) = (1/|y|) × Σ log π_θ(tᵢ|...)
-
-  세 가지를 동시에 해결:
-  1. 학습 목표 = 생성 지표 (불일치 해소)
-  2. 토큰 수로 나눔 → 길이 편향 해소 (Ch4)
-  3. 레퍼런스 모델 불필요 → 메모리 절약 (문제 4)
-
-  추가: 목표 마진 γ
-  L = −log σ(β × (r̄_w − r̄_l) − γ)
-  → γ가 &quot;최소 이만큼은 벌려라&quot;는 하한 — 레퍼런스의 줄 역할을 일부 대체
-
-  결과:
-  → AlpacaEval 2에서 DPO 대비 +6.4점
-  → Arena-Hard에서 +7.5점
-  → Gemma-2-9B-it 기반 모델이 &lt;10B 카테고리에서 Chatbot Arena 1위
-</code></pre>
+<blockquote>
+<p><strong>DPO가 최적화하는 것:</strong> log(π_θ(y)/π_ref(y))의 합 — 레퍼런스 대비 로그비율<br>
+<strong>모델이 생성할 때 쓰는 것:</strong> log π_θ(y)의 합 — 절대 로그확률</p>
+<p>이 둘은 같지 않다.<br>
+→ DPO의 보상 모델(암묵적)과 실제 생성 지표 사이에 괴리<br>
+→ 학습에서 &quot;좋다&quot;고 판단한 응답이 실제 생성 시 나오지 않을 수 있다<br>
+→ 실험적으로 reward accuracy가 ~52%까지 떨어지는 경우도</p>
+<p><strong>SimPO (Simple Preference Optimization, Meng et al. 2024, NeurIPS):</strong><br>
+보상을 &quot;평균 로그확률&quot;로 재정의<br>
+r(y|x) = (1/|y|) × Σ log π_θ(tᵢ|…)</p>
+<p><strong>세 가지를 동시에 해결:</strong>\</p>
+<ol>
+<li>학습 목표 = 생성 지표 (불일치 해소)\</li>
+<li>토큰 수로 나눔 → 길이 편향 해소 (Ch4)\</li>
+<li>레퍼런스 모델 불필요 → 메모리 절약 (문제 4)</li>
+</ol>
+<p><strong>추가:</strong> 목표 마진 γ<br>
+L = −log σ(β × (r̄_w − r̄_l) − γ)<br>
+→ γ가 &quot;최소 이만큼은 벌려라&quot;는 하한 — 레퍼런스의 줄 역할을 일부 대체</p>
+<p><strong>결과:</strong><br>
+→ AlpacaEval 2에서 DPO 대비 +6.4점<br>
+→ Arena-Hard에서 +7.5점<br>
+→ Gemma-2-9B-it 기반 모델이 &lt;10B 카테고리에서 Chatbot Arena 1위</p>
+</blockquote>
 <h4>5세대: 통합 — “이 개선들은 조합할 수 있다”</h4>
-<pre><code>여기까지 각 변형이 고친 것:
-  IPO: σ 교체 (과적합 방지)
-  cDPO: 라벨 스무딩 (노이즈 내성)
-  KTO: 쌍 제거 (데이터 효율)
-  CPO/ORPO: 레퍼런스 제거 (메모리)
-  SimPO: 길이 정규화 + 생성 정렬 + 레퍼런스 제거
-
-이들은 서로 독립적인 개선인가, 아니면 겹치는가?
-
-Rainbow PO (ICLR 2025):
-  기존 변형들을 7개 직교적(orthogonal) 축으로 분해:
-  1. 링크 함수 (σ vs MSE vs hinge)
-  2. 레퍼런스 정책 (유지 vs 제거 vs 목표 마진)
-  3. 길이 정규화 (없음 vs 평균 vs 오즈)
-  4. 홈 어드밴티지/마진 (γ)
-  5. SFT 정규화 (있음 vs 없음)
-  6. 맥락적 스케일링 (고정 vs 프롬프트 의존)
-  7. 데이터 형식 (쌍 vs 단일 vs 리스트)
-
-  핵심 발견:
-  → 각 축의 최적 선택을 조합하면 개별 변형보다 더 좋다
-  → 하지만 조합의 효과가 단순 합이 아니다 — 상호작용이 있다
-  → &quot;최적의 DPO 변형&quot;은 하나가 아니라 태스크에 따라 다르다
-
-  Rainbow PO의 의의:
-  흩어진 변형들을 하나의 좌표계에 매핑한 것.
-  &quot;어떤 축을 바꿨는가&quot;로 모든 변형을 설명할 수 있게 된 정리 작업이다.
-  하지만 이것은 DPO라는 패러다임 안에서의 정리다.
-  패러다임 자체의 한계 — 오프라인, 정적 데이터, 탐색 불가 — 는 여전하다.
-  이 한계를 넘는 것은 Ch13의 GRPO다.
-</code></pre>
+<blockquote>
+<p><strong>여기까지 각 변형이 고친 것:</strong>\</p>
+<ul>
+<li>IPO: σ 교체 (과적합 방지)\</li>
+<li>cDPO: 라벨 스무딩 (노이즈 내성)\</li>
+<li>KTO: 쌍 제거 (데이터 효율)\</li>
+<li>CPO/ORPO: 레퍼런스 제거 (메모리)\</li>
+<li>SimPO: 길이 정규화 + 생성 정렬 + 레퍼런스 제거</li>
+</ul>
+<p>이들은 서로 독립적인 개선인가, 아니면 겹치는가?</p>
+<p><strong>Rainbow PO (ICLR 2025):</strong><br>
+기존 변형들을 7개 직교적(orthogonal) 축으로 분해:</p>
+<ol>
+<li>링크 함수 (σ vs MSE vs hinge)\</li>
+<li>레퍼런스 정책 (유지 vs 제거 vs 목표 마진)\</li>
+<li>길이 정규화 (없음 vs 평균 vs 오즈)\</li>
+<li>홈 어드밴티지/마진 (γ)\</li>
+<li>SFT 정규화 (있음 vs 없음)\</li>
+<li>맥락적 스케일링 (고정 vs 프롬프트 의존)\</li>
+<li>데이터 형식 (쌍 vs 단일 vs 리스트)</li>
+</ol>
+<p><strong>핵심 발견:</strong><br>
+→ 각 축의 최적 선택을 조합하면 개별 변형보다 더 좋다<br>
+→ 하지만 조합의 효과가 단순 합이 아니다 — 상호작용이 있다<br>
+→ &quot;최적의 DPO 변형&quot;은 하나가 아니라 태스크에 따라 다르다</p>
+<p><strong>Rainbow PO의 의의:</strong><br>
+흩어진 변형들을 하나의 좌표계에 매핑한 것.<br>
+&quot;어떤 축을 바꿨는가&quot;로 모든 변형을 설명할 수 있게 된 정리 작업이다.<br>
+하지만 이것은 DPO라는 패러다임 안에서의 정리다.<br>
+패러다임 자체의 한계 — 오프라인, 정적 데이터, 탐색 불가 — 는 여전하다.<br>
+이 한계를 넘는 것은 Ch13의 GRPO다.</p>
+</blockquote>
 <h4>각 알고리즘의 “빠진 요소” 매핑 (종합)</h4>
 <table>
 <thead>
@@ -631,27 +622,25 @@ Rainbow PO (ICLR 2025):
 </tbody>
 </table>
 <h4>진화의 패턴: 무엇이 반복되는가</h4>
-<pre><code>DPO → ... → SimPO 의 진화에서 반복되는 패턴 세 가지:
-
-1. 빼기의 미학
-   DPO가 RLHF에서 보상 모델을 빼고,
-   CPO/ORPO가 레퍼런스를 빼고,
-   KTO가 쌍을 빼고,
-   SimPO가 레퍼런스 + 길이 편향을 빼고.
-   → 매 세대마다 하나씩 제거하며 본질에 가까워진다.
-
-2. 정렬의 일치
-   학습 목표와 추론 시 행동이 일치해야 한다.
-   DPO의 &quot;보상 모델 ≠ 생성 지표&quot; 불일치를 SimPO가 해소.
-   → 이것은 Part III(디퓨전)에서도 동일하게 등장할 문제.
-
-3. 데이터 &gt; 알고리즘
-   Nathan Lambert의 관찰: &quot;Tulu와 Zephyr의 성공은 알고리즘이 아니라
-   데이터와 하이퍼파라미터에서 왔다.&quot;
-   → BeeS: 전체 데이터의 10%만 골라도 전체 성능에 근접
-   → 마진 기반 큐레이션: 강한 예제만 남기면 DPO도 충분히 강하다
-   → 알고리즘 선택보다 데이터 품질이 더 중요할 수 있다
-</code></pre>
+<blockquote>
+<p><strong>DPO → … → SimPO 의 진화에서 반복되는 패턴 세 가지:</strong></p>
+<p><strong>1. 빼기의 미학</strong><br>
+DPO가 RLHF에서 보상 모델을 빼고,<br>
+CPO/ORPO가 레퍼런스를 빼고,<br>
+KTO가 쌍을 빼고,<br>
+SimPO가 레퍼런스 + 길이 편향을 빼고.<br>
+→ 매 세대마다 하나씩 제거하며 본질에 가까워진다.</p>
+<p><strong>2. 정렬의 일치</strong><br>
+학습 목표와 추론 시 행동이 일치해야 한다.<br>
+DPO의 “보상 모델 ≠ 생성 지표” 불일치를 SimPO가 해소.<br>
+→ 이것은 Part III(디퓨전)에서도 동일하게 등장할 문제.</p>
+<p><strong>3. 데이터 &gt; 알고리즘</strong><br>
+Nathan Lambert의 관찰: “Tulu와 Zephyr의 성공은 알고리즘이 아니라<br>
+데이터와 하이퍼파라미터에서 왔다.”<br>
+→ BeeS: 전체 데이터의 10%만 골라도 전체 성능에 근접<br>
+→ 마진 기반 큐레이션: 강한 예제만 남기면 DPO도 충분히 강하다<br>
+→ 알고리즘 선택보다 데이터 품질이 더 중요할 수 있다</p>
+</blockquote>
 <pre class="mermaid">graph TD
     DPO[&quot;&lt;b&gt;DPO&lt;/b&gt;&lt;br/&gt;2023.06&lt;br/&gt;보상 모델 제거&quot;]
     DPO --&gt;|&quot;σ → MSE&lt;br/&gt;과적합 방지&quot;| IPO[&quot;&lt;b&gt;IPO&lt;/b&gt;&lt;br/&gt;2024.01&quot;]
