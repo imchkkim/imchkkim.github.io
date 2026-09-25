@@ -1,0 +1,90 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>8장 위젯 — 분배함수와 자유에너지 — ML 입문자를 위한 동역학</title>
+<style>
+html.embed body{padding:0!important;background:transparent!important}
+html.embed main{max-width:none!important;gap:0!important}
+html.embed section.w{scroll-margin-top:0}
+</style>
+<script>
+(function(){
+  var q=new URLSearchParams(location.search), d=document.documentElement;
+  var t=q.get('theme'); if(t) d.setAttribute('data-theme',t);
+  else { try { var s=localStorage.getItem('theme'); if(s) d.setAttribute('data-theme',s); } catch(e){} }
+  addEventListener('message',function(e){ if(e.data&&e.data.type==='dyn-theme') d.setAttribute('data-theme',e.data.theme); });
+  if(!q.get('embed')) return;
+  d.classList.add('embed');
+  var last=0;
+  function post(){ var h=Math.ceil(document.getElementById('app').getBoundingClientRect().height);
+    if(h&&h!==last){ last=h; parent.postMessage({type:'dyn-widget-height',h:h},'*'); } }
+  addEventListener('load',post);
+  document.addEventListener('DOMContentLoaded',function(){ new ResizeObserver(post).observe(document.getElementById('app')); });
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=STIX+Two+Text:ital,wght@1,500;1,700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f4f6f9; --surface:#ffffff; --ink:#1b2230; --muted:#5d6675; --rule:#dde2e9; --soft:#eef1f5;
+  --ok:#1a7f37; --bad:#b42318; --fill:rgba(227,119,194,.12);
+  --sans:'Noto Sans KR','Noto Sans CJK KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --math:'STIX Two Text','DejaVu Serif','Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#111419; --surface:#181c23; --ink:#e5e8ee; --muted:#98a1af; --rule:#2b313b; --soft:#20252e; --ok:#4cc26a; --bad:#f07167; --fill:rgba(227,119,194,.18); color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#111419; --surface:#181c23; --ink:#e5e8ee; --muted:#98a1af; --rule:#2b313b; --soft:#20252e; --ok:#4cc26a; --bad:#f07167; --fill:rgba(227,119,194,.18); color-scheme:dark; }
+*{box-sizing:border-box}
+body{word-break:keep-all;overflow-wrap:anywhere;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;margin:0;padding-inline:16px;padding-block:28px 56px}
+main{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+header h1{font-size:1.45rem;line-height:1.35;margin:0 0 6px;text-wrap:balance;font-weight:700}
+header p{margin:0;color:var(--muted);max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:.92rem}
+nav a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule)}
+nav a:hover,nav a:focus-visible{border-bottom-color:var(--ink)}
+section.w{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:20px 20px 18px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;font-family:var(--mono)}
+section.w h2{font-size:1.15rem;margin:0;font-weight:700;text-wrap:balance}
+.msg{margin:0;padding:10px 14px;background:var(--soft);border-radius:6px;font-weight:500}
+.formula{font-family:var(--math);font-size:1.05rem;color:var(--ink);overflow-x:auto;white-space:nowrap}
+.sym{font-family:var(--math);font-style:italic;font-weight:700}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 24px}
+.ctl{display:flex;flex-direction:column;gap:4px}
+.ctl label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:.92rem}
+.ctl output{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.92rem}
+input[type=range]{width:100%;margin:0}
+input[type=range]:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.toggle{display:flex;align-items:center;gap:8px;font-size:.92rem;cursor:pointer}
+.chart{width:100%;overflow-x:auto}
+.chart svg{display:block;width:100%;height:auto;min-width:320px}
+.chart .axis{stroke:var(--muted);stroke-width:1}
+.chart .grid{stroke:var(--rule);stroke-width:1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 20px;margin:0}
+.stats div{display:flex;flex-direction:column;border-top:1px solid var(--rule);padding-top:6px}
+.stats dt{font-size:.82rem;color:var(--muted)}
+.stats dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:1rem}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.85rem;color:var(--muted)}
+.legend > span{display:inline-flex;align-items:center;white-space:nowrap}
+.sw{display:inline-block;width:22px;height:0;border-top:3px solid;margin-right:7px}
+.note{margin:0;font-size:.88rem;color:var(--muted)}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.presets button{font:inherit;font-size:.88rem;padding:5px 12px;border-radius:999px;border:1px solid var(--rule);background:var(--soft);color:var(--ink);cursor:pointer}
+.presets button:hover{border-color:var(--muted)}
+.presets button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.pill{display:inline-block;padding:1px 10px;border-radius:999px;font-family:var(--sans);font-size:.85rem;font-weight:700}
+.pill.ok{color:var(--ok);border:1px solid var(--ok)}
+.pill.bad{color:var(--bad);border:1px solid var(--bad)}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:8px 16px}
+/* two-to-one row: plot + small drawing */
+.duo2{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr);gap:8px 16px;align-items:center}
+@media (max-width:560px){.duo2{grid-template-columns:1fr}}
+footer{color:var(--muted);font-size:.85rem}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<main id="app"></main>
+
+<script type="module" src="ch08.js"></script>
+
+</body></html>
