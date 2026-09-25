@@ -32,7 +32,7 @@ GW.register("reinforce-variance", (el) => {
   const left = GW.h("div", {}, row), right = GW.h("div", {}, row);
   GW.legend(left, [["c1", "추정치 분포"], ["c2 dash", "참값 ∂J/∂z", "dash"]]);
   const hist = GW.chart(left, { w: 300, h: 240, x: [-1, 1], y: [0, 1], yticks: [], xlabel: "‘서울입니다’ 로짓의 그래디언트 추정", margin: { l: 16, r: 12 }, label: "그래디언트 추정치 히스토그램" });
-  GW.legend(right, [["c1", "학습 5회 (각각 다른 난수)"], ["cm dash", "정확한 기대값 (VPG)", "dash"]]);
+  GW.legend(right, [["cs-J", "J — 학습 5회 (각각 다른 난수)"], ["cm dash", "정확한 기대값 (VPG)", "dash"]]);
   const curves = GW.chart(right, { w: 300, h: 240, x: [0, STEPS], y: [0, 1], xlabel: "걸음", ylabel: "기대 보상 J", margin: { l: 40, r: 12 }, label: "학습 곡선" });
 
   // 배치 하나의 가중치 (r_i + c − b_i) 를 모드에 맞게 계산
@@ -101,7 +101,7 @@ GW.register("reinforce-variance", (el) => {
         js.push(Jof(softmax(z)));
       }
       finals.push(js[STEPS]);
-      curves.path(js.map((v, i) => [i, v]), "c1 thin");
+      curves.path(js.map((v, i) => [i, v]), "cs-J thin");
     }
     const fm = finals.reduce((a, x) => a + x, 0) / SEEDS;
     const fsd = Math.sqrt(finals.reduce((a, x) => a + (x - fm) ** 2, 0) / (SEEDS - 1));

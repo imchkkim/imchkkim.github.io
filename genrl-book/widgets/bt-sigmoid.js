@@ -26,10 +26,10 @@ GW.register("bt-sigmoid", (el) => {
     GW.s("line", { class: "w-line cm dash thin", x1: c.X(-5), x2: c.X(5), y1: c.Y(0.5), y2: c.Y(0.5) }, c.layer);
     c.fn(GW.sigmoid, "c1");
     const p = GW.sigmoid(gap);
-    GW.s("line", { class: "w-line c1 dash thin", x1: c.X(gap), x2: c.X(gap), y1: c.Y(0), y2: c.Y(p) }, c.layer);
+    GW.s("line", { class: "w-line cs-R dash thin", x1: c.X(gap), x2: c.X(gap), y1: c.Y(0), y2: c.Y(p) }, c.layer);
     c.dot(gap, p, "f1", 6);
     c.text(gap + 0.15, p - 0.05, `${(p * 100).toFixed(1)}%`, "strong");
-    f.readout.innerHTML = `A가 이길 확률 σ(${GW.fmt(gap, 2)}) = <b>${(p * 100).toFixed(1)}%</b>`;
+    f.readout.innerHTML = `A가 이길 확률 σ(<span class="sym-R">${GW.fmt(gap, 2)}</span>) = <b>${(p * 100).toFixed(1)}%</b>`;
     if (games.length) {
       const w = games.filter(Boolean).length;
       const mle = w === 0 || w === 12 ? (w ? "+∞" : "−∞") : GW.fmt(Math.log(w / (12 - w)), 2);

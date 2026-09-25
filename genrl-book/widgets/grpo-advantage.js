@@ -52,12 +52,12 @@ GW.register("grpo-advantage", (el) => {
       });
       const a = A[i];
       const y0 = c.Y(0), y1 = c.Y(GW.clamp(a, -3, 3));
-      GW.s("rect", { class: a >= 0 ? "fgood" : "fbad", x: c.X(i + 0.22), width: c.X(i + 0.78) - c.X(i + 0.22), y: Math.min(y0, y1), height: Math.max(1, Math.abs(y1 - y0)), rx: 3 }, c.layer);
+      GW.s("rect", { class: "fs-A", x: c.X(i + 0.22), width: c.X(i + 0.78) - c.X(i + 0.22), y: Math.min(y0, y1), height: Math.max(1, Math.abs(y1 - y0)), rx: 3 }, c.layer);
       GW.s("text", { class: "w-label strong", x: cx, y: a >= 0 ? y1 - 6 : y1 + 15, "text-anchor": "middle", text: GW.fmt(a, 2) }, c.top);
     }
     const mass = A.reduce((s, a) => s + Math.abs(a), 0);
     f.readout.innerHTML =
-      `평균 μ = <b>${mu.toFixed(3)}</b> · 표준편차 σ = <b>${sd.toFixed(3)}</b> · 학습 시그널 Σ|Â| = <b>${mass.toFixed(2)}</b>` +
+      `평균 <span class="sym-V">μ</span> = <b>${mu.toFixed(3)}</b> · 표준편차 σ = <b>${sd.toFixed(3)}</b> · 학습 시그널 Σ|<span class="sym-A">Â</span>| = <b>${mass.toFixed(2)}</b>` +
       (sd < 1e-9 ? " — <b>모든 답의 보상이 같다. 그래디언트 0.</b>" : "");
   }
   draw();

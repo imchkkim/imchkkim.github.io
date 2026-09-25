@@ -28,7 +28,7 @@ GW.register("denoise-mdp", (el) => {
   const L = GW.h("div", {}, row), Rt = GW.h("div", {}, row);
   const c = GW.chart(L, { x: [0, T], y: [-3.5, 7], w: 360, h: 270, xticks: [0, 5, 10], xfmt: (v) => (v === 0 ? "x_T" : v === T ? "x_0" : "t=" + (T - v)), xlabel: "디노이징 스텝 →", ylabel: "x", label: "디노이징 경로" });
   c.clip();
-  GW.legend(Rt, [["c2", "보상 모델 점수"], ["c3", "진짜 보상"]]);
+  GW.legend(Rt, [["cs-R", "보상 모델 점수 r<sub>ψ</sub>"], ["c3", "진짜 보상"]]);
   const h = GW.chart(Rt, { x: [0, 100], y: [0, 1], w: 250, h: 246, xlabel: "학습 횟수", label: "평균 보상" });
   h.clip();
 
@@ -82,10 +82,10 @@ GW.register("denoise-mdp", (el) => {
     c.text(T - 0.1, 5.4, "보상 모델의 편향 ↑", "", "end");
     h.x = [0, Math.max(100, it)]; h.drawAxes();
     h.layer.innerHTML = "";
-    h.path(hist.map((q) => [q[0], q[1]]), "c2");
+    h.path(hist.map((q) => [q[0], q[1]]), "cs-R");
     h.path(hist.map((q) => [q[0], q[2]]), "c3");
     const last = hist[hist.length - 1];
-    f.readout.innerHTML = `학습 <b>${it}</b>회 · 보상 모델 평균 <b>${last[1].toFixed(3)}</b> · 진짜 보상 평균 <b>${last[2].toFixed(3)}</b>`;
+    f.readout.innerHTML = `학습 <b>${it}</b>회 · 보상 모델 <span class="sym-R">r<sub>ψ</sub></span> 평균 <b>${last[1].toFixed(3)}</b> · 진짜 보상 평균 <b>${last[2].toFixed(3)}</b>`;
   }
   reset();
 });

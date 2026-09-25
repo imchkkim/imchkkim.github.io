@@ -21,9 +21,9 @@ GW.register("gae-lambda", (el) => {
   GW.slider(f.controls, { label: "λ", min: 0, max: 1, step: 0.05, value: st.lam, fmt: (v) => v.toFixed(2), oninput: (v) => { st.lam = v; draw(); } });
   GW.slider(f.controls, { label: "비평가 오차", min: 0, max: 1, step: 0.05, value: st.q, fmt: (v) => (v === 0 ? "완벽" : v.toFixed(2)), oninput: (v) => { st.q = v; draw(); } });
 
-  GW.legend(f.stage, [["cm dash", "실제 가치 V*", "dash"], ["c3", "비평가 예측 V̂"]]);
+  GW.legend(f.stage, [["cm dash", "실제 가치 V*", "dash"], ["cs-V", "비평가 예측 V̂"]]);
   const top = GW.chart(f.stage, { w: 560, h: 150, x: [0, 10], y: [0, 1], xticks: [], yticks: [0, 0.5, 1], ylabel: "가치", margin: { b: 10, l: 48 }, label: "가치 예측" });
-  GW.legend(f.stage, [["c1", "Â > 0 (강화)"], ["c2", "Â < 0 (억제)"], ["c4", "진짜 기여도 (완벽한 비평가, λ=0)"]]);
+  GW.legend(f.stage, [["cs-A", "Â (위: 강화, 아래: 억제)"], ["cm", "◆ 진짜 기여도 (완벽한 비평가, λ=0)"]]);
   const bot = GW.chart(f.stage, { w: 560, h: 230, x: [0, 10], y: [-1, 1], xticks: [], yticks: [-1, -0.5, 0, 0.5, 1], ylabel: "어드밴티지 Â", margin: { b: 30, l: 48 }, label: "토큰별 어드밴티지" });
 
   function gae(V, R, lam) {
@@ -41,8 +41,8 @@ GW.register("gae-lambda", (el) => {
 
     top.layer.innerHTML = ""; top.top.innerHTML = "";
     top.path(s.V.map((v, t) => [t + 0.5, v]).concat([[10, s.R]]), "cm dash");
-    top.path(Vh.map((v, t) => [t + 0.5, v]), "c3");
-    Vh.forEach((v, t) => top.dot(t + 0.5, v, "f3", 3.5));
+    top.path(Vh.map((v, t) => [t + 0.5, v]), "cs-V");
+    Vh.forEach((v, t) => top.dot(t + 0.5, v, "fs-V", 3.5));
     top.dot(10, s.R, "fm", 4);
     top.text(9.9, s.R > 0.5 ? s.R - 0.12 : s.R + 0.08, "R = " + s.R, "strong", "end");
 
@@ -50,17 +50,17 @@ GW.register("gae-lambda", (el) => {
     A.forEach((a, t) => {
       const x0 = bot.X(t + 0.18), x1 = bot.X(t + 0.82);
       const y0 = bot.Y(Math.max(0, a)), y1 = bot.Y(Math.min(0, a));
-      GW.s("rect", { class: a >= 0 ? "f1" : "f2", x: x0, y: y0, width: x1 - x0, height: Math.max(1, y1 - y0), rx: 3 }, bot.layer);
+      GW.s("rect", { class: "fs-A", style: { opacity: a >= 0 ? 1 : 0.55 }, x: x0, y: y0, width: x1 - x0, height: Math.max(1, y1 - y0), rx: 3 }, bot.layer);
       const xm = bot.X(t + 0.5), yt = bot.Y(truth[t]);
-      GW.s("path", { class: "f4", d: `M${xm},${yt - 5} L${xm + 5},${yt} L${xm},${yt + 5} L${xm - 5},${yt} Z` }, bot.top);
+      GW.s("path", { class: "fm", d: `M${xm},${yt - 5} L${xm + 5},${yt} L${xm},${yt + 5} L${xm - 5},${yt} Z` }, bot.top);
       GW.s("text", { class: "w-tick", x: xm, y: bot.Y(-1) + 18, "text-anchor": "middle", text: s.toks[t] }, bot.top);
     });
 
     const key = st.sc === "wrong" ? 7 : 1;
     const other = st.sc === "wrong" ? 1 : 7;
     f.readout.innerHTML =
-      `‘${s.toks[key]}’ 의 Â = <b>${GW.fmt(A[key], 2)}</b> (진짜 기여도 ${GW.fmt(truth[key], 2)}) · ` +
-      `‘${s.toks[other]}’ 의 Â = <b>${GW.fmt(A[other], 2)}</b> (진짜 기여도 ${GW.fmt(truth[other], 2)})`;
+      `‘${s.toks[key]}’ 의 <span class="sym-A">Â</span> = <b>${GW.fmt(A[key], 2)}</b> (진짜 기여도 ${GW.fmt(truth[key], 2)}) · ` +
+      `‘${s.toks[other]}’ 의 <span class="sym-A">Â</span> = <b>${GW.fmt(A[other], 2)}</b> (진짜 기여도 ${GW.fmt(truth[other], 2)})`;
   }
   bot.hover((x) => {
     const t = Math.floor(x); if (t < 0 || t > 9) return "";

@@ -21,11 +21,12 @@ GW.register("token-logprob", (el) => {
     })
   );
   const c = GW.chart(f.stage, { x: [0, 7], y: [-6, 0.4], xticks: [], ylabel: "로그확률", h: 280, margin: { b: 48 }, label: "토큰별 로그확률" });
-  GW.legend(f.stage, [["c1", "선호 응답 y<sub>w</sub>"], ["c2", "비선호 응답 y<sub>l</sub>"]]);
+  GW.legend(f.stage, [["cs-pi", "log π<sub>θ</sub> — 왼쪽 선호 응답 y<sub>w</sub>(진하게), 오른쪽 비선호 응답 y<sub>l</sub>(연하게)"]]);
 
   function bar(x, v, cls, label, sub) {
+    const faint = cls === "f2"; cls = "fs-pi";
     const y0 = c.Y(0), y1 = c.Y(Math.max(v, -6));
-    GW.s("rect", { class: cls, x: c.X(x - 0.38), y: y0, width: c.X(x + 0.38) - c.X(x - 0.38), height: Math.max(0, y1 - y0), rx: 4 }, c.layer);
+    GW.s("rect", { class: cls, style: { opacity: faint ? 0.5 : 1 }, x: c.X(x - 0.38), y: y0, width: c.X(x + 0.38) - c.X(x - 0.38), height: Math.max(0, y1 - y0), rx: 4 }, c.layer);
     GW.s("text", { class: "w-label strong", x: c.X(x), y: Math.min(y1 + 14, c.Y(-6) - 2), "text-anchor": "middle", text: GW.fmt(v, 2) }, c.top);
     GW.s("text", { class: "w-tick", x: c.X(x), y: c.Y(-6) + 16, "text-anchor": "middle", text: label }, c.top);
     if (sub) GW.s("text", { class: "w-tick", x: c.X(x), y: c.Y(-6) + 30, "text-anchor": "middle", text: sub }, c.top);
@@ -47,7 +48,7 @@ GW.register("token-logprob", (el) => {
     const share = d !== 0 ? (branch / d) * 100 : 0;
     f.readout.innerHTML =
       `log π(y<sub>w</sub>) = <b>${GW.fmt(lw, 2)}</b> · log π(y<sub>l</sub>) = <b>${GW.fmt(ll, 2)}</b> · ` +
-      `마진 Δθ = <b>${GW.fmt(d, 2)}</b> · 그중 분기 토큰(서울 vs 부산) 몫 <b>${GW.fmt(branch, 2)}</b>` +
+      `마진 <span class="sym-pi">Δθ</span> = <b>${GW.fmt(d, 2)}</b> · 그중 분기 토큰(서울 vs 부산) 몫 <b>${GW.fmt(branch, 2)}</b>` +
       (Math.abs(d) > 0.05 ? ` (${share.toFixed(0)}%)` : "");
   }
   draw();

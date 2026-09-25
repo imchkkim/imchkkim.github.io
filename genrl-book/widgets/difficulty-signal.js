@@ -12,7 +12,7 @@ GW.register("difficulty-signal", (el) => {
   let G = 8, p = 0.3;
   GW.slider(f.controls, { label: "그룹 크기 G", min: 2, max: 32, step: 1, value: G, oninput: (v) => { G = v; draw(); } });
   GW.slider(f.controls, { label: "정답률 p", min: 0.01, max: 0.99, step: 0.01, value: p, fmt: (v) => v.toFixed(2), oninput: (v) => { p = v; draw(); } });
-  GW.legend(f.stage, [["c1", "시그널이 있을 확률"], ["c2", "롤아웃당 시그널 (σ로 나눔)"], ["c3 dash", "롤아웃당 시그널 (σ 없음)", "dash"]]);
+  GW.legend(f.stage, [["c1", "시그널이 있을 확률"], ["cs-A", "롤아웃당 시그널 Σ|Â|/G (σ로 나눔)"], ["cs-A dash", "롤아웃당 시그널 (σ 없음)", "dash"]]);
   const c = GW.chart(f.stage, { x: [0, 1], y: [0, 1], xlabel: "문제의 정답률 p", ylabel: "값", h: 280, label: "난이도별 학습 시그널" });
 
   function binom(n, k) { let s = 1; for (let i = 0; i < k; i++) s = (s * (n - i)) / (i + 1); return s; }
@@ -32,11 +32,11 @@ GW.register("difficulty-signal", (el) => {
     GW.s("rect", { class: "fa3", x: c.X(0.3), y: c.Y(1), width: c.X(0.7) - c.X(0.3), height: c.Y(0) - c.Y(1) }, c.layer);
     c.text(0.5, 0.04, "흔히 말하는 적정 구간 30–70%", "", "middle", c.layer);
     c.fn((x) => calc(x).P, "c1");
-    c.fn((x) => calc(x).es, "c2");
-    c.fn((x) => calc(x).en, "c3 dash");
+    c.fn((x) => calc(x).es, "cs-A");
+    c.fn((x) => calc(x).en, "cs-A dash");
     const v = calc(p);
     GW.s("line", { class: "w-line cm dash thin", x1: c.X(p), x2: c.X(p), y1: c.Y(0), y2: c.Y(1) }, c.layer);
-    c.dot(p, v.P, "f1"); c.dot(p, v.es, "f2"); c.dot(p, v.en, "f3");
+    c.dot(p, v.P, "f1"); c.dot(p, v.es, "fs-A"); c.dot(p, v.en, "fs-A");
     f.readout.innerHTML =
       `p = <b>${p.toFixed(2)}</b>, G = <b>${G}</b> → 그룹 전체가 같은 보상일 확률 <b>${(1 - v.P).toFixed(3)}</b> · ` +
       `롤아웃당 시그널 <b>${v.es.toFixed(3)}</b> (σ 없음 <b>${v.en.toFixed(3)}</b>)`;

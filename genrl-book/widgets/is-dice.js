@@ -51,7 +51,7 @@ GW.register("is-dice", (el) => {
     GW.s("line", { class: "w-line cm dash thin", x1: wc.X(0.5), x2: wc.X(6.5), y1: wc.Y(1), y2: wc.Y(1) }, wc.layer);
     w.forEach((v, k) => {
       const x0 = wc.X(k + 0.7), x1 = wc.X(k + 1.3);
-      GW.s("rect", { class: "f2", x: x0, y: wc.Y(v), width: x1 - x0, height: wc.Y(0) - wc.Y(v), rx: 3 }, wc.layer);
+      GW.s("rect", { class: "fs-ratio", x: x0, y: wc.Y(v), width: x1 - x0, height: wc.Y(0) - wc.Y(v), rx: 3 }, wc.layer);
       GW.s("text", { class: "w-label", x: (x0 + x1) / 2, y: wc.Y(v) - 4, "text-anchor": "middle", text: v.toFixed(v < 10 ? 2 : 0) }, wc.top);
     });
 

@@ -26,7 +26,7 @@ GW.register("pg-bandit", (el) => {
   const row = GW.h("div", { style: { display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "0.8rem" } }, f.stage);
   const left = GW.h("div", {}, row), right = GW.h("div", {}, row);
   const bars = GW.chart(left, { w: 300, h: 250, x: [0, 3], y: [0, 1], xticks: [], yticks: [0, 0.25, 0.5, 0.75, 1], ylabel: "확률 π", margin: { b: 44, l: 44 }, label: "답별 확률" });
-  GW.legend(right, [["c1", "J (기대 보상)"]]);
+  GW.legend(right, [["cs-J", "J (기대 보상)"]]);
   const line = GW.chart(right, { w: 300, h: 226, x: [0, 40], y: [0, 1], xlabel: "걸음", ylabel: "J", margin: { l: 40 }, label: "기대 보상 변화" });
 
   function reset() { z = Z0.slice(); hist = [J(softmax(z))]; rng = GW.rng(7); stepN = 0; mode = null; draw(); }
@@ -55,7 +55,7 @@ GW.register("pg-bandit", (el) => {
     bars.layer.innerHTML = ""; bars.top.innerHTML = "";
     for (let k = 0; k < 3; k++) {
       const x0 = k + 0.2, x1 = k + 0.8;
-      GW.s("rect", { class: "f1", x: bars.X(x0), y: bars.Y(p[k]), width: bars.X(x1) - bars.X(x0), height: Math.max(0, bars.Y(0) - bars.Y(p[k])), rx: 4 }, bars.layer);
+      GW.s("rect", { class: "fs-pi", x: bars.X(x0), y: bars.Y(p[k]), width: bars.X(x1) - bars.X(x0), height: Math.max(0, bars.Y(0) - bars.Y(p[k])), rx: 4 }, bars.layer);
       GW.s("text", { class: "w-label strong", x: bars.X(k + 0.5), y: bars.Y(p[k]) - 6, "text-anchor": "middle", text: p[k].toFixed(2) }, bars.top);
       GW.s("text", { class: "w-tick", x: bars.X(k + 0.5), y: bars.Y(0) + 16, "text-anchor": "middle", text: ACT[k] }, bars.top);
       GW.s("text", { class: "w-tick", x: bars.X(k + 0.5), y: bars.Y(0) + 31, "text-anchor": "middle", text: "r = " + R[k] }, bars.top);
@@ -69,10 +69,10 @@ GW.register("pg-bandit", (el) => {
       }
     }
     line.layer.innerHTML = "";
-    line.path(hist.map((v, i) => [i, v]), "c1");
-    line.dot(hist.length - 1, hist[hist.length - 1], "f1", 4);
+    line.path(hist.map((v, i) => [i, v]), "cs-J");
+    line.dot(hist.length - 1, hist[hist.length - 1], "fs-J", 4);
     const ls = f.lastSample && mode === "sample" ? ` · 방금 뽑은 답 <b>${ACT[f.lastSample.a]}</b>, 가중치 r+c = <b>${GW.fmt(f.lastSample.w, 1)}</b>` : "";
-    f.readout.innerHTML = `걸음 <b>${stepN}</b> · 기대 보상 J = <b>${Jv.toFixed(3)}</b>${ls}`;
+    f.readout.innerHTML = `걸음 <b>${stepN}</b> · 기대 보상 <span class="sym-J">J</span> = <b>${Jv.toFixed(3)}</b>${ls}`;
   }
   reset();
 });

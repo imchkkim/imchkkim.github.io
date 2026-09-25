@@ -13,7 +13,7 @@ GW.register("passk", (el) => {
   let m = 6, tau = 0.02;
   GW.slider(f.controls, { label: "압축 m", min: 1, max: 16, step: 1, value: m, oninput: (v) => { m = v; draw(); } });
   GW.slider(f.controls, { label: "잃는 문턱 τ", min: 0, max: 0.1, step: 0.005, value: tau, fmt: (v) => v.toFixed(3), oninput: (v) => { tau = v; draw(); } });
-  GW.legend(f.stage, [["c1", "베이스 모델"], ["c2", "RLVR 모델"]]);
+  GW.legend(f.stage, [["cs-ref", "베이스 모델 (π<sub>ref</sub>)"], ["cs-pi", "RLVR 모델 (π<sub>θ</sub>)"]]);
   const c = GW.chart(f.stage, { x: [0, 8], y: [0, 1], xticks: [0, 1, 2, 3, 4, 5, 6, 7, 8], xfmt: (v) => String(2 ** v), xlabel: "시도 횟수 k (log 눈금)", ylabel: "pass@k", h: 280, label: "pass@k 곡선" });
 
   const rng = GW.rng(12345);
@@ -28,8 +28,8 @@ GW.register("passk", (el) => {
   function draw() {
     c.layer.innerHTML = ""; c.top.innerHTML = "";
     const base = (lk) => pass(2 ** lk, (q) => q), rlv = (lk) => pass(2 ** lk, rl);
-    c.fn(base, "c1", 80);
-    c.fn(rlv, "c2", 80);
+    c.fn(base, "cs-ref", 80);
+    c.fn(rlv, "cs-pi", 80);
     let cross = null;
     for (let lk = 0; lk <= 8; lk += 0.02) if (base(lk) > rlv(lk)) { cross = lk; break; }
     if (cross !== null) {

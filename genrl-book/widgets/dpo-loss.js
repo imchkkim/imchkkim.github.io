@@ -29,8 +29,8 @@ GW.register("dpo-loss", (el) => {
   const sTh = GW.slider(f.controls, { label: "Δ<sub>θ</sub>", min: -6, max: 8, step: 0.1, value: st.dth, fmt: (v) => GW.fmt(v, 1), oninput: (v) => { st.dth = v; seg.set(null); draw(); } });
 
   GW.legend(f.stage, [
-    ["c1", "손실 L"],
-    ["c2 dash", "그래디언트 세기 σ(−z)", "dash"],
+    ["cs-J", "손실 L"],
+    ["cs-A dash", "그래디언트 세기 σ(−z)", "dash"],
   ]);
   const c = GW.chart(f.stage, { x: [-6, 8], y: [0, 4], xlabel: "학습 모델의 선호마진 Δθ", ylabel: "값", h: 290, label: "DPO 손실 곡선" });
   c.clip();
@@ -41,18 +41,18 @@ GW.register("dpo-loss", (el) => {
   function draw() {
     c.layer.innerHTML = "";
     c.top.innerHTML = "";
-    GW.s("line", { class: "w-line cm dash thin", x1: c.X(st.dref), x2: c.X(st.dref), y1: c.Y(0), y2: c.Y(4) }, c.layer);
+    GW.s("line", { class: "w-line cs-ref dash thin", x1: c.X(st.dref), x2: c.X(st.dref), y1: c.Y(0), y2: c.Y(4) }, c.layer);
     c.text(st.dref, 3.8, " Δref", "", "start");
     GW.s("line", { class: "w-line cm dash thin", x1: c.X(-6), x2: c.X(8), y1: c.Y(Math.log(2)), y2: c.Y(Math.log(2)) }, c.layer);
     c.text(-5.9, Math.log(2) + 0.12, "0.693 = −log σ(0)", "", "start");
-    c.fn(L, "c1");
-    c.fn(G, "c2 dash");
+    c.fn(L, "cs-J");
+    c.fn(G, "cs-A dash");
     const l = L(st.dth), g = G(st.dth);
-    c.dot(st.dth, Math.min(l, 3.95), "f1", 6);
-    c.dot(st.dth, g, "f2", 5);
+    c.dot(st.dth, Math.min(l, 3.95), "fs-J", 6);
+    c.dot(st.dth, g, "fs-A", 5);
     const z = st.dth - st.dref;
     f.readout.innerHTML =
-      `z = Δθ − Δref = <b>${GW.fmt(z, 2)}</b> · 손실 <b>${GW.fmt(l, 3)}</b> · 그래디언트 세기 <b>${GW.fmt(g, 3)}</b> — ` +
+      `z = <span class="sym-pi">Δθ</span> − <span class="sym-ref">Δref</span> = <b>${GW.fmt(z, 2)}</b> · 손실 <span class="sym-J">L</span> <b>${GW.fmt(l, 3)}</b> · 그래디언트 세기 <span class="sym-A">σ(−z)</span> <b>${GW.fmt(g, 3)}</b> — ` +
       (z > 0.5 ? "원본보다 더 벌렸다. 곡선이 평평해지며 학습이 느려진다." : z < -0.5 ? "원본보다 오히려 좁혔다. 손실과 그래디언트가 모두 크다." : "원본과 거의 같다. 아직 배울 것이 남았다.");
   }
   c.hover((x) => `Δθ = ${GW.fmt(x, 2)}<br>L = ${GW.fmt(L(x), 3)}<br>σ(−z) = ${GW.fmt(G(x), 3)}`);

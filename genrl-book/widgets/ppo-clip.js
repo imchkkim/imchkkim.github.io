@@ -11,7 +11,7 @@ GW.register("ppo-clip", (el) => {
   let eps = 0.2, A = 1;
   GW.slider(f.controls, { label: "ε", min: 0.05, max: 0.5, step: 0.01, value: eps, fmt: (v) => v.toFixed(2), oninput: (v) => { eps = v; draw(); } });
   GW.slider(f.controls, { label: "|A|", min: 0.2, max: 2, step: 0.1, value: A, fmt: (v) => v.toFixed(1), oninput: (v) => { A = v; draw(); } });
-  GW.legend(f.stage, [["c1", "PPO 목적함수 L<sup>CLIP</sup>"], ["cm dash", "클리핑 없는 r·A", "dash"]]);
+  GW.legend(f.stage, [["cs-J", "PPO 목적함수 L<sup>CLIP</sup>"], ["cm dash", "클리핑 없는 r·A", "dash"]]);
   const row = GW.h("div", { style: { display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "0.8rem" } }, f.stage);
   const mk = (title, sign) => {
     const box = GW.h("div", {}, row);
@@ -35,8 +35,8 @@ GW.register("ppo-clip", (el) => {
     GW.s("text", { class: "w-label", x: (c.X(z0) + c.X(z1)) / 2, y: c.m.t + 16, "text-anchor": "middle", text: "그래디언트 0" }, c.top);
     for (const v of [1 - eps, 1 + eps]) GW.s("line", { class: "w-line cm thin dash", x1: c.X(v), x2: c.X(v), y1: c.m.t, y2: c.m.t + c.ph }, c.layer);
     c.fn((r) => r * a, "cm dash");
-    c.fn((r) => L(r, a), "c1");
-    c.dot(1, a, "f1", 5);
+    c.fn((r) => L(r, a), "cs-J");
+    c.dot(1, a, "fs-J", 5);
     GW.s("text", { class: "w-tick", x: c.X(1 - eps), y: c.m.t + c.ph - 4, "text-anchor": "end", text: "1−ε " }, c.top);
     GW.s("text", { class: "w-tick", x: c.X(1 + eps), y: c.m.t + c.ph - 4, "text-anchor": "start", text: " 1+ε" }, c.top);
   }
@@ -51,7 +51,7 @@ GW.register("ppo-clip", (el) => {
   function draw() {
     panel(cp);
     panel(cn);
-    f.readout.innerHTML = `허용 범위 r ∈ [<b>${(1 - eps).toFixed(2)}</b>, <b>${(1 + eps).toFixed(2)}</b>] — 한 배치로 여러 번 업데이트해도 각 행동의 확률은 이 범위 밖으로 “이득을 보며” 나가지 못한다.`;
+    f.readout.innerHTML = `허용 범위 <span class="sym-ratio">r</span> ∈ [<b>${(1 - eps).toFixed(2)}</b>, <b>${(1 + eps).toFixed(2)}</b>] — 한 배치로 여러 번 업데이트해도 각 행동의 확률은 이 범위 밖으로 “이득을 보며” 나가지 못한다.`;
   }
   draw();
 });
