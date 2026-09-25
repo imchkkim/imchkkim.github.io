@@ -465,6 +465,7 @@ figure.fig figcaption {
 /* 초상화: 오른쪽에 작게 띄운다 */
 figure.fig-portrait {
   float: right;
+  clear: right; /* 초상화가 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
   width: 200px;
   margin: 0.3em 0 1em 1.5em;
   text-align: left;
@@ -472,8 +473,13 @@ figure.fig-portrait {
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
 h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+/* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
+.portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
+.portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
 @media (max-width: 600px) {
   figure.fig-portrait { float: none; width: 170px; margin: 1em auto; }
+  .portrait-row { gap: 1em; }
+  .portrait-row figure.fig-portrait { width: 140px; }
 }
 /* 카툰 컷 */
 figure.fig-cut img { max-width: min(100%, 560px); border: 1px solid var(--border); background: #fff; }
@@ -922,7 +928,6 @@ print(&quot;고윳값:&quot;, torch.linalg.eigvalsh(H), &quot; (1,1,1) 방향의
 <p>에너지 0과 ε 두 상태만 가질 수 있는 입자 하나의 열용량 C를 βε의 함수로 구하고, βε = 10, 5, ln 2, 0.1에서 값을 계산하라. 열용량은 어느 온도에서 가장 큰가?</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.svg" alt="김민준 M04" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>온도를 올릴수록 들뜨는 입자가 늘어나니까 열용량도 계속 커지겠죠. 계산해 볼게요. 들떠 있을 확률이 p = 1/(1 + e^(βε))이고 분산은 p(1 − p)ε²이니까, kT²으로 나누면 C/k = (βε)² p(1 − p)예요. βε = 10이면 0.0045, 5면 0.166, ln 2면 0.107, 0.1이면… 0.0025요? 뜨거워지니까 다시 작아졌어요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.svg" alt="이서연 S06" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>이상한데. 분산 p(1 − p)ε²은 p가 1/2에 가까울수록 커지잖아. βε = 0.1이면 p = 0.475라서 분산이 0.249ε²로 네 경우 중에 제일 커. 요동이 제일 큰데 응답이 제일 작다고?</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch09/ch09_cut1.png" alt="요동은 가장 큰데 응답은 가장 작다?" loading="lazy"><figcaption>요동은 가장 큰데 응답은 가장 작다?</figcaption></figure>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>분산을 무엇으로 나눴는지 보세요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.svg" alt="이서연 S07" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>아, kT²이요. 온도가 높을 때는 분산이 조금 커지는 것보다 T²이 훨씬 빨리 커지니까요. 그런데 식을 떠나서 왜 그런지 말로 하고 싶어요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.svg" alt="선생님 T02" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>온도를 무한히 올리면 평균 에너지는 어디까지 가죠?</p></div></div>
@@ -932,17 +937,14 @@ print(&quot;고윳값:&quot;, torch.linalg.eigvalsh(H), &quot; (1,1,1) 방향의
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>열용량은 엔트로피가 로그 온도에 반응하는 정도라고 했죠. 온도 τ의 softmax에 옮기면 ∂H/∂ln τ = Var_p(z)/τ², 곧 모델이 뽑은 토큰의 로짓 분산을 τ²으로 나눈 값이에요. 로짓 (2, 1, 0)으로 해 봐요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.svg" alt="김민준 M11" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>τ = 1에서 로짓 분산이 0.424라서 0.424, τ = 0.5에서는 0.159/0.25 = 0.634, τ = 2에서는 0.590/4 = 0.148이에요. τ를 촘촘하게 바꿔 가며 돌려 보니 τ = 0.53 근처에서 0.637로 가장 커요. 이 로짓에서는 그 근처에서 temperature 값이 제일 잘 먹히네요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.svg" alt="이서연 S08" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>온도를 아주 낮추면 argmax 하나에 몰려서 반응이 없고, 아주 높이면 이미 고르게 퍼져서 반응이 없는 거네. 두 상태짜리 입자랑 똑같은 모양이야.</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch09/ch09_cut2.png" alt="샘플링 온도에도 봉우리가 있다" loading="lazy"><figcaption>샘플링 온도에도 봉우리가 있다</figcaption></figure>
 <h3 id="문제-2-껍질의-두께">문제 2. 껍질의 두께</h3>
 <p>d차원 표준정규분포에서 에너지 E = ‖x‖²/2의 표준편차와 반지름 r = ‖x‖의 표준편차를 d = 2, 10, 100, 3072에서 구하라. 차원이 커지면 샘플이 모이는 껍질은 두꺼워지는가, 얇아지는가?</p>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S11"><img src="images/cast/S11.svg" alt="이서연 S11" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>제곱 항이 d개니까 열용량이 d/2이고, 온도가 1이니까 에너지 분산도 d/2예요. 표준편차는 √(d/2)라서 1, 2.24, 7.07, 39.2로 커져요. 차원이 커질수록 껍질이 두꺼워지는 거죠.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M12"><img src="images/cast/M12.svg" alt="김민준 M12" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>에이, 평균도 d/2로 커지잖아. 표준편차를 평균으로 나누면 1/√(d/2)로 줄어드니까 얇아지는 거지. 3072차원이면 2.6%밖에 안 돼.</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch09/ch09_cut3.png" alt="두꺼워진다 vs 얇아진다" loading="lazy"><figcaption>두꺼워진다 vs 얇아진다</figcaption></figure>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.svg" alt="이서연 S03" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>너는 비율로 재고 나는 절대 크기로 잰 거잖아. 둘 다 맞는 말 아니야?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>둘 다 에너지로 잰 이야기예요. 껍질은 반지름으로 정해지는 모양인데, 반지름으로 재면 어떻게 되죠?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.svg" alt="이서연 S08" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>E = r²/2니까 에너지가 조금 변하면 ΔE ≈ rΔr이에요. r은 거의 √d이니까 Δr ≈ √(d/2)/√d = 1/√2… 차원이 안 남아요. 반지름의 표준편차는 차원과 상관없이 0.707이에요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.svg" alt="김민준 M08" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>진짜? 코드에서 3072차원은 0.709였고, 나머지도 돌려 보면 d = 2에서 0.656, 10에서 0.693, 100에서 0.706이에요. 작은 차원에서만 조금 모자라고 금방 0.707에 붙네요.</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch09/ch09_cut4.png" alt="반지름의 흔들림에는 차원이 없다" loading="lazy"><figcaption>반지름의 흔들림에는 차원이 없다</figcaption></figure>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>그러니까 두께 자체는 차원과 상관없이 거의 그대로이고, 반지름이 √d로 커지니 반지름에 대한 비율로는 1/√(2d)로 얇아져요. 「두꺼워진다」와 「얇아진다」는 무엇을 자로 쓰느냐에 달린 말이었어요. 확산 모델이 처음에 뽑는 3072차원 잡음은 반지름 55.4짜리 구면에서 안팎으로 0.7쯤밖에 벗어나지 않아요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.svg" alt="이서연 S07" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>에너지 흔들림이 √d로 커지는 건 열용량이 차원에 비례하기 때문이고, 그걸 반지름으로 옮기면 √d끼리 약분돼서 상수가 남는 거네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M12"><img src="images/cast/M12.svg" alt="김민준 M12" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>너 아까 두꺼워진다고 자신 있게 말할 때부터 알아봤어. 뭐, 나도 반은 틀렸지만.</p></div></div>
@@ -953,7 +955,6 @@ print(&quot;고윳값:&quot;, torch.linalg.eigvalsh(H), &quot; (1,1,1) 방향의
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.svg" alt="선생님 T02" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>손실의 값과 기울기는 정답에 따라 달라요. 기울기는 p − e_y라서 정답 쪽으로 당기는 방향이 다르죠. 곡률만 모델 자신의 것이에요. 그럼 뉴턴 방법은요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S05"><img src="images/cast/S05.svg" alt="이서연 S05" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>기울기에 헤시안의 역행렬을 곱하면 되는데… 행렬식이 0이에요. 고윳값 하나가 0이었어요. 역행렬이 없어요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.svg" alt="김민준 M05" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>헉, 그럼 softmax에는 뉴턴 방법을 못 써요?</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch09/ch09_cut5.png" alt="역행렬이 없다" loading="lazy"><figcaption>역행렬이 없다</figcaption></figure>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>곡률이 0인 방향이 어느 쪽인지부터 찾아봐요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S09"><img src="images/cast/S09.svg" alt="이서연 S09" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>코드에서 (1, 1, 1) 방향의 곡률이 거의 0이었어요. 아, 르장드르 변환 배울 때 logsumexp가 (1, 1) 방향으로 곧은 선이라고 했던 거네요. 로짓 전체에 같은 상수를 더하면 ln Z도 그 상수만큼만 늘고 softmax는 그대로니까요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.svg" alt="선생님 T02" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>흔들림 쪽에서도 말해 볼래요?</p></div></div>
@@ -965,7 +966,6 @@ print(&quot;고윳값:&quot;, torch.linalg.eigvalsh(H), &quot; (1,1,1) 방향의
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.svg" alt="김민준 M11" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>Fisher 정보는 스코어의 제곱 평균이잖아요. Adam도 기울기 제곱의 평균을 쓰니까 데이터 라벨로 기울기를 구해서 제곱하면 되죠. p = (0.665, 0.245, 0.090)이니까 y = 0이면 g = (−0.335, 0.245, 0.090)이고 대각 성분이 (0.112, 0.060, 0.008), y = 2면 g = (0.665, 0.245, −0.910)이라 (0.442, 0.060, 0.828)이에요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.svg" alt="이서연 S06" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>Fisher 정보의 대각은 (0.223, 0.185, 0.082)인데 둘 다 안 맞아. y = 2일 때 셋째 성분은 열 배나 커. 게다가 ggᵀ는 벡터 하나의 외적이라 계수가 1인데 Fisher 정보는 계수가 2야.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.svg" alt="김민준 M06" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>정답을 하나만 봤으니 그런 거 아냐? 데이터가 많으면 평균이 맞춰 줄 거야.</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch09/ch09_cut6.png" alt="정답 라벨로 잰 흔들림?" loading="lazy"><figcaption>정답 라벨로 잰 흔들림?</figcaption></figure>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>Fisher 정보의 정의에서 평균은 어느 분포로 냈죠?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.svg" alt="김민준 M08" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>⟨·⟩_p_θ요. 모델 분포요. 아… 모델이 스스로 라벨을 뽑아야 하는 거였네요. 그럼 (다)는 y마다 p_y를 곱해서 더하면… Σ_y p_y (p − e_y)(p − e_y)ᵀ를 전개하면 ppᵀ − ppᵀ − ppᵀ + diag(p)라서 정확히 diag(p) − ppᵀ예요.</p></div></div>
 <figure class="fig fig-cut"><img src="images/ch09/ch09_cut7.png" alt="라벨은 모델이 뽑아야 한다" loading="lazy"><figcaption>라벨은 모델이 뽑아야 한다</figcaption></figure>
@@ -981,7 +981,6 @@ print(&quot;고윳값:&quot;, torch.linalg.eigvalsh(H), &quot; (1,1,1) 방향의
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.svg" alt="김민준 M11" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>(다)는 βε = 5가 제일 좋아요. 거의 다 바닥 상태라 들뜬 입자가 평균 6.7개, 표준편차 2.6개밖에 안 돼요. 눈금이 거의 안 흔들리니까 읽을 때마다 같은 값이 나올 거예요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.svg" alt="이서연 S06" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>반대 아니야? 방금 역온도에 대한 Fisher 정보가 에너지의 분산이라고 했잖아. 흔들림이 클수록 정보가 많으니까 분산이 249ε²로 가장 큰 βε = 0.1이 제일 좋아.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T12"><img src="images/cast/T12.svg" alt="선생님 T12" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>두 사람 다 반만 맞았어요. 문제는 상대 오차를 물었어요. 한 번 읽어서 역온도를 추정할 때 틀리는 폭이 1/√Var(E)라면, 상대 오차는 그것을 β로 나눈 거예요.</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch09/ch09_cut8.png" alt="두 사람 다 반만 맞았다" loading="lazy"><figcaption>두 사람 다 반만 맞았다</figcaption></figure>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S09"><img src="images/cast/S09.svg" alt="이서연 S09" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>1/(β√Var(E)) = 1/√(β²Var(E))이고… β²Var(E)는 kT²C에 1/(kT)²을 곱한 거니까 C/k예요. 상대 오차가 1/√(C/k)이에요!</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M12"><img src="images/cast/M12.svg" alt="김민준 M12" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>그럼 열용량만 보면 되네요. 입자 하나의 C/k가 βε = 5에서 0.166, 2.4에서 0.439, 0.1에서 0.0025였으니까 1000개면 166, 439, 2.5이고, 상대 오차는 7.8%, 4.8%, 63%예요. 제 βε = 5는 2등이고 서연이의 βε = 0.1은 꼴찌네?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.svg" alt="이서연 S06" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>꼴찌라니. 시뮬레이션으로도 확인해 봐.</p></div></div>

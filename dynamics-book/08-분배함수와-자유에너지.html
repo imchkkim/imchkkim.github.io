@@ -465,6 +465,7 @@ figure.fig figcaption {
 /* 초상화: 오른쪽에 작게 띄운다 */
 figure.fig-portrait {
   float: right;
+  clear: right; /* 초상화가 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
   width: 200px;
   margin: 0.3em 0 1em 1.5em;
   text-align: left;
@@ -472,8 +473,13 @@ figure.fig-portrait {
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
 h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+/* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
+.portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
+.portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
 @media (max-width: 600px) {
   figure.fig-portrait { float: none; width: 170px; margin: 1em auto; }
+  .portrait-row { gap: 1em; }
+  .portrait-row figure.fig-portrait { width: 140px; }
 }
 /* 카툰 컷 */
 figure.fig-cut img { max-width: min(100%, 560px); border: 1px solid var(--border); background: #fff; }
@@ -1113,7 +1119,6 @@ print(f&quot;ln p(x) = {log_px:.4f},  사후분포: 평균 {x/(1+s2):.3f}, 분�
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.svg" alt="김민준 M11" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>그럼 최댓값은 바로 나오지. τ = 1일 때 최댓값이 ln Z였으니까 τ = 0.5면 ln(e^(2/0.5) + e⁰) = ln(e⁴ + 1) = 4.018이에요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.svg" alt="이서연 S06" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>잠깐, 그건 나올 수가 없는 숫자야. p가 뭐든 로짓 평균은 2를 못 넘고, 두 칸짜리 분포의 엔트로피는 ln 2 = 0.693을 못 넘어. τ = 0.5면 최댓값이 2 + 0.347 = 2.347 이하여야 하는데 4.018이 나왔잖아.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.svg" alt="김민준 M05" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>어… 그럼 직접 넣어 볼게. softmax(z/0.5) = (0.982, 0.018)이고 로짓 평균이 1.964, 엔트로피가 0.0901이니까 1.964 + 0.5 × 0.0901 = 2.009. 4.018의 딱 절반이네?</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch08/ch08_cut1.png" alt="나올 수 없는 숫자 4.018" loading="lazy"><figcaption>나올 수 없는 숫자 4.018</figcaption></figure>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>왜 절반인지 찾아봐요. 최대화하는 식 전체를 τ로 나누면 무엇이 되죠?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.svg" alt="김민준 M07" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>Σpᵢ(zᵢ/τ) + H(p)요. 로짓이 z/τ인 원래 식이니까 최댓값이 ln Σe^(zᵢ/τ)이고… 아, τ로 나눈 식의 최댓값이니까 τ를 다시 곱해야 해요. τ ln Σe^(zᵢ/τ) = 0.5 × 4.018 = 2.009예요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.svg" alt="이서연 S08" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>단위로 봐도 그래. ln Σe^(z/τ)는 nat 단위고, τ를 곱해야 로짓 단위가 돼. 물리에서 ln Z에 kT를 곱해야 에너지가 되는 거랑 똑같아.</p></div></div>
@@ -1136,7 +1141,6 @@ print(f&quot;ln p(x) = {log_px:.4f},  사후분포: 평균 {x/(1+s2):.3f}, 분�
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>켈빈이 말한 두 번째 구름이 바로 그거예요. 분자의 진동은 제곱 항이 두 개라서 등분배대로라면 kT를 받아야 해요. 그런데 양자역학에서는 진동 에너지도 덩어리로만 오가고, 실온에서는 그 덩어리가 kT보다 훨씬 커요. 그래서 진동은 거의 얼어붙어 비열에 끼지 못했던 거죠. 등분배는 에너지가 제곱 항이고, 그 변수가 kT에 비해 촘촘하게, 곧 연속으로 움직일 수 있을 때만 맞아요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.svg" alt="김민준 M08" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>그럼 d차원 가우시안 노이즈는 좌표마다 제곱 항이 하나씩이니까 좌표마다 ½씩, 합쳐서 d/2요. 샘플 에너지가 d/2 근처에 있던 게 등분배였네요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S12"><img src="images/cast/S12.svg" alt="이서연 S12" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>너 추측 맞았다고 너무 좋아하지 마. 조건은 절반밖에 안 맞혔어.</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch08/ch08_cut4.png" alt="추측은 맞았지만 조건은 절반" loading="lazy"><figcaption>추측은 맞았지만 조건은 절반</figcaption></figure>
 <h3 id="문제-3-자유에너지에서-엔트로피-꺼내기">문제 3. 자유에너지에서 엔트로피 꺼내기</h3>
 <p>(가) 2준위 입자 하나의 자유에너지 F = −kT ln(1 + e^(−ε/kT))에서 S = −∂F/∂T로 βε = ln 2일 때의 엔트로피를 구하라. (나) 온도 1에서 로짓 z = (2, 1, 0)인 softmax의 엔트로피를 logsumexp와 로짓 평균만으로 구하라.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.svg" alt="김민준 M11" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>F = −kT ln Z를 T로 미분하면 −k ln Z니까 S = k ln Z = k ln 1.5 = 0.405k예요.</p></div></div>
@@ -1144,7 +1148,6 @@ print(f&quot;ln p(x) = {log_px:.4f},  사후분포: 평균 {x/(1+s2):.3f}, 분�
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>Z는 무엇의 함수죠?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.svg" alt="김민준 M07" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>1 + e^(−ε/kT)… 아, T가 들어 있어요. 곱의 미분이라 한 항이 더 나와야 해요. −kT × ∂ln Z/∂T인데 ∂ln Z/∂T = ⟨E⟩/(kT²)이니까 S = k ln Z + ⟨E⟩/T = 0.405k + 0.231k = 0.636k. 이제 맞아요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S12"><img src="images/cast/S12.svg" alt="이서연 S12" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>정규화 상수라고 부르니까 상수인 줄 안 거지. 온도를 바꾸면 Z도 바뀌어.</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch08/ch08_cut5.png" alt="Z도 온도의 함수" loading="lazy"><figcaption>Z도 온도의 함수</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.svg" alt="김민준 M01" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>(나)는 T = 1에서 S = ln Z + β⟨E⟩에 E = −z를 넣으면 H = logsumexp(z) − ⟨z⟩_p예요. 2.4076 − 1.5752 = 0.8324.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.svg" alt="선생님 T13" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>−Σp ln p로 계산하면 확률이 0에 가까운 클래스에서 ln 0을 조심해야 하지만, 이 식은 logsumexp 한 번과 가중 평균 한 번이면 끝나요. 로짓만 있으면 되죠.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S09"><img src="images/cast/S09.svg" alt="이서연 S09" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>이 식은 −ln pᵢ = Eᵢ − F를 p로 평균한 거네요. 놀라움의 평균이 엔트로피고, 놀라움 하나하나는 에너지가 자유에너지보다 얼마나 높은지니까요.</p></div></div>
@@ -1153,7 +1156,6 @@ print(f&quot;ln p(x) = {log_px:.4f},  사후분포: 평균 {x/(1+s2):.3f}, 분�
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.svg" alt="김민준 M11" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>(가)는 x_a가 0.665, x_b가 0.987이에요. 두 입력 모두 가장 큰 로짓이 2라서 에너지는 −2로 같고, x_b 쪽이 훨씬 확신하니까 학습 데이터에 흔한 전형적인 입력이겠죠. p(x_b)가 더 클 거예요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.svg" alt="이서연 S01" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>라벨을 합쳐 없애면 가장 낮은 에너지만 남는 게 아니잖아. F(x_a) = −ln(e² + e + 1) = −2.408이고 F(x_b) = −ln(e² + 2e⁻³) = −2.013이야. x_a 쪽이 더 낮으니까 p(x_a)/p(x_b) = e^(2.408 − 2.013) = 1.48이야.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.svg" alt="김민준 M05" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>헉, 거꾸로네요. 확신이 낮은 x_a가 1.5배 더 흔한 입력이라고요?</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch08/ch08_cut6.png" alt="확신이 낮은 입력이 더 흔하다?" loading="lazy"><figcaption>확신이 낮은 입력이 더 흔하다?</figcaption></figure>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>두 입력 모두 가장 좋은 라벨의 에너지는 −2로 같아요. 차이는 나머지 라벨들에서 나요. x_a는 다른 라벨들의 에너지도 꽤 낮아서 유효한 라벨 수가 1 + e⁻¹ + e⁻² = 1.503개이고, x_b는 1 + 2e⁻⁵ = 1.013개예요. F(x) = (가장 낮은 에너지) − ln(유효 라벨 수)라서 상태가 많은 쪽의 자유에너지가 낮아요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S09"><img src="images/cast/S09.svg" alt="이서연 S09" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>그런데 softmax 최대 확률의 로그도 −ln(유효 라벨 수)잖아요. 같은 양이 두 점수를 반대 방향으로 움직이는 거네요. 유효 라벨 수가 많으면 신뢰도는 떨어지고 자유에너지도 떨어져서 입력은 더 흔해져요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.svg" alt="김민준 M04" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>(다)는 쉬워요. 로짓에 상수를 더해도 softmax는 그대로니까 신뢰도는 안 바뀌고, 에너지 기준점을 옮긴 거니까 F도… 아니다, F는 −logsumexp라서 c만큼 그대로 내려가요. 그럼 p(x_a)는 e^c배가 되고요.</p></div></div>
@@ -1166,7 +1168,6 @@ print(f&quot;ln p(x) = {log_px:.4f},  사후분포: 평균 {x/(1+s2):.3f}, 분�
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.svg" alt="김민준 M11" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>(가)는 p(x) = 0.5 × 0.1 + 0.3 × 0.4 + 0.2 × 0.8 = 0.33이고 ln p(x) = −1.1087이에요. (나)는 사전분포를 q로 두면 KL 항이 0이라 계산이 제일 편해요. ELBO = 0.5 ln 0.1 + 0.3 ln 0.4 + 0.2 ln 0.8 = −1.4708. KL 벌점이 0이니까 이게 가장 좋은 q겠죠. 그러니까 ln p(x) ≈ −1.47이에요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S12"><img src="images/cast/S12.svg" alt="이서연 S12" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>너 방금 (가)에서 −1.1087이라며. 같은 걸 두 번 계산했는데 답이 다르잖아.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.svg" alt="김민준 M04" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>어… 하한이니까 작게 나오는 건 맞는데, KL이 0이면 틈도 0 아니에요?</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch08/ch08_cut7.png" alt="두 번 계산했는데 답이 다르다" loading="lazy"><figcaption>두 번 계산했는데 답이 다르다</figcaption></figure>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>틈은 어느 두 분포 사이의 KL이었죠?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.svg" alt="김민준 M07" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>q와… 사후분포요. 제가 0이라고 한 건 q와 사전분포 사이의 KL이고요. 둘이 다른 KL이었네요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S11"><img src="images/cast/S11.svg" alt="이서연 S11" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>사후분포는 사전분포 × 우도를 정규화한 거니까 (0.05, 0.12, 0.16)/0.33 = (0.152, 0.364, 0.485)야. 사전분포와 사후분포 사이의 KL이 0.3621이고, −1.4708 + 0.3621 = −1.1087. 딱 맞아.</p></div></div>

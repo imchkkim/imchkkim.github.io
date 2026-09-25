@@ -465,6 +465,7 @@ figure.fig figcaption {
 /* 초상화: 오른쪽에 작게 띄운다 */
 figure.fig-portrait {
   float: right;
+  clear: right; /* 초상화가 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
   width: 200px;
   margin: 0.3em 0 1em 1.5em;
   text-align: left;
@@ -472,8 +473,13 @@ figure.fig-portrait {
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
 h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+/* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
+.portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
+.portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
 @media (max-width: 600px) {
   figure.fig-portrait { float: none; width: 170px; margin: 1em auto; }
+  .portrait-row { gap: 1em; }
+  .portrait-row figure.fig-portrait { width: 140px; }
 }
 /* 카툰 컷 */
 figure.fig-cut img { max-width: min(100%, 560px); border: 1px solid var(--border); background: #fff; }
@@ -1063,7 +1069,6 @@ with torch.no_grad():
 <p>평균 눈 대신 「6이 나올 확률이 0.3」이라는 것만 알려진 주사위가 있다. 최대 엔트로피 분포를 구하고, 이것을 특징 φ(i) = (i가 6이면 1, 아니면 0)의 지수족으로 적을 때 승수 θ를 구하라. 이 분포의 평균 눈은 얼마인가?</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M02"><img src="images/cast/M02.svg" alt="김민준 M02" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>6이 자주 나온다는 건 큰 눈 쪽으로 치우쳤다는 거니까, 평균 4.5 문제처럼 눈이 커질수록 확률이 같은 비율로 늘어나게 하면 되겠죠. 6을 0.3에 맞추고 나머지를 지수로 깔면…</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.svg" alt="이서연 S06" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>잠깐, 1부터 5까지에 대해서는 아무것도 안 들었잖아. 5가 1보다 자주 나온다는 건 어디서 온 거야? 남은 0.7을 다섯 눈이 0.14씩 똑같이 나눠야지.</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch10/ch10_cut1.png" alt="나머지 다섯 눈은 아무것도 모른다" loading="lazy"><figcaption>나머지 다섯 눈은 아무것도 모른다</figcaption></figure>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.svg" alt="선생님 T02" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>서연 학생 말대로 해 보고, 그게 정말 지수족 모양인지 확인해 볼까요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.svg" alt="이서연 S07" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>특징이 6인지 아닌지뿐이니까 p ∝ e^(θφ)는 1~5에서 모두 1이고 6에서만 e^θ예요. 1~5가 같은 확률을 갖는 게 자동으로 나오네요. e^θ = 0.3/0.14이니까 θ = ln(0.3/0.14) = 0.762이고, 엔트로피는 1.737이에요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.svg" alt="김민준 M08" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>평균 눈은 0.14 × (1 + 2 + 3 + 4 + 5) + 0.3 × 6 = 3.9네요. 지수 모양이라고 해서 늘 눈에 대한 지수인 게 아니었어요. 지킨 평균의 특징에 대한 지수고, 특징이 구별하지 않는 눈끼리는 끝까지 같은 확률이에요.</p></div></div>
@@ -1076,13 +1081,11 @@ with torch.no_grad():
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>MSE를 줄이는 것은 잔차가 정규분포를 따른다고 두고 최대우도를 하는 것과 같고, MAE를 줄이는 것은 라플라스 분포로 두는 것과 같아요. 최대 엔트로피로 읽으면 MSE는 「잔차에 대해 제곱 평균 말고는 아무것도 믿지 않겠다」는 선택이고, MAE는 「절댓값 평균만 믿겠다」는 선택이에요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.svg" alt="김민준 M08" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>(나)를 해 볼게요. 10이 들어가면 제곱 평균은 (4 + 1 + 1 + 4 + 100)/5 = 22로 뛰어서 정규분포 쪽은 2.965, 절댓값 평균은 16/5 = 3.2라 라플라스 쪽은 1 + ln 6.4 = 2.856이에요. 아까는 정규분포가 이겼는데 이번엔 라플라스가 이겼어요. 이상치에 강하다는 게 이 말이었네요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.svg" alt="이서연 S07" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>제곱 평균은 10 하나 때문에 2.5에서 22로 아홉 배 가까이 뛰는데, 절댓값 평균은 1.5에서 3.2로 두 배쯤만 늘어. 어떤 평균을 믿느냐가 이상치 하나에 모델이 얼마나 흔들리는지를 정하는 거야.</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch10/ch10_cut2.png" alt="이상치 하나에 승부가 뒤집혔다" loading="lazy"><figcaption>이상치 하나에 승부가 뒤집혔다</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M12"><img src="images/cast/M12.svg" alt="김민준 M12" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>조교님이 과제마다 정답과의 차이를 제곱해서 평균 내면, 크게 틀린 과제 하나가 학기 평가 전체를 끌고 가는 거랑 같네요.</p></div></div>
 <h3 id="문제-3-봉우리-두-개를-못-보는-모델">문제 3. 봉우리 두 개를 못 보는 모델</h3>
 <p>모델 N(0, 2.5), 곧 θ = 0.4인 E_θ(x) = θx²/2를 세 가지 데이터로 평가한다. (가) {−2, −1, 1, 2}, (나) ±1.5에 봉우리가 있고 표준편차 0.5인 가우시안 두 개를 반씩 섞은 분포, (다) x² 평균이 2.5인 라플라스 분포. 세 경우의 평균 음의 로그우도를 구하라. 이 모델이 데이터의 봉우리 개수를 모른다는 것은 약점인가?</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.svg" alt="김민준 M04" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>(가)는 1.877이었고, (나)와 (다)는 샘플 20만 개씩 뽑아서 돌려 볼게요. (나)는 1.877, (다)는 1.879요. 셋이 거의 똑같아요. 어? 코드를 잘못 짰나…</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.svg" alt="이서연 S06" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>이상한데요. (나)는 봉우리가 ±1.5에 있어서 0 근처에는 샘플이 거의 없고, 모델은 0에서 밀도가 제일 높잖아요. 엉뚱한 곳에 확률을 쏟은 모델이니까 손실이 더 커야 하지 않아요?</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch10/ch10_cut3.png" alt="세 데이터의 손실이 똑같다?" loading="lazy"><figcaption>세 데이터의 손실이 똑같다?</figcaption></figure>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>모델의 로그우도를 x에 대해 써 보세요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S09"><img src="images/cast/S09.svg" alt="이서연 S09" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>ln p_θ(x) = −0.2x² − ½ ln(2π/0.4)예요. x²에만 의존하니까 평균을 내면 x²의 평균만 남아요. (나)의 x² 평균은 1.5² + 0.5² = 2.5이고 (다)도 2.5로 맞췄으니, 셋 다 정확히 1.877이에요. 민준이의 (다)가 1.879인 건 샘플의 x² 평균이 2.51로 나와서고요. 아, 교차 엔트로피가 평균 φ̄만으로 정해진다는 식이 이거였네요.</p></div></div>
 <figure class="fig fig-cut"><img src="images/ch10/ch10_cut4.png" alt="로그우도는 x²에만 의존한다" loading="lazy"><figcaption>로그우도는 x²에만 의존한다</figcaption></figure>
@@ -1101,7 +1104,6 @@ with torch.no_grad():
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>기준 모델이 원래 응답 1을 절반이나 내던 것이 그대로 반영된 거예요. 이제 (나)요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.svg" alt="김민준 M04" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>ln(0.360/0.5), ln(0.587/0.3), ln(0.053/0.2)는 (−0.329, 0.671, −1.329)예요. 보상은 (1, 2, 0)인데 전부 1.329씩 모자라요. 제가 또 틀린 거예요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.svg" alt="이서연 S08" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>모자란 양이 셋 다 똑같잖아. 1.329면 ln Z고. 에너지 기준점을 옮긴 것처럼 보상 전체가 상수만큼 내려간 거야. 차이를 보면 −0.329 − 0.671 = −1로 보상의 차이 1 − 2와 정확히 같아.</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch10/ch10_cut5.png" alt="셋 다 1.329씩 모자라다" loading="lazy"><figcaption>셋 다 1.329씩 모자라다</figcaption></figure>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>그게 DPO가 쓰는 식이에요. 사람의 선호는 두 응답 가운데 어느 쪽이 나은지만 말해 주니까 보상의 차이만 필요하고, 계산할 수 없는 ln Z는 빼기에서 사라져요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.svg" alt="김민준 M07" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>(다)는 β = 0.5면 (0.182, 0.808, 0.010)으로 보상 쪽에 몰리고, β = 2면 (0.448, 0.443, 0.109)로 기준 정책 (0.5, 0.3, 0.2)에 가까워져요. β가 온도 자리라서 크면 보상 차이가 nat으로 적게 쳐지는 거네요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.svg" alt="선생님 T13" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>그래요. KL을 줄이는 쪽으로 읽으면, 원래 믿던 분포를 가장 적게 바꾸면서 새로 알게 된 보상을 받아들이는 방법이에요.</p></div></div>
@@ -1110,14 +1112,12 @@ with torch.no_grad():
 <p>한 상태에서 행동 세 개의 가치가 Q = (2, 1, 0)이다. (가) 정책 π ∝ e^(Q/α)의 엔트로피가 목표값 H̄ = 0.8 nat이 되는 α와 그때의 정책, soft 가치 V를 구하라. (나) α = 0.2에서 시작해 J(α) = α(H(π) − H̄)를 경사하강하면 α는 오르는가, 내리는가? (다) 목표를 H̄ = 1.2 nat으로 두면 어떻게 되는가?</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.svg" alt="김민준 M11" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>α = 1이면 정책이 (0.665, 0.245, 0.090)이고 엔트로피가 0.832예요. 목표 0.8보다 크니까 엔트로피를 줄이려면… α를 올리면 되겠죠. 온도가 올라가면 더 차분해지니까요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.svg" alt="이서연 S06" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>반대야. 온도가 올라가면 더 고르게 퍼져서 엔트로피가 커져. α = 2면 (0.506, 0.307, 0.186)이고 엔트로피가 1.020이잖아. 엔트로피를 0.8로 낮추려면 α를 1보다 조금 내려야 해.</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch10/ch10_cut6.png" alt="온도를 올리면 차분해진다?" loading="lazy"><figcaption>온도를 올리면 차분해진다?</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.svg" alt="김민준 M07" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>아, 차분해지는 건 온도를 낮출 때였죠. 다시 풀면 α = 0.929에서 엔트로피가 정확히 0.8이고, 정책은 (0.686, 0.234, 0.080), soft 가치는 0.929 × ln Σe^(Q/0.929) = 2.350이에요. 이 정책으로 얻는 가치의 평균은 1.606으로 가장 좋은 행동의 2보다 낮지만, 엔트로피 0.8에 온도 0.929를 곱한 0.743이 더해져서 2보다 커졌어요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.svg" alt="선생님 T02" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>(나)는요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.svg" alt="김민준 M08" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>α = 0.2면 정책이 (0.993, 0.007, 0.000)으로 거의 한 행동에 몰려서 엔트로피가 0.041이에요. J를 α로 미분하면 H − H̄ = 0.041 − 0.8로 음수니까, 경사하강으로 빼면 α가 올라가요. log α를 학습률 1로 움직였더니 0.2, 0.427, 0.675를 거쳐 스무 걸음 안에 0.929에 멈췄어요. 엔트로피가 모자라면 온도를 올리고 넘치면 내리는 거니까, 진짜 온도 조절기네요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.svg" alt="이서연 S08" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>평균 에너지를 묶었을 때는 승수가 역온도였는데, 엔트로피를 묶으니까 승수가 온도예요. 무엇을 제약으로 두고 무엇을 최적화하느냐만 바뀐 같은 문제네요. (다)는… 행동이 세 개면 엔트로피가 ln 3 = 1.099를 넘을 수 없어요. 1.2는 어떤 정책으로도 못 맞춰요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T12"><img src="images/cast/T12.svg" alt="선생님 T12" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>그럼 α는 어떻게 되죠?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.svg" alt="이서연 S07" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>엔트로피가 늘 목표보다 작으니까 기울기가 늘 음수고, α가 끝없이 올라가요. 제약을 지킬 수 없으면 승수가 무한대로 달아나는 거네요.</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch10/ch10_cut7.png" alt="승수가 무한대로 달아난다" loading="lazy"><figcaption>승수가 무한대로 달아난다</figcaption></figure>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>그래서 목표 엔트로피는 도달할 수 있는 값으로 골라야 해요. SAC 논문은 연속 행동에서 목표를 행동 차원 수에 마이너스를 붙인 값으로 둬요. 연속 분포의 엔트로피는 음수도 될 수 있어서 그 정도는 넉넉히 도달할 수 있거든요.</p></div></div>
 <h3 id="문제-6-왜-하필-엔트로피인가">문제 6. 왜 하필 엔트로피인가</h3>
 <p>서연은 「고르게 퍼진 정도」를 엔트로피 대신 확률의 제곱합 Σpᵢ²로 재자고 제안했다. 제곱합이 작을수록 고르게 퍼진 분포이기 때문이다. (가) 평균 눈 4.5를 지키면서 Σpᵢ²를 가장 작게 하는 분포를 구하고 최대 엔트로피 분포와 비교하라. (나) 굴림 1000번의 눈 개수 조합으로 두 분포를 비교하라. (다) 서로 아무 관계가 없는 주사위 두 개가 각각 평균 4.5라는 것을 알 때, 두 주사위의 결합 분포를 한꺼번에 골라 보라. 두 기준은 어떻게 다른가?</p>
@@ -1127,7 +1127,6 @@ with torch.no_grad():
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.svg" alt="선생님 T13" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>좋은 반론이에요. 그럼 세는 이야기는 빼고 (다)로 가 봐요. 두 주사위는 서로 아무 관계가 없어요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S05"><img src="images/cast/S05.svg" alt="이서연 S05" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>결합 분포는 36칸이고 제약은 첫 주사위의 평균 4.5, 둘째 주사위의 평균 4.5예요. 확률이 음수가 되지 않게 하고 제곱합을 최소화하면… 어? 첫 주사위의 분포가 (0.040, 0.077, 0.124, 0.184, 0.253, 0.322)로 나와요. 주사위 하나만 볼 때는 (0.024, 0.081, …)였는데 옆에 주사위 하나를 더 놓았을 뿐인데 답이 바뀌었어요. 게다가 둘 다 1이 나올 확률이 정확히 0이에요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.svg" alt="김민준 M06" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">김민준</span>그러니까 첫 주사위가 1이면 둘째는 절대 1이 안 나온다는 거네. 서로 아무 관계도 없다며. 옆 분반 시험 결과를 듣고 우리 분반 점수 예상을 바꾸는 거랑 뭐가 달라.</p></div></div>
-<figure class="fig fig-cut"><img src="images/ch10/ch10_cut8.png" alt="주사위 하나를 옆에 놓았을 뿐인데" loading="lazy"><figcaption>주사위 하나를 옆에 놓았을 뿐인데</figcaption></figure>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S04"><img src="images/cast/S04.svg" alt="이서연 S04" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>공분산도 −0.59로 음수예요. 제곱합 기준이 없던 상관을 만들어 냈어요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.svg" alt="선생님 T02" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">선생님</span>최대 엔트로피로 같은 문제를 풀면요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S09"><img src="images/cast/S09.svg" alt="이서연 S09" loading="lazy"></figure><div class="turn-body"><p><span class="speaker">이서연</span>제약이 두 개니까 p(i, j) ∝ e^(θ₁i + θ₂j) = e^(θ₁i) × e^(θ₂j)로 곱으로 쪼개져요. 각 주사위의 분포는 하나만 볼 때와 똑같은 (0.054, 0.079, …)이고, 둘은 독립으로 남아요. 지수는 합을 곱으로 바꾸니까 독립인 제약이 독립인 분포를 만들고, 제곱합은 그렇게 쪼개지지 않으니까 곱을 못 만드는 거네요.</p></div></div>
