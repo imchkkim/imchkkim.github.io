@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/ch03-distance-CtbXZJu5.js","assets/components-CFCkltDE.js","assets/log-D4CkWvmI.js","assets/continuous-KwK7b7SF.js","assets/linear-zvyCYkMK.js","assets/ch04-paths-B5N-IwWe.js","assets/ch05-surprise-and-information-D4vRNYE1.js","assets/ch06-convex-duality-Mbk6IgGV.js","assets/ch07-exponential-family-flashcards-BLxoHTvZ.js","assets/ch09-fisher-information-Dg6LjDZQ.js","assets/ch11-geometry-of-inference-CD5TXuYY.js","assets/ch12-convergence-Dx3_uz3O.js","assets/ch14-diffusion-B52GAvFG.js","assets/ch15-flow-matching-By1S0qX6.js","assets/ch16-broadening-narrowing-DnVxux4H.js","assets/ch17-scaling-GD3UD6sJ.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/ch03-distance-XD7gMh7b.js","assets/components-BInSxCOM.js","assets/log-DsKyiG9m.js","assets/continuous-D95oaVnR.js","assets/linear-vNx_t4yF.js","assets/ch04-paths-BodYCZhS.js","assets/ch05-surprise-and-information-IAn8aJ6l.js","assets/ch06-convex-duality-CaHLN2uC.js","assets/ch07-exponential-family-flashcards-rSDB2PsF.js","assets/ch09-fisher-information-CyaUN2Px.js","assets/ch11-geometry-of-inference-CVhEo7g2.js","assets/ch12-convergence-BgOIWYd1.js","assets/ch14-diffusion-CnRNhTs6.js","assets/ch15-flow-matching-dUiXq1TS.js","assets/ch16-broadening-narrowing-CY-cH0I2.js","assets/ch17-scaling-Dm_WF73i.js"])))=>i.map(i=>d[i]);
 var o2=Object.defineProperty;var u2=(l,n,r)=>n in l?o2(l,n,{enumerable:!0,configurable:!0,writable:!0,value:r}):l[n]=r;var He=(l,n,r)=>u2(l,typeof n!="symbol"?n+"":n,r);function c2(l,n){for(var r=0;r<n.length;r++){const i=n[r];if(typeof i!="string"&&!Array.isArray(i)){for(const s in i)if(s!=="default"&&!(s in l)){const u=Object.getOwnPropertyDescriptor(i,s);u&&Object.defineProperty(l,s,u.get?u:{enumerable:!0,get:()=>i[s]})}}}return Object.freeze(Object.defineProperty(l,Symbol.toStringTag,{value:"Module"}))}(function(){const n=document.createElement("link").relList;if(n&&n.supports&&n.supports("modulepreload"))return;for(const s of document.querySelectorAll('link[rel="modulepreload"]'))i(s);new MutationObserver(s=>{for(const u of s)if(u.type==="childList")for(const h of u.addedNodes)h.tagName==="LINK"&&h.rel==="modulepreload"&&i(h)}).observe(document,{childList:!0,subtree:!0});function r(s){const u={};return s.integrity&&(u.integrity=s.integrity),s.referrerPolicy&&(u.referrerPolicy=s.referrerPolicy),s.crossOrigin==="use-credentials"?u.credentials="include":s.crossOrigin==="anonymous"?u.credentials="omit":u.credentials="same-origin",u}function i(s){if(s.ep)return;s.ep=!0;const u=r(s);fetch(s.href,u)}})();function h2(l){return l&&l.__esModule&&Object.prototype.hasOwnProperty.call(l,"default")?l.default:l}var wo={exports:{}},zl={},ko={exports:{}},Se={};/**
  * @license React
  * react.production.min.js
@@ -1146,27 +1146,14 @@ for eps in [1e-1, 1e-2, 1e-3, 1e-4]:
 > 정보기하학에서는 공간의 구조를 결정하는 자가 되었다.
 > 암호해독가의 실용적 질문이 수학의 근본 개념이 된 셈이다.
 
-## 연습문제
+## 연습문제 1 — 두 동전, 두 방향
 
-**문제 1.** 공정한 동전 (0.5, 0.5)과 기운 동전 (0.9, 0.1)이 있다.
+공정한 동전 (0.5, 0.5)과 기운 동전 (0.9, 0.1)이 있다.
 KL(공정‖기운)과 KL(기운‖공정)을 각각 구하라. 어느 쪽이 더 크고, 왜 그런가?
 
-**문제 2.** 「거리에도 종류가 있다」의 세 분포 A, B, C를 다시 쓴다.
-이번에는 A를 모형 자리에 두고 KL(B‖A)와 KL(C‖A)를 비교하라.
-A와 더 가까운 점은 여전히 C인가?
+### 함께 풀기
 
-**문제 3.** 두 정규분포의 표준편차가 σ로 같고 평균만 Δμ 다르다.
-KL이 (Δμ)² / (2σ²)가 됨을 보이고, 이 값의 단위가 무엇인지 말하라.
-numpy로 σ = 5.8인 정규분포 표본을 뽑아 확인할 때 주의할 점도 적어라.
-
-**문제 4 (킬러).** 베르누이 분포 세 개 a = 0.1, b = 0.5, c = 0.9를 생각한다.
-(가) KL(a‖c)와 KL(a‖b) + KL(b‖c)를 비교해 KL이 삼각부등식을 깨는지 확인하라.
-(나) 그렇다면 KL은 거리로서 쓸모없는가? 유클리드 거리의 제곱과 비교해서 답하라.
-(다) θ = 0.3에서 KL(θ‖θ+ε) − KL(θ+ε‖θ)가 ε의 몇 제곱으로 줄어드는지 보여라.
-
-## 함께 풀기
-
-**선생님:** 문제 1부터 해 봐요. 동전 두 개, 방향 두 개. 숫자가 몇 나왔어요?
+**선생님:** 동전 두 개, 방향 두 개. 숫자가 몇 나왔어요?
 
 **김민준:** 벌써 돌렸어요. KL(공정‖기운)이 0.511이고 KL(기운‖공정)은 0.368이요.
 
@@ -1186,7 +1173,15 @@ numpy로 σ = 5.8인 정규분포 표본을 뽑아 확인할 때 주의할 점�
 
 **김민준:** 팀 과제 채점 기준표를 누가 만드느냐랑 비슷하네요. 조교가 만들면 조교가 중요하게 보는 항목에서 깎이고, 학생이 만들면 또 다른 데서 깎이고.
 
-**선생님:** 그 비유 괜찮아요. 무게를 누가 쥐고 있느냐, 그게 KL의 방향이에요. 문제 2로 가요.
+**선생님:** 그 비유 괜찮아요. 무게를 누가 쥐고 있느냐, 그게 KL의 방향이에요.
+
+## 연습문제 2 — 모형 자리에 선 A
+
+「거리에도 종류가 있다」의 세 분포 A, B, C를 다시 쓴다.
+이번에는 A를 모형 자리에 두고 KL(B‖A)와 KL(C‖A)를 비교하라.
+A와 더 가까운 점은 여전히 C인가?
+
+### 함께 풀기
 
 **김민준:** 이건 위젯에서 봤어요. C가 더 가까워요. KL은 B를 싫어해요, B가 결과 3에 1%밖에 안 주니까.
 
@@ -1204,7 +1199,15 @@ numpy로 σ = 5.8인 정규분포 표본을 뽑아 확인할 때 주의할 점�
 
 **김민준:** 팀플 동료평가 같네. 내가 조원들을 매긴 순위랑 조원들이 나를 기준으로 매긴 순위가 다른 것처럼.
 
-**선생님:** 그래요. 유클리드 자에서는 "가까운 점"이 하나지만, KL에서는 누가 현실이고 누가 모형인지 먼저 정해야 해요. 문제 3.
+**선생님:** 그래요. 유클리드 자에서는 "가까운 점"이 하나지만, KL에서는 누가 현실이고 누가 모형인지 먼저 정해야 해요.
+
+## 연습문제 3 — σ로 나눈 거리
+
+두 정규분포의 표준편차가 σ로 같고 평균만 Δμ 다르다.
+KL이 (Δμ)² / (2σ²)가 됨을 보이고, 이 값의 단위가 무엇인지 말하라.
+numpy로 σ = 5.8인 정규분포 표본을 뽑아 확인할 때 주의할 점도 적어라.
+
+### 함께 풀기
 
 **이서연:** σ가 같으면 log(σ₂/σ₁)가 0이 되고, σ₁²/(2σ₂²)가 ½이라서 −½과 상쇄돼요. (Δμ)²/(2σ²)만 남아요.
 
@@ -1222,7 +1225,16 @@ numpy로 σ = 5.8인 정규분포 표본을 뽑아 확인할 때 주의할 점�
 
 〔M08〕 **김민준:** scale… 표준편차요. 분산을 넣었네요. σ를 33.64로 뽑았으니 봉우리가 엄청 넓어져서 9cm 이동이 별거 아닌 게 된 거예요.
 
-**선생님:** 도입부의 "전 연령 분포"를 우연히 다시 만든 셈이에요. 주의할 점 하나 적었네요. 이제 킬러 문제.
+**선생님:** 도입부의 "전 연령 분포"를 우연히 다시 만든 셈이에요. 주의할 점 하나 적었네요.
+
+## 연습문제 4 — KL은 삼각부등식을 깨는가 (킬러)
+
+베르누이 분포 세 개 a = 0.1, b = 0.5, c = 0.9를 생각한다.
+(가) KL(a‖c)와 KL(a‖b) + KL(b‖c)를 비교해 KL이 삼각부등식을 깨는지 확인하라.
+(나) 그렇다면 KL은 거리로서 쓸모없는가? 유클리드 거리의 제곱과 비교해서 답하라.
+(다) θ = 0.3에서 KL(θ‖θ+ε) − KL(θ+ε‖θ)가 ε의 몇 제곱으로 줄어드는지 보여라.
+
+### 함께 풀기
 
 **김민준:** (가)는 쉬워요. KL(a‖c)가 1.758이고, KL(a‖b) + KL(b‖c)가 0.368 + 0.511 = 0.879예요. 돌아가는 게 두 배나 짧아요. 삼각부등식 깨졌고요, 그러니까 (나)의 답은 "KL은 거리로는 못 쓴다"예요.
 
@@ -6661,7 +6673,7 @@ Fisher 계량이 한 걸음의 크기를 재었고, Muon이 방향을 정규화�
 덧셈의 길과 곱셈의 길 사이를 번역하는 하나의 함수 — log — 가 있었다.
 그리고 그 번역기의 너머에, 아직 우리가 이름 붙이지 못한 풍경이 있다.
 지도는 계속된다.
-`,_e=(l,n)=>J.lazy(()=>l().then(r=>({default:r[n]}))),Kt=[{id:"00",title:"서문",slug:"preface",md:Rm,vizMap:{}},{id:"01",title:"왜 정보기하학인가",slug:"why-infogeo",md:Dm,vizMap:{}},{id:"02",title:"점",slug:"point",md:Fm,vizMap:{}},{id:"03",title:"거리",slug:"distance",md:Nm,vizMap:{"ch03/euclidean-vs-kl":_e(()=>De(()=>import("./ch03-distance-CtbXZJu5.js"),__vite__mapDeps([0,1,2,3,4])),"EuclideanVsKLTab"),"ch03/asymmetry":_e(()=>De(()=>import("./ch03-distance-CtbXZJu5.js"),__vite__mapDeps([0,1,2,3,4])),"AsymmetryTab"),"ch03/fisher-local":_e(()=>De(()=>import("./ch03-distance-CtbXZJu5.js"),__vite__mapDeps([0,1,2,3,4])),"FisherLocalTab")}},{id:"04",title:"길",slug:"paths",md:Pm,vizMap:{"ch04/two-paths":_e(()=>De(()=>import("./ch04-paths-B5N-IwWe.js"),__vite__mapDeps([5,1])),"TwoPathsTab"),"ch04/midpoint":_e(()=>De(()=>import("./ch04-paths-B5N-IwWe.js"),__vite__mapDeps([5,1])),"MidpointTab"),"ch04/color-interpolation":_e(()=>De(()=>import("./ch04-paths-B5N-IwWe.js"),__vite__mapDeps([5,1])),"ColorInterpolationTab")}},{id:"04z",title:"전환 — 같은 세계, 다른 눈",slug:"transition-1",md:Im,vizMap:{}},{id:"05",title:"놀라움과 정보",slug:"surprise",md:Bm,vizMap:{"ch05/surprise":_e(()=>De(()=>import("./ch05-surprise-and-information-D4vRNYE1.js"),__vite__mapDeps([6,1,4,3])),"SurpriseTab"),"ch05/entropy-simplex":_e(()=>De(()=>import("./ch05-surprise-and-information-D4vRNYE1.js"),__vite__mapDeps([6,1,4,3])),"EntropySimplexTab"),"ch05/cross-entropy":_e(()=>De(()=>import("./ch05-surprise-and-information-D4vRNYE1.js"),__vite__mapDeps([6,1,4,3])),"CrossEntropyTab"),"ch05/convexity-kl":_e(()=>De(()=>import("./ch05-surprise-and-information-D4vRNYE1.js"),__vite__mapDeps([6,1,4,3])),"ConvexityTab")}},{id:"06",title:"볼록함수의 쌍대",slug:"convex-duality",md:Om,vizMap:{"ch06/convexity":_e(()=>De(()=>import("./ch06-convex-duality-Mbk6IgGV.js"),__vite__mapDeps([7,1,4,3])),"ConvexityTab"),"ch06/jensen":_e(()=>De(()=>import("./ch06-convex-duality-Mbk6IgGV.js"),__vite__mapDeps([7,1,4,3])),"JensenTab"),"ch06/legendre":_e(()=>De(()=>import("./ch06-convex-duality-Mbk6IgGV.js"),__vite__mapDeps([7,1,4,3])),"LegendreTab"),"ch06/duality-identity":_e(()=>De(()=>import("./ch06-convex-duality-Mbk6IgGV.js"),__vite__mapDeps([7,1,4,3])),"DualityIdentityTab")}},{id:"06z",title:"전환 — 두 눈을 동시에",slug:"transition-2",md:_m,vizMap:{}},{id:"07",title:"지수족",slug:"exponential-family",md:qm,vizMap:{"ch07/flashcards":J.lazy(()=>De(()=>import("./ch07-exponential-family-flashcards-BLxoHTvZ.js"),__vite__mapDeps([8,1,4,3]))),"ch07/legendre":J.lazy(()=>De(()=>import("./ch07-exponential-family-flashcards-BLxoHTvZ.js"),__vite__mapDeps([8,1,4,3]))),"ch07/overview":J.lazy(()=>De(()=>import("./ch07-exponential-family-flashcards-BLxoHTvZ.js"),__vite__mapDeps([8,1,4,3])))}},{id:"08",title:"구부러진 땅",slug:"curved-land",md:jm,vizMap:{}},{id:"09",title:"파라메터 공간의 곡률",slug:"fisher-information",md:Km,vizMap:{"ch09/sensitivity":_e(()=>De(()=>import("./ch09-fisher-information-Dg6LjDZQ.js"),__vite__mapDeps([9,1,4,3])),"SensitivityTab"),"ch09/fisher-matrix":_e(()=>De(()=>import("./ch09-fisher-information-Dg6LjDZQ.js"),__vite__mapDeps([9,1,4,3])),"FisherMatrixTab"),"ch09/metric-ellipse":_e(()=>De(()=>import("./ch09-fisher-information-Dg6LjDZQ.js"),__vite__mapDeps([9,1,4,3])),"MetricEllipseTab")}},{id:"10",title:"무지와 확신",slug:"ignorance",md:Hm,vizMap:{}},{id:"11",title:"추론의 기하학",slug:"geometry-of-inference",md:$m,vizMap:{"ch11/projection-concept":_e(()=>De(()=>import("./ch11-geometry-of-inference-CD5TXuYY.js"),__vite__mapDeps([10,1,4,3])),"ProjectionConceptTab"),"ch11/simplex-projection":_e(()=>De(()=>import("./ch11-geometry-of-inference-CD5TXuYY.js"),__vite__mapDeps([10,1,4,3])),"SimplexProjectionTab")}},{id:"12",title:"수렴",slug:"convergence",md:Vm,vizMap:{"ch12/pythagoras":_e(()=>De(()=>import("./ch12-convergence-Dx3_uz3O.js"),__vite__mapDeps([11,1,4,3])),"PythagorasTab"),"ch12/em-convergence":_e(()=>De(()=>import("./ch12-convergence-Dx3_uz3O.js"),__vite__mapDeps([11,1,4,3])),"EMConvergenceTab")}},{id:"13",title:"전체 지도",slug:"full-map",md:Um,vizMap:{}},{id:"13z",title:"전환 — 도구를 들고 세계로",slug:"transition-3",md:Gm,vizMap:{}},{id:"14",title:"디퓨전",slug:"diffusion",md:Wm,vizMap:{"ch14/score-field":_e(()=>De(()=>import("./ch14-diffusion-B52GAvFG.js"),__vite__mapDeps([12,1,4,3])),"ScoreFieldTab"),"ch14/reverse-diffusion":_e(()=>De(()=>import("./ch14-diffusion-B52GAvFG.js"),__vite__mapDeps([12,1,4,3])),"ReverseDiffusionTab"),"ch14/noise-annealing":_e(()=>De(()=>import("./ch14-diffusion-B52GAvFG.js"),__vite__mapDeps([12,1,4,3])),"NoiseAnnealingTab")}},{id:"15",title:"플로우 매칭",slug:"flow-matching",md:Xm,vizMap:{"ch15/velocity-field":_e(()=>De(()=>import("./ch15-flow-matching-By1S0qX6.js"),__vite__mapDeps([13,1,4,3])),"VelocityFieldTab"),"ch15/comparison":_e(()=>De(()=>import("./ch15-flow-matching-By1S0qX6.js"),__vite__mapDeps([13,1,4,3])),"ComparisonTab")}},{id:"16",title:"넓히기와 좁히기",slug:"broadening-narrowing",md:Jm,vizMap:{"ch16/spectrum":_e(()=>De(()=>import("./ch16-broadening-narrowing-DnVxux4H.js"),__vite__mapDeps([14,1,4,3])),"SpectrumTab"),"ch16/trajectory":_e(()=>De(()=>import("./ch16-broadening-narrowing-DnVxux4H.js"),__vite__mapDeps([14,1,4,3])),"TrajectoryTab")}},{id:"17",title:"스케일링",slug:"scaling",md:Qm,vizMap:{"ch17/coordinate-vs-fisher":_e(()=>De(()=>import("./ch17-scaling-GD3UD6sJ.js"),__vite__mapDeps([15,1,2,3])),"CoordinateVsFisherTab"),"ch17/stability":_e(()=>De(()=>import("./ch17-scaling-GD3UD6sJ.js"),__vite__mapDeps([15,1,2,3])),"StabilityTab")}},{id:"A",title:"에필로그",slug:"epilogue",md:Ym,vizMap:{}}];function gi(l){const n=l.split(`
+`,_e=(l,n)=>J.lazy(()=>l().then(r=>({default:r[n]}))),Kt=[{id:"00",title:"서문",slug:"preface",md:Rm,vizMap:{}},{id:"01",title:"왜 정보기하학인가",slug:"why-infogeo",md:Dm,vizMap:{}},{id:"02",title:"점",slug:"point",md:Fm,vizMap:{}},{id:"03",title:"거리",slug:"distance",md:Nm,vizMap:{"ch03/euclidean-vs-kl":_e(()=>De(()=>import("./ch03-distance-XD7gMh7b.js"),__vite__mapDeps([0,1,2,3,4])),"EuclideanVsKLTab"),"ch03/asymmetry":_e(()=>De(()=>import("./ch03-distance-XD7gMh7b.js"),__vite__mapDeps([0,1,2,3,4])),"AsymmetryTab"),"ch03/fisher-local":_e(()=>De(()=>import("./ch03-distance-XD7gMh7b.js"),__vite__mapDeps([0,1,2,3,4])),"FisherLocalTab")}},{id:"04",title:"길",slug:"paths",md:Pm,vizMap:{"ch04/two-paths":_e(()=>De(()=>import("./ch04-paths-BodYCZhS.js"),__vite__mapDeps([5,1])),"TwoPathsTab"),"ch04/midpoint":_e(()=>De(()=>import("./ch04-paths-BodYCZhS.js"),__vite__mapDeps([5,1])),"MidpointTab"),"ch04/color-interpolation":_e(()=>De(()=>import("./ch04-paths-BodYCZhS.js"),__vite__mapDeps([5,1])),"ColorInterpolationTab")}},{id:"04z",title:"전환 — 같은 세계, 다른 눈",slug:"transition-1",md:Im,vizMap:{}},{id:"05",title:"놀라움과 정보",slug:"surprise",md:Bm,vizMap:{"ch05/surprise":_e(()=>De(()=>import("./ch05-surprise-and-information-IAn8aJ6l.js"),__vite__mapDeps([6,1,4,3])),"SurpriseTab"),"ch05/entropy-simplex":_e(()=>De(()=>import("./ch05-surprise-and-information-IAn8aJ6l.js"),__vite__mapDeps([6,1,4,3])),"EntropySimplexTab"),"ch05/cross-entropy":_e(()=>De(()=>import("./ch05-surprise-and-information-IAn8aJ6l.js"),__vite__mapDeps([6,1,4,3])),"CrossEntropyTab"),"ch05/convexity-kl":_e(()=>De(()=>import("./ch05-surprise-and-information-IAn8aJ6l.js"),__vite__mapDeps([6,1,4,3])),"ConvexityTab")}},{id:"06",title:"볼록함수의 쌍대",slug:"convex-duality",md:Om,vizMap:{"ch06/convexity":_e(()=>De(()=>import("./ch06-convex-duality-CaHLN2uC.js"),__vite__mapDeps([7,1,4,3])),"ConvexityTab"),"ch06/jensen":_e(()=>De(()=>import("./ch06-convex-duality-CaHLN2uC.js"),__vite__mapDeps([7,1,4,3])),"JensenTab"),"ch06/legendre":_e(()=>De(()=>import("./ch06-convex-duality-CaHLN2uC.js"),__vite__mapDeps([7,1,4,3])),"LegendreTab"),"ch06/duality-identity":_e(()=>De(()=>import("./ch06-convex-duality-CaHLN2uC.js"),__vite__mapDeps([7,1,4,3])),"DualityIdentityTab")}},{id:"06z",title:"전환 — 두 눈을 동시에",slug:"transition-2",md:_m,vizMap:{}},{id:"07",title:"지수족",slug:"exponential-family",md:qm,vizMap:{"ch07/flashcards":J.lazy(()=>De(()=>import("./ch07-exponential-family-flashcards-rSDB2PsF.js"),__vite__mapDeps([8,1,4,3]))),"ch07/legendre":J.lazy(()=>De(()=>import("./ch07-exponential-family-flashcards-rSDB2PsF.js"),__vite__mapDeps([8,1,4,3]))),"ch07/overview":J.lazy(()=>De(()=>import("./ch07-exponential-family-flashcards-rSDB2PsF.js"),__vite__mapDeps([8,1,4,3])))}},{id:"08",title:"구부러진 땅",slug:"curved-land",md:jm,vizMap:{}},{id:"09",title:"파라메터 공간의 곡률",slug:"fisher-information",md:Km,vizMap:{"ch09/sensitivity":_e(()=>De(()=>import("./ch09-fisher-information-CyaUN2Px.js"),__vite__mapDeps([9,1,4,3])),"SensitivityTab"),"ch09/fisher-matrix":_e(()=>De(()=>import("./ch09-fisher-information-CyaUN2Px.js"),__vite__mapDeps([9,1,4,3])),"FisherMatrixTab"),"ch09/metric-ellipse":_e(()=>De(()=>import("./ch09-fisher-information-CyaUN2Px.js"),__vite__mapDeps([9,1,4,3])),"MetricEllipseTab")}},{id:"10",title:"무지와 확신",slug:"ignorance",md:Hm,vizMap:{}},{id:"11",title:"추론의 기하학",slug:"geometry-of-inference",md:$m,vizMap:{"ch11/projection-concept":_e(()=>De(()=>import("./ch11-geometry-of-inference-CVhEo7g2.js"),__vite__mapDeps([10,1,4,3])),"ProjectionConceptTab"),"ch11/simplex-projection":_e(()=>De(()=>import("./ch11-geometry-of-inference-CVhEo7g2.js"),__vite__mapDeps([10,1,4,3])),"SimplexProjectionTab")}},{id:"12",title:"수렴",slug:"convergence",md:Vm,vizMap:{"ch12/pythagoras":_e(()=>De(()=>import("./ch12-convergence-BgOIWYd1.js"),__vite__mapDeps([11,1,4,3])),"PythagorasTab"),"ch12/em-convergence":_e(()=>De(()=>import("./ch12-convergence-BgOIWYd1.js"),__vite__mapDeps([11,1,4,3])),"EMConvergenceTab")}},{id:"13",title:"전체 지도",slug:"full-map",md:Um,vizMap:{}},{id:"13z",title:"전환 — 도구를 들고 세계로",slug:"transition-3",md:Gm,vizMap:{}},{id:"14",title:"디퓨전",slug:"diffusion",md:Wm,vizMap:{"ch14/score-field":_e(()=>De(()=>import("./ch14-diffusion-CnRNhTs6.js"),__vite__mapDeps([12,1,4,3])),"ScoreFieldTab"),"ch14/reverse-diffusion":_e(()=>De(()=>import("./ch14-diffusion-CnRNhTs6.js"),__vite__mapDeps([12,1,4,3])),"ReverseDiffusionTab"),"ch14/noise-annealing":_e(()=>De(()=>import("./ch14-diffusion-CnRNhTs6.js"),__vite__mapDeps([12,1,4,3])),"NoiseAnnealingTab")}},{id:"15",title:"플로우 매칭",slug:"flow-matching",md:Xm,vizMap:{"ch15/velocity-field":_e(()=>De(()=>import("./ch15-flow-matching-dUiXq1TS.js"),__vite__mapDeps([13,1,4,3])),"VelocityFieldTab"),"ch15/comparison":_e(()=>De(()=>import("./ch15-flow-matching-dUiXq1TS.js"),__vite__mapDeps([13,1,4,3])),"ComparisonTab")}},{id:"16",title:"넓히기와 좁히기",slug:"broadening-narrowing",md:Jm,vizMap:{"ch16/spectrum":_e(()=>De(()=>import("./ch16-broadening-narrowing-CY-cH0I2.js"),__vite__mapDeps([14,1,4,3])),"SpectrumTab"),"ch16/trajectory":_e(()=>De(()=>import("./ch16-broadening-narrowing-CY-cH0I2.js"),__vite__mapDeps([14,1,4,3])),"TrajectoryTab")}},{id:"17",title:"스케일링",slug:"scaling",md:Qm,vizMap:{"ch17/coordinate-vs-fisher":_e(()=>De(()=>import("./ch17-scaling-Dm_WF73i.js"),__vite__mapDeps([15,1,2,3])),"CoordinateVsFisherTab"),"ch17/stability":_e(()=>De(()=>import("./ch17-scaling-Dm_WF73i.js"),__vite__mapDeps([15,1,2,3])),"StabilityTab")}},{id:"A",title:"에필로그",slug:"epilogue",md:Ym,vizMap:{}}];function gi(l){const n=l.split(`
 `),r=[];let i=[],s=!1;for(const u of n)/^\s*```/.test(u)&&(s=!s),!s&&/^## /.test(u)&&i.length>0?(r.push(i.join(`
 `)),i=[u]):i.push(u);return i.length>0&&r.push(i.join(`
 `)),r}function xu(l){var v;if(!l)return{title:null,vizKeys:[],prose:""};const n=l.split(`
