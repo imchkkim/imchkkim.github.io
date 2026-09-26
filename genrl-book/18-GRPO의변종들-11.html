@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연습문제와 함께 풀기 — 18. GRPO의 변종들 — 부품을 하나씩 의심하다 — 생성모델의 강화학습 — DPO에서 GRPO까지</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>@font-face{font-display:block;font-family:KaTeX_AMS;font-style:normal;font-weight:400;src:url(fonts/KaTeX_AMS-Regular.woff2) format("woff2"),url(fonts/KaTeX_AMS-Regular.woff) format("woff"),url(fonts/KaTeX_AMS-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Bold.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Regular.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Fraktur-Bold.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Bold.woff) format("woff"),url(fonts/KaTeX_Fraktur-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Fraktur-Regular.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Regular.woff) format("woff"),url(fonts/KaTeX_Fraktur-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Main-Bold.woff2) format("woff2"),url(fonts/KaTeX_Main-Bold.woff) format("woff"),url(fonts/KaTeX_Main-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Main-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Main-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Main-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Main-Italic.woff2) format("woff2"),url(fonts/KaTeX_Main-Italic.woff) format("woff"),url(fonts/KaTeX_Main-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Main-Regular.woff2) format("woff2"),url(fonts/KaTeX_Main-Regular.woff) format("woff"),url(fonts/KaTeX_Main-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Math-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Math-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Math-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Math-Italic.woff2) format("woff2"),url(fonts/KaTeX_Math-Italic.woff) format("woff"),url(fonts/KaTeX_Math-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:700;src:url(fonts/KaTeX_SansSerif-Bold.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Bold.woff) format("woff"),url(fonts/KaTeX_SansSerif-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:italic;font-weight:400;src:url(fonts/KaTeX_SansSerif-Italic.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Italic.woff) format("woff"),url(fonts/KaTeX_SansSerif-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:400;src:url(fonts/KaTeX_SansSerif-Regular.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Regular.woff) format("woff"),url(fonts/KaTeX_SansSerif-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Script;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Script-Regular.woff2) format("woff2"),url(fonts/KaTeX_Script-Regular.woff) format("woff"),url(fonts/KaTeX_Script-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size1;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size1-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size1-Regular.woff) format("woff"),url(fonts/KaTeX_Size1-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size2;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size2-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size2-Regular.woff) format("woff"),url(fonts/KaTeX_Size2-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size3;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size3-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size3-Regular.woff) format("woff"),url(fonts/KaTeX_Size3-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size4;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size4-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size4-Regular.woff) format("woff"),url(fonts/KaTeX_Size4-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Typewriter;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Typewriter-Regular.woff2) format("woff2"),url(fonts/KaTeX_Typewriter-Regular.woff) format("woff"),url(fonts/KaTeX_Typewriter-Regular.ttf) format("truetype")}.katex{font:normal 1.21em KaTeX_Main,Times New Roman,serif;line-height:1.2;position:relative;text-indent:0;text-rendering:auto}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.16.45"}.katex .katex-mathml{clip:rect(1px,1px,1px,1px);border:0;height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.newline{display:block}.katex .base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .base,.katex .strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathboldfrak,.katex .textboldfrak{font-family:KaTeX_Fraktur;font-weight:700}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .mathsfit,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .hbox{width:100%}.katex .hbox,.katex .thinbox{display:inline-flex;flex-direction:row}.katex .thinbox{max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline,.katex .hline,.katex .mfrac .frac-line,.katex .overline .overline-line,.katex .rule,.katex .underline .underline-line{min-height:1px}.katex .mspace{display:inline-block}.katex .smash{display:inline;line-height:0}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.inner,.katex .llap>.inner,.katex .rlap>.inner{position:absolute}.katex .clap>.fix,.katex .llap>.fix,.katex .rlap>.fix{display:inline-block}.katex .llap>.inner{right:0}.katex .clap>.inner,.katex .rlap>.inner{left:0}.katex .clap>.inner>span{margin-left:-50%;margin-right:50%}.katex .rule{border:0 solid;display:inline-block;position:relative}.katex .hline,.katex .overline .overline-line,.katex .underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.root{margin-left:.2777777778em;margin-right:-.5555555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .sizing.reset-size2.size1{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .sizing.reset-size2.size3{font-size:1.1666666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .sizing.reset-size2.size4{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .sizing.reset-size2.size6{font-size:1.6666666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .sizing.reset-size2.size10{font-size:3.4566666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .sizing.reset-size2.size11{font-size:4.1466666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .sizing.reset-size3.size1{font-size:.7142857143em}.katex .fontsize-ensurer.reset-size3.size2,.katex .sizing.reset-size3.size2{font-size:.8571428571em}.katex .fontsize-ensurer.reset-size3.size3,.katex .sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .sizing.reset-size3.size4{font-size:1.1428571429em}.katex .fontsize-ensurer.reset-size3.size5,.katex .sizing.reset-size3.size5{font-size:1.2857142857em}.katex .fontsize-ensurer.reset-size3.size6,.katex .sizing.reset-size3.size6{font-size:1.4285714286em}.katex .fontsize-ensurer.reset-size3.size7,.katex .sizing.reset-size3.size7{font-size:1.7142857143em}.katex .fontsize-ensurer.reset-size3.size8,.katex .sizing.reset-size3.size8{font-size:2.0571428571em}.katex .fontsize-ensurer.reset-size3.size9,.katex .sizing.reset-size3.size9{font-size:2.4685714286em}.katex .fontsize-ensurer.reset-size3.size10,.katex .sizing.reset-size3.size10{font-size:2.9628571429em}.katex .fontsize-ensurer.reset-size3.size11,.katex .sizing.reset-size3.size11{font-size:3.5542857143em}.katex .fontsize-ensurer.reset-size4.size1,.katex .sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .sizing.reset-size5.size1{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .sizing.reset-size5.size2{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .sizing.reset-size5.size3{font-size:.7777777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .sizing.reset-size5.size4{font-size:.8888888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .sizing.reset-size5.size6{font-size:1.1111111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .sizing.reset-size5.size7{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .sizing.reset-size5.size10{font-size:2.3044444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .sizing.reset-size5.size11{font-size:2.7644444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .sizing.reset-size7.size1{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .sizing.reset-size7.size3{font-size:.5833333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .sizing.reset-size7.size4{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .sizing.reset-size7.size6{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .sizing.reset-size7.size10{font-size:1.7283333333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .sizing.reset-size7.size11{font-size:2.0733333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .sizing.reset-size8.size1{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .sizing.reset-size8.size2{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .sizing.reset-size8.size3{font-size:.4861111111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .sizing.reset-size8.size4{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .sizing.reset-size8.size6{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .sizing.reset-size8.size7{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .sizing.reset-size8.size10{font-size:1.4402777778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .sizing.reset-size8.size11{font-size:1.7277777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .sizing.reset-size9.size1{font-size:.2893518519em}.katex .fontsize-ensurer.reset-size9.size2,.katex .sizing.reset-size9.size2{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .sizing.reset-size9.size3{font-size:.4050925926em}.katex .fontsize-ensurer.reset-size9.size4,.katex .sizing.reset-size9.size4{font-size:.462962963em}.katex .fontsize-ensurer.reset-size9.size5,.katex .sizing.reset-size9.size5{font-size:.5208333333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .sizing.reset-size9.size6{font-size:.5787037037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .sizing.reset-size9.size7{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .sizing.reset-size9.size8{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .sizing.reset-size9.size10{font-size:1.2002314815em}.katex .fontsize-ensurer.reset-size9.size11,.katex .sizing.reset-size9.size11{font-size:1.4398148148em}.katex .fontsize-ensurer.reset-size10.size1,.katex .sizing.reset-size10.size1{font-size:.2410800386em}.katex .fontsize-ensurer.reset-size10.size2,.katex .sizing.reset-size10.size2{font-size:.2892960463em}.katex .fontsize-ensurer.reset-size10.size3,.katex .sizing.reset-size10.size3{font-size:.337512054em}.katex .fontsize-ensurer.reset-size10.size4,.katex .sizing.reset-size10.size4{font-size:.3857280617em}.katex .fontsize-ensurer.reset-size10.size5,.katex .sizing.reset-size10.size5{font-size:.4339440694em}.katex .fontsize-ensurer.reset-size10.size6,.katex .sizing.reset-size10.size6{font-size:.4821600771em}.katex .fontsize-ensurer.reset-size10.size7,.katex .sizing.reset-size10.size7{font-size:.5785920926em}.katex .fontsize-ensurer.reset-size10.size8,.katex .sizing.reset-size10.size8{font-size:.6943105111em}.katex .fontsize-ensurer.reset-size10.size9,.katex .sizing.reset-size10.size9{font-size:.8331726133em}.katex .fontsize-ensurer.reset-size10.size10,.katex .sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .sizing.reset-size10.size11{font-size:1.1996142719em}.katex .fontsize-ensurer.reset-size11.size1,.katex .sizing.reset-size11.size1{font-size:.2009646302em}.katex .fontsize-ensurer.reset-size11.size2,.katex .sizing.reset-size11.size2{font-size:.2411575563em}.katex .fontsize-ensurer.reset-size11.size3,.katex .sizing.reset-size11.size3{font-size:.2813504823em}.katex .fontsize-ensurer.reset-size11.size4,.katex .sizing.reset-size11.size4{font-size:.3215434084em}.katex .fontsize-ensurer.reset-size11.size5,.katex .sizing.reset-size11.size5{font-size:.3617363344em}.katex .fontsize-ensurer.reset-size11.size6,.katex .sizing.reset-size11.size6{font-size:.4019292605em}.katex .fontsize-ensurer.reset-size11.size7,.katex .sizing.reset-size11.size7{font-size:.4823151125em}.katex .fontsize-ensurer.reset-size11.size8,.katex .sizing.reset-size11.size8{font-size:.578778135em}.katex .fontsize-ensurer.reset-size11.size9,.katex .sizing.reset-size11.size9{font-size:.6945337621em}.katex .fontsize-ensurer.reset-size11.size10,.katex .sizing.reset-size11.size10{font-size:.8336012862em}.katex .fontsize-ensurer.reset-size11.size11,.katex .sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .accent .accent-body{position:relative}.katex .accent .accent-body:not(.accent-full){width:0}.katex .overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex svg{fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .stretchy:after,.katex .stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+</style>
+<style>/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-code: #f5f5f5;
+  --fg: #1a1a1a;
+  --fg-muted: #555;
+  --accent: #1565C0;
+  --border: #ddd;
+  --sidebar-bg: #fafafa;
+  --sidebar-width: 280px;
+  --chapter-gap: 3rem;
+  --max-width: 52rem;
+
+  /* 위젯·도판 색 — 파랑/주황/청록/보라 순서 고정 (색각이상 검증 통과, 양 모드) */
+  --w-1: #2a78d6;
+  --w-2: #eb6834;
+  --w-3: #1baf7a;
+  --w-4: #4a3aa7;
+  --w-good: #0ca30c;
+  --w-bad: #d03b3b;
+  --w-surface: #fcfcfb;
+  --w-ink: #0b0b0b;
+  --w-ink-2: #52514e;
+  --w-muted: #898781;
+  --w-grid: #e1e0d9;
+  --w-axis: #c3c2b7;
+  --w-fill-1: rgba(42,120,214,0.14);
+  --w-fill-2: rgba(235,104,52,0.14);
+  --w-fill-3: rgba(27,175,122,0.16);
+  --w-neutral: #f0efec;
+  --w-fill-bad: rgba(208,59,59,0.13);
+}
+
+[data-theme="dark"] {
+  /* 수식 기호 색의 다크모드 변형 (build.cjs symbolColors) */
+  --sym-d62728: #ff7b7b; --sym-d9670b: #f79f59; --sym-1565c0: #64a8f0;
+  --sym-6f6f78: #a5a5ac; --sym-8e44ad: #c08ad8; --sym-00897b: #3cc4b4;
+  --sym-c2185b: #f06292; --sym-8c564b: #c9937f; --sym-827717: #c6ba3a;
+  --sym-2e7d32: #6cc070;
+
+  --bg: #1a1a2e;
+  --bg-code: #16213e;
+  --fg: #e0e0e0;
+  --fg-muted: #aaa;
+  --accent: #64b5f6;
+  --border: #333;
+  --sidebar-bg: #16213e;
+
+  --w-1: #3987e5;
+  --w-2: #d95926;
+  --w-3: #199e70;
+  --w-4: #9085e9;
+  --w-surface: #1f2036;
+  --w-ink: #ffffff;
+  --w-ink-2: #c3c2b7;
+  --w-muted: #8e8d99;
+  --w-grid: #2c2e45;
+  --w-axis: #45475e;
+  --w-fill-1: rgba(57,135,229,0.22);
+  --w-fill-2: rgba(217,89,38,0.22);
+  --w-fill-3: rgba(25,158,112,0.24);
+  --w-neutral: #383845;
+  --w-fill-bad: rgba(208,59,59,0.24);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.8;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ===== Main Content ===== */
+main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.chapter { margin-bottom: var(--chapter-gap); }
+
+hr.chapter-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: var(--chapter-gap) 0;
+}
+
+/* ===== Typography ===== */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+  font-weight: 700;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.3em; }
+h2 { font-size: 1.6rem; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+h3 { font-size: 1.3rem; }
+h4 { font-size: 1.1rem; }
+
+.chapter > h1:first-child,
+.chapter > h2:first-child,
+.chapter > h3:first-child { margin-top: 0; }
+
+p { margin: 0.8em 0; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+strong { font-weight: 700; }
+
+blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 0.5em 1em;
+  margin: 1em 0;
+  background: var(--bg-code);
+  color: var(--fg-muted);
+}
+
+/* ===== Code ===== */
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9em;
+  background: var(--bg-code);
+  padding: 0.15em 0.3em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--bg-code);
+  padding: 1em 1.2em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1em 0;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85em;
+}
+
+/* ===== Tables ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.8em;
+  text-align: left;
+}
+th { background: var(--bg-code); font-weight: 600; }
+
+/* ===== Lists ===== */
+ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
+li { margin: 0.3em 0; }
+
+/* ===== SVG ===== */
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+}
+
+[data-theme="dark"] svg:not(.w-svg):not(.fig) text { fill: var(--fg); }
+[data-theme="dark"] svg:not(.w-svg):not(.fig) line,
+[data-theme="dark"] svg:not(.w-svg):not(.fig) path { stroke: var(--fg-muted); }
+
+/* ===== Images ===== */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+  border-radius: 6px;
+}
+
+/* ===== KaTeX ===== */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}
+
+/* ===== Mermaid ===== */
+/* 머메이드 강조: 원고에서 `class 노드 m-blue|m-orange|m-green|m-red|m-strong` */
+pre.mermaid g.m-blue > :is(rect, polygon, circle, path) { fill: var(--w-fill-1) !important; stroke: var(--w-1) !important; }
+pre.mermaid g.m-orange > :is(rect, polygon, circle, path) { fill: var(--w-fill-2) !important; stroke: var(--w-2) !important; }
+pre.mermaid g.m-green > :is(rect, polygon, circle, path) { fill: var(--w-fill-3) !important; stroke: var(--w-good) !important; }
+pre.mermaid g.m-red > :is(rect, polygon, circle, path) { fill: var(--w-fill-bad) !important; stroke: var(--w-bad) !important; }
+pre.mermaid g.m-strong > :is(rect, polygon, circle, path) { stroke-width: 2.5px !important; }
+
+pre.mermaid {
+  background: transparent;
+  border: none;
+  text-align: center;
+  padding: 1em 0;
+}
+
+/* ===== Theme Toggle ===== */
+#theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+#theme-toggle:hover { background: var(--border); }
+
+/* ===== Sidebar ===== */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 999;
+  transition: left 0.3s ease;
+  padding: 1rem;
+}
+#sidebar.open { left: 0; }
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-header h2 { font-size: 1.1rem; margin: 0; border: none; padding: 0; }
+
+#sidebar-close {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: var(--fg);
+  padding: 0 0.3em;
+}
+
+#sidebar ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: chapter;
+}
+#sidebar li {
+  margin: 0.3em 0;
+}
+#sidebar a {
+  display: block;
+  padding: 0.4em 0.5em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--fg);
+}
+#sidebar a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+
+#sidebar-open {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 998;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#sidebar-open:hover { background: var(--border); }
+
+/* ===== Responsive ===== */
+@media (min-width: 1200px) {
+  #sidebar {
+    left: 0;
+    padding-top: 2rem;
+  }
+  #sidebar-open { display: none; }
+  #sidebar-close { display: none; }
+  main {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+@media (max-width: 600px) {
+  main { padding: 1rem 0.8rem 3rem; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  pre { font-size: 0.8em; padding: 0.8em; }
+}
+
+/* ===== Chapter Navigation ===== */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border);
+  gap: 1rem;
+}
+.chapter-nav a {
+  display: inline-block;
+  padding: 0.6em 1em;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9em;
+  color: var(--fg);
+  transition: background 0.2s;
+  max-width: 45%;
+}
+.chapter-nav a:hover {
+  background: var(--border);
+  text-decoration: none;
+}
+.chapter-nav-next { text-align: right; margin-left: auto; }
+
+/* ===== TOC Page ===== */
+.toc-page { padding-top: 1rem; }
+.toc-page h1 {
+  margin-bottom: 1.5rem;
+}
+/* 대문(교재 목록)으로 돌아가는 링크 */
+.site-nav { font-size: 0.9rem; }
+.site-nav a { color: var(--fg-muted); text-decoration: none; }
+.site-nav a:hover { color: var(--accent); }
+.site-nav + h1 { margin-top: 1rem; }
+/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
+@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
+@media print { .site-nav { display: none; } }
+.toc-list {
+  list-style: none;
+  padding: 0;
+  counter-reset: toc-ch;
+}
+.toc-list li {
+  margin: 0;
+}
+.toc-list a {
+  display: block;
+  padding: 0.7em 1em;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg);
+  font-size: 1.05em;
+  transition: background 0.2s;
+}
+.toc-list a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+
+/* ===== Sidebar Active ===== */
+#sidebar a.active {
+  background: var(--accent);
+  color: #fff;
+}
+#sidebar a.active:hover {
+  background: var(--accent);
+}
+
+/* ===== Print ===== */
+@media print {
+  #sidebar, #sidebar-open, #theme-toggle { display: none; }
+  main { margin: 0; max-width: none; }
+}
+
+/* ===== 인터랙티브 위젯 ===== */
+.widget {
+  margin: 1.8em 0;
+  padding: 1rem 1.1rem 0.9rem;
+  background: var(--w-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.w-title { font-weight: 700; margin-bottom: 0.6em; color: var(--w-ink); }
+.w-controls { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; align-items: center; margin-bottom: 0.4rem; }
+.w-controls:empty { display: none; }
+.w-slider { display: flex; align-items: center; gap: 0.5rem; color: var(--w-ink-2); }
+.w-slider input { width: 9rem; accent-color: var(--w-1); }
+.w-slider-value { font-variant-numeric: tabular-nums; min-width: 3.2em; color: var(--w-ink); font-weight: 600; }
+.w-toggle { display: flex; align-items: center; gap: 0.4rem; color: var(--w-ink-2); cursor: pointer; }
+.w-toggle input { accent-color: var(--w-1); }
+.w-btn, .w-seg button {
+  font: inherit; font-size: 0.88rem; cursor: pointer;
+  padding: 0.25em 0.8em; border-radius: 6px;
+  border: 1px solid var(--w-axis); background: transparent; color: var(--w-ink);
+}
+.w-btn:hover, .w-seg button:hover { background: var(--w-neutral); }
+.w-seg { display: inline-flex; }
+.w-seg button { border-radius: 0; margin-left: -1px; }
+.w-seg button:first-child { border-radius: 6px 0 0 6px; margin-left: 0; }
+.w-seg button:last-child { border-radius: 0 6px 6px 0; }
+.w-seg button.on { background: var(--w-1); border-color: var(--w-1); color: #fff; }
+.w-stage { position: relative; }
+.w-rel { position: relative; }
+.w-svg { margin: 0.3em auto; width: 100%; overflow: visible; }
+.w-readout { color: var(--w-ink-2); font-variant-numeric: tabular-nums; margin-top: 0.3em; }
+.w-readout:empty { display: none; }
+.w-readout b { color: var(--w-ink); }
+.w-caption { color: var(--w-muted); font-size: 0.85rem; margin-top: 0.5em; }
+.w-tip {
+  position: absolute; pointer-events: none; z-index: 5;
+  background: var(--bg); color: var(--fg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.35em 0.6em; font-size: 0.8rem; white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12); font-variant-numeric: tabular-nums;
+}
+.w-legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; color: var(--w-ink-2); font-size: 0.85rem; margin: 0.2em 0; }
+.w-legend-item { display: inline-flex; align-items: center; gap: 0.35rem; }
+.w-sw { display: inline-block; width: 16px; height: 3px; border-radius: 2px; background: var(--w-muted); }
+.w-sw.dash { background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 7px); height: 2px; }
+
+.w-svg .w-grid { stroke: var(--w-grid); stroke-width: 1; }
+.w-svg .w-axis { stroke: var(--w-axis); stroke-width: 1.2; }
+.w-svg .w-tick { fill: var(--w-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.w-svg .w-axis-label { fill: var(--w-ink-2); font-size: 12px; }
+.w-svg .w-label { fill: var(--w-ink-2); font-size: 12px; }
+.w-svg .w-label.strong { fill: var(--w-ink); font-weight: 700; }
+.w-svg .w-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; stroke: var(--w-muted); }
+.w-svg .w-cross { stroke: var(--w-muted); stroke-dasharray: 3 3; }
+.w-svg .w-dot { stroke: var(--w-surface); stroke-width: 2; fill: var(--w-muted); }
+.w-svg .dash { stroke-dasharray: 5 4; }
+.w-svg .thin { stroke-width: 1.2; }
+.w-svg .c1 { stroke: var(--w-1); } .w-svg .f1 { fill: var(--w-1); }
+.w-svg .c2 { stroke: var(--w-2); } .w-svg .f2 { fill: var(--w-2); }
+.w-svg .c3 { stroke: var(--w-3); } .w-svg .f3 { fill: var(--w-3); }
+.w-svg .c4 { stroke: var(--w-4); } .w-svg .f4 { fill: var(--w-4); }
+.w-svg .cm { stroke: var(--w-muted); } .w-svg .fm { fill: var(--w-muted); }
+.w-svg .cgood { stroke: var(--w-good); } .w-svg .fgood { fill: var(--w-good); }
+.w-svg .cbad { stroke: var(--w-bad); } .w-svg .fbad { fill: var(--w-bad); }
+.w-svg .fa1 { fill: var(--w-fill-1); stroke: none; }
+.w-svg .fa2 { fill: var(--w-fill-2); stroke: none; }
+.w-svg .fa3 { fill: var(--w-fill-3); stroke: none; }
+.w-svg .fneutral { fill: var(--w-neutral); }
+.w-svg .fink { fill: var(--w-ink); }
+.w-sw.c1 { background: var(--w-1); color: var(--w-1); } .w-sw.c2 { background: var(--w-2); color: var(--w-2); }
+.w-sw.c3 { background: var(--w-3); color: var(--w-3); } .w-sw.c4 { background: var(--w-4); color: var(--w-4); }
+.w-sw.cm { background: var(--w-muted); color: var(--w-muted); }
+.w-sw.dash { background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 7px); }
+
+/* 정적 도판(인라인 SVG) 공용 클래스 */
+svg.fig { max-width: 560px; }
+svg.fig text { fill: var(--w-ink-2); font-size: 12px; }
+svg.fig .t-strong { fill: var(--w-ink); font-weight: 700; }
+svg.fig .t-muted { fill: var(--w-muted); }
+svg.fig .t-on-fill { fill: #fff; }
+svg.fig .t1 { fill: var(--w-1); } svg.fig .t2 { fill: var(--w-2); } svg.fig .t3 { fill: var(--w-3); } svg.fig .t4 { fill: var(--w-4); }
+svg.fig .tgood { fill: var(--w-good); } svg.fig .tbad { fill: var(--w-bad); }
+svg.fig .f1 { fill: var(--w-1); } svg.fig .f2 { fill: var(--w-2); } svg.fig .f3 { fill: var(--w-3); } svg.fig .f4 { fill: var(--w-4); }
+svg.fig .fa1 { fill: var(--w-fill-1); } svg.fig .fa2 { fill: var(--w-fill-2); } svg.fig .fa3 { fill: var(--w-fill-3); }
+svg.fig .fgood { fill: var(--w-good); } svg.fig .fbad { fill: var(--w-bad); }
+svg.fig .fneutral { fill: var(--w-neutral); } svg.fig .fsurface { fill: var(--w-surface); }
+svg.fig .s1 { stroke: var(--w-1); fill: none; } svg.fig .s2 { stroke: var(--w-2); fill: none; }
+svg.fig .s3 { stroke: var(--w-3); fill: none; } svg.fig .s4 { stroke: var(--w-4); fill: none; }
+svg.fig .saxis { stroke: var(--w-axis); fill: none; } svg.fig .sgrid { stroke: var(--w-grid); fill: none; }
+svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
+
+/* ===== 만화 대화 (```dialogue) — 규격: ~/.claude/skills/textbook-exercises/SKILL.md 「B. 표현」 =====
+   표정 그림이 있는 차례: 그림 + 그 아래 이름(figcaption), 왼쪽 선 없음.
+   그림이 없는 차례: 대사 앞에 이름, 인물 색 왼쪽 선. 말풍선 열은 그림 폭만큼 들여 맞춘다. 대사는 얇게(350). */
+.dlg {
+  --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; --cast: 88px;
+  margin: 1.5em 0 2em;
+}
+[data-theme="dark"] .dlg { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
+.dlg-T { --who: var(--who-T); } .dlg-M { --who: var(--who-M); } .dlg-S { --who: var(--who-S); }
+.dlg-line { display: flex; gap: 0.9em; align-items: flex-start; margin: 0.7em 0; }
+.dlg-line:not(.has-face) { margin-left: calc(var(--cast) + 0.9em); }
+.dlg-cast { flex: 0 0 var(--cast); width: var(--cast); margin: 0; }
+.dlg-cast img {
+  display: block; width: var(--cast); height: var(--cast); margin: 0;
+  object-fit: cover; object-position: 50% 0; padding-top: 4px;
+  background: #fbfaf6; border: 1px solid var(--border); border-radius: 12px;
+}
+.dlg-cast figcaption {
+  margin-top: 0.25em; text-align: center;
+  font-size: 0.8em; font-weight: 700; line-height: 1.2; color: var(--who);
+}
+.dlg-face-empty {
+  width: var(--cast); height: var(--cast); display: flex; align-items: center; justify-content: center;
+  border: 1.5px dashed var(--who, var(--border)); border-radius: 12px;
+  color: var(--who); font-size: 0.8em; opacity: 0.75;
+}
+.dlg-bubble {
+  flex: 1; min-width: 0;
+  padding: 0.55em 0.95em; border-radius: 10px; line-height: 1.7;
+  background: var(--bg-code); font-weight: 350;
+}
+.dlg-line:not(.has-face) .dlg-bubble { border-left: 3px solid var(--who, var(--border)); }
+.dlg-bubble strong { font-weight: 600; }
+.dlg-bubble code { font-size: 0.85em; }
+.dlg-name { font-weight: 700; color: var(--who); margin-right: 0.5em; }
+.dlg-scene { margin: 0.7em 0 0.7em calc(var(--cast) + 0.9em); color: var(--fg-muted); font-size: 0.85rem; font-style: italic; }
+@media (max-width: 600px) {
+  .dlg { --cast: 56px; }
+  .dlg-line:not(.has-face), .dlg-scene { margin-left: 0; }
+}
+
+/* 연습문제 — 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨. 바로 아래에 그 문제의 함께 풀기 대화가 붙는다 */
+.exercise {
+  background: #fff;
+  color: #111;
+  border: 1.5px solid #222;
+  border-radius: 4px;
+  padding: 0.9em 1.2em;
+  margin: 0.8em 0 1.4em;
+  font-size: 1.12em;
+  font-weight: 600;
+  line-height: 1.75;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.exercise p { margin: 0.4em 0; }
+.exercise > :first-child { margin-top: 0; }
+.exercise > :last-child { margin-bottom: 0; }
+.exercise code { background: #eee; color: #111; }
+[data-theme="dark"] .exercise {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  /* 흰 바탕이므로 수식 기호 색도 라이트 값으로 */
+  --sym-d62728: #d62728; --sym-d9670b: #d9670b; --sym-1565c0: #1565c0;
+  --sym-6f6f78: #6f6f78; --sym-8e44ad: #8e44ad; --sym-00897b: #00897b;
+  --sym-c2185b: #c2185b; --sym-8c564b: #8c564b; --sym-827717: #827717;
+  --sym-2e7d32: #2e7d32;
+}
+
+/* ===== 절 단위 페이지 ===== */
+.page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
+.chapter-crumb { margin: 0 0 0.4em; font-size: 0.85em; }
+.chapter-crumb a { color: var(--fg-muted); }
+.chapter-paged > h3 { font-size: 1.6rem; }
+.chapter-paged > h4 { font-size: 1.35rem; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+.chapter-paged > .chapter-crumb + h4 { margin-top: 0.4em; }
+.chapter h5 { font-size: 1.1rem; }
+#sidebar .sidebar-toc a.current { color: var(--accent); font-weight: 600; }
+.sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0 0 0 0.6em; border-left: 2px solid var(--border); }
+#sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
+
+/* 수식 아래 기호 표 (latex array) */
+.katex-display .symtab { font-size: 0.9em; }
+
+/* 기호 색 (CLAUDE.md 수식 표기) — 위젯에서 같은 기호는 같은 색 */
+:root { --sJ: #d62728; --sR: #d9670b; --spi: #1565c0; --sref: #6f6f78; --sA: #8e44ad; --sV: #00897b; --sratio: #c2185b; --sKL: #8c564b; --sbeta: #827717; --stgt: #2e7d32; }
+[data-theme="dark"] { --sJ: #ff7b7b; --sR: #f79f59; --spi: #64a8f0; --sref: #a5a5ac; --sA: #c08ad8; --sV: #3cc4b4; --sratio: #f06292; --sKL: #c9937f; --sbeta: #c6ba3a; --stgt: #6cc070; }
+.w-svg .cs-J { stroke: var(--sJ); } .w-svg .fs-J { fill: var(--sJ); } .sym-J { color: var(--sJ); }
+.w-svg .cs-R { stroke: var(--sR); } .w-svg .fs-R { fill: var(--sR); } .sym-R { color: var(--sR); }
+.w-svg .cs-pi { stroke: var(--spi); } .w-svg .fs-pi { fill: var(--spi); } .sym-pi { color: var(--spi); }
+.w-svg .cs-ref { stroke: var(--sref); } .w-svg .fs-ref { fill: var(--sref); } .sym-ref { color: var(--sref); }
+.w-svg .cs-A { stroke: var(--sA); } .w-svg .fs-A { fill: var(--sA); } .sym-A { color: var(--sA); }
+.w-svg .cs-V { stroke: var(--sV); } .w-svg .fs-V { fill: var(--sV); } .sym-V { color: var(--sV); }
+.w-svg .cs-ratio { stroke: var(--sratio); } .w-svg .fs-ratio { fill: var(--sratio); } .sym-ratio { color: var(--sratio); }
+.w-svg .cs-KL { stroke: var(--sKL); } .w-svg .fs-KL { fill: var(--sKL); } .sym-KL { color: var(--sKL); }
+.w-svg .cs-beta { stroke: var(--sbeta); } .w-svg .fs-beta { fill: var(--sbeta); } .sym-beta { color: var(--sbeta); }
+.w-sw.cs-J { background: var(--sJ); color: var(--sJ); } .w-sw.cs-R { background: var(--sR); color: var(--sR); }
+.w-sw.cs-pi { background: var(--spi); color: var(--spi); } .w-sw.cs-ref { background: var(--sref); color: var(--sref); }
+.w-sw.cs-A { background: var(--sA); color: var(--sA); } .w-sw.cs-V { background: var(--sV); color: var(--sV); }
+.w-sw.cs-ratio { background: var(--sratio); color: var(--sratio); } .w-sw.cs-KL { background: var(--sKL); color: var(--sKL); }
+.w-sw.cs-beta { background: var(--sbeta); color: var(--sbeta); }
+.w-svg .cs-tgt { stroke: var(--stgt); } .w-svg .fs-tgt { fill: var(--stgt); } .sym-tgt { color: var(--stgt); }
+.w-sw.cs-tgt { background: var(--stgt); color: var(--stgt); }
+.w-sw.dash.cs-J, .w-sw.dash.cs-R, .w-sw.dash.cs-pi, .w-sw.dash.cs-ref, .w-sw.dash.cs-A, .w-sw.dash.cs-V, .w-sw.dash.cs-ratio, .w-sw.dash.cs-KL, .w-sw.dash.cs-beta { background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 7px); }
+
+/* KaTeX 의 늘어나는 기호(underbrace, 긴 화살표 등)는 내부 SVG — 위의 전역 svg 규칙(margin·height)에서 제외 */
+.katex svg { margin: 0; height: inherit; max-width: none; display: block; }
+</style>
+<script>
+(function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
+</script>
+</head>
+<body>
+
+<button id="theme-toggle" aria-label="다크모드 전환">&#x1F319;</button>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="index.html" style="color:inherit;text-decoration:none">목차</a></h2>
+    <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
+  </div>
+  <ol><li><a href="00-서문.html">생성모델의 강화학습 — DPO에서 GRPO까지</a></li>
+<li><a href="01-DPO맛보기.html">1. DPO 맛보기 — 한 줄 수식이 하는 일</a></li>
+<li><a href="02-VPG.html">2. VPG — 미분할 수 없는 점수를 올리는 법</a></li>
+<li><a href="03-REINFORCE.html">3. REINFORCE — 샘플로 추정하고, 베이스라인을 빼다</a></li>
+<li><a href="04-액터크리틱.html">4. Actor-Critic — 비평가를 곁에 두다</a></li>
+<li><a href="05-PPO와RLHF.html">5. PPO와 RLHF — 멀리 가지 않게 묶다</a></li>
+<li><a href="06-DPO의재등장.html">6. DPO의 재등장 — 보상 모델을 수식으로 지우다</a></li>
+<li><a href="07-선호쌍의조건.html">7. 선호 쌍의 조건 — 어떤 데이터가 DPO를 움직이는가</a></li>
+<li><a href="08-로그확률.html">8. 로그확률 — 문장의 점수는 어떻게 매기나</a></li>
+<li><a href="09-길이편향.html">9. 길이 편향 — 합이 공정한가?</a></li>
+<li><a href="10-레퍼런스모델.html">10. 레퍼런스 모델 — 이 줄은 왜 묶여 있나?</a></li>
+<li><a href="11-브래들리테리모델.html">11. Bradley-Terry — 시그모이드는 왜 거기 있는가?</a></li>
+<li><a href="12-다차원보상.html">12. 다차원 보상 — 스칼라를 넘어서</a></li>
+<li><a href="13-DPO의진화.html">13. DPO의 진화 — 하나의 알고리즘이 낳은 가계도</a></li>
+<li><a href="14-온라인과오프라인.html">14. 온라인과 오프라인 — 이상과 현실 사이에서</a></li>
+<li><a href="15-실전사례.html">15. 실전사례 — 현장의 목소리, JoyCaption의 DPO 실전기</a></li>
+<li><a href="16-RLVR과GRPO.html">16. RLVR과 GRPO — 비평가를 내려놓다</a></li>
+<li><a href="17-RL의작동조건.html">17. RL이 작동하는 조건 — 스펙트럼, 적정 난이도, 그리고 한계</a></li>
+<li><a href="18-GRPO의변종들.html" class="active">18. GRPO의 변종들 — 부품을 하나씩 의심하다</a><ul class="sidebar-toc"><li><a href="18-GRPO의변종들.html">(a) 두 개의 나누기 — Dr. GRPO</a></li><li><a href="18-GRPO의변종들-2.html">(b) 클리핑과 샘플링 — DAPO의 네 가지 처방</a></li><li><a href="18-GRPO의변종들-3.html">© 비율의 단위 — GSPO와 GMPO</a></li><li><a href="18-GRPO의변종들-4.html">(d) 클리핑이 버리는 토큰 — CISPO</a></li><li><a href="18-GRPO의변종들-5.html">(e) 베이스라인 자체 — 형제 알고리즘들</a></li><li><a href="18-GRPO의변종들-6.html">(f) 비평가의 귀환 — VAPO</a></li><li><a href="18-GRPO의변종들-7.html">(g) KL과 엔트로피 — 줄을 풀 것인가, 탐색을 지킬 것인가</a></li><li><a href="18-GRPO의변종들-8.html">(h) 시스템이 알고리즘이 되다 — 학습과 추론의 불일치</a></li><li><a href="18-GRPO의변종들-9.html">(i) 레시피의 시대 — ScaleRL과 Olmo 3</a></li><li><a href="18-GRPO의변종들-10.html">지도: 무엇이 무엇을 바꿨나</a></li><li><a href="18-GRPO의변종들-11.html" class="current">연습문제와 함께 풀기</a></li></ul></li>
+<li><a href="19-디퓨전의DPO.html">19. 디퓨전에서 DPO를 쓰려면 — 로그확률의 벽</a></li>
+<li><a href="20-DDPO.html">20. DDPO — 디퓨전의 정책 그래디언트</a></li>
+<li><a href="21-이미지-영상-로보틱스.html">21. 이미지·영상·로보틱스의 강화학습 — GRPO가 시각 생성을 만났을 때</a></li>
+<li><a href="22-에이전트의강화학습.html">22. 에이전틱 AI — 행동하는 모델을 정렬하기</a></li>
+<li><a href="99-부록.html">부록</a></li></ol>
+</nav>
+
+<button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
+
+<main>
+<section class="chapter chapter-paged">
+<p class="chapter-crumb"><a href="18-GRPO의변종들.html">18. GRPO의 변종들 — 부품을 하나씩 의심하다</a></p>
+<h4 id="연습문제와-함께-풀기">연습문제와 함께 풀기</h4>
+<h5 id="문제-1-길게-틀리면-덜-혼난다">문제 1 — 길게 틀리면 덜 혼난다</h5>
+<div class="exercise">
+<p>그룹 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">G = 4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span></eq>에서 두 오답의 길이가 50토큰과 500토큰이고 둘 다 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>A</mi><mo>^</mo></mover><mo>=</mo><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\hat A = -1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9468em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">A</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1111em;"><span class="mord">^</span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">1</span></span></span></span></eq>이다. GRPO에서 각 오답의 토큰 하나가 받는 가중치를 구하시오. DAPO의 토큰 단위 손실에서는 어떤가?</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-M"><div class="dlg-bubble"><span class="dlg-name">김민준</span>GRPO는 Â/(G·|o|)니까 짧은 오답은 −1/(4 × 50) = −0.005, 긴 오답은 −1/(4 × 500) = −0.0005. 열 배 차이요.</div></div>
+<div class="dlg-line dlg-T"><div class="dlg-bubble"><span class="dlg-name">선생님</span>그런데 민준 학생, 응답 하나에 걸린 가중치를 전부 더하면요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M11.svg" alt="김민준 (자신만만)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">짧은 건 50 × 0.005 = 0.25, 긴 건 500 × 0.0005 = 0.25. 똑같네요! 그럼 응답 단위로는 공평한 거 아닌가요?</div></div>
+<div class="dlg-line dlg-S"><div class="dlg-bubble"><span class="dlg-name">이서연</span>그 합이 뭘 뜻하는지가 문제야. 모든 토큰이 같은 w를 받으면 그래디언트는 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><msub><mo>∑</mo><mi>t</mi></msub><mi mathvariant="normal">∇</mi><mi>log</mi><mo>⁡</mo><mi>π</mi><mo stretchy="false">(</mo><msub><mi>o</mi><mi>t</mi></msub><mo stretchy="false">)</mo><mo>=</mo><mi>w</mi><mtext> </mtext><mi mathvariant="normal">∇</mi><mi>log</mi><mo>⁡</mo><mi>π</mi><mo stretchy="false">(</mo><mtext>응답</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">w \sum_t \nabla\log\pi(o_t) = w\,\nabla\log\pi(\text{응답})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0497em;vertical-align:-0.2997em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1308em;"><span style="top:-2.4003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2997em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">∇</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">∇</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="mopen">(</span><span class="mord text"><span class="mord hangul_fallback">응답</span></span><span class="mclose">)</span></span></span></span></eq>이잖아. 응답의 로그확률을 미는 힘은 합이 아니라 w 자체야.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.svg" alt="김민준 (당황)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">아, 합은 그냥 숫자를 더한 거고, 실제로 응답 확률에 걸리는 계수는 토큰당 w구나. 그럼 긴 오답의 확률은 열 배 약하게 눌리고.</div></div>
+<div class="dlg-line dlg-T"><div class="dlg-bubble"><span class="dlg-name">선생님</span>그래요. 합이 같다는 게 “공평해 보이게” 만드는 착시예요. 위젯의 주황 막대가 그거죠.</div></div>
+<div class="dlg-line dlg-M"><div class="dlg-bubble"><span class="dlg-name">김민준</span>조교님이 보고서 감점을 &quot;페이지당 1점&quot;으로 했으면 길게 쓴 사람이 유리했을 거란 얘기랑 같네요. 총 감점은 같아도 페이지 하나하나는 덜 깎이니까.</div></div>
+<div class="dlg-line dlg-S"><div class="dlg-bubble"><span class="dlg-name">이서연</span>DAPO는 Σ|o| = 550으로 다 똑같이 나누니까 둘 다 −1/550. 길이와 상관없이 같아.</div></div>
+</div><blockquote>
+<p><strong>정리</strong> GRPO: <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>0.005</mn></mrow><annotation encoding="application/x-tex">-0.005</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">0.005</span></span></span></span></eq> vs <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>0.0005</mn></mrow><annotation encoding="application/x-tex">-0.0005</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">0.0005</span></span></span></span></eq> (10배 차이). 모든 토큰이 같은 가중치 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span></span></span></span></eq>를 받으면 그래디언트는 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mtext> </mtext><mi mathvariant="normal">∇</mi><mi>log</mi><mo>⁡</mo><mi>π</mi><mo stretchy="false">(</mo><mtext>응답</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">w\,\nabla\log\pi(\text{응답})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">∇</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="mopen">(</span><span class="mord text"><span class="mord hangul_fallback">응답</span></span><span class="mclose">)</span></span></span></span></eq> — 응답 확률을 미는 힘은 합이 아니라 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span></span></span></span></eq>다. DAPO는 둘 다 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>1</mn><mi mathvariant="normal">/</mi><mn>550</mn></mrow><annotation encoding="application/x-tex">-1/550</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">−</span><span class="mord">1/550</span></span></span></span></eq>로 같다.</p>
+</blockquote>
+<h5 id="문제-2-동적-샘플링의-비용">문제 2 — 동적 샘플링의 비용</h5>
+<div class="exercise">
+<p>배치에 프롬프트 512개를 넣었는데 30%는 모두 정답, 10%는 모두 오답이었다. 시그널을 주는 프롬프트는 몇 개인가? DAPO처럼 512개를 모두 시그널 있는 프롬프트로 채우려면 평균적으로 몇 개의 프롬프트를 뽑아야 하는가?</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-M"><div class="dlg-bubble"><span class="dlg-name">김민준</span>30% + 10% = 40%가 시그널이 없으니까 512 × 0.6 = 307개요. 빠진 205개만큼 더 뽑으면 되니까 512 + 205 = 717개요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.svg" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 새로 뽑은 205개는 전부 시그널이 있나요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.svg" alt="김민준 (당황)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">아니요, 그것도 40%는 또 빠지죠. 채운 것도 또 빠지는구나.</div></div>
+<div class="dlg-line dlg-S"><div class="dlg-bubble"><span class="dlg-name">이서연</span>512 × (1 + 0.4 + 0.4² + …) = 512 / 0.6 ≈ 853개. 등비급수야. 한 번에 생각하면, 뽑은 것 중 60%만 남으니까 512개를 남기려면 512/0.6개를 뽑아야 하는 거고.</div></div>
+<div class="dlg-line dlg-M"><div class="dlg-bubble"><span class="dlg-name">김민준</span>재제출 받은 과제도 또 반려될 수 있다는 걸 까먹은 거네요. 조교님이 재제출도 채점 대상이라 했는데.</div></div>
+<div class="dlg-line dlg-T"><div class="dlg-bubble"><span class="dlg-name">선생님</span>그래요. 뽑는 건 추론이니까 생성 비용이 1.7배쯤 들어요. 그런데도 DAPO의 표에서 동적 샘플링이 가장 큰 향상(42 → 50)을 줬죠. 배치가 들쭉날쭉하면 그래디언트 크기도 들쭉날쭉해지니까요. Olmo 3의 &quot;능동 샘플링&quot;은 이 비용을 줄이려는 구현이고요.</div></div>
+</div><blockquote>
+<p><strong>정리</strong> 시그널 있는 프롬프트는 약 307개. 채운 프롬프트도 다시 40%가 빠지므로 512개를 채우려면 평균 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>512</mn><mi mathvariant="normal">/</mi><mn>0.6</mn><mo>≈</mo><mn>853</mn></mrow><annotation encoding="application/x-tex">512/0.6 \approx 853</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">512/0.6</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">853</span></span></span></span></eq>개를 뽑아야 한다(생성 비용 약 1.7배). 그래도 실질 배치 크기가 일정해지는 이득이 커서 DAPO에서 가장 효과가 큰 기법이었다.</p>
+</blockquote>
+<h5 id="문제-3-토큰-비율과-응답-비율">문제 3 — 토큰 비율과 응답 비율</h5>
+<div class="exercise">
+<p>네 토큰짜리 응답의 토큰 비율이 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1.1</mn><mo separator="true">,</mo><mtext> </mtext><mn>0.9</mn><mo separator="true">,</mo><mtext> </mtext><mn>1.5</mn><mo separator="true">,</mo><mtext> </mtext><mn>0.8</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1.1,\ 0.9,\ 1.5,\ 0.8]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1.1</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0.9</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1.5</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0.8</span><span class="mclose">]</span></span></span></span></eq>이고 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>A</mi><mo>^</mo></mover><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\hat A &gt; 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9859em;vertical-align:-0.0391em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">A</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1111em;"><span class="mord">^</span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span></eq>이다. (가) GRPO(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi><mo>=</mo><mn>0.2</mn></mrow><annotation encoding="application/x-tex">\varepsilon = 0.2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.2</span></span></span></span></eq>)에서 그래디언트가 끊기는 토큰은? (나) GSPO의 응답 비율 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>s</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">s_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>를 구하고, 클리핑 범위 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo>−</mo><mn>3</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>4</mn></mrow></msup><mo separator="true">,</mo><mtext> </mtext><mn>1</mn><mo>+</mo><mn>4</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>4</mn></mrow></msup><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1 - 3\times10^{-4},\ 1 + 4\times10^{-4}]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0085em;vertical-align:-0.1944em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">4</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">4</span></span></span></span></span></span></span></span></span><span class="mclose">]</span></span></span></span></eq>에서 어떻게 되는지 쓰시오.</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-M"><div class="dlg-bubble"><span class="dlg-name">김민준</span>Â &gt; 0이면 1.2를 넘는 토큰이 잘리니까 1.5 하나요. 0.8은 딱 경계인데, Â &gt; 0에서는 아래쪽은 안 잘리죠. min이 작은 쪽을 고르니까.</div></div>
+<div class="dlg-line dlg-T"><div class="dlg-bubble"><span class="dlg-name">선생님</span>좋아요. GSPO는요?</div></div>
+<div class="dlg-line dlg-M"><div class="dlg-bubble"><span class="dlg-name">김민준</span>로그 평균이 0.043이라 s = 1.044요. 범위가 1.0004까지니까 한참 넘었어요. 응답 전체가 잘리네요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M06.svg" alt="김민준 (의심)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">근데 이상한데요. 범위가 0.0004면 거의 모든 응답이 잘릴 텐데, 그럼 학습이 안 되지 않아요?</div></div>
+<div class="dlg-line dlg-S"><div class="dlg-bubble"><span class="dlg-name">이서연</span>그건 s가 길이로 나눈 기하평균이라서 그래. 4토큰이라 1.044지, 1,000토큰 응답이면 토큰 비율이 이 정도로 흔들려도 평균 로그비율이 훨씬 0에 가까워져. 범위가 좁은 게 이상한 게 아니라 s의 스케일 자체가 작은 거야.</div></div>
+<div class="dlg-line dlg-T"><div class="dlg-bubble"><span class="dlg-name">선생님</span>그래요. 그리고 실제로 논문에서도 GRPO보다 훨씬 많은 토큰이 잘렸는데 효율은 더 좋았어요. 몇 개가 잘리느냐보다 <strong>남은 그래디언트가 얼마나 깨끗하냐</strong>가 중요했던 거죠.</div></div>
+<div class="dlg-line dlg-M"><div class="dlg-bubble"><span class="dlg-name">김민준</span>과제 채점할 때 이상한 제출물을 과감히 빼니까 오히려 평균이 믿을 만해지는 거랑 비슷하네요.</div></div>
+</div><blockquote>
+<p><strong>정리</strong> (가) 1.5인 토큰만 끊긴다(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>A</mi><mo>^</mo></mover><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\hat A &gt; 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9859em;vertical-align:-0.0391em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">A</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1111em;"><span class="mord">^</span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span></eq>이면 하한 쪽은 자르지 않는다). (나) <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>s</mi><mi>i</mi></msub><mo>=</mo><mi>exp</mi><mo>⁡</mo><mo stretchy="false">(</mo><mtext>평균 로그비율</mtext><mo stretchy="false">)</mo><mo>≈</mo><mn>1.044</mn></mrow><annotation encoding="application/x-tex">s_i = \exp(\text{평균 로그비율}) \approx 1.044</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">exp</span><span class="mopen">(</span><span class="mord text"><span class="mord hangul_fallback">평균</span><span class="mord"> </span><span class="mord hangul_fallback">로그비율</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1.044</span></span></span></span></eq> — 범위를 한참 넘어 응답 전체가 잘린다. <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>s</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">s_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>는 길이로 나눈 기하평균이라 긴 응답에서는 1에 매우 가깝고, 그래서 범위도 좁게 잡는다. GSPO는 더 많이 자르지만 남은 그래디언트의 분산이 작다.</p>
+</blockquote>
+<h5 id="문제-4-킬러-1-의-차이">문제 4 — (킬러) 1%의 차이</h5>
+<div class="exercise">
+<p>한 팀이 vLLM으로 응답을 생성하고 FSDP로 학습한다. 같은 가중치인데 토큰별 로그확률이 평균 0, 표준편차 0.01 정도로 어긋난다. (가) &quot;0.01이면 1% 차이니 무시해도 된다&quot;는 주장을 4,000토큰 응답에 대해 검토하시오. (나) 토큰 단위로 비율을 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi></mrow><annotation encoding="application/x-tex">C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span></span></span></span></eq>에서 잘라내는 TIS만으로 충분한가? (다) 근본 해결책으로 무엇이 제안되었는가?</p>
+</div>
+<div class="dlg">
+<div class="dlg-scene">민준이 두 엔진의 로그확률 차이를 히스토그램으로 띄운다. 0 근처에 뾰족하게 몰려 있다.</div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M11.svg" alt="김민준 (자신만만)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">보세요, 거의 다 0이에요. 표준편차 0.01이면 비율로 치면 1% 차이인데, 이 정도는 무시해도 되죠.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.svg" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">서연 학생, 4,000토큰짜리 응답 하나의 비율은 어떻게 계산하죠?</div></div>
+<div class="dlg-line dlg-S"><div class="dlg-bubble"><span class="dlg-name">이서연</span>토큰 비율의 곱이니까 로그비율의 합이요. 토큰마다 독립이라고 치면 합의 표준편차는 0.01 × √4000 ≈ 0.63이에요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S08.svg" alt="이서연 (놀람)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble"><eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>e</mi><mn>0.63</mn></msup></mrow><annotation encoding="application/x-tex">e^{0.63}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0.63</span></span></span></span></span></span></span></span></span></span></span></span></eq>이면 1.9배. 2σ면 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>e</mi><mn>1.26</mn></msup><mo>≈</mo><mn>3.5</mn></mrow><annotation encoding="application/x-tex">e^{1.26} \approx 3.5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1.26</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">3.5</span></span></span></span></eq>배예요. 토큰 하나는 1%인데 응답 하나는 몇 배씩 어긋나는 거네요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.svg" alt="김민준 (당황)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">그럼 토큰마다 C에서 잘라내면요? TIS처럼요. 토큰 비율은 1% 근처라 거의 안 잘리겠지만, 잘못된 건 없잖아요.</div></div>
+<div class="dlg-line dlg-S"><div class="dlg-bubble"><span class="dlg-name">이서연</span>바로 그게 문제 아냐? 토큰 하나하나는 범위 안이라 안 잘리는데, 곱해지면 몇 배가 되는 거. 토큰 단위 보정으로는 응답 단위로 쌓인 차이를 못 본다고.</div></div>
+<div class="dlg-line dlg-T"><div class="dlg-bubble"><span class="dlg-name">선생님</span>그래요. 그래서 MIS와 Trust Region Masking은 응답 전체를 보고 크게 어긋난 응답을 통째로 버렸어요. 그리고 드물게, 추론 엔진이 뽑은 낮은 확률 토큰에서 두 엔진이 크게 어긋나는 경우도 있어요. 평균이 아니라 꼬리가 사고를 치죠.</div></div>
+<div class="dlg-line dlg-M"><div class="dlg-bubble"><span class="dlg-name">김민준</span>(다)는… 그럼 애초에 차이를 안 만드는 게 답이겠네요. 정밀도를 맞추거나.</div></div>
+<div class="dlg-line dlg-T"><div class="dlg-bubble"><span class="dlg-name">선생님</span>맞아요. FP16 연구는 BF16의 짧은 가수부가 근본 원인이라 보고, FP16으로 바꿔서 응답 단위 불일치를 약 24배 줄였어요. MoE라면 라우팅까지 맞춰야 하고요(R3, Keep Routing).</div></div>
+<div class="dlg-line dlg-S"><div class="dlg-bubble"><span class="dlg-name">이서연</span>수치해석 시간에 반올림 오차가 한 번은 작아도 수천 번 누적되면 결과가 망가진다고 배웠는데, 이게 딱 그거네요. 오차가 √n으로 자라는 랜덤워크.</div></div>
+<div class="dlg-line dlg-M"><div class="dlg-bubble"><span class="dlg-name">김민준</span>실험 보고서에서 유효숫자 하나 아끼다가 마지막 계산에서 틀린 적 있어요. 조교님이 중간값은 넉넉하게 들고 가라고 했는데.</div></div>
+</div><blockquote>
+<p><strong>정리</strong> (가) 로그비율의 합은 표준편차가 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.01</mn><msqrt><mn>4000</mn></msqrt><mo>≈</mo><mn>0.63</mn></mrow><annotation encoding="application/x-tex">0.01\sqrt{4000} \approx 0.63</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.04em;vertical-align:-0.1328em;"></span><span class="mord">0.01</span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9072em;"><span class="svg-align" style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord" style="padding-left:0.833em;"><span class="mord">4000</span></span></span><span style="top:-2.8672em;"><span class="pstrut" style="height:3em;"></span><span class="hide-tail" style="min-width:0.853em;height:1.08em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="1.08em" viewBox="0 0 400000 1080" preserveAspectRatio="xMinYMin slice"><path d="M95,702
+c-2.7,0,-7.17,-2.7,-13.5,-8c-5.8,-5.3,-9.5,-10,-9.5,-14
+c0,-2,0.3,-3.3,1,-4c1.3,-2.7,23.83,-20.7,67.5,-54
+c44.2,-33.3,65.8,-50.3,66.5,-51c1.3,-1.3,3,-2,5,-2c4.7,0,8.7,3.3,12,10
+s173,378,173,378c0.7,0,35.3,-71,104,-213c68.7,-142,137.5,-285,206.5,-429
+c69,-144,104.5,-217.7,106.5,-221
+l0 -0
+c5.3,-9.3,12,-14,20,-14
+H400000v40H845.2724
+s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
+c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
+M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1328em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.63</span></span></span></span></eq> — 응답 단위 비율은 흔히 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>e</mi><mrow><mo>±</mo><mn>0.63</mn></mrow></msup><mo>≈</mo></mrow><annotation encoding="application/x-tex">e^{\pm 0.63} \approx</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">±</span><span class="mord mtight">0.63</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span></span></span></span></eq> 0.5–1.9배, 2σ면 3.5배까지 어긋난다. 토큰 하나의 1%는 무시할 수 없다. (나) 토큰 단위 잘라내기는 개별 토큰이 범위 안이면 아무것도 못 한다. 응답 단위 마스킹(MIS, Trust Region Masking)이 필요하다. (다) 차이 자체를 줄이는 것: FP16 정밀도, MoE 라우팅 재생(R3, Keep Routing), 샘플링 마스크 일치.</p>
+</blockquote>
+<h4 id="다음-장으로의-질문">다음 장으로의 질문</h4>
+<blockquote>
+<p>이 장의 모든 변종은 한 가지를 전제한다: 토큰의 로그확률 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>o</mi><mrow><mi>i</mi><mo separator="true">,</mo><mi>t</mi></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log \pi_\theta(o_{i,t})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></eq>를 <strong>계산할 수 있다</strong>는 것.
+자기회귀 언어모델에게는 당연한 전제다. 그런데 이미지를 한 번에 뽑아내는 디퓨전 모델이나, 노이즈를 결정론적으로 옮기는 플로우 모델은 어떤가?
+로그확률을 구할 수 없는 모델에서도 DPO와 GRPO를 쓸 수 있을까?</p>
+</blockquote>
+
+</section>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="18-GRPO의변종들-10.html">&larr; 지도: 무엇이 무엇을 바꿨나</a><span class="page-count">11 / 11</span><a class="chapter-nav-next" href="19-디퓨전의DPO.html">19. 디퓨전에서 DPO를 쓰려면 — 로그확률의 벽 &rarr;</a></nav>
+</main>
+
+<script type="module">
+// Dark mode
+const toggle = document.getElementById('theme-toggle');
+const stored = localStorage.getItem('theme');
+if (stored === 'dark' || (!stored && matchMedia('(prefers-color-scheme: dark)').matches)) {
+  document.documentElement.setAttribute('data-theme', 'dark');
+  toggle.textContent = '\u2600\uFE0F';
+}
+toggle.addEventListener('click', () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  toggle.textContent = isDark ? '\u{1F319}' : '\u2600\uFE0F';
+});
+
+// Sidebar
+const sidebar = document.getElementById('sidebar');
+const openBtn = document.getElementById('sidebar-open');
+const closeBtn = document.getElementById('sidebar-close');
+openBtn.addEventListener('click', () => sidebar.classList.add('open'));
+closeBtn.addEventListener('click', () => sidebar.classList.remove('open'));
+sidebar.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => sidebar.classList.remove('open'));
+});
+
+// Mermaid — 테마를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  mermaidLib.initialize({ startOnLoad: false, theme: isDark ? 'dark' : 'default', securityLevel: 'loose' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+toggle.addEventListener('click', () => renderMermaid());
+
+// 키보드 ←/→ 로 이전·다음 페이지
+addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  const a = document.querySelector(e.key === 'ArrowLeft' ? '.chapter-nav-prev' : e.key === 'ArrowRight' ? '.chapter-nav-next' : null);
+  if (a) location.href = a.href;
+});
+</script>
+
+</body>
+</html>
