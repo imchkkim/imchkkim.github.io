@@ -627,7 +627,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="11-브래들리테리모델.html">11. Bradley-Terry — 시그모이드는 왜 거기 있는가?</a></li>
 <li><a href="12-다차원보상.html">12. 다차원 보상 — 스칼라를 넘어서</a></li>
 <li><a href="13-DPO의진화.html">13. DPO의 진화 — 하나의 알고리즘이 낳은 가계도</a></li>
-<li><a href="14-온라인과오프라인.html" class="active">14. 온라인과 오프라인 — 이상과 현실 사이에서</a><ul class="sidebar-toc"><li><a href="14-온라인과오프라인.html" class="current">온라인 학습의 현실적 어려움</a></li><li><a href="14-온라인과오프라인-2.html">그래서 오프라인이 매력적이다</a></li><li><a href="14-온라인과오프라인-3.html">하지만 오프라인은 근본적 한계가 있다</a></li><li><a href="14-온라인과오프라인-4.html">얼마나 빨리 낡는가 — 장난감으로 재보기</a></li><li><a href="14-온라인과오프라인-5.html">해결: 이상과 현실 사이의 절충안들</a></li><li><a href="14-온라인과오프라인-6.html">실무 컨센서스</a></li><li><a href="14-온라인과오프라인-7.html">연습문제와 함께 풀기</a></li></ul></li>
+<li><a href="14-온라인과오프라인.html" class="active">14. 온라인과 오프라인 — 이상과 현실 사이에서</a><ul class="sidebar-toc"><li><a href="14-온라인과오프라인.html" class="current">온라인 학습: 지금의 모델로 매 배치 새로 배운다</a></li><li><a href="14-온라인과오프라인-2.html">오프라인 데이터 정제: 시간 제약 없이 여러 번 거른다</a></li><li><a href="14-온라인과오프라인-3.html">분포 이동: 데이터는 옛 정책에서 나왔다</a></li><li><a href="14-온라인과오프라인-4.html">반복 DPO: 온라인과 오프라인 사이의 다이얼</a></li><li><a href="14-온라인과오프라인-5.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="15-실전사례.html">15. 실전사례 — 현장의 목소리, JoyCaption의 DPO 실전기</a></li>
 <li><a href="16-RLVR과GRPO.html">16. RLVR과 GRPO — 비평가를 내려놓다</a></li>
 <li><a href="17-RL의작동조건.html">17. RL이 작동하는 조건 — 스펙트럼, 적정 난이도, 그리고 한계</a></li>
@@ -645,10 +645,10 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <h3>Chapter 14: 온라인과 오프라인 — 이상과 현실 사이에서</h3>
 <h4 id="의문">의문</h4>
-<p>Ch2–5에서 정책 그래디언트의 조건을 배웠다. 로그 미분 트릭은 <em>지금의 정책이 뽑은</em> 응답에서만 올바른 그래디언트를 준다(Ch2). 남이 만든 데이터를 쓰려면 임포턴스 가중치로 보정해야 하는데, 두 분포가 멀어지면 그 분산이 폭발한다(Ch5). PPO조차 “조금만” 오프폴리시를 허용하려고 클리핑을 발명했다. 이론은 분명히 온라인·온폴리시를 가리킨다. 그렇다면 왜 Ch13의 DPO 가계도는 모두 오프라인·오프폴리시를 선택했는가?</p>
-<h4 id="온라인-학습의-현실적-어려움">온라인 학습의 현실적 어려움</h4>
-<p>이론은 명쾌하다. “현재 모델이 생성한 데이터로 학습하라.” 하지만 현실에서 이것은 세 가지 무거운 짐을 동반한다.</p>
-<p><strong>[1] 모델을 계속 갱신해야 한다</strong></p>
+<p>정책 그래디언트의 조건을 떠올려 보자. 로그 미분 트릭은 <em>지금의 정책이 뽑은</em> 응답에서만 올바른 그래디언트를 준다. 남이 만든 데이터를 쓰려면 임포턴스 가중치로 보정해야 하는데, 두 분포가 멀어지면 그 분산이 폭발한다. PPO조차 “조금만” 오프폴리시를 허용하려고 클리핑을 발명했다. 이론은 분명히 온라인·온폴리시를 가리킨다. 그렇다면 왜 DPO와 그 변형들의 가계도는 모두 오프라인·오프폴리시를 선택했는가?</p>
+<h4 id="온라인-학습-지금의-모델로-매-배치-새로-배운다">온라인 학습: 지금의 모델로 매 배치 새로 배운다</h4>
+<p>이론은 명쾌하다. “현재 모델이 생성한 데이터로 학습하라.” 그런데 이 한 문장을 실제로 돌리면 무엇이 필요할까? 현실에서 이것은 세 가지 무거운 짐을 동반한다.</p>
+<h5 id="1-모델을-계속-갱신해야-한다">[1] 모델을 계속 갱신해야 한다</h5>
 <blockquote>
 <p>온라인 RL의 루프:<br>
 생성 → 평가 → 학습 → 생성 → 평가 → 학습 → …</p>
@@ -669,7 +669,34 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 생성하고, 인간이 평가하고, 학습하는 걸 매 배치마다?<br>
 얼마나 복잡하고 느려질지 상상해보라.”</p>
 </blockquote>
-<p><strong>[2] 모델이 드리프트하는 위험</strong></p>
+<h5 id="2-데이터셋을-계속-만들어내는-것의-어려움">[2] 데이터셋을 계속 만들어내는 것의 어려움</h5>
+<blockquote>
+<ul>
+<li><strong>오프라인:</strong> 데이터셋을 한 번 만들면 끝. 여유 있게 검수할 수 있다.</li>
+<li><strong>온라인:</strong> 매 배치마다 새 데이터가 필요하다.</li>
+</ul>
+<p><strong>인간 평가 기반 (RLHF):</strong></p>
+<ul>
+<li>매 배치마다 인간에게 응답 쌍을 보여주고 판정을 받아야 한다</li>
+<li>인간은 느리고, 비싸고, 지친다</li>
+<li>배치 크기가 256이면 128쌍을 인간이 실시간으로 판정?</li>
+<li>현실적으로 불가능 → 보상 모델로 대체</li>
+<li>하지만 보상 모델 자체도 드리프트하면? (아래의 [3]과 맞물림)</li>
+</ul>
+<p><strong>자동 평가 기반 (RLVR):</strong></p>
+<ul>
+<li>검증기가 자동으로 판정 → 속도 문제는 해결</li>
+<li>하지만 “정답이 있는” 도메인에서만 가능</li>
+</ul>
+<p><strong>LLM-as-Judge:</strong></p>
+<ul>
+<li>SOTA 모델이 판정 → JoyCaption이 이 방식을 사용</li>
+<li>API 비용이 데이터 크기에 비례하여 증가</li>
+<li>온라인이면 매 스텝마다 API 호출 → 비용 폭발</li>
+</ul>
+</blockquote>
+<h5 id="3-모델이-드리프트하는-위험">[3] 모델이 드리프트하는 위험</h5>
+<p>비용만이 문제라면 돈과 GPU로 해결할 수 있다. 더 까다로운 것은 모델이 자기 출력으로 배운다는 사실 자체다.</p>
 <blockquote>
 <p>온라인 학습 중 모델은 자기 출력으로 계속 학습한다.<br>
 이 피드백 루프에는 양성(자기 강화)과 음성(자기 붕괴) 두 방향이 있다.</p>
@@ -680,7 +707,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li>보상 해킹이 시작되면 되돌리기 어렵다</li>
 </ul>
 </blockquote>
-<p>실제로 관찰된 양성 드리프트 사례들:</p>
+<h5 id="ml에서-실제로-관찰된-양성-드리프트-사례들">ML에서: 실제로 관찰된 양성 드리프트 사례들</h5>
 <blockquote>
 <p><strong>“과도한 사과” 해킹:</strong><br>
 보상 모델이 &quot;공손한 응답&quot;을 선호하도록 학습됨</p>
@@ -710,7 +737,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </blockquote>
 <blockquote>
 <p><strong>이 사례들의 공통 패턴:</strong><br>
-보상 모델의 특정 차원 하나를 극단적으로 최적화하면 다른 차원의 품질이 무너진다 (Ch12의 파레토 트레이드오프).<br>
+보상 모델의 특정 차원 하나를 극단적으로 최적화하면 다른 차원의 품질이 무너진다 (여러 보상 사이의 파레토 트레이드오프).<br>
 온라인 학습은 이 극단적 최적화를 가속한다 — 매 배치마다 해킹된 출력이 새 학습 데이터가 되어 패턴이 강화되니까.</p>
 </blockquote>
 <blockquote>
@@ -718,65 +745,30 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 모델이 안전한 소수의 출력 패턴에 수렴한다.</p>
 <ul>
 <li>다양성이 사라지고, 엔트로피가 급격히 감소</li>
-<li>Ch17에서 다시 볼 &quot;스펙트럼이 좁아진다&quot;의 실시간 버전</li>
+<li>모델이 내놓는 출력의 스펙트럼이 실시간으로 좁아진다</li>
 <li>한 번 붕괴하면 탐색 능력을 잃어서 회복이 불가능</li>
 </ul>
 <p>레퍼런스 모델(π_ref)이 줄(leash) 역할을 하지만, 줄이 있다고 드리프트가 멈추지는 않는다:<br>
-정책은 &quot;보상 이득이 KL 벌점보다 큰 방향&quot;을 계속 찾아내고, 그 방향으로 조금씩 끌려 나간다. 보상 모델 점수는 오르는데 실제 품질은 떨어지는 과최적화(Ch5)가 이 모습이다.</p>
+정책은 &quot;보상 이득이 KL 벌점보다 큰 방향&quot;을 계속 찾아내고, 그 방향으로 조금씩 끌려 나간다. 보상 모델 점수는 오르는데 실제 품질은 떨어지는 과최적화가 이 모습이다.</p>
 </blockquote>
-<p><strong>[3] 데이터셋을 계속 만들어내는 것의 어려움</strong></p>
-<blockquote>
-<ul>
-<li><strong>오프라인:</strong> 데이터셋을 한 번 만들면 끝. 여유 있게 검수할 수 있다.</li>
-<li><strong>온라인:</strong> 매 배치마다 새 데이터가 필요하다.</li>
-</ul>
-<p><strong>인간 평가 기반 (RLHF):</strong></p>
-<ul>
-<li>매 배치마다 인간에게 응답 쌍을 보여주고 판정을 받아야 한다</li>
-<li>인간은 느리고, 비싸고, 지친다</li>
-<li>배치 크기가 256이면 128쌍을 인간이 실시간으로 판정?</li>
-<li>현실적으로 불가능 → 보상 모델로 대체</li>
-<li>하지만 보상 모델 자체도 드리프트하면? (위의 [2]와 맞물림)</li>
-</ul>
-<p><strong>자동 평가 기반 (RLVR):</strong></p>
-<ul>
-<li>검증기가 자동으로 판정 → 속도 문제는 해결</li>
-<li>하지만 “정답이 있는” 도메인에서만 가능 (Ch16에서 다룰 제약)</li>
-</ul>
-<p><strong>LLM-as-Judge:</strong></p>
-<ul>
-<li>SOTA 모델이 판정 → JoyCaption이 이 방식을 사용</li>
-<li>API 비용이 데이터 크기에 비례하여 증가</li>
-<li>온라인이면 매 스텝마다 API 호출 → 비용 폭발</li>
-</ul>
+<h5 id="문제-1-온라인이-해킹을-가속하는-이유">문제 1 — 온라인이 해킹을 가속하는 이유</h5>
+<div class="exercise">
+<p>보상 모델의 빈틈을 파고드는 &quot;양성 드리프트&quot;는 오프라인보다 온라인에서 더 빠르게 진행된다. 왜 그런지 피드백 루프의 관점에서 설명하시오.</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.svg" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">온라인이 업데이트를 더 자주 하니까요. 스텝 수가 많으면 빈틈 쪽으로도 더 많이 가죠.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.svg" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">오프라인도 에폭을 늘리면 스텝 수는 얼마든지 늘릴 수 있어요. 그럼 오프라인도 같은 속도로 해킹되나요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M02.svg" alt="김민준 (생각)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">오프라인은 에폭을 늘려도 보는 응답이 똑같죠. 모델이 빈틈을 찾아도 빈틈을 쓴 응답이 데이터에 새로 들어오지 않아요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.svg" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">온라인은 반대로, 빈틈을 조금 이용한 응답이 높은 점수를 받으면 그게 다음 배치의 &quot;좋은 예&quot;가 되고, 그걸 더 강화하고… 양의 피드백 루프야.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M07.svg" alt="김민준 (깨달음)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">스텝 수가 아니라 데이터가 자기 출력으로 바뀌는 게 핵심이었네요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.svg" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 온라인은 탐색을 하니까 좋은 답도 빨리 찾지만, 채점기의 구멍도 빨리 찾아요. 같은 능력의 양면이에요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.svg" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">보고서에서 한 번 칭찬받은 표현을 다음 보고서에 더 넣고, 또 칭찬받으면 더 넣고… 학기 말엔 보고서가 그 표현 범벅이 되는 거랑 같네요. 내가 쓴 게 다음 내가 따라 하는 본보기가 되니까.</div></div>
+</div><blockquote>
+<p><strong>정리</strong> 핵심은 스텝 수가 아니라 <strong>데이터의 출처</strong>다. 온라인에서는 해킹된 출력이 곧 다음 학습 데이터가 된다(양의 피드백 루프). 오프라인은 데이터가 고정이라 이 루프가 없다. 탐색 능력과 해킹 속도는 같은 동전의 양면이다.</p>
 </blockquote>
-<p>아래 다이어그램이 온라인과 오프라인의 구조적 차이를 보여준다:</p>
-<pre class="mermaid">graph TB
-    subgraph offline[&quot;오프라인 DPO&quot;]
-        direction TB
-        D1[&quot;📦 데이터셋&lt;br/&gt;(y_w, y_l) 쌍&lt;br/&gt;한 번 구축&quot;] --&gt; T1[&quot;🔧 학습&lt;br/&gt;일반 파인튜닝과 동일&quot;]
-        T1 --&gt; M1[&quot;✅ 정렬된 모델&quot;]
-    end
 
-    subgraph online[&quot;온라인 RL&quot;]
-        direction TB
-        G[&quot;🎲 현재 모델로&lt;br/&gt;응답 생성&quot;] --&gt; E[&quot;⚖️ 실시간 평가&lt;br/&gt;(인간/보상모델/검증기)&quot;]
-        E --&gt; U[&quot;🔧 모델 업데이트&quot;]
-        U --&gt;|&quot;매 배치 반복&quot;| G
-    end
-
-    subgraph iterative[&quot;Iterative DPO (절충안)&quot;]
-        direction TB
-        R1[&quot;Round 1&lt;br/&gt;데이터 생성 → DPO&quot;] --&gt; R2[&quot;Round 2&lt;br/&gt;갱신된 모델로&lt;br/&gt;새 데이터 → DPO&quot;]
-        R2 --&gt; R3[&quot;Round 3&lt;br/&gt;...반복&quot;]
-    end
-
-    class offline m-blue
-    class online m-orange
-    class iterative m-green
-</pre>
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="13-DPO의진화-10.html">&larr; 연습문제와 함께 풀기</a><span class="page-count">1 / 7</span><a class="chapter-nav-next" href="14-온라인과오프라인-2.html">그래서 오프라인이 매력적이다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="13-DPO의진화-5.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="14-온라인과오프라인-2.html">오프라인 데이터 정제: 시간 제약 없이 여러 번 거른다 &rarr;</a></nav>
 </main>
 
 <script type="module">

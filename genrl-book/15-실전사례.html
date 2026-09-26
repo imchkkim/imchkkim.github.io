@@ -628,7 +628,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="12-다차원보상.html">12. 다차원 보상 — 스칼라를 넘어서</a></li>
 <li><a href="13-DPO의진화.html">13. DPO의 진화 — 하나의 알고리즘이 낳은 가계도</a></li>
 <li><a href="14-온라인과오프라인.html">14. 온라인과 오프라인 — 이상과 현실 사이에서</a></li>
-<li><a href="15-실전사례.html" class="active">15. 실전사례 — 현장의 목소리, JoyCaption의 DPO 실전기</a><ul class="sidebar-toc"><li><a href="15-실전사례.html" class="current">배경</a></li><li><a href="15-실전사례-2.html">데이터셋은 어떻게 만들었는가</a></li><li><a href="15-실전사례-3.html">첫 번째 시도의 실패 — 약한 예제의 함정</a></li><li><a href="15-실전사례-4.html">해결: 마진 기반 필터링</a></li><li><a href="15-실전사례-5.html">교재 개념들이 현장에서 부딪히는 지점</a></li><li><a href="15-실전사례-6.html">제작자가 실제 사례에서 얻은 교훈</a></li><li><a href="15-실전사례-7.html">연습문제와 함께 풀기</a></li></ul></li>
+<li><a href="15-실전사례.html" class="active">15. 실전사례 — 현장의 목소리, JoyCaption의 DPO 실전기</a><ul class="sidebar-toc"><li><a href="15-실전사례.html" class="current">좋은 선호쌍: 모델이 실제로 저지르는 실수를 담는다</a></li><li><a href="15-실전사례-2.html">마진 기반 필터링: 양 끝을 골라 쌍을 만든다</a></li><li><a href="15-실전사례-3.html">일회용 데이터셋: DPO 데이터는 그 모델에만 유효하다</a></li><li><a href="15-실전사례-4.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="16-RLVR과GRPO.html">16. RLVR과 GRPO — 비평가를 내려놓다</a></li>
 <li><a href="17-RL의작동조건.html">17. RL이 작동하는 조건 — 스펙트럼, 적정 난이도, 그리고 한계</a></li>
 <li><a href="18-GRPO의변종들.html">18. GRPO의 변종들 — 부품을 하나씩 의심하다</a></li>
@@ -648,14 +648,108 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p><strong>원문</strong>: fpgaminer, <em>“How OpenAI Misled You on RLHF”</em>
 <a href="https://aerial-toothpaste-34a.notion.site/How-OpenAI-Misled-You-on-RLHF-1f83f742d9dd80a68129d06503464aff">https://aerial-toothpaste-34a.notion.site/How-OpenAI-Misled-You-on-RLHF-1f83f742d9dd80a68129d06503464aff</a></p>
 </blockquote>
-<p>이론을 벗어나 잠시 현장으로 가보자. 레딧에서 활동하는 비전 모델 제작자 fpgaminer가 공개한 JoyCaption Beta One의 DPO 훈련 기록은 이 교재의 여러 챕터에서 다룬 개념들이 실전에서 어떻게 부딪히는지를 생생하게 보여준다.</p>
-<h4 id="배경">배경</h4>
+<p>이론을 벗어나 잠시 현장으로 가보자. 레딧에서 활동하는 비전 모델 제작자 fpgaminer가 공개한 JoyCaption Beta One의 DPO 훈련 기록은 이 교재에서 다룬 개념들이 실전에서 어떻게 부딪히는지를 생생하게 보여준다.</p>
+<h4 id="좋은-선호쌍-모델이-실제로-저지르는-실수를-담는다">좋은 선호쌍: 모델이 실제로 저지르는 실수를 담는다</h4>
+<p>DPO 데이터셋을 만들 때 가장 먼저 부딪히는 물음은 이것이다. 어떤 두 응답을 짝지어야 모델이 무언가를 배울까? 점수 차이가 크면 될까, 아니면 다른 조건이 더 있을까? JoyCaption의 기록은 이 물음에 대한 현장의 답을 보여 준다.</p>
+<h5 id="역사-joycaption이-dpo를-고른-이유">역사: JoyCaption이 DPO를 고른 이유</h5>
 <p>JoyCaption은 오픈소스 이미지 캡셔닝 VLM(Visual Language Model)이다. Llama 3.1 기반으로, 이미지를 입력받아 디퓨전 모델 학습용 캡션을 생성한다.
 검열에서 자유로운 이미지 캡셔닝 기능을 오픈소스로 제공하기 위해 만들어졌고 NSFW 이미지를 학습하고자하는 로컬 이미지 생성 모델 제작자들이 많이 사용한다.</p>
 <p>SFT만으로 학습된 이전 버전(Alpha Two)은 약 90%의 신뢰도로 작동했지만, 10번 중 1번꼴로 반복 루프에 빠지거나 엉뚱한 출력을 내놓았다. 개발자는 이 &quot;헛발질 확률&quot;을 줄이기 위해 오프라인 DPO를 선택했다.</p>
+<h5 id="데이터셋은-어떻게-만들었는가">데이터셋은 어떻게 만들었는가</h5>
+<p>JoyCaption의 DPO 데이터셋 구축 과정은 &quot;좋은 쌍의 조건&quot;과 &quot;오프라인 데이터 파이프라인&quot;을 실전에서 보여준다.</p>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>한 일</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 태스크 균형</td>
+<td>서술형 캡션(격식/비격식, 짧게/길게), Stable Diffusion 프롬프트(태그+구문), VQA(이미지 질의응답), 태그 증강 — 모든 모드를 고르게 섞음</td>
+<td>특정 모드만 좋아지고 나머지가 퇴화하는 것을 막기 위해</td>
+</tr>
+<tr>
+<td>2. 후보 생성</td>
+<td>(이미지, 프롬프트)마다 <strong>현재 모델로</strong> 응답 10개를 높은 온도로 샘플링</td>
+<td>비선호 응답이 &quot;모델이 실제로 저지르는 실수&quot;가 되도록 (비선호가 모델의 분포 안에 있어야 한다는 조건)</td>
+</tr>
+<tr>
+<td>3. 심사</td>
+<td>GPT-4o급 VLM이 응답마다 1–10점. “10점 = 프롬프트를 완벽히 따르고, 유용하고, 100% 정확”</td>
+<td>사람이 하기엔 양이 너무 많아서</td>
+</tr>
+<tr>
+<td>4. 라운드</td>
+<td>1라운드 1만 쌍 → 모델 갱신 → 2라운드 2만 쌍을 <strong>새로</strong> 생성</td>
+<td>모델이 바뀌면 옛 데이터는 낡는다</td>
+</tr>
+</tbody>
+</table>
+<h5 id="서핑-사진-한-장으로-본-네-가지-쌍">서핑 사진 한 장으로 본 네 가지 쌍</h5>
+<p>실제 쌍은 어떻게 생겼는가? 해질녘 바닷가에서 서핑하는 사람 사진 한 장으로 네 종류의 쌍을 보자. 프롬프트는 앞의 셋은 <em>“Write a long descriptive caption in a formal tone.”</em>, 셋째만 <em>“Write a Stable Diffusion prompt for this image.”</em> 이다.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>w</mi></msub></mrow><annotation encoding="application/x-tex">y_w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0269em;">w</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> (점수)</th>
+<th><eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> (점수)</th>
+<th>마진</th>
+<th>이 쌍이 가르치는 것</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>예제 1</strong> 나쁜 쌍</td>
+<td><em>“A solitary surfer navigates a modest wave against the backdrop of a vivid sunset, with warm hues of orange and crimson…”</em> (8)</td>
+<td><em>“A lone surfer rides a wave during sunset. The sky displays warm orange and red tones…”</em> (7)</td>
+<td>1</td>
+<td>거의 없음. 둘 다 정확하고 형식도 맞다. 심사 모델도 미묘하게 판정한다. 둘 다 괜찮은 답끼리의 쌍이지만 마진이 너무 좁다</td>
+</tr>
+<tr>
+<td><strong>예제 2</strong> 좋은 쌍</td>
+<td>같은 상세 캡션 + <em>“…on a white shortboard, arms extended for balance”</em> (9)</td>
+<td><em>“The image shows a person surfing. The image shows a person surfing. The sky is orange…”</em> (3)</td>
+<td>6</td>
+<td><strong>“반복하지 마라.”</strong> <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>은 JoyCaption의 대표적 헛발질인 반복 루프에 빠졌다. 그럴듯하게 시작해서 무너지는, 모델이 실제로 저지르는 실수다</td>
+</tr>
+<tr>
+<td><strong>예제 3</strong> SD 프롬프트 모드</td>
+<td><em>“1girl, surfer, ocean, sunset, orange sky, waves, dynamic pose, crouching, …”</em> (7)</td>
+<td><em>“A beautiful sunset scene with a surfer riding waves in the golden hour light, …”</em> (2)</td>
+<td>5</td>
+<td><strong>“형식을 따르라.”</strong> <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>은 캡션으로는 좋지만 SD 프롬프트 형식(태그 + 짧은 구문)을 무시했다</td>
+</tr>
+<tr>
+<td><strong>예제 4</strong> 삐꾸 vs 정상</td>
+<td>상세 캡션 (9)</td>
+<td><em>“surfing surfing surfing surfing …”</em> (500토큰 반복) (0)</td>
+<td>9</td>
+<td>마진은 최대인데 쓸모는 작다. 정답 대 삐꾸의 쌍 — 왜 그런지는 아래 문제 1에서 따져본다</td>
+</tr>
+</tbody>
+</table>
+<p>예제 3의 SD 프롬프트 모드는 끝까지 개선이 가장 느렸다. 심사 모델도 &quot;좋은 SD 프롬프트&quot;를 판정하기 어려웠고, 베이스 모델에도 이 형식의 서포트가 빈약했다.</p>
+<h5 id="문제-1-마진이-넓을수록-좋은-쌍인가">문제 1 — 마진이 넓을수록 좋은 쌍인가</h5>
+<div class="exercise">
+<p>표의 예제 1, 2, 4를 마진 크기 순으로 세우면 4 &gt; 2 &gt; 1 이다. 마진 순서가 곧 “좋은 쌍” 순서인가? 예제 2가 가장 좋은 쌍인 이유를 쓰시오.</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.svg" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 세 쌍 중 가장 좋은 쌍은 어느 거예요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M11.svg" alt="김민준 (자신만만)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">예제 4요. 마진이 9점으로 제일 넓잖아요. 마진이 좁으면 배울 게 없다고 했으니까, 넓을수록 좋죠.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.svg" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">예제 4의 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 은 &quot;surfing&quot;을 500번 반복한 거예요. 지금 모델이 그런 답을 얼마나 자주 내놓을까요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M02.svg" alt="김민준 (생각)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">거의 안 내놓겠죠… 반복 루프에 빠져도 보통은 예제 2처럼 그럴듯하게 시작했다가 무너지니까요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.svg" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그러니까 예제 4는 마진은 넓은데 고칠 실수가 없는 쌍이야. 예제 2는 마진도 넓고, <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 이 모델이 실제로 10번에 1번 저지르던 바로 그 실수고.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M07.svg" alt="김민준 (깨달음)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">마진은 필요조건이었네요. 넓은 마진이 <em>실제 실수</em>를 가리켜야 좋은 쌍이고요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.svg" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">조교님이 오답노트 검사할 때 &quot;아무도 안 틀리는 문제 적어 오지 말고 네가 틀린 문제 적어 와&quot;라고 한 거랑 같네요.</div></div>
+</div><blockquote>
+<p><strong>정리</strong> 마진 크기 순서는 좋은 쌍의 순서가 아니다. 예제 1은 마진이 좁아(1점) 차이가 취향 수준이고, 예제 4는 마진이 넓지만(9점) <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 이 모델이 거의 내놓지 않는 답이다. 예제 2는 넓은 마진(6점)이 모델의 <strong>실제 약점</strong>(반복 루프)을 가리킨다.</p>
+</blockquote>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="14-온라인과오프라인-7.html">&larr; 연습문제와 함께 풀기</a><span class="page-count">1 / 7</span><a class="chapter-nav-next" href="15-실전사례-2.html">데이터셋은 어떻게 만들었는가 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="14-온라인과오프라인-5.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="15-실전사례-2.html">마진 기반 필터링: 양 끝을 골라 쌍을 만든다 &rarr;</a></nav>
 </main>
 
 <script type="module">

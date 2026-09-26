@@ -634,7 +634,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="18-GRPO의변종들.html">18. GRPO의 변종들 — 부품을 하나씩 의심하다</a></li>
 <li><a href="19-디퓨전의DPO.html">19. 디퓨전에서 DPO를 쓰려면 — 로그확률의 벽</a></li>
 <li><a href="20-DDPO.html">20. DDPO — 디퓨전의 정책 그래디언트</a></li>
-<li><a href="21-이미지-영상-로보틱스.html" class="active">21. 이미지·영상·로보틱스의 강화학습 — GRPO가 시각 생성을 만났을 때</a><ul class="sidebar-toc"><li><a href="21-이미지-영상-로보틱스.html" class="current">이 장의 역할</a></li><li><a href="21-이미지-영상-로보틱스-2.html">세 갈래의 접근법</a></li><li><a href="21-이미지-영상-로보틱스-3.html">먼저 풀어야 할 문제 — 요즘 모델은 노이즈를 넣지 않는다</a></li><li><a href="21-이미지-영상-로보틱스-4.html">Flow-GRPO와 DanceGRPO — GRPO가 시각 생성을 만났을 때</a></li><li><a href="21-이미지-영상-로보틱스-5.html">T2I-R1 — 시각 생성에서의 “사고 과정”</a></li><li><a href="21-이미지-영상-로보틱스-6.html">영상 생성의 RL — 보상이 여러 축으로 갈라진다</a></li><li><a href="21-이미지-영상-로보틱스-7.html">디노이징의 크레딧 할당 — B²-DiffuRL</a></li><li><a href="21-이미지-영상-로보틱스-8.html">로보틱스와 자율주행 — 같은 도구, 다른 전장</a></li><li><a href="21-이미지-영상-로보틱스-9.html">보상 모델의 진화 — 무엇으로 &quot;좋은 이미지&quot;를 판단하는가</a></li><li><a href="21-이미지-영상-로보틱스-10.html">이 장이 교재 전체에서 하는 일</a></li><li><a href="21-이미지-영상-로보틱스-11.html">연습문제와 함께 풀기</a></li></ul></li>
+<li><a href="21-이미지-영상-로보틱스.html" class="active">21. 이미지·영상·로보틱스의 강화학습 — GRPO가 시각 생성을 만났을 때</a><ul class="sidebar-toc"><li><a href="21-이미지-영상-로보틱스.html" class="current">세 갈래 지도: 무엇으로 배우는가</a></li><li><a href="21-이미지-영상-로보틱스-2.html">노이즈 재주입(ODE → SDE): 결정론적 샘플러에 탐색을 되돌린다</a></li><li><a href="21-이미지-영상-로보틱스-3.html">시각 생성 GRPO: 흐름 모델 위의 그룹 비교</a></li><li><a href="21-이미지-영상-로보틱스-4.html">그룹 통제: 무엇과 무엇을 비교할 것인가</a></li><li><a href="21-이미지-영상-로보틱스-5.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="22-에이전트의강화학습.html">22. 에이전틱 AI — 행동하는 모델을 정렬하기</a></li>
 <li><a href="99-부록.html">부록</a></li></ol>
 </nav>
@@ -644,11 +644,118 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <main>
 <section class="chapter chapter-paged">
 <h3>Chapter 21: 이미지·영상·로보틱스의 강화학습 — GRPO가 시각 생성을 만났을 때</h3>
-<h4 id="이-장의-역할">이 장의 역할</h4>
-<p>DDPO와 Diffusion-DPO는 시작에 불과했다. DeepSeek-R1(2025년 1월) 이후 LLM의 GRPO 붐이 시각 생성으로 번지면서, 디퓨전·흐름 모델·영상 모델의 RL은 2025년에 폭발적으로 늘었다. 이 장에서는 그 지형도를 그린다. 뼈대는 이미 다 배웠다 — 정책 그래디언트(Ch2–5), DPO(Ch6), GRPO와 그 변종(Ch16–18). 새로 필요한 것은 &quot;연속 출력에서 로그확률과 탐색을 어떻게 얻는가&quot;뿐이다.</p>
+<h4 id="의문">의문</h4>
+<p>DDPO와 Diffusion-DPO는 시작에 불과했다. DeepSeek-R1(2025년 1월) 이후 LLM의 GRPO 붐이 시각 생성으로 번지면서, 디퓨전·흐름 모델·영상 모델의 RL은 2025년에 폭발적으로 늘었다. 뼈대 — 정책 그래디언트, DPO, GRPO와 그 변종 — 는 LLM에서 이미 갖춰져 있다. 그렇다면 이미지·영상·로봇으로 옮길 때 새로 풀어야 하는 것은 무엇일까? 연속 출력에서 로그확률과 탐색은 어디서 얻고, 그룹 안에서는 무엇과 무엇을 비교해야 할까?</p>
+<h4 id="세-갈래-지도-무엇으로-배우는가">세 갈래 지도: 무엇으로 배우는가</h4>
+<p>2025년에 쏟아진 방법들을 하나씩 외우기 전에, 무엇으로 배우는지 — 어떤 데이터와 어떤 보상을 쓰는지 — 에 따라 나눠 보면 세 갈래가 된다.</p>
+<pre class="mermaid">graph TB
+    subgraph map[&quot;이미지·영상 생성 RL 지도&quot;]
+        direction TB
+        subgraph pref[&quot;1. 선호 기반 (오프라인 DPO 변형)&quot;]
+            direction LR
+            P1[&quot;Diffusion-DPO&quot;] --&gt; P2[&quot;Diffusion-SDPO&quot;] --&gt; P3[&quot;DenseDPO&quot;]
+            P1 --&gt; P4[&quot;DiffusionKTO&quot;] --&gt; P5[&quot;Pick-a-Pic 학습&quot;]
+        end
+        subgraph pg[&quot;2. 정책 그래디언트 (온라인 RL)&quot;]
+            direction LR
+            G1[&quot;DDPO&quot;] --&gt; G2[&quot;DPOK&quot;] --&gt; G3[&quot;ReFL&quot;] --&gt; G4[&quot;AlignProp&quot;] --&gt; G5[&quot;B²-DiffuRL&quot;]
+        end
+        subgraph grpo[&quot;3. GRPO 기반 (2025년 — 통합 프레임워크)&quot;]
+            direction LR
+            R1[&quot;DanceGRPO&quot;] --&gt; R2[&quot;FlowGRPO&quot;] --&gt; R3[&quot;T2I-R1&quot;] --&gt; R4[&quot;Identity-GRPO&quot;]
+        end
+    end
+
+    class pref m-blue
+    class pg m-orange
+    class grpo m-green
+</pre><table>
+<thead>
+<tr>
+<th>갈래</th>
+<th>데이터</th>
+<th>특징</th>
+<th>LLM 쪽 대응</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 선호 기반</td>
+<td>쌍비교, 오프라인</td>
+<td>안정적이지만 탐색 제한</td>
+<td>DPO 가계도</td>
+</tr>
+<tr>
+<td>2. 정책 그래디언트</td>
+<td>보상 모델, 온라인 생성</td>
+<td>미분 불가 보상도 처리</td>
+<td>REINFORCE·PPO</td>
+</tr>
+<tr>
+<td>3. GRPO 기반</td>
+<td>보상 모델/검증기, 온라인 그룹 생성</td>
+<td>비평가 없이 그룹 정규화</td>
+<td>GRPO와 변종</td>
+</tr>
+</tbody>
+</table>
+<h5 id="ml에서-보상-모델의-네-세대">ML에서: 보상 모델의 네 세대</h5>
+<p>둘째·셋째 갈래는 &quot;좋은 이미지&quot;를 점수로 매겨 줄 무언가가 있어야 돌아간다. 그 점수를 주는 보상 모델은 네 세대를 거쳐 왔다.</p>
+<table>
+<thead>
+<tr>
+<th>세대</th>
+<th>예</th>
+<th>장점</th>
+<th>한계</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 텍스트-이미지 유사도</td>
+<td>CLIP 점수</td>
+<td>간단하고 빠르다</td>
+<td>&quot;아름다운가&quot;와 &quot;프롬프트에 맞는가&quot;를 구분하지 못하고, 이미지에 프롬프트 단어를 글자로 그려 넣으면 속는다</td>
+</tr>
+<tr>
+<td>2. 인간 선호 점수</td>
+<td>HPS, ImageReward, PickScore</td>
+<td>사람의 쌍비교로 학습 — 미학·품질·정합을 종합</td>
+<td>여전히 스칼라 하나</td>
+</tr>
+<tr>
+<td>3. 다차원 보상</td>
+<td>영상의 축별 보상 모델</td>
+<td>축마다 따로 점수 → 트레이드오프를 드러낸다</td>
+<td>축을 어떻게 합칠지 정해야 한다</td>
+</tr>
+<tr>
+<td>4. 멀티모달 LLM 판정</td>
+<td>비전-언어 모델이 직접 판정</td>
+<td>다차원 판정이 자연스럽다</td>
+<td>비싸고, 판정 모델 자체의 편향</td>
+</tr>
+</tbody>
+</table>
+<p>세대가 올라갈수록 LLM 쪽의 흐름(쌍비교로 학습한 보상 모델 → 다차원 보상 → LLM-as-judge)을 따라간다.</p>
+<h5 id="문제-1-세-갈래-정리">문제 1 — 세 갈래 정리</h5>
+<div class="exercise">
+<p>세 갈래(선호 기반, 정책 그래디언트, GRPO 기반) 각각에 대해, 필요한 데이터와 &quot;비평가(가치 모델)가 있는가&quot;를 표로 정리하시오.</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.svg" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">세 갈래 중 비평가(가치 모델)가 있는 건 어디일까요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M11.svg" alt="김민준 (자신만만)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">없어요. DDPO도 비평가 없었고, GRPO는 원래 비평가를 뺀 거고, DPO는 보상도 없으니까요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.svg" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">정책 그래디언트 갈래가 DDPO 하나만 있는 건 아니잖아. PPO식으로 구현하면 가치 모델을 붙일 수 있어. 로봇 디퓨전 정책을 PPO로 미세조정하는 작업들이 그렇고.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.svg" alt="김민준 (당황)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">논문 하나를 보고 갈래 전체로 일반화했네요. &quot;보통 없음, PPO식이면 있을 수 있음&quot;이 맞겠어요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.svg" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 그럼 시각 생성에서 비평가가 인기 없는 이유는요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.svg" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">모델이 커서요. 이미지·영상 모델만 한 비평가를 하나 더 올리면 메모리가 두 배고, 스텝마다 가치를 맞히는 것도 어렵고요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.svg" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">실험 하나 보고 보고서에 &quot;항상 그렇다&quot;고 썼다가 조교님께 반례를 받은 적이 있어요. 딱 그거네요.</div></div>
+</div><blockquote>
+<p><strong>정리</strong> 선호 기반: 쌍 데이터, 비평가 없음. 정책 그래디언트: 보상 모델 + 온라인 생성, 비평가는 방법에 따라(DDPO 없음, PPO식은 있음). GRPO 기반: 보상 + 그룹 생성, 비평가 없음(그룹 평균이 대신).</p>
+</blockquote>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="20-DDPO-6.html">&larr; 연습문제와 함께 풀기</a><span class="page-count">1 / 11</span><a class="chapter-nav-next" href="21-이미지-영상-로보틱스-2.html">세 갈래의 접근법 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="20-DDPO-4.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="21-이미지-영상-로보틱스-2.html">노이즈 재주입(ODE → SDE): 결정론적 샘플러에 탐색을 되돌린다 &rarr;</a></nav>
 </main>
 
 <script type="module">

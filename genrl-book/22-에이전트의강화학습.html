@@ -635,7 +635,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="19-디퓨전의DPO.html">19. 디퓨전에서 DPO를 쓰려면 — 로그확률의 벽</a></li>
 <li><a href="20-DDPO.html">20. DDPO — 디퓨전의 정책 그래디언트</a></li>
 <li><a href="21-이미지-영상-로보틱스.html">21. 이미지·영상·로보틱스의 강화학습 — GRPO가 시각 생성을 만났을 때</a></li>
-<li><a href="22-에이전트의강화학습.html" class="active">22. 에이전틱 AI — 행동하는 모델을 정렬하기</a><ul class="sidebar-toc"><li><a href="22-에이전트의강화학습.html" class="current">LLM RL vs 에이전틱 RL — 무엇이 달라지는가</a></li><li><a href="22-에이전트의강화학습-2.html">왜 기존 DPO/GRPO가 바로 적용되지 않는가</a></li><li><a href="22-에이전트의강화학습-3.html">현재의 접근법들</a></li><li><a href="22-에이전트의강화학습-4.html">이 교재의 도구가 어떻게 확장되는가</a></li><li><a href="22-에이전트의강화학습-5.html">이 분야가 지금 가장 뜨거운 이유</a></li><li><a href="22-에이전트의강화학습-6.html">연습문제와 함께 풀기</a></li></ul></li>
+<li><a href="22-에이전트의강화학습.html" class="active">22. 에이전틱 AI — 행동하는 모델을 정렬하기</a><ul class="sidebar-toc"><li><a href="22-에이전트의강화학습.html" class="current">에이전틱 RL: 다음 상태를 환경이 정한다</a></li><li><a href="22-에이전트의강화학습-2.html">크레딧 할당: 성공 궤적의 어느 스텝이 잘한 것인가</a></li><li><a href="22-에이전트의강화학습-3.html">에이전틱 리워드 해킹: 보상의 빈틈이 실제 행동이 된다</a></li><li><a href="22-에이전트의강화학습-4.html">시그널의 해상도: 스칼라 하나에서 토큰별 방향으로</a></li><li><a href="22-에이전트의강화학습-5.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="99-부록.html">부록</a></li></ol>
 </nav>
 
@@ -645,9 +645,8 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <h3>Chapter 22: 에이전틱 AI — 행동하는 모델을 정렬하기</h3>
 <h4 id="의문">의문</h4>
-<p>Part II–IV에서 정책 그래디언트, DPO, GRPO를 배웠고, Part V에서 이미지·영상·로보틱스로 확장했다. 하지만 이 모든 것에는 공통점이 있었다: <strong>한 번의 입력에 한 번의 출력</strong>. 프롬프트를 주면 텍스트가 나오고, 노이즈를 주면 이미지가 나온다.</p>
-<p>현실에서 가장 빠르게 성장하는 AI 응용은 그렇지 않다:</p>
-<p><strong>에이전틱 AI</strong>(agentic AI)에서는 LLM이 도구를 호출하고, 파일을 읽고, 웹을 검색하고, 코드를 실행하고, 결과를 관찰한 뒤 다음 행동을 정한다. 한 번의 출력이 아니라 여러 스텝에 걸친 의사결정의 연쇄다.</p>
+<p>정책 그래디언트, DPO, GRPO로 생성모델을 학습시키는 방법에는 공통된 전제가 있다: <strong>한 번의 입력에 한 번의 출력</strong>. 프롬프트를 주면 텍스트가 나오고, 노이즈를 주면 이미지가 나온다.</p>
+<p>현실에서 가장 빠르게 성장하는 AI 응용은 그렇지 않다. LLM이 도구를 호출하고, 파일을 읽고, 웹을 검색하고, 코드를 실행하고, 결과를 관찰한 뒤 다음 행동을 정한다. 한 번의 출력이 아니라 여러 스텝에 걸친 의사결정의 연쇄다.</p>
 <table>
 <thead>
 <tr>
@@ -670,13 +669,18 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 </tbody>
 </table>
-<p>이것은 RL의 원래 문제 설정과 훨씬 더 가깝다. 사실 Ch1–21에서 다룬 “한 번 생성” 설정이 RL의 관점에서는 퇴화된(degenerate) 특수 케이스였다.</p>
-<p><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Reinforcement_learning_diagram.svg" alt="강화학습 에이전트-환경 상호작용 루프"></p>
+<p>그래서 묻는다:</p>
 <blockquote>
-<p><em>RL의 기본 구조: 에이전트가 환경에서 행동(action)하고, 보상(reward)과 상태(state)를 관찰한다. LLM RL은 이 루프가 1회로 퇴화한 것이고, 에이전틱 RL은 원래의 다회 루프로 돌아간다. (CC0, Megajuice, Wikimedia Commons)</em></p>
+<p>행동이 수십 번 이어지고 점수는 맨 끝에 한 번만 온다면, 어느 행동을 칭찬해야 하는가?<br>
+한 번 생성하는 모델을 위해 만든 도구 — 마진, 그룹 상대 점수, 검증기 보상 — 는 어디까지 그대로 쓸 수 있는가?</p>
 </blockquote>
-<h4 id="llm-rl-vs-에이전틱-rl-무엇이-달라지는가">LLM RL vs 에이전틱 RL — 무엇이 달라지는가</h4>
-<p>Ch2에서는 언어모델을 토큰 하나가 행동인 다스텝 MDP로 썼다. 하지만 그 MDP에는 <strong>환경이 없다</strong> — 다음 상태는 방금 고른 토큰을 이어붙인 것으로 완전히 정해진다. 외부 세계가 끼어들지 않으니 응답 전체를 행동 하나로 봐도 잃는 것이 거의 없고, GRPO가 모든 토큰에 같은 어드밴티지를 주는 것도 그래서 통한다. 에이전트에서는 다르다. 상태는 프롬프트와 지금까지의 관찰·행동 이력(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>o</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>o</mi><mn>2</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>2</mn></msub><mo separator="true">,</mo><mo>…</mo></mrow><annotation encoding="application/x-tex">o_1, a_1, o_2, a_2, \dots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span></span></span></span></eq>)이고, 행동은 다음 도구 호출이나 텍스트이며, 다음 관찰은 <strong>환경</strong>이 돌려준다. 보상은 수십–수백 스텝 뒤 최종 성공 여부로만 오는 경우가 많고, 환경의 일부만 보이므로 엄밀히는 부분 관찰 MDP(POMDP)다.</p>
+<h4 id="에이전틱-rl-다음-상태를-환경이-정한다">에이전틱 RL: 다음 상태를 환경이 정한다</h4>
+<p>언어모델도 토큰을 하나씩 고르니 이미 &quot;여러 스텝&quot;이다. 그렇다면 에이전트가 수십 스텝을 밟는다는 것은 무엇이 새로운가?</p>
+<h5 id="역사-mdp에서-도구를-쓰는-언어모델까지">역사: MDP에서 도구를 쓰는 언어모델까지</h5>
+<p>상태·행동·전이·보상으로 순차적 의사결정을 적는 틀은 벨만(Richard Bellman)이 1957년 &quot;마르코프 결정 과정&quot;이라는 이름으로 정리했고, 서튼(Richard Sutton)과 바토(Andrew Barto)의 교과서 『Reinforcement Learning: An Introduction』(1998)이 강화학습을 &quot;에이전트가 환경과 주고받는 루프&quot;로 가르치는 표준이 됐다. 언어모델이 이 루프 안으로 들어온 대표적인 계기는 추론과 도구 호출을 번갈아 쓰게 한 ReAct(Yao et al., 2022)다.</p>
+<h5 id="토큰-mdp에는-환경이-없다">토큰 MDP에는 환경이 없다</h5>
+<p>언어모델을 토큰 하나가 행동인 다스텝 MDP로 쓰면, 상태는 프롬프트와 지금까지의 토큰이고 행동은 다음 토큰이다. 하지만 그 MDP에는 <strong>환경이 없다</strong> — 다음 상태는 방금 고른 토큰을 이어붙인 것으로 완전히 정해진다. 외부 세계가 끼어들지 않으니 응답 전체를 행동 하나로 봐도 잃는 것이 거의 없고, GRPO가 모든 토큰에 같은 어드밴티지를 주는 것도 그래서 통한다.</p>
+<p>에이전트에서는 다르다. 상태는 프롬프트와 지금까지의 관찰·행동 이력(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>o</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>o</mi><mn>2</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>2</mn></msub><mo separator="true">,</mo><mo>…</mo></mrow><annotation encoding="application/x-tex">o_1, a_1, o_2, a_2, \dots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span></span></span></span></eq>)이고, 행동은 다음 도구 호출이나 텍스트이며, 다음 관찰은 <strong>환경</strong>이 돌려준다. 보상은 수십–수백 스텝 뒤 최종 성공 여부로만 오는 경우가 많고, 환경의 일부만 보이므로 엄밀히는 부분 관찰 MDP(POMDP)다. 이렇게 환경과 여러 번 주고받는 궤적 전체를 최적화하는 것을 <strong>에이전틱 RL</strong>(agentic RL)이라 부른다.</p>
 <table>
 <thead>
 <tr>
@@ -713,7 +717,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 <tr>
 <td>크레딧 할당</td>
-<td>토큰 단위로는 있으나(Ch4) 보통 무시</td>
+<td>토큰 단위로는 있으나 보통 무시</td>
 <td>핵심 문제 (어떤 스텝이 성공을 만들었나)</td>
 </tr>
 <tr>
@@ -723,76 +727,47 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 </tbody>
 </table>
-<p>아래 그림은 에이전틱 RL에서 크레딧 할당 문제를 보여준다. 20스텝 궤적 중 어떤 스텝이 성공에 기여했는가?</p>
-<svg class="fig" viewBox="0 0 580 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="20스텝 궤적의 크레딧 할당">
-  <text class="t-strong" x="290" y="16" text-anchor="middle">크레딧 할당 문제: 20스텝 중 핵심은 어디?</text>
-  <rect class="fneutral" x="14" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="24.5" y="59.0" text-anchor="middle" style="font-size:9px">1</text>
-  <text class="t-muted" x="24.5" y="94" text-anchor="middle" style="font-size:8px">파일</text>
-  <rect class="fneutral" x="38" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="48.5" y="59.0" text-anchor="middle" style="font-size:9px">2</text>
-  <text class="t-muted" x="48.5" y="94" text-anchor="middle" style="font-size:8px">검색</text>
-  <rect class="fneutral" x="62" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="72.5" y="59.0" text-anchor="middle" style="font-size:9px">3</text>
-  <text class="t-muted" x="72.5" y="94" text-anchor="middle" style="font-size:8px">검색</text>
-  <rect class="fneutral" x="86" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="96.5" y="59.0" text-anchor="middle" style="font-size:9px">4</text>
-  <text class="t-muted" x="96.5" y="94" text-anchor="middle" style="font-size:8px">읽기</text>
-  <rect class="fneutral" x="110" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="120.5" y="59.0" text-anchor="middle" style="font-size:9px">5</text>
-  <rect class="fneutral" x="134" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="144.5" y="59.0" text-anchor="middle" style="font-size:9px">6</text>
-  <rect class="fneutral" x="158" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="168.5" y="59.0" text-anchor="middle" style="font-size:9px">7</text>
-  <rect class="fneutral" x="182" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="192.5" y="59.0" text-anchor="middle" style="font-size:9px">8</text>
-  <rect class="fgood" x="206" y="26" width="21" height="58" rx="2"/>
-  <text class="t-muted" x="216.5" y="59.0" text-anchor="middle" style="font-size:9px">9</text>
-  <text class="tgood" x="216.5" y="94" text-anchor="middle" style="font-size:8px">원인발견</text>
-  <rect class="f3" opacity="0.55" x="230" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="240.5" y="59.0" text-anchor="middle" style="font-size:9px">10</text>
-  <text class="t-muted" x="240.5" y="94" text-anchor="middle" style="font-size:8px">수정</text>
-  <rect class="f3" opacity="0.55" x="254" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="264.5" y="59.0" text-anchor="middle" style="font-size:9px">11</text>
-  <rect class="fneutral" x="278" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="288.5" y="59.0" text-anchor="middle" style="font-size:9px">12</text>
-  <rect class="fneutral" x="302" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="312.5" y="59.0" text-anchor="middle" style="font-size:9px">13</text>
-  <rect class="fneutral" x="326" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="336.5" y="59.0" text-anchor="middle" style="font-size:9px">14</text>
-  <rect class="fneutral" x="350" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="360.5" y="59.0" text-anchor="middle" style="font-size:9px">15</text>
-  <rect class="fbad" x="374" y="30" width="21" height="50" rx="2" opacity="0.55"/>
-  <text class="t-muted" x="384.5" y="59.0" text-anchor="middle" style="font-size:9px">16</text>
-  <text class="tbad" x="384.5" y="94" text-anchor="middle" style="font-size:8px">오수정</text>
-  <rect class="fbad" x="398" y="30" width="21" height="50" rx="2" opacity="0.55"/>
-  <text class="t-muted" x="408.5" y="59.0" text-anchor="middle" style="font-size:9px">17</text>
-  <rect class="f3" opacity="0.55" x="422" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="432.5" y="59.0" text-anchor="middle" style="font-size:9px">18</text>
-  <text class="t-muted" x="432.5" y="94" text-anchor="middle" style="font-size:8px">되돌림</text>
-  <rect class="f3" opacity="0.55" x="446" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="456.5" y="59.0" text-anchor="middle" style="font-size:9px">19</text>
-  <text class="t-muted" x="456.5" y="94" text-anchor="middle" style="font-size:8px">테스트</text>
-  <rect class="f3" opacity="0.55" x="470" y="30" width="21" height="50" rx="2"/>
-  <text class="t-muted" x="480.5" y="59.0" text-anchor="middle" style="font-size:9px">20</text>
-  <text class="t-muted" x="480.5" y="94" text-anchor="middle" style="font-size:8px">커밋</text>
-  <rect class="f3" opacity="0.55" x="498" y="28" width="60" height="54" rx="4"/>
-  <text class="tgood" x="528" y="52" text-anchor="middle" style="font-weight:700">r = +1</text>
-  <text class="t-muted" x="528" y="68" text-anchor="middle" style="font-size:9px">테스트 통과</text>
-  <rect class="fneutral" x="20" y="112" width="14" height="10" rx="2"/>
-  <text x="40" y="121" style="font-size:10px">탐색/삽질 (12)</text>
-  <rect class="fgood" x="150" y="112" width="14" height="10" rx="2"/>
-  <text x="170" y="121" style="font-size:10px">핵심 기여 (1)</text>
-  <rect class="f3" opacity="0.55" x="280" y="112" width="14" height="10" rx="2"/>
-  <text x="300" y="121" style="font-size:10px">후속 작업 (5)</text>
-  <rect class="fbad" x="410" y="112" width="14" height="10" rx="2" opacity="0.55"/>
-  <text x="430" y="121" style="font-size:10px">실수 (2)</text>
-  <text x="290" y="146" text-anchor="middle" style="font-size:11px">GRPO: 궤적 전체에 같은 어드밴티지 → 탐색 12스텝과 실수 2스텝도 똑같이 강화</text>
-  <text class="t2" x="290" y="162" text-anchor="middle" style="font-size:11px">가치 함수(Ch4)·PRM: 스텝마다 다른 값 → 핵심 기여만 골라 강화할 여지</text>
-</svg>
+<p>이것은 RL의 원래 문제 설정과 훨씬 더 가깝다. 사실 “한 번 생성” 설정이 RL의 관점에서는 퇴화된(degenerate) 특수 케이스였다.</p>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Reinforcement_learning_diagram.svg" alt="강화학습 에이전트-환경 상호작용 루프"></p>
+<blockquote>
+<p><em>RL의 기본 구조: 에이전트가 환경에서 행동(action)하고, 보상(reward)과 상태(state)를 관찰한다. LLM RL은 이 루프가 1회로 퇴화한 것이고, 에이전틱 RL은 원래의 다회 루프로 돌아간다. (CC0, Megajuice, Wikimedia Commons)</em></p>
+</blockquote>
+<pre class="mermaid">graph LR
+    subgraph llm[&quot;LLM RL (1스텝 MDP)&quot;]
+        direction LR
+        S1[&quot;프롬프트 x&quot;] --&gt;|&quot;행동: 응답 y&quot;| R1[&quot;보상 r&quot;]
+    end
+
+    subgraph agent[&quot;에이전틱 RL (다스텝 POMDP)&quot;]
+        direction LR
+        SA[&quot;프롬프트&quot;] --&gt;|&quot;a₁: 파일 읽기&quot;| O1[&quot;관찰 o₁&quot;]
+        O1 --&gt;|&quot;a₂: 코드 수정&quot;| O2[&quot;관찰 o₂&quot;]
+        O2 --&gt;|&quot;a₃: 테스트&quot;| O3[&quot;관찰 o₃&quot;]
+        O3 --&gt;|&quot;...&quot;| ON[&quot;최종 결과&quot;]
+        ON --&gt; RA[&quot;보상 r&quot;]
+    end
+
+    class llm m-blue
+    class agent m-orange
+    class RA m-red
+</pre><h5 id="ml에서-길어지는-컨텍스트와-도구-선택">ML에서: 길어지는 컨텍스트와 도구 선택</h5>
+<p><strong>긴 컨텍스트의 비용.</strong> 관찰 이력이 쌓여 64K–128K 토큰이 필요할 수 있고, 스텝마다 처리할 컨텍스트가 길어진다. 궤적 하나가 이미 비싼데 GRPO는 같은 태스크에 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span></span></span></span></eq>개를 굴려야 한다.</p>
+<p><strong>도구 선택의 분기.</strong> 행동 공간에 &quot;어떤 도구를 부를 것인가&quot;가 들어간다. 초반의 잘못된 도구 선택 하나가 이후 모든 스텝을 무효로 만들 수 있고, 탐색 공간이 조합적으로 커진다. 토큰 확률을 조금씩 조정하는 것과는 결이 다른 문제다.</p>
+<h5 id="문제-1-토큰-mdp와-턴-mdp">문제 1 — 토큰 MDP와 턴 MDP</h5>
+<div class="exercise">
+<p>언어모델의 토큰 단위 MDP와 에이전트의 턴 단위 MDP는 둘 다 &quot;여러 스텝&quot;이다. 결정적으로 다른 점 하나를 상태 전이의 관점에서 쓰시오.</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.svg" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">둘 다 상태가 쌓이고 행동을 고르는 건 같은데요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.svg" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 토큰 MDP에서 행동을 고른 다음 상태는 누가 정하죠?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.svg" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">제가 고른 토큰을 붙인 게 다음 상태니까… 제가 정해요. 에이전트는 도구를 부르면 결과를 환경이 돌려주고요. 파일 내용이나 테스트 결과는 제가 못 정해요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T13.svg" alt="선생님 (미소)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 전이가 결정적이냐 확률적이냐, 그게 핵심이에요.</div></div>
+</div><blockquote>
+<p><strong>정리</strong> 토큰 MDP의 다음 상태는 &quot;이어붙이기&quot;로 완전히 결정된다. 에이전트의 다음 상태는 외부 환경(도구 출력, 사용자)이 정한다 — 확률적이고 부분적으로만 관찰된다.</p>
+</blockquote>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="21-이미지-영상-로보틱스-11.html">&larr; 연습문제와 함께 풀기</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="22-에이전트의강화학습-2.html">왜 기존 DPO/GRPO가 바로 적용되지 않는가 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="21-이미지-영상-로보틱스-5.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="22-에이전트의강화학습-2.html">크레딧 할당: 성공 궤적의 어느 스텝이 잘한 것인가 &rarr;</a></nav>
 </main>
 
 <script type="module">
