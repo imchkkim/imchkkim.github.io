@@ -5,7 +5,7 @@ GW.register("is-dice", (el) => {
     title: "임포턴스 샘플링 — 찌그러진 주사위로 공정한 주사위의 평균 맞히기",
     caption:
       "목표는 공정한 주사위의 기대값 3.5. 점 하나가 ‘N번 던지는 실험’ 한 번의 추정값이고, 실험을 300번 반복했다. " +
-      "보정 없는 평균은 한쪽으로 치우치고(편향), 임포턴스 가중치는 중심은 맞추지만 π<sub>old</sub>가 찌그러질수록 크게 퍼진다(분산). " +
+      "보정 없는 평균은 한쪽으로 치우치고(편향), 임포턴스 가중치는 중심은 맞추지만 <span class='sym-ref'>π<sub>old</sub></span>가 찌그러질수록 크게 퍼진다(분산). " +
       "가중치를 [0.8, 1.2]로 자르면 퍼짐은 줄지만 다시 치우친다 — PPO가 고른 절충이다.",
   });
   const OLD = {
@@ -14,7 +14,7 @@ GW.register("is-dice", (el) => {
     "극단": [0.55, 0.25, 0.1, 0.06, 0.035, 0.005],
   };
   let key = "보통", N = 20, seed = 1;
-  GW.h("span", { class: "w-slider-label", text: "π_old 찌그러짐", style: { color: "var(--w-ink-2)" } }, f.controls);
+  GW.h("span", { class: "w-slider-label", html: "<span class=\"sym-ref\">π_old</span> 찌그러짐", style: { color: "var(--w-ink-2)" } }, f.controls);
   GW.segmented(f.controls, { options: Object.keys(OLD).map((k) => [k, k]), value: key, onchange: (k) => { key = k; draw(); } });
   GW.slider(f.controls, { label: "한 실험당 던지는 횟수 N", min: 5, max: 200, step: 5, value: N, oninput: (v) => { N = v; draw(); } });
   GW.button(f.controls, "다시 던지기", () => { seed++; draw(); });
@@ -77,7 +77,7 @@ GW.register("is-dice", (el) => {
       GW.s("circle", { cx: ec.X(mean), cy: ec.Y(yc - 0.38), r: 3.5, style: { fill: "var(--w-ink)" } }, ec.top);
     });
     f.readout.innerHTML = stats
-      .map(([n, m, s]) => `${n}: 평균 <b>${m.toFixed(2)}</b> ± <b>${s.toFixed(2)}</b>`)
+      .map(([n, m, s]) => `${n.replace("w를", '<span class="sym-ratio">w</span>를')}: 평균 <b>${m.toFixed(2)}</b> ± <b>${s.toFixed(2)}</b>`)
       .join(" · ") + ` — 가장 큰 가중치 <b>${Math.max(...w).toFixed(1)}</b>`;
   }
   draw();

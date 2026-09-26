@@ -4,14 +4,14 @@ GW.register("ppo-clip", (el) => {
   const f = GW.frame(el, {
     title: "PPO 클리핑 — 비율 r 이 얼마나 멀어지면 멈추는가",
     caption:
-      "가로축은 확률 비율 r = π<sub>θ</sub>/π<sub>old</sub> (업데이트 전엔 1). 실선은 PPO 목적함수, 점선은 클리핑 없는 r·A. " +
+      "가로축은 확률 비율 <span class='sym-ratio'>r</span> = <span class='sym-pi'>π<sub>θ</sub></span>/<span class='sym-ref'>π<sub>old</sub></span> (업데이트 전엔 1). 실선은 PPO 목적함수, 점선은 클리핑 없는 <span class='sym-ratio'>r</span>·<span class='sym-A'>A</span>. " +
       "음영 구간에서는 목적함수가 평평해 그래디언트가 0 — 이 샘플은 더 이상 정책을 밀지 않는다. " +
-      "좋은 행동(A&gt;0)은 1+ε 까지만 올리고, 나쁜 행동(A&lt;0)은 1−ε 까지만 내린다. 반대 방향으로 멀어진 경우는 잘라내지 않는다.",
+      "좋은 행동(<span class='sym-A'>A</span>&gt;0)은 1+<span style='color:var(--sym-1f6d7a, #1f6d7a)'>ε</span> 까지만 올리고, 나쁜 행동(<span class='sym-A'>A</span>&lt;0)은 1−<span style='color:var(--sym-1f6d7a, #1f6d7a)'>ε</span> 까지만 내린다. 반대 방향으로 멀어진 경우는 잘라내지 않는다.",
   });
   let eps = 0.2, A = 1;
-  GW.slider(f.controls, { label: "ε", min: 0.05, max: 0.5, step: 0.01, value: eps, fmt: (v) => v.toFixed(2), oninput: (v) => { eps = v; draw(); } });
-  GW.slider(f.controls, { label: "|A|", min: 0.2, max: 2, step: 0.1, value: A, fmt: (v) => v.toFixed(1), oninput: (v) => { A = v; draw(); } });
-  GW.legend(f.stage, [["cs-J", "PPO 목적함수 L<sup>CLIP</sup>"], ["cm dash", "클리핑 없는 r·A", "dash"]]);
+  GW.slider(f.controls, { label: "<span style='color:var(--sym-1f6d7a, #1f6d7a)'>ε</span>", min: 0.05, max: 0.5, step: 0.01, value: eps, fmt: (v) => v.toFixed(2), oninput: (v) => { eps = v; draw(); } });
+  GW.slider(f.controls, { label: "|<span class=\"sym-A\">A</span>|", min: 0.2, max: 2, step: 0.1, value: A, fmt: (v) => v.toFixed(1), oninput: (v) => { A = v; draw(); } });
+  GW.legend(f.stage, [["cs-J", "PPO 목적함수 <span class=\"sym-J\">L<sup>CLIP</sup></span>"], ["cm dash", "클리핑 없는 <span class=\"sym-ratio\">r</span>·<span class=\"sym-A\">A</span>", "dash"]]);
   const row = GW.h("div", { style: { display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "0.8rem" } }, f.stage);
   const mk = (title, sign) => {
     const box = GW.h("div", {}, row);
@@ -43,8 +43,8 @@ GW.register("ppo-clip", (el) => {
   const tip = (c) => (r) => {
     if (r < 0 || r > 2.2) return null;
     const a = c.sign * A;
-    const clipped = r * a > GW.clamp(r, 1 - eps, 1 + eps) * a + 1e-12 ? "잘림 → 그래디언트 0" : "그대로 → 그래디언트 A";
-    return `r = ${r.toFixed(2)}<br>L = ${GW.fmt(L(r, a), 2)}<br>${clipped}`;
+    const clipped = r * a > GW.clamp(r, 1 - eps, 1 + eps) * a + 1e-12 ? "잘림 → 그래디언트 0" : "그대로 → 그래디언트 <span class='sym-A'>A</span>";
+    return `<span class='sym-ratio'>r</span> = ${r.toFixed(2)}<br><span class='sym-J'>L</span> = ${GW.fmt(L(r, a), 2)}<br>${clipped}`;
   };
   cp.hover(tip(cp));
   cn.hover(tip(cn));

@@ -4,12 +4,12 @@ GW.register("bt-sigmoid", (el) => {
   const f = GW.frame(el, {
     title: "Bradley-Terry — 이길 확률은 실력 차의 시그모이드",
     caption:
-      "곡선은 P(A가 B를 이김) = σ(r<sub>A</sub> − r<sub>B</sub>). 괄호 안의 ELO 점수는 같은 실력 차를 체스 레이팅 단위(×400/ln 10)로 바꾼 것. " +
+      "곡선은 P(A가 B를 이김) = σ(<span class='sym-R'>r<sub>A</sub></span> − <span class='sym-R'>r<sub>B</sub></span>). 괄호 안의 ELO 점수는 같은 실력 차를 체스 레이팅 단위(×400/ln 10)로 바꾼 것. " +
       "‘12경기 해 보기’는 이 확률로 실제 경기를 치러 승패를 센다 — 실력이 같아도 7승 5패는 흔하다.",
   });
   let gap = 0.5, rng = GW.rng(3), games = [];
   GW.slider(f.controls, {
-    label: "실력 차 r<sub>A</sub> − r<sub>B</sub>", min: -5, max: 5, step: 0.05, value: gap,
+    label: "실력 차 <span class=\"sym-R\">r<sub>A</sub></span> − <span class=\"sym-R\">r<sub>B</sub></span>", min: -5, max: 5, step: 0.05, value: gap,
     fmt: (v) => `${GW.fmt(v, 2)} (ELO ${Math.round((v * 400) / Math.LN10)})`,
     oninput: (v) => { gap = v; games = []; draw(); },
   });

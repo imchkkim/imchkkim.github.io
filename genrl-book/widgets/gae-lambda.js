@@ -7,8 +7,8 @@ GW.register("gae-lambda", (el) => {
     title: "GAE — 끝에 한 번 받은 점수를 토큰별로 나누기",
     caption:
       "마름모는 완벽한 비평가가 알려주는 ‘진짜 기여도’(그 토큰이 결국 맞힐 확률을 얼마나 바꿨나). " +
-      "λ = 1 이면 Â<sub>t</sub> = R − V̂(s<sub>t</sub>) — 비평가를 베이스라인으로만 쓰고, 좋은 수든 나쁜 수든 결과를 뒤집어쓴다. " +
-      "λ = 0 이면 Â<sub>t</sub> = δ<sub>t</sub> — 비평가를 전적으로 믿어 정확히 짚어내지만, 비평가가 틀리면 그 오류가 그대로 어드밴티지가 된다.",
+      "<span style='color:var(--sym-993600, #993600)'>λ</span> = 1 이면 <span class='sym-A'>Â<sub>t</sub></span> = <span class='sym-R'>R</span> − <span class='sym-V'>V̂</span>(<span style='color:var(--sym-0093b8, #0093b8)'>s<sub>t</sub></span>) — 비평가를 베이스라인으로만 쓰고, 좋은 수든 나쁜 수든 결과를 뒤집어쓴다. " +
+      "<span style='color:var(--sym-993600, #993600)'>λ</span> = 0 이면 <span class='sym-A'>Â<sub>t</sub></span> = <span class='sym-A'>δ<sub>t</sub></span> — 비평가를 전적으로 믿어 정확히 짚어내지만, 비평가가 틀리면 그 오류가 그대로 어드밴티지가 된다.",
   });
   const SC = {
     right: { toks: ["17×3은", "10×3", "+", "7×3", "=", "30", "+", "21", "=", "51"], V: [0.45, 0.45, 0.7, 0.7, 0.72, 0.72, 0.8, 0.8, 0.95, 0.95], R: 1 },
@@ -17,13 +17,13 @@ GW.register("gae-lambda", (el) => {
   const st = { sc: "wrong", lam: 0.95, q: 0 };
   const noise = (() => { const r = GW.rng(11); return Array.from({ length: 10 }, () => r.normal()); })();
 
-  GW.segmented(f.controls, { options: [["right", "정답 응답 (R = 1)"], ["wrong", "오답 응답 (R = 0)"]], value: st.sc, onchange: (v) => { st.sc = v; draw(); } });
-  GW.slider(f.controls, { label: "λ", min: 0, max: 1, step: 0.05, value: st.lam, fmt: (v) => v.toFixed(2), oninput: (v) => { st.lam = v; draw(); } });
+  GW.segmented(f.controls, { options: [["right", "정답 응답 (<span class=\"sym-R\">R</span> = 1)"], ["wrong", "오답 응답 (<span class=\"sym-R\">R</span> = 0)"]], value: st.sc, onchange: (v) => { st.sc = v; draw(); } });
+  GW.slider(f.controls, { label: "<span style='color:var(--sym-993600, #993600)'>λ</span>", min: 0, max: 1, step: 0.05, value: st.lam, fmt: (v) => v.toFixed(2), oninput: (v) => { st.lam = v; draw(); } });
   GW.slider(f.controls, { label: "비평가 오차", min: 0, max: 1, step: 0.05, value: st.q, fmt: (v) => (v === 0 ? "완벽" : v.toFixed(2)), oninput: (v) => { st.q = v; draw(); } });
 
-  GW.legend(f.stage, [["cm dash", "실제 가치 V*", "dash"], ["cs-V", "비평가 예측 V̂"]]);
+  GW.legend(f.stage, [["cm dash", "실제 가치 V*", "dash"], ["cs-V", "비평가 예측 <span class=\"sym-V\">V̂</span>"]]);
   const top = GW.chart(f.stage, { w: 560, h: 150, x: [0, 10], y: [0, 1], xticks: [], yticks: [0, 0.5, 1], ylabel: "가치", margin: { b: 10, l: 48 }, label: "가치 예측" });
-  GW.legend(f.stage, [["cs-A", "Â (위: 강화, 아래: 억제)"], ["cm", "◆ 진짜 기여도 (완벽한 비평가, λ=0)"]]);
+  GW.legend(f.stage, [["cs-A", "<span class=\"sym-A\">Â</span> (위: 강화, 아래: 억제)"], ["cm", "◆ 진짜 기여도 (완벽한 비평가, <span style='color:var(--sym-993600, #993600)'>λ</span>=0)"]]);
   const bot = GW.chart(f.stage, { w: 560, h: 230, x: [0, 10], y: [-1, 1], xticks: [], yticks: [-1, -0.5, 0, 0.5, 1], ylabel: "어드밴티지 Â", margin: { b: 30, l: 48 }, label: "토큰별 어드밴티지" });
 
   function gae(V, R, lam) {
@@ -67,7 +67,7 @@ GW.register("gae-lambda", (el) => {
     const s = SC[st.sc];
     const Vh = s.V.map((v, i) => GW.clamp(v + st.q * 0.28 * noise[i], 0, 1));
     const A = gae(Vh, s.R, st.lam), truth = gae(s.V, s.R, 0);
-    return `토큰 ‘${s.toks[t]}’<br>V̂(s<sub>t</sub>) = ${GW.fmt(Vh[t], 2)}<br>Â = ${GW.fmt(A[t], 2)} · 진짜 ${GW.fmt(truth[t], 2)}`;
+    return `토큰 ‘${s.toks[t]}’<br><span class='sym-V'>V̂</span>(<span style='color:var(--sym-0093b8, #0093b8)'>s<sub>t</sub></span>) = ${GW.fmt(Vh[t], 2)}<br><span class='sym-A'>Â</span> = ${GW.fmt(A[t], 2)} · 진짜 ${GW.fmt(truth[t], 2)}`;
   });
   draw();
 });

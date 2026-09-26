@@ -5,7 +5,7 @@ GW.register("kl-direction", (el) => {
   const f = GW.frame(el, {
     title: "같은 목표, 다른 방향의 KL — SFT는 덮고, RL은 고른다",
     caption:
-      "초록은 목표 분포(SFT의 정답 분포 p<sub>data</sub>, RL의 최적 정책 π*), 파랑은 봉우리 하나밖에 못 만드는 모델 π<sub>θ</sub>. " +
+      "초록은 목표 분포(SFT의 정답 분포 <span class='sym-tgt'>p<sub>data</sub></span>, RL의 최적 정책 <span class='sym-tgt'>π*</span>), 파랑은 봉우리 하나밖에 못 만드는 모델 <span class='sym-pi'>π<sub>θ</sub></span>. " +
       "회색 띠는 목표가 거의 0인 ‘골짜기’ — 모델이 여기에 두는 확률은 데이터에도, 좋은 답에도 없는 응답, 즉 모델 자신의 실수다.",
   });
   const st = { sep: 2.2, w: 0.5, mode: "both" };
@@ -18,9 +18,9 @@ GW.register("kl-direction", (el) => {
   GW.slider(f.controls, { label: "왼쪽 봉우리 비중", min: 0.1, max: 0.9, step: 0.05, value: st.w, fmt: (v) => Math.round(v * 100) + "%", oninput: (v) => { st.w = v; draw(); } });
 
   GW.legend(f.stage, [
-    ["cs-tgt", "목표 분포 p (p<sub>data</sub> 또는 π*)"],
-    ["cs-pi", "순KL로 맞춘 π<sub>θ</sub> (SFT)"],
-    ["cs-pi dash", "역KL로 맞춘 π<sub>θ</sub> (RL)", "dash"],
+    ["cs-tgt", "목표 분포 <span class=\"sym-tgt\">p</span> (<span class=\"sym-tgt\">p<sub>data</sub></span> 또는 <span class=\"sym-tgt\">π*</span>)"],
+    ["cs-pi", "순KL로 맞춘 <span class=\"sym-pi\">π<sub>θ</sub></span> (SFT)"],
+    ["cs-pi dash", "역KL로 맞춘 <span class=\"sym-pi\">π<sub>θ</sub></span> (RL)", "dash"],
   ]);
   const X0 = -6, X1 = 6, N = 600, dx = (X1 - X0) / N;
   const xs = Array.from({ length: N + 1 }, (_, i) => X0 + i * dx);
@@ -90,6 +90,6 @@ GW.register("kl-direction", (el) => {
       (st.mode !== "fwd" ? `<b>RL식</b> μ=${GW.fmt(R.m, 2)}, 골짜기에 둔 확률 <b>${Math.round(valley(R.m, R.s) * 100)}%</b>, 버린 봉우리의 확률 <b>${Math.round((R.m > 0 ? st.w : 1 - st.w) * 100)}%</b>` : "") +
       `<br><span class="sym-KL">KL</span>(<span class="sym-tgt">p</span>‖<span class="sym-pi">π<sub>θ</sub></span>) 최소 = ${GW.fmt(kf, 3)} · <span class="sym-KL">KL</span>(<span class="sym-pi">π<sub>θ</sub></span>‖<span class="sym-tgt">p</span>) 최소 = ${GW.fmt(kr, 3)}`;
   }
-  c.hover((x) => `x = ${GW.fmt(x, 2)}<br>목표 p = ${GW.fmt(p(x), 3)}`);
+  c.hover((x) => `x = ${GW.fmt(x, 2)}<br>목표 <span class='sym-tgt'>p</span> = ${GW.fmt(p(x), 3)}`);
   draw();
 });

@@ -5,7 +5,7 @@ GW.register("pg-bandit", (el) => {
   const f = GW.frame(el, {
     title: "세 개의 답 중 하나를 고르는 정책 — 그래디언트는 어디로 미는가",
     caption:
-      "막대는 각 답을 고를 확률 π, 막대 위 화살표는 정확한 그래디언트가 로짓을 미는 방향과 크기(π<sub>k</sub>(r<sub>k</sub> − J)). " +
+      "막대는 각 답을 고를 확률 <span class='sym-pi'>π</span>, 막대 위 화살표는 정확한 그래디언트가 로짓을 미는 방향과 크기(<span class='sym-pi'>π<sub>k</sub></span>(<span class='sym-R'>r<sub>k</sub></span> − <span class='sym-J'>J</span>)). " +
       "‘기대값으로 한 걸음’은 VPG, ‘샘플 1개로 한 걸음’은 다음 장의 REINFORCE 다. 보상에 상수 c 를 더한 뒤 두 방식의 학습 곡선을 비교해 보라.",
   });
   const ACT = ["서울입니다", "부산입니다", "서울이요"];
@@ -26,7 +26,7 @@ GW.register("pg-bandit", (el) => {
   const row = GW.h("div", { style: { display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "0.8rem" } }, f.stage);
   const left = GW.h("div", {}, row), right = GW.h("div", {}, row);
   const bars = GW.chart(left, { w: 300, h: 250, x: [0, 3], y: [0, 1], xticks: [], yticks: [0, 0.25, 0.5, 0.75, 1], ylabel: "확률 π", margin: { b: 44, l: 44 }, label: "답별 확률" });
-  GW.legend(right, [["cs-J", "J (기대 보상)"]]);
+  GW.legend(right, [["cs-J", "<span class=\"sym-J\">J</span> (기대 보상)"]]);
   const line = GW.chart(right, { w: 300, h: 226, x: [0, 40], y: [0, 1], xlabel: "걸음", ylabel: "J", margin: { l: 40 }, label: "기대 보상 변화" });
 
   function reset() { z = Z0.slice(); hist = [J(softmax(z))]; rng = GW.rng(7); stepN = 0; mode = null; draw(); }
@@ -71,7 +71,7 @@ GW.register("pg-bandit", (el) => {
     line.layer.innerHTML = "";
     line.path(hist.map((v, i) => [i, v]), "cs-J");
     line.dot(hist.length - 1, hist[hist.length - 1], "fs-J", 4);
-    const ls = f.lastSample && mode === "sample" ? ` · 방금 뽑은 답 <b>${ACT[f.lastSample.a]}</b>, 가중치 r+c = <b>${GW.fmt(f.lastSample.w, 1)}</b>` : "";
+    const ls = f.lastSample && mode === "sample" ? ` · 방금 뽑은 답 <b>${ACT[f.lastSample.a]}</b>, 가중치 <span class='sym-R'>r</span>+c = <b>${GW.fmt(f.lastSample.w, 1)}</b>` : "";
     f.readout.innerHTML = `걸음 <b>${stepN}</b> · 기대 보상 <span class="sym-J">J</span> = <b>${Jv.toFixed(3)}</b>${ls}`;
   }
   reset();

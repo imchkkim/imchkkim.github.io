@@ -12,7 +12,7 @@ GW.register("ode-sde", (el) => {
   });
   const st = { g: 0.8, seed: 5 };
   const K = 60;
-  GW.slider(f.controls, { label: "SDE 노이즈 크기 g", min: 0, max: 1.5, step: 0.05, value: st.g, fmt: (v) => v.toFixed(2), oninput: (v) => { st.g = v; draw(); } });
+  GW.slider(f.controls, { label: "SDE 노이즈 크기 <span style='color:var(--sym-993600, #993600)'>g</span>", min: 0, max: 1.5, step: 0.05, value: st.g, fmt: (v) => v.toFixed(2), oninput: (v) => { st.g = v; draw(); } });
   GW.button(f.controls, "다른 시작 노이즈", () => { st.seed++; draw(); });
   const row = GW.h("div", { style: { display: "grid", gridTemplateColumns: "minmax(0,3fr) minmax(0,2fr)", gap: "0.8rem" } }, f.stage);
   const L = GW.h("div", {}, row), Rt = GW.h("div", {}, row);

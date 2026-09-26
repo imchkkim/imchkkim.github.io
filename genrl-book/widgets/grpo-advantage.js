@@ -4,8 +4,8 @@ GW.register("grpo-advantage", (el) => {
   const f = GW.frame(el, {
     title: "GRPO 어드밴티지 — 같은 문제에 대한 8개 답을 서로 비교한다",
     caption:
-      "위쪽 원을 클릭하면 그 답의 보상이 1(정답) → 0.5(부분 점수) → 0(오답) 순으로 바뀐다. 막대는 각 답이 받는 어드밴티지 Â. " +
-      "모두 같은 보상이면 모든 Â 가 0 — 이 문제에서는 아무것도 배우지 않는다. ‘σ로 나누기’를 끄면 Dr. GRPO의 어드밴티지가 된다.",
+      "위쪽 원을 클릭하면 그 답의 보상이 1(정답) → 0.5(부분 점수) → 0(오답) 순으로 바뀐다. 막대는 각 답이 받는 어드밴티지 <span class='sym-A'>Â</span>. " +
+      "모두 같은 보상이면 모든 <span class='sym-A'>Â</span> 가 0 — 이 문제에서는 아무것도 배우지 않는다. ‘<span style='color:var(--sym-008deb, #008deb)'>σ</span>로 나누기’를 끄면 Dr. GRPO의 어드밴티지가 된다.",
   });
   const G = 8;
   let r = [1, 1, 1, 0, 1, 1, 0, 1];
@@ -21,7 +21,7 @@ GW.register("grpo-advantage", (el) => {
     value: "ex",
     onchange: (k) => { r = presets[k].slice(); draw(); },
   });
-  GW.toggle(f.controls, { label: "σ로 나누기", value: true, onchange: (v) => { useStd = v; draw(); } });
+  GW.toggle(f.controls, { label: "<span style='color:var(--sym-008deb, #008deb)'>σ</span>로 나누기", value: true, onchange: (v) => { useStd = v; draw(); } });
 
   const c = GW.chart(f.stage, { w: 560, h: 330, x: [0, G], y: [-3, 3], xticks: [], yticks: [-3, -2, -1, 0, 1, 2, 3], ylabel: "어드밴티지 Â", margin: { t: 70, b: 28 }, label: "롤아웃별 어드밴티지" });
   const chips = GW.s("g", {}, c.svg);
@@ -57,7 +57,7 @@ GW.register("grpo-advantage", (el) => {
     }
     const mass = A.reduce((s, a) => s + Math.abs(a), 0);
     f.readout.innerHTML =
-      `평균 <span class="sym-V">μ</span> = <b>${mu.toFixed(3)}</b> · 표준편차 σ = <b>${sd.toFixed(3)}</b> · 학습 시그널 Σ|<span class="sym-A">Â</span>| = <b>${mass.toFixed(2)}</b>` +
+      `평균 <span class="sym-V">μ</span> = <b>${mu.toFixed(3)}</b> · 표준편차 <span style='color:var(--sym-008deb, #008deb)'>σ</span> = <b>${sd.toFixed(3)}</b> · 학습 시그널 Σ|<span class="sym-A">Â</span>| = <b>${mass.toFixed(2)}</b>` +
       (sd < 1e-9 ? " — <b>모든 답의 보상이 같다. 그래디언트 0.</b>" : "");
   }
   draw();

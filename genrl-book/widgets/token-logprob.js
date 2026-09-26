@@ -4,7 +4,7 @@ GW.register("token-logprob", (el) => {
   const f = GW.frame(el, {
     title: "토큰 로그확률을 더하면 문장 점수가 된다",
     caption:
-      "막대는 각 토큰의 log p(아래로 길수록 모델이 덜 예상한 토큰). 오른쪽 끝 막대가 문장 전체의 log π(y|x) = 합. " +
+      "막대는 각 토큰의 log p(아래로 길수록 모델이 덜 예상한 토큰). 오른쪽 끝 막대가 문장 전체의 log <span class='sym-pi'>π</span>(y|x) = 합. " +
       "뒤의 ‘입니다’는 앞 토큰이 달라 조건이 다르므로 확률도 조금 다르다 — 공유 토큰은 대부분 상쇄되지만 완전히는 아니다.",
   });
   const toks = [
@@ -13,7 +13,7 @@ GW.register("token-logprob", (el) => {
     { resp: "l", text: "부산", p: 0.03, branch: true },
     { resp: "l", text: "입니다", p: 0.74 },
   ];
-  const lbl = (t) => `${t.resp === "w" ? "y<sub>w</sub>" : "y<sub>l</sub>"} “${t.text}”`;
+  const lbl = (t) => `${t.resp === "w" ? "<span style='color:var(--sym-e000a5, #e000a5)'>y<sub>w</sub></span>" : "<span style='color:var(--sym-e000a5, #e000a5)'>y<sub>l</sub></span>"} “${t.text}”`;
   toks.forEach((t) =>
     GW.slider(f.controls, {
       label: lbl(t), min: 0.01, max: 0.99, step: 0.01, value: t.p, fmt: (v) => v.toFixed(2),
@@ -21,7 +21,7 @@ GW.register("token-logprob", (el) => {
     })
   );
   const c = GW.chart(f.stage, { x: [0, 7], y: [-6, 0.4], xticks: [], ylabel: "로그확률", h: 280, margin: { b: 48 }, label: "토큰별 로그확률" });
-  GW.legend(f.stage, [["cs-pi", "log π<sub>θ</sub> — 왼쪽 선호 응답 y<sub>w</sub>(진하게), 오른쪽 비선호 응답 y<sub>l</sub>(연하게)"]]);
+  GW.legend(f.stage, [["cs-pi", "log <span class=\"sym-pi\">π<sub>θ</sub></span> — 왼쪽 선호 응답 <span style='color:var(--sym-e000a5, #e000a5)'>y<sub>w</sub></span>(진하게), 오른쪽 비선호 응답 <span style='color:var(--sym-e000a5, #e000a5)'>y<sub>l</sub></span>(연하게)"]]);
 
   function bar(x, v, cls, label, sub) {
     const faint = cls === "f2"; cls = "fs-pi";
@@ -47,7 +47,7 @@ GW.register("token-logprob", (el) => {
     const branch = Math.log(toks[0].p) - Math.log(toks[2].p);
     const share = d !== 0 ? (branch / d) * 100 : 0;
     f.readout.innerHTML =
-      `log π(y<sub>w</sub>) = <b>${GW.fmt(lw, 2)}</b> · log π(y<sub>l</sub>) = <b>${GW.fmt(ll, 2)}</b> · ` +
+      `log <span class='sym-pi'>π</span>(<span style='color:var(--sym-e000a5, #e000a5)'>y<sub>w</sub></span>) = <b>${GW.fmt(lw, 2)}</b> · log <span class='sym-pi'>π</span>(<span style='color:var(--sym-e000a5, #e000a5)'>y<sub>l</sub></span>) = <b>${GW.fmt(ll, 2)}</b> · ` +
       `마진 <span class="sym-pi">Δθ</span> = <b>${GW.fmt(d, 2)}</b> · 그중 분기 토큰(서울 vs 부산) 몫 <b>${GW.fmt(branch, 2)}</b>` +
       (Math.abs(d) > 0.05 ? ` (${share.toFixed(0)}%)` : "");
   }
