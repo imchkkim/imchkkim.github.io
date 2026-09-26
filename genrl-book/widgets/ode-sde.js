@@ -1,6 +1,6 @@
 // ODE 샘플러 vs 같은 주변분포를 주는 SDE 샘플러 (Flow-GRPO / DanceGRPO 의 핵심 아이디어, 1차원 장난감).
 // 노이즈 x(0) ~ N(0,1) 에서 데이터 x(1) ~ N(2, 0.5²) 로 가는 직선 보간 흐름.
-// 시각 t 의 주변분포 N(m_t, V_t), m_t = 2t, V_t = (1−t)² + 0.25t².
+// 시점 t 의 주변분포 N(m_t, V_t), m_t = 2t, V_t = (1−t)² + 0.25t².
 // ODE: dx = v dt,  v(x,t) = 2 + V'(t)/(2V_t)·(x − m_t)
 // SDE: dx = [v + (g²/2)·∇log p_t(x)] dt + g dW,  ∇log p_t = −(x − m_t)/V_t  → 모든 t 에서 주변분포가 ODE 와 같다.
 GW.register("ode-sde", (el) => {
@@ -8,16 +8,16 @@ GW.register("ode-sde", (el) => {
     title: "같은 시작 노이즈에서 8장 생성하기 — ODE는 한 장, SDE는 여덟 장",
     caption:
       "흐름 매칭 모델은 보통 결정론적 ODE로 샘플링한다. 같은 시작 노이즈에서 G개를 뽑으면 G개가 전부 같은 결과라 그룹 내 보상 분산이 0 — GRPO가 배울 것이 없다. " +
-      "Flow-GRPO·DanceGRPO는 ODE를 ‘모든 시각에서 같은 분포를 주는’ SDE로 바꿔 스텝마다 노이즈를 넣는다. 오른쪽 히스토그램(2000장)은 노이즈 세기와 무관하게 목표 분포(점선)와 일치한다.",
+      "Flow-GRPO·DanceGRPO는 ODE를 ‘모든 시점에서 같은 분포를 주는’ SDE로 바꿔 스텝마다 노이즈를 넣는다. 오른쪽 히스토그램(2000장)은 노이즈 크기와 무관하게 목표 분포(점선)와 일치한다.",
   });
   const st = { g: 0.8, seed: 5 };
   const K = 60;
-  GW.slider(f.controls, { label: "SDE 노이즈 세기 g", min: 0, max: 1.5, step: 0.05, value: st.g, fmt: (v) => v.toFixed(2), oninput: (v) => { st.g = v; draw(); } });
+  GW.slider(f.controls, { label: "SDE 노이즈 크기 g", min: 0, max: 1.5, step: 0.05, value: st.g, fmt: (v) => v.toFixed(2), oninput: (v) => { st.g = v; draw(); } });
   GW.button(f.controls, "다른 시작 노이즈", () => { st.seed++; draw(); });
   const row = GW.h("div", { style: { display: "grid", gridTemplateColumns: "minmax(0,3fr) minmax(0,2fr)", gap: "0.8rem" } }, f.stage);
   const L = GW.h("div", {}, row), Rt = GW.h("div", {}, row);
   GW.legend(L, [["cm dash", "ODE 8개 (전부 겹침)", "dash"], ["c1", "SDE 8개"]]);
-  const c = GW.chart(L, { x: [0, 1], y: [-2.5, 4], w: 360, h: 260, xlabel: "시각 t (0 = 노이즈, 1 = 데이터)", ylabel: "x", label: "샘플 경로" });
+  const c = GW.chart(L, { x: [0, 1], y: [-2.5, 4], w: 360, h: 260, xlabel: "시점 t (0 = 노이즈, 1 = 데이터)", ylabel: "x", label: "샘플 경로" });
   c.clip();
   GW.legend(Rt, [["c1", "SDE 결과 2000개"], ["cm dash", "목표 N(2, 0.5²)", "dash"]]);
   const h = GW.chart(Rt, { x: [0, 4], y: [0, 1], w: 240, h: 236, xlabel: "x(1)", yticks: [], label: "결과 분포" });

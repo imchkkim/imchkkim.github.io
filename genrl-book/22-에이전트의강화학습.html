@@ -621,9 +621,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="05-PPO와RLHF.html">5. PPO와 RLHF — 멀리 가지 않게 묶다</a></li>
 <li><a href="06-DPO의재등장.html">6. DPO의 재등장 — 보상 모델을 수식으로 지우다</a></li>
 <li><a href="07-선호쌍의조건.html">7. 선호 쌍의 조건 — 어떤 데이터가 DPO를 움직이는가</a></li>
-<li><a href="08-로그확률.html">8. 로그확률 — 문장의 점수는 어떻게 매기나</a></li>
+<li><a href="08-로그확률.html">8. 로그확률 — 문장의 확률은 어떻게 매기나</a></li>
 <li><a href="09-길이편향.html">9. 길이 편향 — 합이 공정한가?</a></li>
-<li><a href="10-레퍼런스모델.html">10. 레퍼런스 모델 — 이 줄은 왜 묶여 있나?</a></li>
+<li><a href="10-레퍼런스모델.html">10. 레퍼런스 모델 — 이 목줄은 왜 묶여 있나?</a></li>
 <li><a href="11-브래들리테리모델.html">11. Bradley-Terry — 시그모이드는 왜 거기 있는가?</a></li>
 <li><a href="12-다차원보상.html">12. 다차원 보상 — 스칼라를 넘어서</a></li>
 <li><a href="13-DPO의진화.html">13. DPO의 진화 — 하나의 알고리즘이 낳은 가계도</a></li>
@@ -645,7 +645,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <h3>Chapter 22: 에이전틱 AI — 행동하는 모델을 정렬하기</h3>
 <h4 id="의문">의문</h4>
-<p>정책 그래디언트, DPO, GRPO로 생성모델을 학습시키는 방법에는 공통된 전제가 있다: <strong>한 번의 입력에 한 번의 출력</strong>. 프롬프트를 주면 텍스트가 나오고, 노이즈를 주면 이미지가 나온다.</p>
+<p>정책 그래디언트(답을 내는 모델, 곧 정책의 확률을 보상 쪽으로 미는 방법), DPO, GRPO로 생성모델을 학습시켜 정렬하는(사람이 바라는 방식으로 답하게 맞추는) 방법에는 공통된 전제가 있다: <strong>한 번의 입력에 한 번의 출력</strong>. 프롬프트를 주면 텍스트가 나오고, 노이즈를 주면 이미지가 나온다.</p>
 <p>현실에서 가장 빠르게 성장하는 AI 응용은 그렇지 않다. LLM이 도구를 호출하고, 파일을 읽고, 웹을 검색하고, 코드를 실행하고, 결과를 관찰한 뒤 다음 행동을 정한다. 한 번의 출력이 아니라 여러 스텝에 걸친 의사결정의 연쇄다.</p>
 <table>
 <thead>
@@ -672,14 +672,14 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p>그래서 묻는다:</p>
 <blockquote>
 <p>행동이 수십 번 이어지고 점수는 맨 끝에 한 번만 온다면, 어느 행동을 칭찬해야 하는가?<br>
-한 번 생성하는 모델을 위해 만든 도구 — 마진, 그룹 상대 점수, 검증기 보상 — 는 어디까지 그대로 쓸 수 있는가?</p>
+한 번 생성하는 모델을 위해 만든 도구 — 마진, 그룹(같은 문제에 뽑은 답 묶음) 상대 점수, 검증기 보상 — 는 어디까지 그대로 쓸 수 있는가?</p>
 </blockquote>
 <h4 id="에이전틱-rl-다음-상태를-환경이-정한다">에이전틱 RL: 다음 상태를 환경이 정한다</h4>
 <p>언어모델도 토큰을 하나씩 고르니 이미 &quot;여러 스텝&quot;이다. 그렇다면 에이전트가 수십 스텝을 밟는다는 것은 무엇이 새로운가?</p>
 <h5 id="역사-mdp에서-도구를-쓰는-언어모델까지">역사: MDP에서 도구를 쓰는 언어모델까지</h5>
 <p>상태·행동·전이·보상으로 순차적 의사결정을 적는 틀은 벨만(Richard Bellman)이 1957년 &quot;마르코프 결정 과정&quot;이라는 이름으로 정리했고, 서튼(Richard Sutton)과 바토(Andrew Barto)의 교과서 『Reinforcement Learning: An Introduction』(1998)이 강화학습을 &quot;에이전트가 환경과 주고받는 루프&quot;로 가르치는 표준이 됐다. 언어모델이 이 루프 안으로 들어온 대표적인 계기는 추론과 도구 호출을 번갈아 쓰게 한 ReAct(Yao et al., 2022)다.</p>
 <h5 id="토큰-mdp에는-환경이-없다">토큰 MDP에는 환경이 없다</h5>
-<p>언어모델을 토큰 하나가 행동인 다스텝 MDP로 쓰면, 상태는 프롬프트와 지금까지의 토큰이고 행동은 다음 토큰이다. 하지만 그 MDP에는 <strong>환경이 없다</strong> — 다음 상태는 방금 고른 토큰을 이어붙인 것으로 완전히 정해진다. 외부 세계가 끼어들지 않으니 응답 전체를 행동 하나로 봐도 잃는 것이 거의 없고, GRPO가 모든 토큰에 같은 어드밴티지를 주는 것도 그래서 통한다.</p>
+<p>언어모델을 토큰 하나가 행동인 다스텝 MDP로 쓰면, 상태는 프롬프트와 지금까지의 토큰이고 행동은 다음 토큰이다. 하지만 그 MDP에는 <strong>환경이 없다</strong> — 다음 상태는 방금 고른 토큰을 이어붙인 것으로 완전히 정해진다. 외부 세계가 끼어들지 않으니 응답 전체를 행동 하나로 봐도 잃는 것이 거의 없고, GRPO가 모든 토큰에 같은 어드밴티지(평균보다 얼마나 나은가)를 주는 것도 그래서 통한다.</p>
 <p>에이전트에서는 다르다. 상태는 프롬프트와 지금까지의 관찰·행동 이력(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>o</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>o</mi><mn>2</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>2</mn></msub><mo separator="true">,</mo><mo>…</mo></mrow><annotation encoding="application/x-tex">o_1, a_1, o_2, a_2, \dots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span></span></span></span></eq>)이고, 행동은 다음 도구 호출이나 텍스트이며, 다음 관찰은 <strong>환경</strong>이 돌려준다. 보상은 수십–수백 스텝 뒤 최종 성공 여부로만 오는 경우가 많고, 환경의 일부만 보이므로 엄밀히는 부분 관찰 MDP(POMDP)다. 이렇게 환경과 여러 번 주고받는 궤적 전체를 최적화하는 것을 <strong>에이전틱 RL</strong>(agentic RL)이라 부른다.</p>
 <table>
 <thead>
@@ -712,7 +712,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 <tr>
 <td>상태 전이</td>
-<td>결정적 (토큰 이어붙이기)</td>
+<td>결정론적 (토큰 이어붙이기)</td>
 <td>확률적 (도구·환경이 응답)</td>
 </tr>
 <tr>
@@ -755,13 +755,13 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p><strong>도구 선택의 분기.</strong> 행동 공간에 &quot;어떤 도구를 부를 것인가&quot;가 들어간다. 초반의 잘못된 도구 선택 하나가 이후 모든 스텝을 무효로 만들 수 있고, 탐색 공간이 조합적으로 커진다. 토큰 확률을 조금씩 조정하는 것과는 결이 다른 문제다.</p>
 <h5 id="문제-1-토큰-mdp와-턴-mdp">문제 1 — 토큰 MDP와 턴 MDP</h5>
 <div class="exercise">
-<p>언어모델의 토큰 단위 MDP와 에이전트의 턴 단위 MDP는 둘 다 &quot;여러 스텝&quot;이다. 결정적으로 다른 점 하나를 상태 전이의 관점에서 쓰시오.</p>
+<p>언어모델의 토큰 단위 MDP와 에이전트의 턴 단위 MDP는 둘 다 &quot;여러 스텝&quot;이다. 가장 크게 다른 점 하나를 상태 전이의 관점에서 쓰시오.</p>
 </div>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.svg" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">둘 다 상태가 쌓이고 행동을 고르는 건 같은데요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.svg" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 토큰 MDP에서 행동을 고른 다음 상태는 누가 정하죠?</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.svg" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">제가 고른 토큰을 붙인 게 다음 상태니까… 제가 정해요. 에이전트는 도구를 부르면 결과를 환경이 돌려주고요. 파일 내용이나 테스트 결과는 제가 못 정해요.</div></div>
-<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T13.svg" alt="선생님 (미소)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 전이가 결정적이냐 확률적이냐, 그게 핵심이에요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T13.svg" alt="선생님 (미소)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 전이가 결정론적이냐 확률적이냐, 그게 핵심이에요.</div></div>
 </div><blockquote>
 <p><strong>정리</strong> 토큰 MDP의 다음 상태는 &quot;이어붙이기&quot;로 완전히 결정된다. 에이전트의 다음 상태는 외부 환경(도구 출력, 사용자)이 정한다 — 확률적이고 부분적으로만 관찰된다.</p>
 </blockquote>

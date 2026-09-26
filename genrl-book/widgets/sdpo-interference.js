@@ -13,7 +13,7 @@ GW.register("sdpo-interference", (el) => {
   const st = { ang: 35, ratio: 1.2, lam: 1, guard: false };
   GW.slider(f.controls, { label: "g<sub>w</sub>와 g<sub>l</sub> 사이 각도", min: 0, max: 180, step: 1, value: st.ang, fmt: (v) => v + "°", oninput: (v) => { st.ang = v; draw(); } });
   GW.slider(f.controls, { label: "|g<sub>l</sub>| / |g<sub>w</sub>|", min: 0.2, max: 3, step: 0.05, value: st.ratio, fmt: (v) => v.toFixed(2), oninput: (v) => { st.ratio = v; draw(); } });
-  GW.slider(f.controls, { label: "loser 쪽 세기 λ", min: 0, max: 2, step: 0.05, value: st.lam, fmt: (v) => v.toFixed(2), oninput: (v) => { st.lam = v; draw(); } });
+  GW.slider(f.controls, { label: "loser 쪽 강도 λ", min: 0, max: 2, step: 0.05, value: st.lam, fmt: (v) => v.toFixed(2), oninput: (v) => { st.lam = v; draw(); } });
   GW.toggle(f.controls, { label: "winner 보호 (SDPO식 스케일링)", value: st.guard, onchange: (v) => { st.guard = v; draw(); } });
   GW.legend(f.stage, [["c1", "−g<sub>w</sub> (winner 개선)"], ["c2", "λ·g<sub>l</sub> (loser 억제)"], ["cm", "실제 업데이트 d"]]);
   const c = GW.chart(f.stage, { x: [-3.2, 3.2], y: [-1.4, 3], w: 460, h: 250, xticks: [], yticks: [], label: "그래디언트 간섭" });

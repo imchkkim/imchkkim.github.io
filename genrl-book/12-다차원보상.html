@@ -621,9 +621,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="05-PPO와RLHF.html">5. PPO와 RLHF — 멀리 가지 않게 묶다</a></li>
 <li><a href="06-DPO의재등장.html">6. DPO의 재등장 — 보상 모델을 수식으로 지우다</a></li>
 <li><a href="07-선호쌍의조건.html">7. 선호 쌍의 조건 — 어떤 데이터가 DPO를 움직이는가</a></li>
-<li><a href="08-로그확률.html">8. 로그확률 — 문장의 점수는 어떻게 매기나</a></li>
+<li><a href="08-로그확률.html">8. 로그확률 — 문장의 확률은 어떻게 매기나</a></li>
 <li><a href="09-길이편향.html">9. 길이 편향 — 합이 공정한가?</a></li>
-<li><a href="10-레퍼런스모델.html">10. 레퍼런스 모델 — 이 줄은 왜 묶여 있나?</a></li>
+<li><a href="10-레퍼런스모델.html">10. 레퍼런스 모델 — 이 목줄은 왜 묶여 있나?</a></li>
 <li><a href="11-브래들리테리모델.html">11. Bradley-Terry — 시그모이드는 왜 거기 있는가?</a></li>
 <li><a href="12-다차원보상.html" class="active">12. 다차원 보상 — 스칼라를 넘어서</a><ul class="sidebar-toc"><li><a href="12-다차원보상.html" class="current">파레토 프론티어: 모든 축에서 이기는 응답은 없다</a></li><li><a href="12-다차원보상-2.html">가중합: 벡터 보상을 숫자 하나로</a></li><li><a href="12-다차원보상-3.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="13-DPO의진화.html">13. DPO의 진화 — 하나의 알고리즘이 낳은 가계도</a></li>
@@ -645,13 +645,13 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <h3>Chapter 12: 다차원 보상 — 스칼라를 넘어서</h3>
 <h4 id="의문">의문</h4>
-<p>쌍비교로 학습한 Bradley-Terry(BT) 보상 모델은 응답마다 점수 <strong>하나</strong>만 준다. 정책 그래디언트 속 보상 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span></eq> 도 스칼라다. 그런데 좋은 답은 여러 면에서 좋다 — 정확하고, 간결하고, 안전하고, 친절하다. 보상이 숫자 하나가 아니라 벡터라면, <strong>&quot;이 응답이 좋다&quot;는 판단을 어떻게 내리는가?</strong></p>
+<p>쌍비교로 학습한 Bradley-Terry(BT — 두 응답의 점수 차를 시그모이드로 승률로 바꾸는 모델) 보상 모델은 응답마다 점수 <strong>하나</strong>만 준다. 정책(응답을 뽑는 모델)을 학습하는 정책 그래디언트 속 보상 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span></eq> 도 스칼라다. 그런데 좋은 답은 여러 면에서 좋다 — 정확하고, 간결하고, 안전하고, 친절하다. 보상이 숫자 하나가 아니라 벡터라면, <strong>&quot;이 응답이 좋다&quot;는 판단을 어떻게 내리는가?</strong></p>
 <h4 id="파레토-프론티어-모든-축에서-이기는-응답은-없다">파레토 프론티어: 모든 축에서 이기는 응답은 없다</h4>
 <p>한 응답은 더 정확하고 다른 응답은 더 간결하다. 이 둘 중 어느 쪽이 &quot;더 좋다&quot;고 말할 수 있을까? 말할 수 없다면, 적어도 “확실히 나쁜” 응답은 어떻게 가려낼까?</p>
 <h5 id="역사-파레토의-최적">역사: 파레토의 최적</h5>
 <p>이 물음에 이름을 준 사람은 이탈리아의 경제학자 빌프레도 파레토(Vilfredo Pareto)다. 그는 1906년 『정치경제학 교본(Manuale di economia politica)』에서, 누군가의 처지를 나쁘게 하지 않고는 다른 누구의 처지도 더 낫게 할 수 없는 상태를 따졌다. 사람 대신 평가 기준을 놓으면 그대로 여러 목표를 동시에 다루는 최적화의 언어가 된다.</p>
 <h5 id="자동차-고르기-지배와-프론티어">자동차 고르기: 지배와 프론티어</h5>
-<p>자동차를 고른다고 하자. 성능(마력)과 연비 두 가지만 따진다. 스포츠카는 성능이 좋고 연비가 나쁘다. 경차는 반대다. 세단과 하이브리드는 그 사이 어딘가다. 넷 중 누구도 다른 차보다 <strong>두 가지 모두에서</strong> 낫지는 않다. 이런 차들을 <strong>파레토 최적</strong>이라 하고, 그 점들을 이은 경계를 <strong>파레토 프론티어</strong>라 한다. 프론티어 위의 어느 점이 &quot;최고&quot;인지는 차가 아니라 <strong>운전자의 가중치</strong>가 정한다. 출퇴근용이면 경차, 서킷용이면 스포츠카.</p>
+<p>자동차를 고른다고 하자. 성능(마력)과 연비 두 가지만 따진다. 스포츠카는 성능이 좋고 연비가 나쁘다. 경차는 반대다. 세단과 하이브리드는 그 사이 어딘가다. 넷 중 누구도 다른 차보다 <strong>두 가지 모두에서</strong> 낫지는 않다. 이런 차들을 <strong>파레토 최적</strong>이라 하고, 그 점들을 이은 경계를 <strong>파레토 프론티어</strong>라 한다. 프론티어 위의 어느 점이 &quot;최고&quot;인지는 차가 아니라 <strong>운전자의 가중치</strong>(기준마다 곱하는 수 — 신경망 파라미터가 아니다)가 정한다. 출퇴근용이면 경차, 서킷용이면 스포츠카.</p>
 <p>어느 날 신차가 나와서 하이브리드보다 성능도 연비도 좋다면, 신차는 하이브리드를 <strong>지배</strong>(dominate)한다. 하이브리드는 더 이상 파레토 최적이 아니다. 프론티어가 바깥으로 밀려난 것이다.</p>
 <p>LLM 응답도 똑같다. 정확성과 간결성을 두 축으로 놓자.</p>
 <ul>

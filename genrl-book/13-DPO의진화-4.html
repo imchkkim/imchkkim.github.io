@@ -621,9 +621,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="05-PPO와RLHF.html">5. PPO와 RLHF — 멀리 가지 않게 묶다</a></li>
 <li><a href="06-DPO의재등장.html">6. DPO의 재등장 — 보상 모델을 수식으로 지우다</a></li>
 <li><a href="07-선호쌍의조건.html">7. 선호 쌍의 조건 — 어떤 데이터가 DPO를 움직이는가</a></li>
-<li><a href="08-로그확률.html">8. 로그확률 — 문장의 점수는 어떻게 매기나</a></li>
+<li><a href="08-로그확률.html">8. 로그확률 — 문장의 확률은 어떻게 매기나</a></li>
 <li><a href="09-길이편향.html">9. 길이 편향 — 합이 공정한가?</a></li>
-<li><a href="10-레퍼런스모델.html">10. 레퍼런스 모델 — 이 줄은 왜 묶여 있나?</a></li>
+<li><a href="10-레퍼런스모델.html">10. 레퍼런스 모델 — 이 목줄은 왜 묶여 있나?</a></li>
 <li><a href="11-브래들리테리모델.html">11. Bradley-Terry — 시그모이드는 왜 거기 있는가?</a></li>
 <li><a href="12-다차원보상.html">12. 다차원 보상 — 스칼라를 넘어서</a></li>
 <li><a href="13-DPO의진화.html" class="active">13. DPO의 진화 — 하나의 알고리즘이 낳은 가계도</a><ul class="sidebar-toc"><li><a href="13-DPO의진화.html">링크 함수: 마진을 손실로 바꾸는 함수</a></li><li><a href="13-DPO의진화-2.html">부품 덜어내기: 쌍도 레퍼런스도 없이</a></li><li><a href="13-DPO의진화-3.html">생성과 맞춘 보상: SimPO의 평균 로그확률</a></li><li><a href="13-DPO의진화-4.html" class="current">통합: RainbowPO가 변형들을 한 좌표계에 놓다</a></li><li><a href="13-DPO의진화-5.html">자주 하는 실수와 요약</a></li></ul></li>
@@ -654,7 +654,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li>cDPO: 라벨 스무딩 (노이즈 내성)\</li>
 <li>KTO: 쌍 제거 (데이터 효율)\</li>
 <li>CPO/ORPO: 레퍼런스 제거 (메모리)\</li>
-<li>SimPO: 길이 정규화 + 생성 정렬 + 레퍼런스 제거</li>
+<li>SimPO: 길이 정규화 + 생성 지표와 맞춤 + 레퍼런스 제거</li>
 </ul>
 <p>이들은 서로 독립적인 개선인가, 아니면 겹치는가?</p>
 <p><strong>RainbowPO (Zhao et al., arXiv 2410.04203, 2024년 10월, ICLR 2025):</strong><br>
@@ -662,14 +662,14 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <ol>
 <li>길이 정규화 (없음 vs 평균)\</li>
 <li>링크 함수 (σ vs 제곱 오차 vs 힌지)\</li>
-<li>홈 어드밴티지/마진 (<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0556em;">γ</span></span></span></span></eq>)\</li>
+<li>목표 마진 (<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0556em;">γ</span></span></span></span></eq> — 홈 경기 가산점처럼 선호 응답에 미리 얹어 주는 몫)\</li>
 <li>레퍼런스 정책 (유지 vs 제거 vs 섞기)\</li>
 <li>거절 샘플링 (어떤 쌍으로 학습할지 다시 뽑기)\</li>
-<li>맥락적 스케일링 (고정 vs 프롬프트 의존)\</li>
+<li>맥락적 스케일링 (<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi></mrow><annotation encoding="application/x-tex">\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span></span></span></span></eq> 같은 크기 계수를 고정할지, 프롬프트마다 다르게 할지)\</li>
 <li>SFT 손실 (있음 vs 없음)</li>
 </ol>
 <p><strong>핵심 발견:</strong><br>
-→ 효과가 있는 요소들(길이 정규화, 레퍼런스 섞기, 맥락적 스케일링)을 골라 조합하면 개별 변형보다 좋아진다 — Llama3-8B-Instruct의 AlpacaEval 2 길이 보정 승률이 22.92%에서 51.66%로<br>
+→ 효과가 있는 요소들(길이 정규화, 레퍼런스 섞기, 맥락적 스케일링)을 골라 조합하면 개별 변형보다 좋아진다 — Llama3-8B-Instruct의 AlpacaEval 2 길이 보정 승률(응답 길이의 영향을 걸러 낸 승률)이 22.92%에서 51.66%로<br>
 → 모든 요소가 도움이 되는 것은 아니다 — 조합해 보면 효과가 없거나 오히려 해로운 요소도 있다</p>
 <p><strong>RainbowPO의 의의:</strong><br>
 흩어진 변형들을 하나의 좌표계에 매핑한 것.<br>
@@ -685,7 +685,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
     DPO --&gt;|&quot;쌍 제거&lt;br/&gt;전망 이론&quot;| KTO[&quot;&lt;b&gt;KTO&lt;/b&gt;&lt;br/&gt;2024.02&quot;]
     DPO --&gt;|&quot;ref 제거&lt;br/&gt;SFT 통합&quot;| CPO[&quot;&lt;b&gt;CPO&lt;/b&gt;&lt;br/&gt;2024.01&quot;]
     DPO --&gt;|&quot;평균 위의 오즈&lt;br/&gt;ref 제거&quot;| ORPO[&quot;&lt;b&gt;ORPO&lt;/b&gt;&lt;br/&gt;2024.03&quot;]
-    DPO --&gt;|&quot;길이 정규화&lt;br/&gt;ref 제거&lt;br/&gt;생성 정렬&quot;| SimPO[&quot;&lt;b&gt;SimPO&lt;/b&gt;&lt;br/&gt;2024.05&lt;br/&gt;NeurIPS 2024&quot;]
+    DPO --&gt;|&quot;길이 정규화&lt;br/&gt;ref 제거&lt;br/&gt;생성 지표와 맞춤&quot;| SimPO[&quot;&lt;b&gt;SimPO&lt;/b&gt;&lt;br/&gt;2024.05&lt;br/&gt;NeurIPS 2024&quot;]
     IPO &amp; cDPO &amp; KTO &amp; CPO &amp; ORPO &amp; SimPO --&gt;|&quot;7요소 통합&quot;| Rainbow[&quot;&lt;b&gt;RainbowPO&lt;/b&gt;&lt;br/&gt;2024.10&lt;br/&gt;ICLR 2025&quot;]
 
     class DPO m-blue
@@ -704,8 +704,8 @@ CPO/ORPO가 레퍼런스를 빼고,<br>
 KTO가 쌍을 빼고,<br>
 SimPO가 레퍼런스 + 길이 편향을 빼고.<br>
 → 매 세대마다 하나씩 제거하며 본질에 가까워진다.</p>
-<p><strong>2. 정렬의 일치</strong><br>
-학습 목표와 추론 시 행동이 일치해야 한다.<br>
+<p><strong>2. 학습 목표와 생성의 일치</strong><br>
+학습 목표와 생성 시 행동이 일치해야 한다.<br>
 DPO의 “보상 모델 ≠ 생성 지표” 불일치를 SimPO가 해소.<br>
 → 이것은 디퓨전 모델의 선호 학습에서도 동일하게 등장하는 문제.</p>
 </blockquote>

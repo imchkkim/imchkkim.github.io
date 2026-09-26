@@ -5,7 +5,7 @@ GW.register("dpo-loss", (el) => {
     title: "DPO 손실 — 원본 대비 마진을 얼마나 더 벌렸나",
     caption:
       "가로축은 학습 모델의 선호마진 Δ<sub>θ</sub>. 곡선은 Δ<sub>θ</sub> = Δ<sub>ref</sub> 인 지점(점선)에서 항상 손실 0.693 을 지난다 — " +
-      "원본과 똑같이 구분하면 아직 할 일이 남아 있다는 뜻이다. 그래디언트 세기 σ(−z)는 마진을 충분히 벌리면 0 으로 사라진다.",
+      "원본과 똑같이 구분하면 아직 할 일이 남아 있다는 뜻이다. 그래디언트 크기 σ(−z)는 마진을 충분히 벌리면 0 으로 사라진다.",
   });
   const st = { beta: 0.5, dref: 2.2, dth: 2.9 };
   const presets = {
@@ -30,7 +30,7 @@ GW.register("dpo-loss", (el) => {
 
   GW.legend(f.stage, [
     ["cs-J", "손실 L"],
-    ["cs-A dash", "그래디언트 세기 σ(−z)", "dash"],
+    ["cs-A dash", "그래디언트 크기 σ(−z)", "dash"],
   ]);
   const c = GW.chart(f.stage, { x: [-6, 8], y: [0, 4], xlabel: "학습 모델의 선호마진 Δθ", ylabel: "값", h: 290, label: "DPO 손실 곡선" });
   c.clip();
@@ -52,7 +52,7 @@ GW.register("dpo-loss", (el) => {
     c.dot(st.dth, g, "fs-A", 5);
     const z = st.dth - st.dref;
     f.readout.innerHTML =
-      `z = <span class="sym-pi">Δθ</span> − <span class="sym-ref">Δref</span> = <b>${GW.fmt(z, 2)}</b> · 손실 <span class="sym-J">L</span> <b>${GW.fmt(l, 3)}</b> · 그래디언트 세기 <span class="sym-A">σ(−z)</span> <b>${GW.fmt(g, 3)}</b> — ` +
+      `z = <span class="sym-pi">Δθ</span> − <span class="sym-ref">Δref</span> = <b>${GW.fmt(z, 2)}</b> · 손실 <span class="sym-J">L</span> <b>${GW.fmt(l, 3)}</b> · 그래디언트 크기 <span class="sym-A">σ(−z)</span> <b>${GW.fmt(g, 3)}</b> — ` +
       (z > 0.5 ? "원본보다 더 벌렸다. 곡선이 평평해지며 학습이 느려진다." : z < -0.5 ? "원본보다 오히려 좁혔다. 손실과 그래디언트가 모두 크다." : "원본과 거의 같다. 아직 배울 것이 남았다.");
   }
   c.hover((x) => `Δθ = ${GW.fmt(x, 2)}<br>L = ${GW.fmt(L(x), 3)}<br>σ(−z) = ${GW.fmt(G(x), 3)}`);
