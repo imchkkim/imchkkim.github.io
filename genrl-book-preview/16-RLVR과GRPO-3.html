@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RLVR: 검증기가 보상 모델을 대신한다 — 16. RLVR과 GRPO — 비평가를 내려놓다 — 생성모델의 강화학습 — DPO에서 GRPO까지</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>@font-face{font-display:block;font-family:KaTeX_AMS;font-style:normal;font-weight:400;src:url(fonts/KaTeX_AMS-Regular.woff2) format("woff2"),url(fonts/KaTeX_AMS-Regular.woff) format("woff"),url(fonts/KaTeX_AMS-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Bold.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Regular.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Fraktur-Bold.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Bold.woff) format("woff"),url(fonts/KaTeX_Fraktur-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Fraktur-Regular.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Regular.woff) format("woff"),url(fonts/KaTeX_Fraktur-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Main-Bold.woff2) format("woff2"),url(fonts/KaTeX_Main-Bold.woff) format("woff"),url(fonts/KaTeX_Main-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Main-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Main-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Main-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Main-Italic.woff2) format("woff2"),url(fonts/KaTeX_Main-Italic.woff) format("woff"),url(fonts/KaTeX_Main-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Main-Regular.woff2) format("woff2"),url(fonts/KaTeX_Main-Regular.woff) format("woff"),url(fonts/KaTeX_Main-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Math-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Math-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Math-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Math-Italic.woff2) format("woff2"),url(fonts/KaTeX_Math-Italic.woff) format("woff"),url(fonts/KaTeX_Math-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:700;src:url(fonts/KaTeX_SansSerif-Bold.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Bold.woff) format("woff"),url(fonts/KaTeX_SansSerif-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:italic;font-weight:400;src:url(fonts/KaTeX_SansSerif-Italic.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Italic.woff) format("woff"),url(fonts/KaTeX_SansSerif-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:400;src:url(fonts/KaTeX_SansSerif-Regular.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Regular.woff) format("woff"),url(fonts/KaTeX_SansSerif-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Script;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Script-Regular.woff2) format("woff2"),url(fonts/KaTeX_Script-Regular.woff) format("woff"),url(fonts/KaTeX_Script-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size1;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size1-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size1-Regular.woff) format("woff"),url(fonts/KaTeX_Size1-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size2;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size2-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size2-Regular.woff) format("woff"),url(fonts/KaTeX_Size2-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size3;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size3-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size3-Regular.woff) format("woff"),url(fonts/KaTeX_Size3-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size4;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size4-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size4-Regular.woff) format("woff"),url(fonts/KaTeX_Size4-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Typewriter;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Typewriter-Regular.woff2) format("woff2"),url(fonts/KaTeX_Typewriter-Regular.woff) format("woff"),url(fonts/KaTeX_Typewriter-Regular.ttf) format("truetype")}.katex{font:normal 1.21em KaTeX_Main,Times New Roman,serif;line-height:1.2;position:relative;text-indent:0;text-rendering:auto}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.16.45"}.katex .katex-mathml{clip:rect(1px,1px,1px,1px);border:0;height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.newline{display:block}.katex .base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .base,.katex .strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathboldfrak,.katex .textboldfrak{font-family:KaTeX_Fraktur;font-weight:700}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .mathsfit,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .hbox{width:100%}.katex .hbox,.katex .thinbox{display:inline-flex;flex-direction:row}.katex .thinbox{max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline,.katex .hline,.katex .mfrac .frac-line,.katex .overline .overline-line,.katex .rule,.katex .underline .underline-line{min-height:1px}.katex .mspace{display:inline-block}.katex .smash{display:inline;line-height:0}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.inner,.katex .llap>.inner,.katex .rlap>.inner{position:absolute}.katex .clap>.fix,.katex .llap>.fix,.katex .rlap>.fix{display:inline-block}.katex .llap>.inner{right:0}.katex .clap>.inner,.katex .rlap>.inner{left:0}.katex .clap>.inner>span{margin-left:-50%;margin-right:50%}.katex .rule{border:0 solid;display:inline-block;position:relative}.katex .hline,.katex .overline .overline-line,.katex .underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.root{margin-left:.2777777778em;margin-right:-.5555555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .sizing.reset-size2.size1{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .sizing.reset-size2.size3{font-size:1.1666666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .sizing.reset-size2.size4{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .sizing.reset-size2.size6{font-size:1.6666666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .sizing.reset-size2.size10{font-size:3.4566666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .sizing.reset-size2.size11{font-size:4.1466666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .sizing.reset-size3.size1{font-size:.7142857143em}.katex .fontsize-ensurer.reset-size3.size2,.katex .sizing.reset-size3.size2{font-size:.8571428571em}.katex .fontsize-ensurer.reset-size3.size3,.katex .sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .sizing.reset-size3.size4{font-size:1.1428571429em}.katex .fontsize-ensurer.reset-size3.size5,.katex .sizing.reset-size3.size5{font-size:1.2857142857em}.katex .fontsize-ensurer.reset-size3.size6,.katex .sizing.reset-size3.size6{font-size:1.4285714286em}.katex .fontsize-ensurer.reset-size3.size7,.katex .sizing.reset-size3.size7{font-size:1.7142857143em}.katex .fontsize-ensurer.reset-size3.size8,.katex .sizing.reset-size3.size8{font-size:2.0571428571em}.katex .fontsize-ensurer.reset-size3.size9,.katex .sizing.reset-size3.size9{font-size:2.4685714286em}.katex .fontsize-ensurer.reset-size3.size10,.katex .sizing.reset-size3.size10{font-size:2.9628571429em}.katex .fontsize-ensurer.reset-size3.size11,.katex .sizing.reset-size3.size11{font-size:3.5542857143em}.katex .fontsize-ensurer.reset-size4.size1,.katex .sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .sizing.reset-size5.size1{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .sizing.reset-size5.size2{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .sizing.reset-size5.size3{font-size:.7777777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .sizing.reset-size5.size4{font-size:.8888888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .sizing.reset-size5.size6{font-size:1.1111111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .sizing.reset-size5.size7{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .sizing.reset-size5.size10{font-size:2.3044444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .sizing.reset-size5.size11{font-size:2.7644444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .sizing.reset-size7.size1{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .sizing.reset-size7.size3{font-size:.5833333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .sizing.reset-size7.size4{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .sizing.reset-size7.size6{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .sizing.reset-size7.size10{font-size:1.7283333333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .sizing.reset-size7.size11{font-size:2.0733333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .sizing.reset-size8.size1{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .sizing.reset-size8.size2{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .sizing.reset-size8.size3{font-size:.4861111111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .sizing.reset-size8.size4{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .sizing.reset-size8.size6{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .sizing.reset-size8.size7{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .sizing.reset-size8.size10{font-size:1.4402777778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .sizing.reset-size8.size11{font-size:1.7277777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .sizing.reset-size9.size1{font-size:.2893518519em}.katex .fontsize-ensurer.reset-size9.size2,.katex .sizing.reset-size9.size2{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .sizing.reset-size9.size3{font-size:.4050925926em}.katex .fontsize-ensurer.reset-size9.size4,.katex .sizing.reset-size9.size4{font-size:.462962963em}.katex .fontsize-ensurer.reset-size9.size5,.katex .sizing.reset-size9.size5{font-size:.5208333333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .sizing.reset-size9.size6{font-size:.5787037037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .sizing.reset-size9.size7{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .sizing.reset-size9.size8{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .sizing.reset-size9.size10{font-size:1.2002314815em}.katex .fontsize-ensurer.reset-size9.size11,.katex .sizing.reset-size9.size11{font-size:1.4398148148em}.katex .fontsize-ensurer.reset-size10.size1,.katex .sizing.reset-size10.size1{font-size:.2410800386em}.katex .fontsize-ensurer.reset-size10.size2,.katex .sizing.reset-size10.size2{font-size:.2892960463em}.katex .fontsize-ensurer.reset-size10.size3,.katex .sizing.reset-size10.size3{font-size:.337512054em}.katex .fontsize-ensurer.reset-size10.size4,.katex .sizing.reset-size10.size4{font-size:.3857280617em}.katex .fontsize-ensurer.reset-size10.size5,.katex .sizing.reset-size10.size5{font-size:.4339440694em}.katex .fontsize-ensurer.reset-size10.size6,.katex .sizing.reset-size10.size6{font-size:.4821600771em}.katex .fontsize-ensurer.reset-size10.size7,.katex .sizing.reset-size10.size7{font-size:.5785920926em}.katex .fontsize-ensurer.reset-size10.size8,.katex .sizing.reset-size10.size8{font-size:.6943105111em}.katex .fontsize-ensurer.reset-size10.size9,.katex .sizing.reset-size10.size9{font-size:.8331726133em}.katex .fontsize-ensurer.reset-size10.size10,.katex .sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .sizing.reset-size10.size11{font-size:1.1996142719em}.katex .fontsize-ensurer.reset-size11.size1,.katex .sizing.reset-size11.size1{font-size:.2009646302em}.katex .fontsize-ensurer.reset-size11.size2,.katex .sizing.reset-size11.size2{font-size:.2411575563em}.katex .fontsize-ensurer.reset-size11.size3,.katex .sizing.reset-size11.size3{font-size:.2813504823em}.katex .fontsize-ensurer.reset-size11.size4,.katex .sizing.reset-size11.size4{font-size:.3215434084em}.katex .fontsize-ensurer.reset-size11.size5,.katex .sizing.reset-size11.size5{font-size:.3617363344em}.katex .fontsize-ensurer.reset-size11.size6,.katex .sizing.reset-size11.size6{font-size:.4019292605em}.katex .fontsize-ensurer.reset-size11.size7,.katex .sizing.reset-size11.size7{font-size:.4823151125em}.katex .fontsize-ensurer.reset-size11.size8,.katex .sizing.reset-size11.size8{font-size:.578778135em}.katex .fontsize-ensurer.reset-size11.size9,.katex .sizing.reset-size11.size9{font-size:.6945337621em}.katex .fontsize-ensurer.reset-size11.size10,.katex .sizing.reset-size11.size10{font-size:.8336012862em}.katex .fontsize-ensurer.reset-size11.size11,.katex .sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .accent .accent-body{position:relative}.katex .accent .accent-body:not(.accent-full){width:0}.katex .overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex svg{fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .stretchy:after,.katex .stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+</style>
+<style>/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-code: #f5f5f5;
+  --fg: #1a1a1a;
+  --fg-muted: #555;
+  --accent: #1565C0;
+  --border: #ddd;
+  --sidebar-bg: #fafafa;
+  --sidebar-width: 280px;
+  --chapter-gap: 3rem;
+  --max-width: 52rem;
+
+  /* 위젯·도판 색 — 파랑/주황/청록/보라 순서 고정 (색각이상 검증 통과, 양 모드) */
+  --w-1: #2a78d6;
+  --w-2: #eb6834;
+  --w-3: #1baf7a;
+  --w-4: #4a3aa7;
+  --w-good: #0ca30c;
+  --w-bad: #d03b3b;
+  --w-surface: #fcfcfb;
+  --w-ink: #0b0b0b;
+  --w-ink-2: #52514e;
+  --w-muted: #898781;
+  --w-grid: #e1e0d9;
+  --w-axis: #c3c2b7;
+  --w-fill-1: rgba(42,120,214,0.14);
+  --w-fill-2: rgba(235,104,52,0.14);
+  --w-fill-3: rgba(27,175,122,0.16);
+  --w-neutral: #f0efec;
+  --w-fill-bad: rgba(208,59,59,0.13);
+}
+
+[data-theme="dark"] {
+  /* 수식 기호 색의 다크모드 변형 (build.cjs symbolColors) */
+  --sym-d62728: #ff7b7b; --sym-d9670b: #f79f59; --sym-1565c0: #64a8f0;
+  --sym-6f6f78: #a5a5ac; --sym-8e44ad: #c08ad8; --sym-00897b: #3cc4b4;
+  --sym-c2185b: #f06292; --sym-8c564b: #c9937f; --sym-827717: #c6ba3a;
+  --sym-2e7d32: #6cc070;
+  /* 2026-09-26 추가: 책 고정 8색 + 보조 팔레트 6색 */
+  --sym-0093b8: #37a9be; --sym-1c9c60: #7bf4c8; --sym-e000a5: #f042b9; --sym-915a08: #be8e37;
+  --sym-5f970c: #8aec13; --sym-008deb: #578cdb; --sym-1f6d7a: #42cef0; --sym-b8860b: #dfb890;
+  --sym-cc00ff: #ee2fee; --sym-993600: #ed6226; --sym-206049: #1ded78; --sym-0033ff: #7b81f4;
+  --sym-536020: #cff47b; --sym-ff0059: #df90bb;
+
+  --bg: #1a1a2e;
+  --bg-code: #16213e;
+  --fg: #e0e0e0;
+  --fg-muted: #aaa;
+  --accent: #64b5f6;
+  --border: #333;
+  --sidebar-bg: #16213e;
+
+  --w-1: #3987e5;
+  --w-2: #d95926;
+  --w-3: #199e70;
+  --w-4: #9085e9;
+  --w-surface: #1f2036;
+  --w-ink: #ffffff;
+  --w-ink-2: #c3c2b7;
+  --w-muted: #8e8d99;
+  --w-grid: #2c2e45;
+  --w-axis: #45475e;
+  --w-fill-1: rgba(57,135,229,0.22);
+  --w-fill-2: rgba(217,89,38,0.22);
+  --w-fill-3: rgba(25,158,112,0.24);
+  --w-neutral: #383845;
+  --w-fill-bad: rgba(208,59,59,0.24);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.8;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ===== Main Content ===== */
+main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.chapter { margin-bottom: var(--chapter-gap); }
+
+hr.chapter-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: var(--chapter-gap) 0;
+}
+
+/* ===== Typography ===== */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+  font-weight: 700;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.3em; }
+h2 { font-size: 1.6rem; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+h3 { font-size: 1.3rem; }
+h4 { font-size: 1.1rem; }
+
+.chapter > h1:first-child,
+.chapter > h2:first-child,
+.chapter > h3:first-child { margin-top: 0; }
+
+p { margin: 0.8em 0; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+strong { font-weight: 700; }
+
+blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 0.5em 1em;
+  margin: 1em 0;
+  background: var(--bg-code);
+  color: var(--fg-muted);
+}
+
+/* 트릭의 뿌리: 본문 흐름 밖의 곁글 */
+aside.sidenote {
+  margin: 1.5em 0;
+  padding: 0.9em 1.2em;
+  border: 1px solid var(--border);
+  border-top: 3px solid #b8860b;
+  border-radius: 6px;
+  background: var(--bg-code);
+  font-size: 0.93em;
+}
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #9a6f08; }
+[data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
+[data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
+
+/* ===== Code ===== */
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9em;
+  background: var(--bg-code);
+  padding: 0.15em 0.3em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--bg-code);
+  padding: 1em 1.2em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1em 0;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85em;
+}
+
+/* ===== Tables ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.8em;
+  text-align: left;
+}
+th { background: var(--bg-code); font-weight: 600; }
+
+/* ===== Lists ===== */
+ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
+li { margin: 0.3em 0; }
+
+/* ===== SVG ===== */
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+}
+
+[data-theme="dark"] svg:not(.w-svg):not(.fig) text { fill: var(--fg); }
+[data-theme="dark"] svg:not(.w-svg):not(.fig) line,
+[data-theme="dark"] svg:not(.w-svg):not(.fig) path { stroke: var(--fg-muted); }
+
+/* ===== Images ===== */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+  border-radius: 6px;
+}
+
+/* ===== KaTeX ===== */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}
+
+/* ===== Mermaid ===== */
+/* 머메이드 강조: 원고에서 `class 노드 m-blue|m-orange|m-green|m-red|m-strong` */
+pre.mermaid g.m-blue > :is(rect, polygon, circle, path) { fill: var(--w-fill-1) !important; stroke: var(--w-1) !important; }
+pre.mermaid g.m-orange > :is(rect, polygon, circle, path) { fill: var(--w-fill-2) !important; stroke: var(--w-2) !important; }
+pre.mermaid g.m-green > :is(rect, polygon, circle, path) { fill: var(--w-fill-3) !important; stroke: var(--w-good) !important; }
+pre.mermaid g.m-red > :is(rect, polygon, circle, path) { fill: var(--w-fill-bad) !important; stroke: var(--w-bad) !important; }
+pre.mermaid g.m-strong > :is(rect, polygon, circle, path) { stroke-width: 2.5px !important; }
+
+pre.mermaid {
+  background: transparent;
+  border: none;
+  text-align: center;
+  padding: 1em 0;
+}
+
+/* ===== Theme Toggle ===== */
+#theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+#theme-toggle:hover { background: var(--border); }
+
+/* ===== Sidebar ===== */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 999;
+  transition: left 0.3s ease;
+  padding: 1rem;
+}
+#sidebar.open { left: 0; }
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-header h2 { font-size: 1.1rem; margin: 0; border: none; padding: 0; }
+
+#sidebar-close {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: var(--fg);
+  padding: 0 0.3em;
+}
+
+#sidebar ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: chapter;
+}
+#sidebar li {
+  margin: 0.3em 0;
+}
+#sidebar a {
+  display: block;
+  padding: 0.4em 0.5em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--fg);
+}
+#sidebar a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+
+#sidebar-open {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 998;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#sidebar-open:hover { background: var(--border); }
+
+/* ===== Responsive ===== */
+@media (min-width: 1200px) {
+  #sidebar {
+    left: 0;
+    padding-top: 2rem;
+  }
+  #sidebar-open { display: none; }
+  #sidebar-close { display: none; }
+  main {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+@media (max-width: 600px) {
+  main { padding: 1rem 0.8rem 3rem; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  pre { font-size: 0.8em; padding: 0.8em; }
+}
+
+/* ===== Chapter Navigation ===== */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border);
+  gap: 1rem;
+}
+.chapter-nav a {
+  display: inline-block;
+  padding: 0.6em 1em;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9em;
+  color: var(--fg);
+  transition: background 0.2s;
+  max-width: 45%;
+}
+.chapter-nav a:hover {
+  background: var(--border);
+  text-decoration: none;
+}
+.chapter-nav-next { text-align: right; margin-left: auto; }
+
+/* ===== TOC Page ===== */
+.toc-page { padding-top: 1rem; }
+.toc-page h1 {
+  margin-bottom: 1.5rem;
+}
+/* 대문(교재 목록)으로 돌아가는 링크 */
+.site-nav { font-size: 0.9rem; }
+.site-nav a { color: var(--fg-muted); text-decoration: none; }
+.site-nav a:hover { color: var(--accent); }
+.site-nav + h1 { margin-top: 1rem; }
+/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
+@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
+@media print { .site-nav { display: none; } }
+.toc-list {
+  list-style: none;
+  padding: 0;
+  counter-reset: toc-ch;
+}
+.toc-list li {
+  margin: 0;
+}
+.toc-list a {
+  display: block;
+  padding: 0.7em 1em;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg);
+  font-size: 1.05em;
+  transition: background 0.2s;
+}
+.toc-list a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+
+/* ===== Sidebar Active ===== */
+#sidebar a.active {
+  background: var(--accent);
+  color: #fff;
+}
+#sidebar a.active:hover {
+  background: var(--accent);
+}
+
+/* ===== Print ===== */
+@media print {
+  #sidebar, #sidebar-open, #theme-toggle { display: none; }
+  main { margin: 0; max-width: none; }
+}
+
+/* ===== 인터랙티브 위젯 ===== */
+.widget {
+  margin: 1.8em 0;
+  padding: 1rem 1.1rem 0.9rem;
+  background: var(--w-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.w-title { font-weight: 700; margin-bottom: 0.6em; color: var(--w-ink); }
+.w-controls { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; align-items: center; margin-bottom: 0.4rem; }
+.w-controls:empty { display: none; }
+.w-slider { display: flex; align-items: center; gap: 0.5rem; color: var(--w-ink-2); }
+.w-slider input { width: 9rem; accent-color: var(--w-1); }
+.w-slider-value { font-variant-numeric: tabular-nums; min-width: 3.2em; color: var(--w-ink); font-weight: 600; }
+.w-toggle { display: flex; align-items: center; gap: 0.4rem; color: var(--w-ink-2); cursor: pointer; }
+.w-toggle input { accent-color: var(--w-1); }
+.w-btn, .w-seg button {
+  font: inherit; font-size: 0.88rem; cursor: pointer;
+  padding: 0.25em 0.8em; border-radius: 6px;
+  border: 1px solid var(--w-axis); background: transparent; color: var(--w-ink);
+}
+.w-btn:hover, .w-seg button:hover { background: var(--w-neutral); }
+.w-seg { display: inline-flex; }
+.w-seg button { border-radius: 0; margin-left: -1px; }
+.w-seg button:first-child { border-radius: 6px 0 0 6px; margin-left: 0; }
+.w-seg button:last-child { border-radius: 0 6px 6px 0; }
+.w-seg button.on { background: var(--w-1); border-color: var(--w-1); color: #fff; }
+.w-stage { position: relative; }
+.w-rel { position: relative; }
+.w-svg { margin: 0.3em auto; width: 100%; overflow: visible; }
+.w-readout { color: var(--w-ink-2); font-variant-numeric: tabular-nums; margin-top: 0.3em; }
+.w-readout:empty { display: none; }
+.w-readout b { color: var(--w-ink); }
+.w-caption { color: var(--w-muted); font-size: 0.85rem; margin-top: 0.5em; }
+.w-tip {
+  position: absolute; pointer-events: none; z-index: 5;
+  background: var(--bg); color: var(--fg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.35em 0.6em; font-size: 0.8rem; white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12); font-variant-numeric: tabular-nums;
+}
+.w-legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; color: var(--w-ink-2); font-size: 0.85rem; margin: 0.2em 0; }
+.w-legend-item { display: inline-flex; align-items: center; gap: 0.35rem; }
+.w-sw { display: inline-block; width: 16px; height: 3px; border-radius: 2px; background: var(--w-muted); }
+.w-sw.dash { background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 7px); height: 2px; }
+
+.w-svg .w-grid { stroke: var(--w-grid); stroke-width: 1; }
+.w-svg .w-axis { stroke: var(--w-axis); stroke-width: 1.2; }
+.w-svg .w-tick { fill: var(--w-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.w-svg .w-axis-label { fill: var(--w-ink-2); font-size: 12px; }
+.w-svg .w-label { fill: var(--w-ink-2); font-size: 12px; }
+.w-svg .w-label.strong { fill: var(--w-ink); font-weight: 700; }
+.w-svg .w-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; stroke: var(--w-muted); }
+.w-svg .w-cross { stroke: var(--w-muted); stroke-dasharray: 3 3; }
+.w-svg .w-dot { stroke: var(--w-surface); stroke-width: 2; fill: var(--w-muted); }
+.w-svg .dash { stroke-dasharray: 5 4; }
+.w-svg .thin { stroke-width: 1.2; }
+.w-svg .c1 { stroke: var(--w-1); } .w-svg .f1 { fill: var(--w-1); }
+.w-svg .c2 { stroke: var(--w-2); } .w-svg .f2 { fill: var(--w-2); }
+.w-svg .c3 { stroke: var(--w-3); } .w-svg .f3 { fill: var(--w-3); }
+.w-svg .c4 { stroke: var(--w-4); } .w-svg .f4 { fill: var(--w-4); }
+.w-svg .cm { stroke: var(--w-muted); } .w-svg .fm { fill: var(--w-muted); }
+.w-svg .cgood { stroke: var(--w-good); } .w-svg .fgood { fill: var(--w-good); }
+.w-svg .cbad { stroke: var(--w-bad); } .w-svg .fbad { fill: var(--w-bad); }
+.w-svg .fa1 { fill: var(--w-fill-1); stroke: none; }
+.w-svg .fa2 { fill: var(--w-fill-2); stroke: none; }
+.w-svg .fa3 { fill: var(--w-fill-3); stroke: none; }
+.w-svg .fneutral { fill: var(--w-neutral); }
+.w-svg .fink { fill: var(--w-ink); }
+.w-sw.c1 { background: var(--w-1); color: var(--w-1); } .w-sw.c2 { background: var(--w-2); color: var(--w-2); }
+.w-sw.c3 { background: var(--w-3); color: var(--w-3); } .w-sw.c4 { background: var(--w-4); color: var(--w-4); }
+.w-sw.cm { background: var(--w-muted); color: var(--w-muted); }
+.w-sw.dash { background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 7px); }
+
+/* 정적 도판(인라인 SVG) 공용 클래스 */
+svg.fig { max-width: 560px; }
+svg.fig text { fill: var(--w-ink-2); font-size: 12px; }
+svg.fig .t-strong { fill: var(--w-ink); font-weight: 700; }
+svg.fig .t-muted { fill: var(--w-muted); }
+svg.fig .t-on-fill { fill: #fff; }
+svg.fig .t1 { fill: var(--w-1); } svg.fig .t2 { fill: var(--w-2); } svg.fig .t3 { fill: var(--w-3); } svg.fig .t4 { fill: var(--w-4); }
+svg.fig .tgood { fill: var(--w-good); } svg.fig .tbad { fill: var(--w-bad); }
+svg.fig .f1 { fill: var(--w-1); } svg.fig .f2 { fill: var(--w-2); } svg.fig .f3 { fill: var(--w-3); } svg.fig .f4 { fill: var(--w-4); }
+svg.fig .fa1 { fill: var(--w-fill-1); } svg.fig .fa2 { fill: var(--w-fill-2); } svg.fig .fa3 { fill: var(--w-fill-3); }
+svg.fig .fgood { fill: var(--w-good); } svg.fig .fbad { fill: var(--w-bad); }
+svg.fig .fneutral { fill: var(--w-neutral); } svg.fig .fsurface { fill: var(--w-surface); }
+svg.fig .s1 { stroke: var(--w-1); fill: none; } svg.fig .s2 { stroke: var(--w-2); fill: none; }
+svg.fig .s3 { stroke: var(--w-3); fill: none; } svg.fig .s4 { stroke: var(--w-4); fill: none; }
+svg.fig .saxis { stroke: var(--w-axis); fill: none; } svg.fig .sgrid { stroke: var(--w-grid); fill: none; }
+svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
+
+/* ===== 만화 대화 (```dialogue) — 규격: ~/.claude/skills/textbook-exercises/SKILL.md 「B. 표현」 =====
+   표정 그림이 있는 차례: 그림 + 그 아래 이름(figcaption), 왼쪽 선 없음.
+   그림이 없는 차례: 대사 앞에 이름, 인물 색 왼쪽 선. 말풍선 열은 그림 폭만큼 들여 맞춘다. 대사는 얇게(350). */
+.dlg {
+  --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; --cast: 88px;
+  margin: 1.5em 0 2em;
+}
+[data-theme="dark"] .dlg { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
+.dlg-T { --who: var(--who-T); } .dlg-M { --who: var(--who-M); } .dlg-S { --who: var(--who-S); }
+.dlg-line { display: flex; gap: 0.9em; align-items: flex-start; margin: 0.7em 0; }
+.dlg-line:not(.has-face) { margin-left: calc(var(--cast) + 0.9em); }
+.dlg-cast { flex: 0 0 var(--cast); width: var(--cast); margin: 0; }
+.dlg-cast img {
+  display: block; width: var(--cast); height: var(--cast); margin: 0;
+  object-fit: cover; object-position: 50% 0; padding-top: 4px;
+  background: #fbfaf6; border: 1px solid var(--border); border-radius: 12px;
+}
+.dlg-cast figcaption {
+  margin-top: 0.25em; text-align: center;
+  font-size: 0.8em; font-weight: 700; line-height: 1.2; color: var(--who);
+}
+.dlg-face-empty {
+  width: var(--cast); height: var(--cast); display: flex; align-items: center; justify-content: center;
+  border: 1.5px dashed var(--who, var(--border)); border-radius: 12px;
+  color: var(--who); font-size: 0.8em; opacity: 0.75;
+}
+.dlg-bubble {
+  flex: 1; min-width: 0;
+  padding: 0.55em 0.95em; border-radius: 10px; line-height: 1.7;
+  background: var(--bg-code); font-weight: 350;
+}
+.dlg-bubble strong { font-weight: 600; }
+.dlg-bubble code { font-size: 0.85em; }
+.dlg-name { font-weight: 700; color: var(--who); margin-right: 0.5em; }
+.dlg-scene { margin: 0.7em 0 0.7em calc(var(--cast) + 0.9em); color: var(--fg-muted); font-size: 0.85rem; font-style: italic; }
+@media (max-width: 600px) {
+  .dlg { --cast: 56px; }
+  .dlg-line:not(.has-face), .dlg-scene { margin-left: 0; }
+}
+
+/* 연습문제 — 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨. 바로 아래에 그 문제의 함께 풀기 대화가 붙는다 */
+.exercise {
+  background: #fff;
+  color: #111;
+  border: 1.5px solid #222;
+  border-radius: 4px;
+  padding: 0.9em 1.2em;
+  margin: 0.8em 0 1.4em;
+  font-size: 1.12em;
+  font-weight: 600;
+  line-height: 1.75;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.exercise p { margin: 0.4em 0; }
+.exercise > :first-child { margin-top: 0; }
+.exercise > :last-child { margin-bottom: 0; }
+.exercise code { background: #eee; color: #111; }
+[data-theme="dark"] .exercise {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  /* 흰 바탕이므로 수식 기호 색도 라이트 값으로 */
+  --sym-d62728: #d62728; --sym-d9670b: #d9670b; --sym-1565c0: #1565c0;
+  --sym-6f6f78: #6f6f78; --sym-8e44ad: #8e44ad; --sym-00897b: #00897b;
+  --sym-c2185b: #c2185b; --sym-8c564b: #8c564b; --sym-827717: #827717;
+  --sym-2e7d32: #2e7d32;
+  --sym-0093b8: #0093b8; --sym-1c9c60: #1c9c60; --sym-e000a5: #e000a5; --sym-915a08: #915a08;
+  --sym-5f970c: #5f970c; --sym-008deb: #008deb; --sym-1f6d7a: #1f6d7a; --sym-b8860b: #b8860b;
+  --sym-cc00ff: #cc00ff; --sym-993600: #993600; --sym-206049: #206049; --sym-0033ff: #0033ff;
+  --sym-536020: #536020; --sym-ff0059: #ff0059;
+}
+
+/* ===== 절 단위 페이지 ===== */
+.page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
+.chapter-crumb { margin: 0 0 0.4em; font-size: 0.85em; }
+.chapter-crumb a { color: var(--fg-muted); }
+.chapter-paged > h3 { font-size: 1.6rem; }
+.chapter-paged > h4 { font-size: 1.35rem; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+.chapter-paged > .chapter-crumb + h4 { margin-top: 0.4em; }
+.chapter h5 { font-size: 1.1rem; }
+#sidebar .sidebar-toc a.current { color: var(--accent); font-weight: 600; }
+.sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0 0 0 0.6em; border-left: 2px solid var(--border); }
+#sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
+
+/* 수식 아래 기호 표 (latex array) */
+.katex-display .symtab { font-size: 0.9em; }
+
+/* 기호 색 (CLAUDE.md 수식 표기) — 위젯에서 같은 기호는 같은 색 */
+:root { --sJ: #d62728; --sR: #d9670b; --spi: #1565c0; --sref: #6f6f78; --sA: #8e44ad; --sV: #00897b; --sratio: #c2185b; --sKL: #8c564b; --sbeta: #827717; --stgt: #2e7d32; }
+[data-theme="dark"] { --sJ: #ff7b7b; --sR: #f79f59; --spi: #64a8f0; --sref: #a5a5ac; --sA: #c08ad8; --sV: #3cc4b4; --sratio: #f06292; --sKL: #c9937f; --sbeta: #c6ba3a; --stgt: #6cc070; }
+.w-svg .cs-J { stroke: var(--sJ); } .w-svg .fs-J { fill: var(--sJ); } .sym-J { color: var(--sJ); }
+.w-svg .cs-R { stroke: var(--sR); } .w-svg .fs-R { fill: var(--sR); } .sym-R { color: var(--sR); }
+.w-svg .cs-pi { stroke: var(--spi); } .w-svg .fs-pi { fill: var(--spi); } .sym-pi { color: var(--spi); }
+.w-svg .cs-ref { stroke: var(--sref); } .w-svg .fs-ref { fill: var(--sref); } .sym-ref { color: var(--sref); }
+.w-svg .cs-A { stroke: var(--sA); } .w-svg .fs-A { fill: var(--sA); } .sym-A { color: var(--sA); }
+.w-svg .cs-V { stroke: var(--sV); } .w-svg .fs-V { fill: var(--sV); } .sym-V { color: var(--sV); }
+.w-svg .cs-ratio { stroke: var(--sratio); } .w-svg .fs-ratio { fill: var(--sratio); } .sym-ratio { color: var(--sratio); }
+.w-svg .cs-KL { stroke: var(--sKL); } .w-svg .fs-KL { fill: var(--sKL); } .sym-KL { color: var(--sKL); }
+.w-svg .cs-beta { stroke: var(--sbeta); } .w-svg .fs-beta { fill: var(--sbeta); } .sym-beta { color: var(--sbeta); }
+.w-sw.cs-J { background: var(--sJ); color: var(--sJ); } .w-sw.cs-R { background: var(--sR); color: var(--sR); }
+.w-sw.cs-pi { background: var(--spi); color: var(--spi); } .w-sw.cs-ref { background: var(--sref); color: var(--sref); }
+.w-sw.cs-A { background: var(--sA); color: var(--sA); } .w-sw.cs-V { background: var(--sV); color: var(--sV); }
+.w-sw.cs-ratio { background: var(--sratio); color: var(--sratio); } .w-sw.cs-KL { background: var(--sKL); color: var(--sKL); }
+.w-sw.cs-beta { background: var(--sbeta); color: var(--sbeta); }
+.w-svg .cs-tgt { stroke: var(--stgt); } .w-svg .fs-tgt { fill: var(--stgt); } .sym-tgt { color: var(--stgt); }
+.w-sw.cs-tgt { background: var(--stgt); color: var(--stgt); }
+.w-sw.dash.cs-J, .w-sw.dash.cs-R, .w-sw.dash.cs-pi, .w-sw.dash.cs-ref, .w-sw.dash.cs-A, .w-sw.dash.cs-V, .w-sw.dash.cs-ratio, .w-sw.dash.cs-KL, .w-sw.dash.cs-beta { background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 7px); }
+
+/* KaTeX 의 늘어나는 기호(underbrace, 긴 화살표 등)는 내부 SVG — 위의 전역 svg 규칙(margin·height)에서 제외 */
+.katex svg { margin: 0; height: inherit; max-width: none; display: block; }
+</style>
+<script>
+(function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
+</script>
+</head>
+<body>
+
+<button id="theme-toggle" aria-label="다크모드 전환">&#x1F319;</button>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="index.html" style="color:inherit;text-decoration:none">목차</a></h2>
+    <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
+  </div>
+  <ol><li><a href="00-서문.html">생성모델의 강화학습 — DPO에서 GRPO까지</a></li>
+<li><a href="01-DPO맛보기.html">1. DPO 맛보기 — 한 줄 수식이 하는 일</a></li>
+<li><a href="02-VPG.html">2. VPG — 미분할 수 없는 점수를 올리는 법</a></li>
+<li><a href="03-REINFORCE.html">3. REINFORCE — 샘플로 추정하고, 베이스라인을 빼다</a></li>
+<li><a href="04-액터크리틱.html">4. Actor-Critic — 비평가를 곁에 두다</a></li>
+<li><a href="05-PPO와RLHF.html">5. PPO와 RLHF — 멀리 가지 않게 묶다</a></li>
+<li><a href="06-DPO의재등장.html">6. DPO의 재등장 — 보상 모델을 수식으로 지우다</a></li>
+<li><a href="07-선호쌍의조건.html">7. 선호 쌍의 조건 — 어떤 데이터가 DPO를 움직이는가</a></li>
+<li><a href="08-로그확률.html">8. 로그확률 — 문장의 확률은 어떻게 매기나</a></li>
+<li><a href="09-길이편향.html">9. 길이 편향 — 합이 공정한가?</a></li>
+<li><a href="10-레퍼런스모델.html">10. 레퍼런스 모델 — 이 목줄은 왜 묶여 있나?</a></li>
+<li><a href="11-브래들리테리모델.html">11. Bradley-Terry — 시그모이드는 왜 거기 있는가?</a></li>
+<li><a href="12-다차원보상.html">12. 다차원 보상 — 스칼라를 넘어서</a></li>
+<li><a href="13-DPO의진화.html">13. DPO의 진화 — 하나의 알고리즘이 낳은 가계도</a></li>
+<li><a href="14-온라인과오프라인.html">14. 온라인과 오프라인 — 이상과 현실 사이에서</a></li>
+<li><a href="15-실전사례.html">15. 실전사례 — 현장의 목소리, JoyCaption의 DPO 실전기</a></li>
+<li><a href="16-RLVR과GRPO.html" class="active">16. RLVR과 GRPO — 비평가를 내려놓다</a><ul class="sidebar-toc"><li><a href="16-RLVR과GRPO.html">그룹 베이스라인: 여러 답의 평균이 비평가를 대신한다</a></li><li><a href="16-RLVR과GRPO-2.html">GRPO 목적함수: 그룹 어드밴티지를 PPO의 클리핑에 끼운다</a></li><li><a href="16-RLVR과GRPO-3.html" class="current">RLVR: 검증기가 보상 모델을 대신한다</a></li><li><a href="16-RLVR과GRPO-4.html">DeepSeek-R1: 정답 보상이 추론 습관을 키웠다</a></li><li><a href="16-RLVR과GRPO-5.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="17-RL의작동조건.html">17. RL이 작동하는 조건 — 스펙트럼, 적정 난이도, 그리고 한계</a></li>
+<li><a href="18-GRPO의변종들.html">18. GRPO의 변종들 — 부품을 하나씩 의심하다</a></li>
+<li><a href="19-디퓨전의DPO.html">19. 디퓨전에서 DPO를 쓰려면 — 로그확률의 벽</a></li>
+<li><a href="20-DDPO.html">20. DDPO — 디퓨전의 정책 그래디언트</a></li>
+<li><a href="21-이미지-영상-로보틱스.html">21. 이미지·영상·로보틱스의 강화학습 — GRPO가 시각 생성을 만났을 때</a></li>
+<li><a href="22-에이전트의강화학습.html">22. 에이전틱 AI — 행동하는 모델을 정렬하기</a></li>
+<li><a href="99-부록.html">부록</a></li></ol>
+</nav>
+
+<button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
+
+<main>
+<section class="chapter chapter-paged">
+<p class="chapter-crumb"><a href="16-RLVR과GRPO.html">16. RLVR과 GRPO — 비평가를 내려놓다</a></p>
+<h4 id="rlvr-검증기가-보상-모델을-대신한다">RLVR: 검증기가 보상 모델을 대신한다</h4>
+<p>이제 보상 쪽이다. 보상 모델은 사람 선호 데이터로 따로 학습해야 하고, 학습해 놓아도 &quot;좋은 답&quot;의 불완전한 대리인이다. 그런데 수학 문제라면 정답이 있다. 채점을 학습된 모델 대신 규칙에 맡기면 안 될까?</p>
+<p>RLVR은 보상을 <strong>규칙 기반 검증기</strong>로 준다.</p>
+<table>
+<thead>
+<tr>
+<th>도메인</th>
+<th>검증기</th>
+<th>보상</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>수학</td>
+<td>최종 답을 추출해 정답과 비교</td>
+<td>1 / 0</td>
+</tr>
+<tr>
+<td>코드</td>
+<td>테스트 케이스 실행</td>
+<td>통과 비율 또는 1 / 0</td>
+</tr>
+<tr>
+<td>논리 퍼즐</td>
+<td>규칙 검사기</td>
+<td>1 / 0</td>
+</tr>
+<tr>
+<td>객관식 (예: 의학 MCQA)</td>
+<td>선택지 비교</td>
+<td>1 / 0</td>
+</tr>
+<tr>
+<td>SQL</td>
+<td>실행 결과 비교</td>
+<td>1 / 0</td>
+</tr>
+</tbody>
+</table>
+<p>전제는 하나다: <strong>정답 여부를 자동으로 판정할 수 있어야 한다.</strong> 이 전제가 충족되면 세 가지가 동시에 따라온다. 사람 라벨이 필요 없으니 문제만 있으면 데이터가 무한하고, 보상 모델을 학습할 필요가 없고, 매번 현재 모델이 답하니 분포 이동(데이터를 만든 모델과 지금 학습 중인 모델이 달라져 생기는 어긋남)이 없다.</p>
+<h5 id="리워드-해킹이-거의-사라지는-이유">리워드 해킹이 (거의) 사라지는 이유</h5>
+<p>보상 모델을 쓰는 곳에서는 리워드 해킹이 되풀이해 나타난다. 보상 모델은 &quot;좋은 답&quot;의 <strong>불완전한 대리인</strong>이라서, 최적화 압력이 그 빈틈을 찾아낸다.</p>
+<table>
+<thead>
+<tr>
+<th>보상</th>
+<th>해킹</th>
+<th>RLVR에서는</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>사람 선호로 학습한 보상 모델</td>
+<td>아첨하면 점수가 오른다</td>
+<td>&quot;1+1=3이군요, 맞습니다&quot;라고 해도 검증기는 0점</td>
+</tr>
+<tr>
+<td>여러 차원의 보상</td>
+<td>한 차원을 극대화하고 나머지를 희생</td>
+<td>보상이 1차원 이진값 — 희생할 다른 차원이 없다</td>
+</tr>
+<tr>
+<td>형식 편향이 있는 보상 모델</td>
+<td>모든 답을 번호 매긴 리스트로 쓰면 점수가 오른다</td>
+<td>형식과 무관하게 답이 맞아야 1</td>
+</tr>
+<tr>
+<td>이미지 생성의 CLIP 점수</td>
+<td>이미지에 글자를 그려 CLIP 점수 올리기</td>
+<td>해당 없음 — &quot;아름다움&quot;은 이진 검증이 불가능해서 애초에 RLVR을 못 쓴다</td>
+</tr>
+</tbody>
+</table>
+<p>검증기는 정답의 <strong>정의에 가깝기</strong> 때문에 속일 틈이 좁다. 단, 좁을 뿐 없지는 않다. 검증기는 정답의 정의가 아니라 정의를 <strong>구현한 코드</strong>다. 답 추출 정규식이 허술하면 여러 후보를 나열해 하나라도 걸리게 하는 전략이 보상을 받고, 테스트 케이스가 빈약하면 테스트만 통과하는 특수처리 코드가 보상을 받는다. 아래 문제 3에서 이 틈을 직접 본다.</p>
+<h5 id="적용할-수-있는-곳과-없는-곳">적용할 수 있는 곳과 없는 곳</h5>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>예</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>작동한다</td>
+<td>수학, 코딩, 논리 퍼즐, 객관식, SQL</td>
+<td>정답이 있고 판정이 자동</td>
+</tr>
+<tr>
+<td>작동하지 않는다</td>
+<td>역할극의 자연스러움, 창작 글쓰기, 브랜드 말투, 설득력 있는 논증</td>
+<td>&quot;정답&quot;이 없거나 판정이 주관적</td>
+</tr>
+<tr>
+<td>경계</td>
+<td>내용 모순 검사</td>
+<td>검사기는 만들 수 있지만 보상이 극도로 희소 (아래)</td>
+</tr>
+</tbody>
+</table>
+<h5 id="희소-보상의-벽">희소 보상의 벽</h5>
+<p>모순 검사기를 보상으로 쓴다고 하자. 프롬프트 100개에 8개씩 800개 응답을 뽑았더니 모순이 있는 응답은 12개(1.5%)뿐이다. 대부분의 그룹은 8개 모두 보상 1이고, 위에서 봤듯 <strong>모두 같은 보상인 그룹은 학습 신호(시그널)가 0</strong>이다. 모순이 하나라도 섞인 그룹은 최대 12개, 전체의 12%에 불과하다. 수학 문제에서 8개 중 3개쯤 맞히는 경우와 비교하면 배울 거리가 거의 없다.</p>
+<p>이 벽을 넘으려는 시도들:</p>
+<ul>
+<li><strong>과정 보상 모델</strong>(PRM, Process Reward Model): 최종 답이 아니라 풀이의 중간 단계마다 점수를 준다. 스텝마다 보상을 받는 밀집 보상이 되지만, 결국 또 하나의 학습된 보상 모델이라 해킹 위험이 돌아온다.</li>
+<li><strong>평가기준 기반 보상</strong>(Rubrics-as-Rewards): 사람이 쓴 체크리스트 항목들을 LLM 심사 모델이 하나씩 판정해 점수화한다. 검증기를 주관적 도메인으로 넓히려는 시도다.</li>
+</ul>
+<h5 id="문제-3-숫자를-흩뿌리는-답">문제 3 — 숫자를 흩뿌리는 답</h5>
+<div class="exercise">
+<p>어떤 수학 검증기는 응답에 등장하는 <strong>모든 숫자</strong> 중 하나라도 정답과 같으면 1점을 준다. GRPO로 오래 학습하면 어떤 응답이 늘어날까? &quot;RLVR은 해킹이 불가능하다&quot;는 말과 어떻게 양립하는가?</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">이 검증기로 오래 학습하면 어떤 답이 늘어날까요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M02.webp" alt="김민준 (생각)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">숫자를 많이 쓰는 답이요. 후보를 열 개쯤 나열하면 하나는 걸리니까요. 한번 짜봤는데 “답은 12, 혹은 13, 아니면 14…” 같은 게 평균 보상이 제일 높아요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그건 이상한데. 이 장에서 검증기는 정답의 정의라서 속일 수 없다고 했잖아.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">서연 학생, 이 검증기가 판정하는 명제를 그대로 써 보면요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">“응답에 등장하는 숫자 중 하나가 정답과 같다”… 아. 이건 &quot;응답이 정답을 말한다&quot;랑 다른 명제네요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S07.webp" alt="이서연 (깨달음)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">해킹 불가능하다는 건 검증기가 판정하는 명제가 우리가 원하는 명제와 정확히 같을 때의 이야기구나. 구현이 다른 명제를 판정하면 그 차이가 빈틈이 되고요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 검증기는 정의 자체가 아니라, 정의를 구현한 코드예요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">증명 채점할 때 &quot;결론이 맞으면 만점&quot;으로 채점하면 과정이 엉터리여도 만점이 나오는 것과 같네요. 채점 기준이 증명의 정의와 달라서.</div></div>
+</div><blockquote>
+<p><strong>정리</strong> 모든 숫자를 확인하는 검증기는 &quot;정답을 말한다&quot;가 아니라 &quot;정답이 어딘가 등장한다&quot;를 판정한다. 후보를 나열하는 응답이 늘어난다. RLVR이 해킹에 강한 것은 검증기의 판정 명제가 원하는 명제와 <strong>정확히 일치할 때</strong>뿐이다. 실무에서는 “마지막 한 개의 답만 추출”, 형식 강제 등으로 이 차이를 좁힌다.</p>
+</blockquote>
+
+</section>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="16-RLVR과GRPO-2.html">&larr; GRPO 목적함수: 그룹 어드밴티지를 PPO의 클리핑에 끼운다</a><span class="page-count">3 / 5</span><a class="chapter-nav-next" href="16-RLVR과GRPO-4.html">DeepSeek-R1: 정답 보상이 추론 습관을 키웠다 &rarr;</a></nav>
+</main>
+
+<script type="module">
+// Dark mode
+const toggle = document.getElementById('theme-toggle');
+const stored = localStorage.getItem('theme');
+if (stored === 'dark' || (!stored && matchMedia('(prefers-color-scheme: dark)').matches)) {
+  document.documentElement.setAttribute('data-theme', 'dark');
+  toggle.textContent = '\u2600\uFE0F';
+}
+toggle.addEventListener('click', () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  toggle.textContent = isDark ? '\u{1F319}' : '\u2600\uFE0F';
+});
+
+// Sidebar
+const sidebar = document.getElementById('sidebar');
+const openBtn = document.getElementById('sidebar-open');
+const closeBtn = document.getElementById('sidebar-close');
+openBtn.addEventListener('click', () => sidebar.classList.add('open'));
+closeBtn.addEventListener('click', () => sidebar.classList.remove('open'));
+sidebar.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => sidebar.classList.remove('open'));
+});
+
+// Mermaid — 테마를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  mermaidLib.initialize({ startOnLoad: false, theme: isDark ? 'dark' : 'default', securityLevel: 'loose' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+toggle.addEventListener('click', () => renderMermaid());
+
+// 키보드 ←/→ 로 이전·다음 페이지
+addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  const a = document.querySelector(e.key === 'ArrowLeft' ? '.chapter-nav-prev' : e.key === 'ArrowRight' ? '.chapter-nav-next' : null);
+  if (a) location.href = a.href;
+});
+</script>
+
+</body>
+</html>
