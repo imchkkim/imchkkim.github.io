@@ -596,7 +596,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
     <h2><a href="index.html" style="color:inherit;text-decoration:none">ML 입문자를 위한 동역학</a></h2>
     <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
   </div>
-  <ol><li><a href="00-머리말.html">머릿말</a></li>
+  <ol><li><a href="00-머리말.html">머리말</a></li>
 <li><a href="01-미시상태와-거시상태.html">1장 — 미시상태와 거시상태</a></li>
 <li><a href="02-엔트로피.html">2장 — 엔트로피</a></li>
 <li><a href="03-온도.html">3장 — 온도</a></li>
@@ -677,7 +677,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <h3 id="ml에서-f-gan-움직이는-것-생성기의-매개변수와-비평-함수">ML에서: f-GAN (움직이는 것: 생성기의 매개변수와 비평 함수)</h3>
 <p>Nowozin, Cseke, Tomioka(2016)의 f-GAN은 이 부등식을 그대로 학습 규칙으로 썼다. 비평 함수는 오른쪽을 키워 발산을 최대한 정확히 재려 하고, 생성기는 모델 분포 q를 움직여 그 값을 줄이려 한다. 최초의 GAN이 판별기와 생성기의 게임이었던 것도 f를 특정하게 고른 경우라는 것이 이 논문이 보인 핵심 가운데 하나다. 판별기의 로짓을 비평 함수라 보면, 판별기가 배우는 것은 결국 밀도 비의 로그다.</p>
 <h3 id="ml에서-mine-움직이는-것-비평-신경망">ML에서: MINE (움직이는 것: 비평 신경망)</h3>
-<p>이제 이 장 첫머리의 주장을 직접 확인할 차례다. 두 변수가 서로에 대해 얼마나 알려 주는지를, 밀도 없이 (입력, 특징) 쌍의 샘플만으로 잴 수 있을까? 상관계수가 0.8인 두 정규분포 변수 x, y를 생각하자. 한 변수를 알 때 다른 변수에 대해 줄어드는 불확실성을 상호정보량(mutual information)이라 하는데, 이 경우에는 식으로 구할 수 있어서 −½ ln(1 − 0.8²) ≈ 0.511 nat이다. 상호정보량은 결합분포와 「두 주변분포의 곱」 사이의 KL이므로, 결합분포의 샘플은 (x, y) 쌍 그대로, 곱분포의 샘플은 y의 순서를 섞어 짝을 끊은 쌍으로 얻는다. 코드는 밀도를 한 번도 쓰지 않는다. 비평 함수 역할을 하는 신경망 z(x, y) 하나를 두고, 결합분포에서의 z 평균에서 곱분포에서의 e^z 평균의 로그를 뺀 값, 곧 돈스커–바라단 표현의 괄호 안을 키우도록 학습할 뿐이다.</p>
+<p>이제 이 장 첫머리의 주장을 직접 확인할 차례다. 두 변수가 서로에 대해 얼마나 알려 주는지를, 밀도 없이 (입력, 특징) 쌍의 샘플만으로 잴 수 있을까? 상관계수가 0.8인 두 정규분포 변수 x, y를 생각하자. 한 변수를 알 때 다른 변수에 대해 줄어드는 불확실성을 상호정보량(mutual information)이라 하는데, 이 경우에는 식으로 구할 수 있어서 −½ ln(1 − 0.8²) ≈ 0.511 nat이다. 상호정보량은 결합 분포(두 변수를 함께 본 분포, joint)와 「두 주변 분포(한 변수씩 따로 본 분포, marginal)의 곱」 사이의 KL이므로, 결합 분포의 샘플은 (x, y) 쌍 그대로, 곱분포의 샘플은 y의 순서를 섞어 짝을 끊은 쌍으로 얻는다. 코드는 밀도를 한 번도 쓰지 않는다. 비평 함수 역할을 하는 신경망 z(x, y) 하나를 두고, 결합 분포에서의 z 평균에서 곱분포에서의 e^z 평균의 로그를 뺀 값, 곧 돈스커–바라단 표현의 괄호 안을 키우도록 학습할 뿐이다.</p>
 <figure class="fig "><img src="images/ch05/img_a8_shuffle.png" alt="상관계수 0.8인 (x, y) 쌍 500개(왼쪽)와 y의 순서만 섞어 짝을 끊은 쌍(오른쪽). MINE은 왼쪽 점에서 z의 평균을, 오른쪽 점에서 e^z의 평균을 낼 뿐 밀도는 쓰지 않는다" loading="lazy"><figcaption>상관계수 0.8인 (x, y) 쌍 500개(왼쪽)와 y의 순서만 섞어 짝을 끊은 쌍(오른쪽). MINE은 왼쪽 점에서 z의 평균을, 오른쪽 점에서 e^z의 평균을 낼 뿐 밀도는 쓰지 않는다</figcaption></figure>
 <pre><code class="language-python">import math, torch
 torch.manual_seed(0)
@@ -708,8 +708,8 @@ with torch.no_grad():
 print(-0.5 * math.log(1 - corr**2))         # 0.5108 (참값)
 </code></pre>
 <p>추정값은 0.5071로 참값 0.5108에 가까우며, 시드를 1, 2, 3으로 바꿔도 0.504~0.506 사이에 머물렀다. 추정값이 참값보다 조금 작게 나오는 것은 우연이 아니다. 이 양은 비평 함수가 완벽할 때만 KL과 같고 그 밖에는 항상 작은 하한이기 때문이다. dv_bound 함수 마지막 줄의 logsumexp에서 ln N을 뺀 것은 「e^z의 표본 평균의 로그」를 수치적으로 안전하게 계산하는 방법이다.</p>
-<p>Belghazi 외(2018)의 MINE은 상호정보량 I(X; Y)가 결합분포와 주변분포의 곱 사이의 KL이라는 사실에 돈스커–바라단 표현을 적용했다. 논문의 핵심 정리는 「상호정보량 ≥ ⟨T⟩ − ln⟨e^T⟩」 한 줄인데, 이 장을 마친 독자는 이것을 「KL의 볼록 켤레를 두 번 취한 식이고, 비평 신경망 T는 밀도 비의 로그를 배운다」로 읽게 된다. 논문의 T는 이 책의 z와 같은 것이다. 대조 학습에서 쓰는 InfoNCE 손실도 같은 가족의 상호정보량 하한이라는 것이 Poole 외(2019)의 정리로 알려져 있다.</p>
-<div class="dialogue"><h3 id="문제-6-같은-비평-함수-다른-하한">문제 6. 같은 비평 함수, 다른 하한</h3>
+<p>Belghazi 외(2018)의 MINE은 상호정보량 I(X; Y)가 결합 분포와 주변 분포의 곱 사이의 KL이라는 사실에 돈스커–바라단 표현을 적용했다. 논문의 핵심 정리는 「상호정보량 ≥ ⟨T⟩ − ln⟨e^T⟩」 한 줄인데, 이 장을 마친 독자는 이것을 「KL의 볼록 켤레를 두 번 취한 식이고, 비평 신경망 T는 밀도 비의 로그를 배운다」로 읽게 된다. 논문의 T는 이 책의 z와 같은 것이다. 대조 학습에서 쓰는 InfoNCE 손실도 같은 가족의 상호정보량 하한이라는 것이 Poole 외(2019)의 정리로 알려져 있다.</p>
+<div class="dialogue"><h3 id="문제-8-같은-비평-함수-다른-하한">문제 8. 같은 비평 함수, 다른 하한</h3>
 <blockquote>
 <p>데이터 분포 p는 평균 1, 분산 1인 정규분포이고 기준 분포 q는 표준정규분포다. 두 분포의 KL은 0.5다. 비평 함수 z(x) = x를 NWJ 하한 ⟨z⟩_p − ⟨e^(z − 1)⟩_q와 돈스커–바라단(DV) 하한 ⟨z⟩_p − ln⟨e^z⟩_q에 넣어 비교하라. (q가 표준정규분포이면 ⟨e^(ax)⟩_q = e^(a²/2)다.)</p>
 </blockquote>
@@ -722,8 +722,8 @@ print(-0.5 * math.log(1 - corr**2))         # 0.5108 (참값)
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.svg" alt="김민준 M08" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 상수를 크게 잘못 잡으면 어떻게 돼요? z = x + 3을 넣어 볼게요. NWJ는 4 − e^(2.5) ≈ −8.18이고… DV는 4 − ln e^(3.5) = 0.5. 우와, NWJ는 음수까지 떨어지는데 DV는 꼼짝도 안 하네요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.svg" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>샘플 400만 개로 몬테카를로 계산해도 NWJ는 0.394, 0.501, −8.17이고 DV는 세 경우 모두 0.501이 나와요. 그럼 같은 z에서 DV가 항상 NWJ보다 크거나 같다는 걸 보일 수 있을까요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.svg" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>빼는 항만 비교하면 돼요. y = ⟨e^z⟩_q라 두면 ln y ≤ y/e를 보이면 되는데, y/e − ln y를 미분하면 y = e에서 최소이고 그때 값이 1 − 1 = 0이에요. 해석학 연습문제로 자주 나오는 부등식인데 여기서 만날 줄은 몰랐네요.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M03"><img src="images/cast/M03.svg" alt="김민준 M03" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 MINE이 DV를 고른 이유가 이거군요. 근데 스터디에서 DV는 로그 안에 평균이 들어 있어서 미니배치로 구한 기울기가 편향된다고 들었어요.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>맞아요. 미니배치 평균의 로그는 참 평균의 로그와 기댓값이 다르니까요. 그래서 MINE 논문은 분모 쪽 평균을 이동 평균으로 바꿔 기울기의 편향을 줄였어요. NWJ는 편향은 없는 대신 상수까지 맞춰야 하고요. 두 하한은 같은 르장드르 변환에서 나왔지만, 켤레를 다루는 방식이 달라서 실무에서의 장단점이 갈려요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M03"><img src="images/cast/M03.svg" alt="김민준 M03" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 MINE이 DV를 고른 이유가 이거군요. 근데 스터디에서 DV는 로그 안에 평균이 들어 있어서 미니배치로 구한 기울기가 한쪽으로 치우친다고 들었어요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.svg" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>맞아요. 미니배치 평균의 로그는 참 평균의 로그와 기댓값이 다르니까요. 그래서 MINE 논문은 분모 쪽 평균을 이동 평균으로 바꿔 기울기의 치우침을 줄였어요. NWJ는 치우침은 없는 대신 상수까지 맞춰야 하고요. 두 하한은 같은 르장드르 변환에서 나왔지만, 켤레를 다루는 방식이 달라서 실무에서의 장단점이 갈려요.</p></div></div>
 </div>
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="05-르장드르-변환-6.html">&larr; 펜헬–영 부등식: 교차 엔트로피의 정체</a><span class="page-count">7 / 8</span><a class="chapter-nav-next" href="05-르장드르-변환-8.html">자주 하는 실수와 요약 &rarr;</a></nav>
