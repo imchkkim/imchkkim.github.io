@@ -125,6 +125,13 @@ th, td {
   text-align: left;
 }
 th { background: var(--bg-code); font-weight: 600; }
+/* build.cjs 가 표를 이 상자로 감싼다: 좁은 화면에서 넓은 표는 상자 안에서만 가로로 밀린다(쪽 전체는 밀리지 않음).
+   넓은 화면(1200 이상)에서는 상자를 없는 셈 치고(display: contents) 예전과 똑같이 그린다 — 상자가 있으면 표 테두리 때문에 1~2px 어긋난다 */
+.table-wrap { display: contents; }
+@media (max-width: 1199px) {
+  .table-wrap { display: block; overflow-x: auto; margin: 1em 0; }
+  .table-wrap > table { margin: 0; }
+}
 
 /* ===== Lists ===== */
 ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
@@ -169,23 +176,37 @@ img {
   padding: 0.5em;
 }
 
-/* Portrait images in 핵심 인물과 일화 sections */
-h3 + p > img:only-child {
-  max-width: 200px;
+/* ===== 그림 상자와 설명 줄 =====
+   build.cjs 가 그림만으로 된 문단을 <figure class="fig"> 로 바꾼다. 개념 그림은 본문 폭 그대로 두고 아래에 설명 줄,
+   초상(「### 역사: …」 바로 다음 그림)은 fig-portrait 로 설명 없이 오른쪽에 작게 띄운다. 본보기: 동역학 style.css 「그림과 캡션」 */
+figure.fig { margin: 1.5em 0; }
+figure.fig img { margin: 0 auto; }
+figure.fig figcaption {
+  margin-top: 0.5em;
+  font-size: 0.86em;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: center;
+}
+/* 문제 상자는 어느 화면 모드에서나 흰 바탕이다 */
+.exercises figure.fig figcaption { color: #444; font-weight: 400; }
+figure.fig-portrait {
   float: right;
-  margin: 0 0 1em 1.5em;
+  clear: right; /* 띄운 그림이 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
+  /* 띄운 상자 여백은 소제목 여백과 겹치지 않는다: 소제목 아래 여백(0.5em × 1.3rem)과 합쳐 예전 문단 여백(0.8em)과 같게 */
+  margin: 0.15em 0 1em 1.5em;
+}
+figure.fig-portrait img {
+  max-width: 200px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-[data-theme="dark"] h3 + p > img:only-child {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-}
+[data-theme="dark"] figure.fig-portrait img { box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+/* 띄운 그림 뒤 글이 짧아도 다음 소제목은 그림 옆이 아니라 그림 아래에서 시작한다 */
+h2, h3, h4 { clear: both; }
 @media (max-width: 600px) {
-  h3 + p > img:only-child {
-    float: none;
-    margin: 0 auto 1em;
-    max-width: 160px;
-  }
+  figure.fig-portrait { float: none; margin: 0.8em 0 1em; }
+  figure.fig-portrait img { max-width: 160px; }
 }
 
 /* ===== Interactive Visualizations ===== */
@@ -374,11 +395,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -554,6 +570,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정, 1rem + 40px)이 보이는 폭: 본문 첫 줄을 버튼 아래에서 시작해 제목 끝이 덮이지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -602,8 +622,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -682,15 +700,15 @@ pre.mermaid {
 <h2 id="출발-문제">출발 문제</h2>
 <p>당신이 지금 북극점에 서 있다고 상상해 보자. 손에는 남쪽을 가리키는 화살표가 들려 있다. 이제 아주 중요한 규칙 하나를 정한다: 이 화살표를 절대로, 어떤 이유로도 <strong>회전시키지 않겠다</strong>. 오직 &quot;앞으로 밀기&quot;만 허용한다. 화살표가 가리키는 방향을 내 의지로 돌리는 행위는 금지다.</p>
 <p>이 규칙을 지키며 걸어가 보자. 먼저 경도 0° 자오선(북극과 남극을 잇는 반원)을 따라 적도까지 내려간다. 화살표는 여전히 남쪽을 가리킨다 — 여기까지는 자연스럽다. 이제 적도를 따라 동쪽으로 90° 이동한다. 적도 위에서 화살표를 회전시키지 않고 옮기면, 화살표는 계속 남쪽을 가리킨다(적도에서 &quot;남쪽&quot;은 적도와 수직 방향이다). 마지막으로 경도 90° 자오선을 따라 다시 북극으로 올라온다. 화살표를 한 번도 회전시키지 않았으니, 당연히 원래 방향을 가리키고 있어야 하지 않을까?</p>
-<p><img src="images/parallel-transport-sphere.svg" alt="구면 위 삼각형 경로를 따라 벡터를 평행이동하면, 벡터를 한 번도 회전시키지 않았는데도 출발점에서 방향이 어긋난다. 이 어긋남이 홀로노미이며, 공간이 휘어져 있다는 증거다."></p>
+<figure class="fig"><img src="images/parallel-transport-sphere.svg" alt="구면 위 삼각형 경로를 따라 벡터를 옮기면, 한 번도 회전시키지 않았는데도 출발점에서 방향이 어긋난다."><figcaption>구면 위 삼각형 경로를 따라 벡터를 옮기면, 한 번도 회전시키지 않았는데도 출발점에서 방향이 어긋난다.</figcaption></figure>
 <p>놀랍게도, 화살표는 원래 방향에서 정확히 <strong>90° 돌아가 있다</strong>. 처음에는 경도 0° 자오선 쪽을 가리키던 화살표가, 이제는 방금 올라온 경도 90° 자오선 쪽을 가리킨다. 한 번도 회전시키지 않았는데 돌아간 것이다. 마술이 아니라, 평평한 바닥에서는 절대 일어나지 않는 이 현상은 구면이 <strong>휘어져 있기 때문에</strong> 벌어진다.</p>
 <p>이 실험에서 한 가지만 바꿔 보자. 적도를 따라 90°가 아니라 180° 이동한 뒤 북극으로 돌아오면 화살표는 180° 돌아가 있다. 적도를 360° 전부 돌면 360°, 곧 원래 방향으로 돌아온다. 적도를 따라 간 거리가 두 배가 되면 경로가 둘러싼 면적도 두 배가 되고 회전량도 두 배가 되니, 회전량이 면적에 비례한다는 느낌이 든다. 이 직감은 정확히 맞다.</p>
 <h2 id="평행이동-돌리지-않고-옮긴다는-것">평행이동: 돌리지 않고 옮긴다는 것</h2>
 <p>출발 문제의 화살표는 한 번도 돌리지 않았는데 돌아가 있었다. 그렇다면 &quot;돌리지 않는다&quot;는 말이 정확히 무슨 뜻인지부터 따져 봐야 한다.</p>
 <p>평면 위에서는 답이 분명하다. 화살표를 들고 어떤 경로를 따라 걸어간 뒤 출발점으로 돌아오면, 화살표는 반드시 원래 방향을 가리킨다. 경로가 직선이든 구불구불하든, 크든 작든 상관없다. 곡면 위에서도 이 &quot;그냥 밀기&quot;를 정의할 수 있을까?</p>
 <h3 id="역사-툴리오-레비-치비타-tullio-levi-civita-1873-1941">역사: 툴리오 레비-치비타 (Tullio Levi-Civita, 1873–1941)</h3>
-<p><img src="images/levi-civita.jpg" alt="레비-치비타의 초상"></p>
-<p>크리스토펠 기호는 1869년부터 존재했지만, 거의 50년간 순수하게 계산 도구로만 쓰였다. 이 기호들에 기하학적 생명을 불어넣은 것은 레비-치비타의 1917년 논문 &quot;평행이동의 개념(Nozione di parallelismo)&quot;이다.</p>
+<figure class="fig fig-portrait"><img src="images/levi-civita.jpg" alt="레비-치비타의 초상"></figure>
+<p>크리스토펠 기호(좌표 격자가 휘는 만큼을 적은 보정값)는 1869년부터 존재했지만, 거의 50년간 순수하게 계산 도구로만 쓰였다. 이 기호들에 기하학적 생명을 불어넣은 것은 레비-치비타의 1917년 논문 &quot;평행이동의 개념(Nozione di parallelismo)&quot;이다.</p>
 <p>레비-치비타의 질문은 놀라울 정도로 단순했다: 곡면 위의 한 점에서 다른 점으로 화살표를 옮길 때, &quot;회전시키지 않는다&quot;는 것은 무슨 뜻인가? 발밑의 곡면이 휘어져 있으면 평면에서처럼 &quot;그냥 밀기&quot;가 정의되지 않는다.</p>
 <p>레비-치비타의 답은 이것이었다: 곡면 위의 곡선을 따라 아주 짧은 구간마다, 곡면에 접하는 평면 위에서 벡터를 밀고, 다시 곡면 위로 수직으로 눌러 내려라(사영, projection). 이 과정의 극한이 평행이동이며, 크리스토펠 기호는 바로 이 사영 과정에서 나타나는 보정 항이었다.</p>
 <h3 id="접선공간에서-밀고-곡면으로-되돌리기">접선공간에서 밀고 곡면으로 되돌리기</h3>
@@ -701,7 +719,7 @@ pre.mermaid {
 <li>떠 있던 부분 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>sin</mi><mo>⁡</mo><mn>0.1</mn><mo>≈</mo><mn>0.0998</mn></mrow><annotation encoding="application/x-tex">\sin 0.1 \approx 0.0998</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6679em;"></span><span class="mop">sin</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0.1</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.0998</span></span></span></span></eq>이 잘려 나가고, 길이는 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>cos</mi><mo>⁡</mo><mn>0.1</mn><mo>≈</mo><mn>0.995</mn></mrow><annotation encoding="application/x-tex">\cos 0.1 \approx 0.995</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mop">cos</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0.1</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.995</span></span></span></span></eq>가 된다. 방향은 새 자리의 남쪽이다.</li>
 </ol>
 <p>길이가 0.5% 줄었다. 돌리지 않고 옮긴다면서 길이가 줄면 곤란하다. 같은 0.1 rad을 잘게 쪼개 한 걸음마다 눌러 내려 보자.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>쪼갠 걸음 수</th>
@@ -726,10 +744,10 @@ pre.mermaid {
 <td>0.99995</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>열 배 잘게 쪼갤 때마다 줄어든 양도 10분의 1이 되므로, 끝없이 쪼개면 길이는 1 그대로다. 방향은 어느 경우나 새 자리의 남쪽이다. 이렇게 끝없이 쪼갠 극한에 이름을 붙인다.</p>
 <ul>
-<li><strong>평행이동</strong> (방향 택배 / Direction Shipping) — 접속(이웃한 점의 벡터를 비교하는 규칙)을 사용해 벡터를 경로를 따라 “회전 없이” 옮기는 것. 접선공간에서 밀고 곡면으로 눌러 내리기를 끝없이 잘게 쪼갠 극한이다. 수학적으로는, 곡선 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\gamma(t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0556em;">γ</span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span></eq>를 따라 벡터장 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.2222em;">V</span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span></eq>의 공변미분(좌표 탓 가짜 변화를 뺀 미분) <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">∇</mi><msup><mi>γ</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></msub><mi>V</mi></mrow><annotation encoding="application/x-tex">\nabla_{\gamma&#x27;}V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord">∇</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.328em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0556em;">γ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6828em;"><span style="top:-2.786em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.2222em;">V</span></span></span></span></eq>가 0이 되도록 옮기는 것이다. 좌표로 풀어 쓰면 아래처럼 한 번 미분한 양만 든 연립 미분방정식이 되고, 출발점의 벡터만 정하면 경로 위의 벡터가 하나로 정해진다.</li>
+<li><strong>평행이동</strong> (방향 택배 / Parallel Transport) — 접속(이웃한 점의 벡터를 비교하는 규칙)을 사용해 벡터를 경로를 따라 “회전 없이” 옮기는 것. 접선공간에서 밀고 곡면으로 눌러 내리기를 끝없이 잘게 쪼갠 극한이다. 수학적으로는, 곡선 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\gamma(t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0556em;">γ</span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span></eq>를 따라 벡터장 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.2222em;">V</span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span></eq>의 공변미분(좌표 탓 가짜 변화를 뺀 미분) <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">∇</mi><msup><mi>γ</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></msub><mi>V</mi></mrow><annotation encoding="application/x-tex">\nabla_{\gamma&#x27;}V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord">∇</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.328em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0556em;">γ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6828em;"><span style="top:-2.786em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.2222em;">V</span></span></span></span></eq>가 0이 되도록 옮기는 것이다. 좌표로 풀어 쓰면 아래처럼 한 번 미분한 양만 든 연립 미분방정식이 되고, 출발점의 벡터만 정하면 경로 위의 벡터가 하나로 정해진다.</li>
 </ul>
 <section><eqn><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mfrac><mrow><mi>d</mi><msup><mstyle mathcolor="#e8710a"><mi>V</mi></mstyle><mi>k</mi></msup></mrow><mrow><mi>d</mi><mstyle mathcolor="#6a7a00"><mi>t</mi></mstyle></mrow></mfrac><mo>+</mo><msubsup><mstyle mathcolor="#9467bd"><mi mathvariant="normal">Γ</mi></mstyle><mrow><mi>i</mi><mi>j</mi></mrow><mi>k</mi></msubsup><mtext> </mtext><msup><mover accent="true"><mstyle mathcolor="#0e9aa7"><mi>γ</mi></mstyle><mo>˙</mo></mover><mi>i</mi></msup><mtext> </mtext><msup><mstyle mathcolor="#e8710a"><mi>V</mi></mstyle><mi>j</mi></msup><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">
 \frac{d\textcolor{#e8710a}{V}^k}{d\textcolor{#6a7a00}{t}} + \textcolor{#9467bd}{\Gamma}^k_{ij}\, \dot{\textcolor{#0e9aa7}{\gamma}}^i\, \textcolor{#e8710a}{V}^j = 0
@@ -781,16 +799,32 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
+// Mermaid — 테마를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  m.default.initialize({
-    startOnLoad: false,
-    theme: isDark ? 'dark' : 'default',
-    securityLevel: 'loose',
-  });
-  m.default.run();
-});
+  // 다크: mermaid 내장 dark 는 회색 상자·회색 묶음 바탕이 남색 페이지와 어긋난다 → 페이지 CSS 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(isDark ? {
+    startOnLoad: false, securityLevel: 'loose', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+toggle.addEventListener('click', () => renderMermaid());
 </script>
 
 </body>

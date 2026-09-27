@@ -125,6 +125,13 @@ th, td {
   text-align: left;
 }
 th { background: var(--bg-code); font-weight: 600; }
+/* build.cjs 가 표를 이 상자로 감싼다: 좁은 화면에서 넓은 표는 상자 안에서만 가로로 밀린다(쪽 전체는 밀리지 않음).
+   넓은 화면(1200 이상)에서는 상자를 없는 셈 치고(display: contents) 예전과 똑같이 그린다 — 상자가 있으면 표 테두리 때문에 1~2px 어긋난다 */
+.table-wrap { display: contents; }
+@media (max-width: 1199px) {
+  .table-wrap { display: block; overflow-x: auto; margin: 1em 0; }
+  .table-wrap > table { margin: 0; }
+}
 
 /* ===== Lists ===== */
 ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
@@ -169,23 +176,37 @@ img {
   padding: 0.5em;
 }
 
-/* Portrait images in 핵심 인물과 일화 sections */
-h3 + p > img:only-child {
-  max-width: 200px;
+/* ===== 그림 상자와 설명 줄 =====
+   build.cjs 가 그림만으로 된 문단을 <figure class="fig"> 로 바꾼다. 개념 그림은 본문 폭 그대로 두고 아래에 설명 줄,
+   초상(「### 역사: …」 바로 다음 그림)은 fig-portrait 로 설명 없이 오른쪽에 작게 띄운다. 본보기: 동역학 style.css 「그림과 캡션」 */
+figure.fig { margin: 1.5em 0; }
+figure.fig img { margin: 0 auto; }
+figure.fig figcaption {
+  margin-top: 0.5em;
+  font-size: 0.86em;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: center;
+}
+/* 문제 상자는 어느 화면 모드에서나 흰 바탕이다 */
+.exercises figure.fig figcaption { color: #444; font-weight: 400; }
+figure.fig-portrait {
   float: right;
-  margin: 0 0 1em 1.5em;
+  clear: right; /* 띄운 그림이 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
+  /* 띄운 상자 여백은 소제목 여백과 겹치지 않는다: 소제목 아래 여백(0.5em × 1.3rem)과 합쳐 예전 문단 여백(0.8em)과 같게 */
+  margin: 0.15em 0 1em 1.5em;
+}
+figure.fig-portrait img {
+  max-width: 200px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-[data-theme="dark"] h3 + p > img:only-child {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-}
+[data-theme="dark"] figure.fig-portrait img { box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+/* 띄운 그림 뒤 글이 짧아도 다음 소제목은 그림 옆이 아니라 그림 아래에서 시작한다 */
+h2, h3, h4 { clear: both; }
 @media (max-width: 600px) {
-  h3 + p > img:only-child {
-    float: none;
-    margin: 0 auto 1em;
-    max-width: 160px;
-  }
+  figure.fig-portrait { float: none; margin: 0.8em 0 1em; }
+  figure.fig-portrait img { max-width: 160px; }
 }
 
 /* ===== Interactive Visualizations ===== */
@@ -374,11 +395,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -554,6 +570,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정, 1rem + 40px)이 보이는 폭: 본문 첫 줄을 버튼 아래에서 시작해 제목 끝이 덮이지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -602,8 +622,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -679,12 +697,12 @@ pre.mermaid {
 <main>
 <section class="chapter">
 <h1>에필로그: 언어 너머의 풍경</h1>
-<p>이 책은 하나의 질문에서 시작했다. &quot;두 점 사이의 거리&quot;라는 일상적 개념을 엄밀하게 다루려면 무엇이 필요한가? 먼저 좌표 조각들로 공간을 덮는 법을 배웠고, 점마다 거리를 재는 눈금인 계량 텐서를 만났고, 접속을 통해 벡터를 비교하는 법을 배웠고, 곡률이라는 이름으로 공간의 휘어짐을 정량화했다. 리만 기하학의 언어를 한 겹 한 겹 쌓아 올린 이 여정은, 단순한 수학적 호기심이 아니라 물리학과 정보과학의 깊은 문제들과 만나기 위한 준비였다.</p>
+<p>이 책은 하나의 질문에서 시작했다. 둥근 지구를 왜 지도 한 장에 왜곡 없이 담을 수 없는가? 먼저 좌표 조각들로 공간을 덮는 법을 배웠고, 점마다 거리를 재는 눈금인 계량 텐서를 만났고, 접속을 통해 벡터를 비교하는 법을 배웠고, 곡률이라는 이름으로 공간의 휘어짐을 정량화했다. 리만 기하학의 언어를 한 겹 한 겹 쌓아 올린 이 여정은, 단순한 수학적 호기심이 아니라 물리학과 정보과학의 깊은 문제들과 만나기 위한 준비였다.</p>
 <p>책의 후반부는 그 만남이 실현되는 무대였다. 곡률 텐서를 축약하여 리치 텐서와 아인슈타인 텐서를 얻었을 때, 일반상대성이론의 중력장 방정식이 기하학의 자연스러운 귀결임을 보았다. 같은 공간에 두 개의 접속이 공존할 수 있다는 발견은 확률분포의 공간이 가진 풍부한 구조를 드러냈다. 비대칭적 발산과 쌍대 사영의 피타고라스 정리는 EM 알고리즘이 한 번도 뒷걸음질하지 않는 이유와 변분추론이 봉우리 하나를 붙잡는 이유를 기하학으로 설명해 주었다. 그리고 자연 경사는 &quot;매개변수 공간의 기하학을 존중하라&quot;는 원칙이 어떻게 현대 최적화 알고리즘을 인도하는지를 보여주었다.</p>
 <p>미분기하학의 언어가 이토록 다양한 세계에 적용되는 이유는 무엇일까? 그것은 미분기하학이 &quot;좌표에 의존하지 않는 사고&quot;의 학문이기 때문이다. 물리 법칙은 관측자의 좌표계에 의존하지 않아야 한다. 통계적 추론은 매개변수의 이름에 의존하지 않아야 한다. 학습 알고리즘은 매개변수를 어떻게 잡느냐에 의존하지 않아야 한다. 이 모든 &quot;불변성&quot;의 요구가 자연스럽게 미분기하학의 언어로 이어진다. 리만이 1854년에 놓은 토대 위에서, 150년 뒤의 인공지능 연구자들이 같은 언어로 사고하고 있다는 것은 수학의 보편성을 보여주는 가장 아름다운 사례 중 하나다.</p>
 <p>이 책이 끝이 아니라 시작이 되기를 바란다. 여기서 다룬 것은 광대한 풍경의 일부에 불과하다. 아래 표는 이 책에서 다루지 못한, 그러나 여러분이 이제 탐험할 준비가 된 세계들의 목록이다.</p>
 <h2 id="다루지-못한-이야기들">다루지 못한 이야기들</h2>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>주제</th>
@@ -724,7 +742,7 @@ pre.mermaid {
 <td>양자컴퓨팅, 양자 기계학습</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2 id="마치며">마치며</h2>
 <p>수학의 아름다움에 대해 많은 사람들이 말해 왔지만, 기하학적 사고의 아름다움은 조금 특별하다. 그것은 추상적 공식 뒤에 숨어 있는 <strong>풍경</strong>을 보는 능력이다. 크리스토펠 기호의 복잡한 공식 뒤에는 &quot;벡터를 평행하게 옮기면 어떻게 되는가?&quot;라는 단순한 질문이 있고, 리만 곡률 텐서의 첨자 숲 뒤에는 &quot;작은 루프를 돌면 벡터가 얼마나 회전하는가?&quot;라는 그림이 있다. 공식을 외우는 것이 아니라 풍경을 보는 것 — 그것이 기하학적 사고의 본질이다.</p>
 <p>이 책을 읽는 동안 한 번이라도 &quot;아, 그래서 이것이 곡률이구나&quot;라고 느낀 순간이 있었다면, 그것만으로 이 책은 제 역할을 한 것이다. 그리고 그 순간의 감각을 간직한 채 위의 표에 적힌 세계들 — 파이버 다발의 게이지 대칭, 심플렉틱 기하학의 보존법칙, 최적수송의 바서슈타인 거리 — 로 발걸음을 옮긴다면, 여러분은 이미 그 풍경을 읽을 수 있는 언어를 가지고 있다.</p>
@@ -766,16 +784,32 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
+// Mermaid — 테마를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  m.default.initialize({
-    startOnLoad: false,
-    theme: isDark ? 'dark' : 'default',
-    securityLevel: 'loose',
-  });
-  m.default.run();
-});
+  // 다크: mermaid 내장 dark 는 회색 상자·회색 묶음 바탕이 남색 페이지와 어긋난다 → 페이지 CSS 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(isDark ? {
+    startOnLoad: false, securityLevel: 'loose', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+toggle.addEventListener('click', () => renderMermaid());
 </script>
 
 </body>

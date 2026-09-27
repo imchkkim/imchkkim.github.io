@@ -125,6 +125,13 @@ th, td {
   text-align: left;
 }
 th { background: var(--bg-code); font-weight: 600; }
+/* build.cjs 가 표를 이 상자로 감싼다: 좁은 화면에서 넓은 표는 상자 안에서만 가로로 밀린다(쪽 전체는 밀리지 않음).
+   넓은 화면(1200 이상)에서는 상자를 없는 셈 치고(display: contents) 예전과 똑같이 그린다 — 상자가 있으면 표 테두리 때문에 1~2px 어긋난다 */
+.table-wrap { display: contents; }
+@media (max-width: 1199px) {
+  .table-wrap { display: block; overflow-x: auto; margin: 1em 0; }
+  .table-wrap > table { margin: 0; }
+}
 
 /* ===== Lists ===== */
 ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
@@ -169,23 +176,37 @@ img {
   padding: 0.5em;
 }
 
-/* Portrait images in 핵심 인물과 일화 sections */
-h3 + p > img:only-child {
-  max-width: 200px;
+/* ===== 그림 상자와 설명 줄 =====
+   build.cjs 가 그림만으로 된 문단을 <figure class="fig"> 로 바꾼다. 개념 그림은 본문 폭 그대로 두고 아래에 설명 줄,
+   초상(「### 역사: …」 바로 다음 그림)은 fig-portrait 로 설명 없이 오른쪽에 작게 띄운다. 본보기: 동역학 style.css 「그림과 캡션」 */
+figure.fig { margin: 1.5em 0; }
+figure.fig img { margin: 0 auto; }
+figure.fig figcaption {
+  margin-top: 0.5em;
+  font-size: 0.86em;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: center;
+}
+/* 문제 상자는 어느 화면 모드에서나 흰 바탕이다 */
+.exercises figure.fig figcaption { color: #444; font-weight: 400; }
+figure.fig-portrait {
   float: right;
-  margin: 0 0 1em 1.5em;
+  clear: right; /* 띄운 그림이 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
+  /* 띄운 상자 여백은 소제목 여백과 겹치지 않는다: 소제목 아래 여백(0.5em × 1.3rem)과 합쳐 예전 문단 여백(0.8em)과 같게 */
+  margin: 0.15em 0 1em 1.5em;
+}
+figure.fig-portrait img {
+  max-width: 200px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-[data-theme="dark"] h3 + p > img:only-child {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-}
+[data-theme="dark"] figure.fig-portrait img { box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+/* 띄운 그림 뒤 글이 짧아도 다음 소제목은 그림 옆이 아니라 그림 아래에서 시작한다 */
+h2, h3, h4 { clear: both; }
 @media (max-width: 600px) {
-  h3 + p > img:only-child {
-    float: none;
-    margin: 0 auto 1em;
-    max-width: 160px;
-  }
+  figure.fig-portrait { float: none; margin: 0.8em 0 1em; }
+  figure.fig-portrait img { max-width: 160px; }
 }
 
 /* ===== Interactive Visualizations ===== */
@@ -374,11 +395,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -554,6 +570,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정, 1rem + 40px)이 보이는 폭: 본문 첫 줄을 버튼 아래에서 시작해 제목 끝이 덮이지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -602,8 +622,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -681,7 +699,7 @@ pre.mermaid {
 <p class="chapter-crumb"><a href="09-곡률을요약하는법.html">곡률을 요약하는 법</a></p>
 <h2 id="자주-하는-실수와-요약">자주 하는 실수와 요약</h2>
 <h3 id="자주-하는-실수">자주 하는 실수</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>실수</th>
@@ -711,11 +729,11 @@ pre.mermaid {
 <td>차원 조건을 먼저 확인한다. 4차원에서는 바일이 10개 성분을 갖는다</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="요약">요약</h3>
 <p>리만 곡률 텐서는 4차원에서 성분이 20개다. 첫째·셋째 첨자를 축약하면 대칭 2차 텐서인 리치 텐서(10개)가 되고, 이것은 방향별로 측지선 묶음의 부피가 어떻게 변하는지를 잰다. 계량으로 한 번 더 축약하면 스칼라 곡률(1개)이 되고, 이것은 작은 측지 공의 부피가 평평한 공간에서보다 얼마나 모자라는지를 잰다. 2차원에서는 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mo>=</mo><mn>2</mn><mi>K</mi></mrow><annotation encoding="application/x-tex">R = 2K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.0715em;">K</span></span></span></span></eq>로 정보 손실이 없지만, 차원이 높을수록 요약이 버리는 정보가 많다. 리치 텐서로 계량을 흘려보내는 리치 흐름은 푸앵카레 추측의 증명으로 이어졌다. 리치와 스칼라 곡률을 조합한 아인슈타인 텐서는 발산이 0이어서 물질의 보존법칙과 맞세울 수 있고, 리치가 버린 나머지인 바일 텐서는 부피는 그대로 두고 모양만 바꾸는 조석력을 담는다.</p>
 <h3 id="연결되는-세계들">연결되는 세계들</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>분야</th>
@@ -733,7 +751,7 @@ pre.mermaid {
 </tr>
 <tr>
 <td>기계학습</td>
-<td>손실 풍경의 리치 곡률 → 학습이 어려운 영역</td>
+<td>그래프의 곡률 → 그래프 신경망에서 정보가 막히는 간선</td>
 </tr>
 <tr>
 <td>최적수송</td>
@@ -744,7 +762,7 @@ pre.mermaid {
 <td>통계적 매니폴드의 스칼라 곡률 → 추정의 효율성</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>요약은 무엇을 버렸는지 알고 쓸 때만 안전하다는 것을 보았다. 그런데 이 장의 곡률은 모두 계량 하나에서 나왔다. 계량으로부터 크리스토펠 기호를 거쳐 곡률까지 가는 길은 하나뿐일까? 같은 계량을 두고도 &quot;평행하게 옮긴다&quot;는 규칙을 다르게 정할 수 있다면, 곡률도 달라질까? 이 질문에는 아직 답하지 못했다.</p>
 
@@ -784,16 +802,32 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
+// Mermaid — 테마를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  m.default.initialize({
-    startOnLoad: false,
-    theme: isDark ? 'dark' : 'default',
-    securityLevel: 'loose',
-  });
-  m.default.run();
-});
+  // 다크: mermaid 내장 dark 는 회색 상자·회색 묶음 바탕이 남색 페이지와 어긋난다 → 페이지 CSS 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(isDark ? {
+    startOnLoad: false, securityLevel: 'loose', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+toggle.addEventListener('click', () => renderMermaid());
 </script>
 
 </body>

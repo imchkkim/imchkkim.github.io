@@ -125,6 +125,13 @@ th, td {
   text-align: left;
 }
 th { background: var(--bg-code); font-weight: 600; }
+/* build.cjs 가 표를 이 상자로 감싼다: 좁은 화면에서 넓은 표는 상자 안에서만 가로로 밀린다(쪽 전체는 밀리지 않음).
+   넓은 화면(1200 이상)에서는 상자를 없는 셈 치고(display: contents) 예전과 똑같이 그린다 — 상자가 있으면 표 테두리 때문에 1~2px 어긋난다 */
+.table-wrap { display: contents; }
+@media (max-width: 1199px) {
+  .table-wrap { display: block; overflow-x: auto; margin: 1em 0; }
+  .table-wrap > table { margin: 0; }
+}
 
 /* ===== Lists ===== */
 ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
@@ -169,23 +176,37 @@ img {
   padding: 0.5em;
 }
 
-/* Portrait images in 핵심 인물과 일화 sections */
-h3 + p > img:only-child {
-  max-width: 200px;
+/* ===== 그림 상자와 설명 줄 =====
+   build.cjs 가 그림만으로 된 문단을 <figure class="fig"> 로 바꾼다. 개념 그림은 본문 폭 그대로 두고 아래에 설명 줄,
+   초상(「### 역사: …」 바로 다음 그림)은 fig-portrait 로 설명 없이 오른쪽에 작게 띄운다. 본보기: 동역학 style.css 「그림과 캡션」 */
+figure.fig { margin: 1.5em 0; }
+figure.fig img { margin: 0 auto; }
+figure.fig figcaption {
+  margin-top: 0.5em;
+  font-size: 0.86em;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: center;
+}
+/* 문제 상자는 어느 화면 모드에서나 흰 바탕이다 */
+.exercises figure.fig figcaption { color: #444; font-weight: 400; }
+figure.fig-portrait {
   float: right;
-  margin: 0 0 1em 1.5em;
+  clear: right; /* 띄운 그림이 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
+  /* 띄운 상자 여백은 소제목 여백과 겹치지 않는다: 소제목 아래 여백(0.5em × 1.3rem)과 합쳐 예전 문단 여백(0.8em)과 같게 */
+  margin: 0.15em 0 1em 1.5em;
+}
+figure.fig-portrait img {
+  max-width: 200px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-[data-theme="dark"] h3 + p > img:only-child {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-}
+[data-theme="dark"] figure.fig-portrait img { box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+/* 띄운 그림 뒤 글이 짧아도 다음 소제목은 그림 옆이 아니라 그림 아래에서 시작한다 */
+h2, h3, h4 { clear: both; }
 @media (max-width: 600px) {
-  h3 + p > img:only-child {
-    float: none;
-    margin: 0 auto 1em;
-    max-width: 160px;
-  }
+  figure.fig-portrait { float: none; margin: 0.8em 0 1em; }
+  figure.fig-portrait img { max-width: 160px; }
 }
 
 /* ===== Interactive Visualizations ===== */
@@ -374,11 +395,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -554,6 +570,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정, 1rem + 40px)이 보이는 폭: 본문 첫 줄을 버튼 아래에서 시작해 제목 끝이 덮이지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -602,8 +622,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -682,9 +700,9 @@ pre.mermaid {
 <h2 id="위도선의-홀로노미-푸코-진자가-도는-까닭">위도선의 홀로노미: 푸코 진자가 도는 까닭</h2>
 <p>지금까지 본 경로는 대원(구의 중심을 지나는 평면이 구면을 자른 가장 큰 원. 적도나 자오선) 조각을 이어 붙인 삼각형이었다. 대원이 아닌 원, 이를테면 위도선을 따라 한 바퀴 돌면 화살표는 얼마나 돌아갈까? 그리고 이 어긋남을 실제 지구 위에서 눈으로 볼 수 있을까?</p>
 <h3 id="역사-레옹-푸코-léon-foucault-1819-1868">역사: 레옹 푸코 (Léon Foucault, 1819–1868)</h3>
-<p><img src="images/foucault.jpg" alt="푸코의 초상"></p>
+<figure class="fig fig-portrait"><img src="images/foucault.jpg" alt="푸코의 초상"></figure>
 <p>레비-치비타보다 66년 앞선 1851년, 파리의 물리학자 레옹 푸코는 판테온의 돔에서 길이 67미터의 진자를 매달았다. 진자가 흔들리는 평면(진동면)은 천천히 회전하며 하루 만에 원래 방향에서 벗어났다. 지구가 자전하고 있다는 직접적 증거였다.</p>
-<p><img src="images/foucault-pendulum-pantheon.jpg" alt="파리 판테온에 설치된 푸코 진자. 67미터 길이의 줄에 매달린 진자의 진동면이 천천히 회전하며, 이는 구면 위에서 벡터가 평행이동될 때 나타나는 홀로노미의 물리적 시연이다."></p>
+<figure class="fig"><img src="images/foucault-pendulum-pantheon.jpg" alt="파리 판테온에 설치된 푸코 진자. 67미터 길이의 줄에 매달린 진자의 진동면이 천천히 회전하며, 이는 구면 위에서 벡터가 평행이동될 때 나타나는 홀로노미의 물리적 시연이다."><figcaption>파리 판테온에 설치된 푸코 진자. 67미터 길이의 줄에 매달린 진자의 진동면이 천천히 회전하며, 이는 구면 위에서 벡터가 평행이동될 때 나타나는 홀로노미의 물리적 시연이다.</figcaption></figure>
 <p>지구 자전의 증거로 유명하지만, 기하학적으로 보면 이것은 평행이동의 홀로노미다. 땅 위에서 보면 진자의 진동면이라는 &quot;벡터&quot;가 위도선이라는 &quot;닫힌 경로&quot;를 따라 하루에 한 바퀴 평행이동된다.</p>
 <p>푸코 자신은 이것을 미분기하학의 언어로 이해하지 못했다. 하지만 그의 실험은 &quot;닫힌 경로를 따라 벡터를 옮기면 원래로 돌아오지 않는다&quot;는 현상의 가장 극적인 물리적 시연이었다. 60여 년 뒤 레비-치비타가 수학적 형식을 갖추었고, 또 60여 년 뒤 마이클 베리(Michael Berry)가 같은 구조를 양자역학에서 재발견한다 — &quot;베리 위상(Berry phase)&quot;이라는 이름으로.</p>
 <h3 id="위도선-한-바퀴의-회전각">위도선 한 바퀴의 회전각</h3>
@@ -714,7 +732,7 @@ pre.mermaid {
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:3.6em;vertical-align:-1.55em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.0359em;">π</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:var(--c-holo,#a0522d);">Δ</span><span class="mord mathnormal" style="margin-right:0.0278em;color:var(--c-holo,#a0522d);">θ</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;color:var(--c-coord,#1b9e77);">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">한</span><span class="mord"> </span><span class="mord hangul_fallback">바퀴</span><span class="mord"> </span><span class="mord hangul_fallback">도는</span><span class="mord"> </span><span class="mord hangul_fallback">동안</span><span class="mord"> </span><span class="mord hangul_fallback">경로</span><span class="mord"> </span><span class="mord hangul_fallback">방향</span><span class="mord">(</span><span class="mord hangul_fallback">동쪽</span><span class="mord">)</span><span class="mord hangul_fallback">이</span><span class="mord"> </span><span class="mord hangul_fallback">돌아간</span><span class="mord"> </span><span class="mord hangul_fallback">각도</span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">홀로노미</span></span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">여위도</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord">90°</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord text"><span class="mord hangul_fallback">위도</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></eqn></section><p>가 된다. 북위 60°에서는 하루(항성일: 먼 별을 기준으로 지구가 한 바퀴 도는 시간, 약 23.93시간)에 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>311.8</mn><mi mathvariant="normal">°</mi></mrow><annotation encoding="application/x-tex">311.8°</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord">311.8°</span></span></span></span></eq>, 서울(북위 37.5°)에서는 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>219.2</mn><mi mathvariant="normal">°</mi></mrow><annotation encoding="application/x-tex">219.2°</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord">219.2°</span></span></span></span></eq> 돌아가서, 진동면이 한 바퀴 도는 데 약 39.3시간이 걸린다. 홀로노미와 푸코 회전은 합이 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>360</mn><mi mathvariant="normal">°</mi></mrow><annotation encoding="application/x-tex">360°</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord">360°</span></span></span></span></eq>인 한 쌍이다.</p>
 </div>
 <p>위도별로 두 값을 나란히 놓아 보자(회전은 항성일 하루 동안).</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>위도</th>
@@ -749,7 +767,7 @@ pre.mermaid {
 <td>360°</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>북극에서는 진동면이 땅에 대해 하루에 한 바퀴 돌고, 적도에서는 전혀 돌지 않는다. 두 칸은 같은 어긋남을 서로 다른 기준으로 잰 값이라 합이 언제나 360°다.</p>
 <h3 id="문제-2-북위-60-의-화살표와-서울의-푸코-진자">문제 2 — 북위 60°의 화살표와 서울의 푸코 진자</h3>
 <div class="exercises">
@@ -805,16 +823,32 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
+// Mermaid — 테마를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  m.default.initialize({
-    startOnLoad: false,
-    theme: isDark ? 'dark' : 'default',
-    securityLevel: 'loose',
-  });
-  m.default.run();
-});
+  // 다크: mermaid 내장 dark 는 회색 상자·회색 묶음 바탕이 남색 페이지와 어긋난다 → 페이지 CSS 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(isDark ? {
+    startOnLoad: false, securityLevel: 'loose', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+toggle.addEventListener('click', () => renderMermaid());
 </script>
 
 </body>

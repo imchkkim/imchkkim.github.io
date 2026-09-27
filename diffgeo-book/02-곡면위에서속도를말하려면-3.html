@@ -125,6 +125,13 @@ th, td {
   text-align: left;
 }
 th { background: var(--bg-code); font-weight: 600; }
+/* build.cjs 가 표를 이 상자로 감싼다: 좁은 화면에서 넓은 표는 상자 안에서만 가로로 밀린다(쪽 전체는 밀리지 않음).
+   넓은 화면(1200 이상)에서는 상자를 없는 셈 치고(display: contents) 예전과 똑같이 그린다 — 상자가 있으면 표 테두리 때문에 1~2px 어긋난다 */
+.table-wrap { display: contents; }
+@media (max-width: 1199px) {
+  .table-wrap { display: block; overflow-x: auto; margin: 1em 0; }
+  .table-wrap > table { margin: 0; }
+}
 
 /* ===== Lists ===== */
 ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
@@ -169,23 +176,37 @@ img {
   padding: 0.5em;
 }
 
-/* Portrait images in 핵심 인물과 일화 sections */
-h3 + p > img:only-child {
-  max-width: 200px;
+/* ===== 그림 상자와 설명 줄 =====
+   build.cjs 가 그림만으로 된 문단을 <figure class="fig"> 로 바꾼다. 개념 그림은 본문 폭 그대로 두고 아래에 설명 줄,
+   초상(「### 역사: …」 바로 다음 그림)은 fig-portrait 로 설명 없이 오른쪽에 작게 띄운다. 본보기: 동역학 style.css 「그림과 캡션」 */
+figure.fig { margin: 1.5em 0; }
+figure.fig img { margin: 0 auto; }
+figure.fig figcaption {
+  margin-top: 0.5em;
+  font-size: 0.86em;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: center;
+}
+/* 문제 상자는 어느 화면 모드에서나 흰 바탕이다 */
+.exercises figure.fig figcaption { color: #444; font-weight: 400; }
+figure.fig-portrait {
   float: right;
-  margin: 0 0 1em 1.5em;
+  clear: right; /* 띄운 그림이 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
+  /* 띄운 상자 여백은 소제목 여백과 겹치지 않는다: 소제목 아래 여백(0.5em × 1.3rem)과 합쳐 예전 문단 여백(0.8em)과 같게 */
+  margin: 0.15em 0 1em 1.5em;
+}
+figure.fig-portrait img {
+  max-width: 200px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-[data-theme="dark"] h3 + p > img:only-child {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-}
+[data-theme="dark"] figure.fig-portrait img { box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+/* 띄운 그림 뒤 글이 짧아도 다음 소제목은 그림 옆이 아니라 그림 아래에서 시작한다 */
+h2, h3, h4 { clear: both; }
 @media (max-width: 600px) {
-  h3 + p > img:only-child {
-    float: none;
-    margin: 0 auto 1em;
-    max-width: 160px;
-  }
+  figure.fig-portrait { float: none; margin: 0.8em 0 1em; }
+  figure.fig-portrait img { max-width: 160px; }
 }
 
 /* ===== Interactive Visualizations ===== */
@@ -374,11 +395,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -554,6 +570,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정, 1rem + 40px)이 보이는 폭: 본문 첫 줄을 버튼 아래에서 시작해 제목 끝이 덮이지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -602,8 +622,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -682,6 +700,7 @@ pre.mermaid {
 <h2 id="좌표-기저-좌표-한-칸만큼-가는-화살표">좌표 기저: 좌표 한 칸만큼 가는 화살표</h2>
 <p>접선공간이 벡터공간이라는 것은 알았다. 하지만 개미가 &quot;내 속도는 이것&quot;이라고 말하려면 숫자로 적어야 한다. 구면 안에서만 사는 개미는 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo separator="true">,</mo><mi>z</mi></mrow><annotation encoding="application/x-tex">x, y, z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.044em;">z</span></span></span></span></eq>를 모르고 자기 좌표만 안다. 좌표만 가지고 화살표에 이름을 붙일 수 있을까?</p>
 <p>구면의 다이얼은 둘이다. 북극에서 잰 각 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span></span></span></span></eq>(여위도)와 경도 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϕ</mi></mrow><annotation encoding="application/x-tex">\phi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">ϕ</span></span></span></span></eq>. 경도 다이얼만 0.01 돌리고 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span></span></span></span></eq>는 그대로 두면 점은 동쪽으로 조금 움직인다. 적도에서는 거의 정확히 0.01만큼, 북극에서 30도 떨어진 곳(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mo>=</mo><mn>30</mn><mi mathvariant="normal">°</mi></mrow><annotation encoding="application/x-tex">\theta = 30°</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord">30°</span></span></span></span></eq>)에서는 0.005만큼 움직인다. 같은 &quot;경도 0.01&quot;이라도 위도에 따라 실제 거리가 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>sin</mi><mo>⁡</mo><mi>θ</mi></mrow><annotation encoding="application/x-tex">\sin\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mop">sin</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span></span></span></span></eq>배로 줄어든다. 이렇게 다이얼 하나만 조금 돌릴 때 점이 움직이는 화살표를 그 다이얼의 기저 화살표 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">∂</mi><mi>ϕ</mi></msub></mrow><annotation encoding="application/x-tex">\partial_\phi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9805em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord" style="margin-right:0.0556em;">∂</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0556em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">ϕ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></eq>라 부르고, 그 길이는 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>sin</mi><mo>⁡</mo><mi>θ</mi></mrow><annotation encoding="application/x-tex">\sin\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mop">sin</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span></span></span></span></eq>다. 다이얼마다 하나씩 이런 화살표가 있고, 어떤 속도든 &quot;<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span></span></span></span></eq> 화살표 몇 개와 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϕ</mi></mrow><annotation encoding="application/x-tex">\phi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">ϕ</span></span></span></span></eq> 화살표 몇 개&quot;로 적을 수 있다.</p>
+<p>좌표가 여럿일 때 쓰는 표기 세 가지를 먼저 풀어 둔다. 좌표는 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>x</mi><mn>1</mn></msup><mo separator="true">,</mo><msup><mi>x</mi><mn>2</mn></msup><mo separator="true">,</mo><mo>…</mo></mrow><annotation encoding="application/x-tex">x^1, x^2, \ldots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0085em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span></span></span></span></eq>처럼 번호를 위에 붙여 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>x</mi><mi>i</mi></msup></mrow><annotation encoding="application/x-tex">x^i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8247em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8247em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span></span></span></span></span></span></span></eq>라 적는다. 이 위첨자는 거듭제곱이 아니라 몇 번째 좌표인지 알려 주는 번호다. <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>x</mi><mi>i</mi></msup></mrow><annotation encoding="application/x-tex">x^i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8247em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8247em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span></span></span></span></span></span></span></eq> 다이얼의 기저 화살표는 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">∂</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\partial_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord" style="margin-right:0.0556em;">∂</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0556em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>라 적는다. 곱셈이 아니라 한 덩어리 이름이고, 그 방향으로 함수가 변하는 빠르기를 재는 일이 곧 편미분 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∂</mi><mi mathvariant="normal">/</mi><mi mathvariant="normal">∂</mi><msup><mi>x</mi><mi>i</mi></msup></mrow><annotation encoding="application/x-tex">\partial/\partial x^i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0747em;vertical-align:-0.25em;"></span><span class="mord" style="margin-right:0.0556em;">∂</span><span class="mord">/</span><span class="mord" style="margin-right:0.0556em;">∂</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8247em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span></span></span></span></span></span></span></eq>라서 미분 기호를 빌려 쓴다. 그리고 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>v</mi><mi>i</mi></msup><mtext> </mtext><msub><mi mathvariant="normal">∂</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v^i\,\partial_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9747em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">v</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8247em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord" style="margin-right:0.0556em;">∂</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0556em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>처럼 같은 첨자가 위와 아래에 한 번씩 나오면 그 첨자에 대해 모두 더한다고 약속한다(아인슈타인 합 규약).</p>
 <ul>
 <li><strong>좌표 기저</strong> (좌표 한 칸 화살표 / Coordinate Basis) — 좌표 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>x</mi><mi>i</mi></msup></mrow><annotation encoding="application/x-tex">x^i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8247em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8247em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span></span></span></span></span></span></span></eq> 하나만 늘리고 나머지 좌표는 그대로 둘 때 점이 움직이는 방향의 접선벡터 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">∂</mi><mi>i</mi></msub><mo>=</mo><mi mathvariant="normal">∂</mi><mi mathvariant="normal">/</mi><mi mathvariant="normal">∂</mi><msup><mi>x</mi><mi>i</mi></msup></mrow><annotation encoding="application/x-tex">\partial_i = \partial/\partial x^i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord" style="margin-right:0.0556em;">∂</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0556em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0747em;vertical-align:-0.25em;"></span><span class="mord" style="margin-right:0.0556em;">∂</span><span class="mord">/</span><span class="mord" style="margin-right:0.0556em;">∂</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8247em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span></span></span></span></span></span></span></eq>들의 모임. 길이가 1이라는 보장은 없다.</li>
 </ul>
@@ -734,7 +753,7 @@ c-10,0,-16.667,5,-20,15z M188 15 H145 v585 v0 v585 h43z"/></svg></span></span></
 </div>
 <h4>같이 풀기 세션 2</h4>
 <div class="dialogue">
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>이건 그림으로 보여요. 점 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1, 1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span></eq>에서 바깥쪽 단위벡터 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>r</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span></eq>와 반시계 방향 단위벡터 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>θ</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9579em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1667em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span></eq>가 서로 45도로 벌어져 있으니까, 동쪽은 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mn>1</mn><msqrt><mn>2</mn></msqrt></mfrac><mover accent="true"><mi>r</mi><mo>^</mo></mover><mo>−</mo><mfrac><mn>1</mn><msqrt><mn>2</mn></msqrt></mfrac><mover accent="true"><mi>θ</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\frac{1}{\sqrt2}\hat r - \frac{1}{\sqrt2}\hat\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.3831em;vertical-align:-0.538em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.551em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord sqrt mtight"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9128em;"><span class="svg-align" style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mtight" style="padding-left:0.833em;">2</span></span><span style="top:-2.8728em;"><span class="pstrut" style="height:3em;"></span><span class="hide-tail mtight" style="min-width:0.853em;height:1.08em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="1.08em" viewBox="0 0 400000 1080" preserveAspectRatio="xMinYMin slice"><path d="M95,702
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>이건 그림으로 보여요. 점 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1, 1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span></eq>에서 동쪽은 바깥쪽 단위벡터 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>r</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span></eq>와 45도, 반시계 방향 단위벡터 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>θ</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9579em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1667em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span></eq>의 반대쪽과도 45도로 벌어져 있으니까, <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mn>1</mn><msqrt><mn>2</mn></msqrt></mfrac><mover accent="true"><mi>r</mi><mo>^</mo></mover><mo>−</mo><mfrac><mn>1</mn><msqrt><mn>2</mn></msqrt></mfrac><mover accent="true"><mi>θ</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\frac{1}{\sqrt2}\hat r - \frac{1}{\sqrt2}\hat\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.3831em;vertical-align:-0.538em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.551em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord sqrt mtight"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9128em;"><span class="svg-align" style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mtight" style="padding-left:0.833em;">2</span></span><span style="top:-2.8728em;"><span class="pstrut" style="height:3em;"></span><span class="hide-tail mtight" style="min-width:0.853em;height:1.08em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="1.08em" viewBox="0 0 400000 1080" preserveAspectRatio="xMinYMin slice"><path d="M95,702
 c-2.7,0,-7.17,-2.7,-13.5,-8c-5.8,-5.3,-9.5,-10,-9.5,-14
 c0,-2,0.3,-3.3,1,-4c1.3,-2.7,23.83,-20.7,67.5,-54
 c44.2,-33.3,65.8,-50.3,66.5,-51c1.3,-1.3,3,-2,5,-2c4.7,0,8.7,3.3,12,10
@@ -958,16 +977,32 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
+// Mermaid — 테마를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  m.default.initialize({
-    startOnLoad: false,
-    theme: isDark ? 'dark' : 'default',
-    securityLevel: 'loose',
-  });
-  m.default.run();
-});
+  // 다크: mermaid 내장 dark 는 회색 상자·회색 묶음 바탕이 남색 페이지와 어긋난다 → 페이지 CSS 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(isDark ? {
+    startOnLoad: false, securityLevel: 'loose', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+toggle.addEventListener('click', () => renderMermaid());
 </script>
 <script type="module">
     (function() {
@@ -976,7 +1011,7 @@ if (document.querySelector('pre.mermaid')) import('https://cdn.jsdelivr.net/npm/
       var obs = new IntersectionObserver(function(entries) {
         if (entries[0].isIntersecting) {
           obs.disconnect();
-          import('./viz/ch02-tangent.js').then(function(m) { m.mount(el); });
+          import('./viz/ch02-tangent.js?v=15383f8b').then(function(m) { m.mount(el); });
         }
       }, { rootMargin: '200px' });
       obs.observe(el);

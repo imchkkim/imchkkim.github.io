@@ -125,6 +125,13 @@ th, td {
   text-align: left;
 }
 th { background: var(--bg-code); font-weight: 600; }
+/* build.cjs 가 표를 이 상자로 감싼다: 좁은 화면에서 넓은 표는 상자 안에서만 가로로 밀린다(쪽 전체는 밀리지 않음).
+   넓은 화면(1200 이상)에서는 상자를 없는 셈 치고(display: contents) 예전과 똑같이 그린다 — 상자가 있으면 표 테두리 때문에 1~2px 어긋난다 */
+.table-wrap { display: contents; }
+@media (max-width: 1199px) {
+  .table-wrap { display: block; overflow-x: auto; margin: 1em 0; }
+  .table-wrap > table { margin: 0; }
+}
 
 /* ===== Lists ===== */
 ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
@@ -169,23 +176,37 @@ img {
   padding: 0.5em;
 }
 
-/* Portrait images in 핵심 인물과 일화 sections */
-h3 + p > img:only-child {
-  max-width: 200px;
+/* ===== 그림 상자와 설명 줄 =====
+   build.cjs 가 그림만으로 된 문단을 <figure class="fig"> 로 바꾼다. 개념 그림은 본문 폭 그대로 두고 아래에 설명 줄,
+   초상(「### 역사: …」 바로 다음 그림)은 fig-portrait 로 설명 없이 오른쪽에 작게 띄운다. 본보기: 동역학 style.css 「그림과 캡션」 */
+figure.fig { margin: 1.5em 0; }
+figure.fig img { margin: 0 auto; }
+figure.fig figcaption {
+  margin-top: 0.5em;
+  font-size: 0.86em;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: center;
+}
+/* 문제 상자는 어느 화면 모드에서나 흰 바탕이다 */
+.exercises figure.fig figcaption { color: #444; font-weight: 400; }
+figure.fig-portrait {
   float: right;
-  margin: 0 0 1em 1.5em;
+  clear: right; /* 띄운 그림이 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
+  /* 띄운 상자 여백은 소제목 여백과 겹치지 않는다: 소제목 아래 여백(0.5em × 1.3rem)과 합쳐 예전 문단 여백(0.8em)과 같게 */
+  margin: 0.15em 0 1em 1.5em;
+}
+figure.fig-portrait img {
+  max-width: 200px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-[data-theme="dark"] h3 + p > img:only-child {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-}
+[data-theme="dark"] figure.fig-portrait img { box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+/* 띄운 그림 뒤 글이 짧아도 다음 소제목은 그림 옆이 아니라 그림 아래에서 시작한다 */
+h2, h3, h4 { clear: both; }
 @media (max-width: 600px) {
-  h3 + p > img:only-child {
-    float: none;
-    margin: 0 auto 1em;
-    max-width: 160px;
-  }
+  figure.fig-portrait { float: none; margin: 0.8em 0 1em; }
+  figure.fig-portrait img { max-width: 160px; }
 }
 
 /* ===== Interactive Visualizations ===== */
@@ -374,11 +395,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -554,6 +570,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정, 1rem + 40px)이 보이는 폭: 본문 첫 줄을 버튼 아래에서 시작해 제목 끝이 덮이지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -602,8 +622,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -682,11 +700,11 @@ pre.mermaid {
 <h2 id="리치-흐름-곡률을-따라-계량을-흘려보내기">리치 흐름: 곡률을 따라 계량을 흘려보내기</h2>
 <p>지금까지 리치 텐서는 곡률을 요약한 숫자 묶음이었다. 이 요약을 거꾸로 공간을 바꾸는 힘으로 쓸 수는 없을까? 울퉁불퉁한 곳은 펴고 둥근 곳은 고르게 만드는 방향으로 계량을 조금씩 바꿔 나간다면?</p>
 <h3 id="역사-리처드-해밀턴-richard-s-hamilton-1943-2024">역사: 리처드 해밀턴 (Richard S. Hamilton, 1943–2024)</h3>
-<p><img src="images/hamilton.jpg" alt="해밀턴의 초상"></p>
+<figure class="fig fig-portrait"><img src="images/hamilton.jpg" alt="해밀턴의 초상"></figure>
 <p>리치 텐서에 완전히 새로운 생명을 불어넣은 사람은 리처드 해밀턴이다. 1982년, 해밀턴은 획기적인 아이디어를 제시한다: 계량 텐서를 리치 곡률에 따라 흘려보내면 어떨까?</p>
 <h3 id="구면이-한-점으로-줄어드는-흐름">구면이 한 점으로 줄어드는 흐름</h3>
 <p>해밀턴의 규칙은 말로 하면 간단하다. 둥근 곳일수록(리치 곡률이 클수록) 그 방향의 눈금을 빨리 줄이고, 말안장처럼 휜 곳(리치 곡률이 음수)에서는 눈금을 늘린다. 반지름 1인 구면에 걸어 보자. 구면은 어디서나 똑같이 둥그니 어디서나 똑같이 줄어들고, 둥근 모양 그대로 작아진다. 계산해 보면 반지름의 제곱이 시간 1당 2씩 일정하게 준다.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>시각</th>
@@ -723,7 +741,7 @@ pre.mermaid {
 <td>무한대</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>작아질수록 더 둥글어지고(곡률이 커지고), 시각 0.5에 한 점으로 사라진다. 이 규칙을 식으로 쓰면 다음과 같다.</p>
 <section><eqn><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mfrac><mrow><mi mathvariant="normal">∂</mi><msub><mstyle mathcolor="#d62728"><mi>g</mi></mstyle><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><mrow><mi mathvariant="normal">∂</mi><mstyle mathcolor="#6a7a00"><mi>t</mi></mstyle></mrow></mfrac><mo>=</mo><mo>−</mo><mn>2</mn><mtext> </mtext><msub><mstyle mathcolor="#5c5ab0"><mi>R</mi></mstyle><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
 \frac{\partial \textcolor{#d62728}{g}_{ij}}{\partial \textcolor{#6a7a00}{t}} = -2\,\textcolor{#5c5ab0}{R}_{ij}
@@ -734,14 +752,14 @@ pre.mermaid {
 \textcolor{#6a7a00}{t} &amp; \text{흐름의 시간}
 \end{array}
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:3.6em;vertical-align:-1.55em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--c-metric,#d62728);">g</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0077em;color:var(--c-ricci,#5c5ab0);">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:var(--c-time,#6a7a00);">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">시간에</span><span class="mord"> </span><span class="mord hangul_fallback">따라</span><span class="mord"> </span><span class="mord hangul_fallback">변하는</span><span class="mord"> </span><span class="mord hangul_fallback">계량</span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">그</span><span class="mord"> </span><span class="mord hangul_fallback">순간</span><span class="mord"> </span><span class="mord hangul_fallback">계량의</span><span class="mord"> </span><span class="mord hangul_fallback">리치</span><span class="mord"> </span><span class="mord hangul_fallback">텐서</span></span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">흐름의</span><span class="mord"> </span><span class="mord hangul_fallback">시간</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></eqn></section><p>이것이 <strong>리치 흐름</strong> (곡률 따라 계량 흘려보내기 / Ricci Flow)이다. 반지름 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mstyle mathcolor="#0561ff"><mi>r</mi></mstyle><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">\textcolor{#0561ff}{r}_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;color:var(--c-radius,#0561ff);">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>인 구면 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>S</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">S^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0576em;">S</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span></eq>에서는 앞 절의 따라 계산해 보기처럼 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mstyle mathcolor="#5c5ab0"><mi>R</mi></mstyle><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mstyle mathcolor="#d62728"><mi>g</mi></mstyle><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi mathvariant="normal">/</mi><msup><mstyle mathcolor="#0561ff"><mi>r</mi></mstyle><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\textcolor{#5c5ab0}{R}_{ij} = \textcolor{#d62728}{g}_{ij}/\textcolor{#0561ff}{r}^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0077em;color:var(--c-ricci,#5c5ab0);">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.1002em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--c-metric,#d62728);">g</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mord">/</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;color:var(--c-radius,#0561ff);">r</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span></eq>이므로 식이 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi>d</mi><mo stretchy="false">(</mo><msup><mstyle mathcolor="#0561ff"><mi>r</mi></mstyle><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><mrow><mi>d</mi><mstyle mathcolor="#6a7a00"><mi>t</mi></mstyle></mrow></mfrac><mo>=</mo><mo>−</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\frac{d(\textcolor{#0561ff}{r}^2)}{d\textcolor{#6a7a00}{t}} = -2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.4539em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.1089em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight" style="color:var(--c-time,#6a7a00);">t</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.485em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="mopen mtight">(</span><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;color:var(--c-radius,#0561ff);">r</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913em;"><span style="top:-2.931em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">2</span></span></span></span></eq>가 되고, 반지름은 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#0561ff"><mi>r</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#6a7a00"><mi>t</mi></mstyle><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>=</mo><msubsup><mstyle mathcolor="#0561ff"><mi>r</mi></mstyle><mn>0</mn><mn>2</mn></msubsup><mo>−</mo><mn>2</mn><mstyle mathcolor="#6a7a00"><mi>t</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#0561ff}{r}(\textcolor{#6a7a00}{t})^2 = \textcolor{#0561ff}{r}_0^2 - 2\textcolor{#6a7a00}{t}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;color:var(--c-radius,#0561ff);">r</span><span class="mopen">(</span><span class="mord mathnormal" style="color:var(--c-time,#6a7a00);">t</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0622em;vertical-align:-0.2481em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;color:var(--c-radius,#0561ff);">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-2.4519em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2481em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span><span class="mord mathnormal" style="color:var(--c-time,#6a7a00);">t</span></span></span></span></eq>를 따라 줄어들다가 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#6a7a00"><mi>t</mi></mstyle><mo>=</mo><msubsup><mstyle mathcolor="#0561ff"><mi>r</mi></mstyle><mn>0</mn><mn>2</mn></msubsup><mi mathvariant="normal">/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">\textcolor{#6a7a00}{t} = \textcolor{#0561ff}{r}_0^2/2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal" style="color:var(--c-time,#6a7a00);">t</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;color:var(--c-radius,#0561ff);">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-2.4519em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2481em;"><span></span></span></span></span></span></span><span class="mord">/2</span></span></span></span></eq>에 한 점으로 사라진다. <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mstyle mathcolor="#0561ff"><mi>r</mi></mstyle><mn>0</mn></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\textcolor{#0561ff}{r}_0 = 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;color:var(--c-radius,#0561ff);">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></eq>이면 위 표다. 마치 고르지 않은 금속판에 열을 가하면 온도가 균일해지듯, 리치 흐름은 매니폴드(좁게 보면 평평해 보이는 휘어진 공간)의 기하학을 “균일하게” 만든다.</p>
-<p><img src="images/ricci_flow.png" alt="리치 흐름에 의해 울퉁불퉁한 2차원 매니폴드가 점차 매끄럽게 변형되는 과정"></p>
+<figure class="fig"><img src="images/ricci_flow.png" alt="리치 흐름에 의해 울퉁불퉁한 2차원 매니폴드가 점차 매끄럽게 변형되는 과정"><figcaption>리치 흐름에 의해 울퉁불퉁한 2차원 매니폴드가 점차 매끄럽게 변형되는 과정</figcaption></figure>
 <p>해밀턴은 이 흐름을 사용하여, 닫힌 3차원 매니폴드가 모든 곳에서 양의 리치 곡률을 가지면 흐름이 그것을 둥근 구(또는 구를 대칭으로 접어 만든 공간)로 데려간다는 것을 증명했다. 하지만 일반적인 3차원 매니폴드에 대해서는 곡률이 무한대로 커져 흐름을 더 이어 갈 수 없는 곳(특이점, singularity)이 생기는 문제에 가로막혔다.</p>
 <p>아래 그림은 둥근 구에 리치 흐름을 걸었을 때다. 시간을 흘려 보내면 반지름의 제곱이 일정한 속도로 줄어들고, 그동안 스칼라 곡률은 점점 커지다가 소멸 시각에 무한대로 간다. 차원을 바꾸면 소멸 속도가 어떻게 달라지는지도 확인할 수 있다.</p>
 <div data-viz="ch09-flow" class="viz-container">
   <noscript>이 시각화를 보려면 JavaScript가 필요합니다.</noscript>
 </div>
 <h3 id="역사-그리고리-페렐만-grigori-perelman-1966">역사: 그리고리 페렐만 (Grigori Perelman, 1966–)</h3>
-<p><img src="images/perelman.jpg" alt="페렐만의 초상"></p>
+<figure class="fig fig-portrait"><img src="images/perelman.jpg" alt="페렐만의 초상"></figure>
 <p>2002년 11월, 러시아 수학자 그리고리 페렐만은 arXiv에 짧은 프리프린트를 올린다. 제목: “리치 흐름의 엔트로피 공식과 그 기하학적 응용.” 후속 논문 두 편이 2003년에 이어진다.</p>
 <p>페렐만은 해밀턴의 리치 흐름이 특이점에 도달할 때 어떤 일이 벌어지는지를 완전히 분석했다. 특이점이 생기면, 해밀턴이 구상했던 대로 매니폴드를 &quot;수술(surgery)&quot;로 절단하고, 각 조각에서 리치 흐름을 다시 시작한다. 이 과정을 반복하면 3차원 매니폴드가 표준적인 조각들로 분해된다는 것을 보인 것이다.</p>
 <p>이 결과의 직접적 귀결이 <strong>푸앵카레 추측</strong>의 증명이다: 그 위에 그린 고리를 모두 한 점으로 줄일 수 있는(단일연결, simply connected) 닫힌 3차원 매니폴드는 3차원 구와 같다. 1904년에 제기되어 100년간 미해결이었던 문제가 곡률 텐서의 축약이라는 리치의 대수적 조작과 해밀턴의 기하학적 흐름, 페렐만의 해석학적 통찰의 결합으로 풀린 것이다.</p>
@@ -783,16 +801,32 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
+// Mermaid — 테마를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  m.default.initialize({
-    startOnLoad: false,
-    theme: isDark ? 'dark' : 'default',
-    securityLevel: 'loose',
-  });
-  m.default.run();
-});
+  // 다크: mermaid 내장 dark 는 회색 상자·회색 묶음 바탕이 남색 페이지와 어긋난다 → 페이지 CSS 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(isDark ? {
+    startOnLoad: false, securityLevel: 'loose', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+toggle.addEventListener('click', () => renderMermaid());
 </script>
 <script type="module">
     (function() {
@@ -801,7 +835,7 @@ if (document.querySelector('pre.mermaid')) import('https://cdn.jsdelivr.net/npm/
       var obs = new IntersectionObserver(function(entries) {
         if (entries[0].isIntersecting) {
           obs.disconnect();
-          import('./viz/ch09-flow.js').then(function(m) { m.mount(el); });
+          import('./viz/ch09-flow.js?v=ffde0f3e').then(function(m) { m.mount(el); });
         }
       }, { rootMargin: '200px' });
       obs.observe(el);
