@@ -186,6 +186,9 @@ th, td {
   text-align: left;
 }
 th { background: var(--bg-code); font-weight: 600; }
+/* build.cjs wrapTables 가 표를 감싸는 상자: 넓은 표만 가로로 밀린다. 바깥 여백은 상자가 갖는다(앞뒤 문단과 여백이 겹치는 모양 유지) */
+.table-scroll { overflow-x: auto; margin: 1em 0; font-size: 0.95em; }
+.table-scroll > table { margin: 0; font-size: 1em; }
 
 /* ===== Lists ===== */
 ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
@@ -338,8 +341,13 @@ pre.mermaid {
   }
 }
 
+/* 목차 버튼(#sidebar-open, 오른쪽 위 top 1rem + 40px)이 보이는 폭: 본문 위 여백을 버튼 아래까지 늘려 첫 제목·장 이름 줄이 버튼 밑에 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4.25rem; }
+}
+
 @media (max-width: 600px) {
-  main { padding: 1rem 0.8rem 3rem; }
+  main { padding: 4.25rem 0.8rem 3rem; }
   h1 { font-size: 1.5rem; }
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
@@ -382,8 +390,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -514,8 +520,8 @@ svg.fig .saxis { stroke: var(--w-axis); fill: none; } svg.fig .sgrid { stroke: v
 svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 
 /* ===== 만화 대화 (```dialogue) — 규격: ~/.claude/skills/textbook-exercises/SKILL.md 「B. 표현」 =====
-   표정 그림이 있는 차례: 그림 + 그 아래 이름(figcaption), 왼쪽 선 없음.
-   그림이 없는 차례: 대사 앞에 이름, 인물 색 왼쪽 선. 말풍선 열은 그림 폭만큼 들여 맞춘다. 대사는 얇게(350). */
+   모든 차례에 표정 그림 + 그 아래 이름(figcaption), 왼쪽 선 없음({표정} 이 없으면 평상 표정, 없는 번호는 점선 자리표시 .dlg-face-empty).
+   지문(.dlg-scene)은 그림 폭만큼 들여 말풍선 열에 맞춘다. 대사는 얇게(350). 렌더러: lib/dialogue.cjs */
 .dlg {
   --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; --cast: 88px;
   margin: 1.5em 0 2em;
@@ -523,7 +529,6 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 [data-theme="dark"] .dlg { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
 .dlg-T { --who: var(--who-T); } .dlg-M { --who: var(--who-M); } .dlg-S { --who: var(--who-S); }
 .dlg-line { display: flex; gap: 0.9em; align-items: flex-start; margin: 0.7em 0; }
-.dlg-line:not(.has-face) { margin-left: calc(var(--cast) + 0.9em); }
 .dlg-cast { flex: 0 0 var(--cast); width: var(--cast); margin: 0; }
 .dlg-cast img {
   display: block; width: var(--cast); height: var(--cast); margin: 0;
@@ -546,11 +551,10 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 }
 .dlg-bubble strong { font-weight: 600; }
 .dlg-bubble code { font-size: 0.85em; }
-.dlg-name { font-weight: 700; color: var(--who); margin-right: 0.5em; }
 .dlg-scene { margin: 0.7em 0 0.7em calc(var(--cast) + 0.9em); color: var(--fg-muted); font-size: 0.85rem; font-style: italic; }
 @media (max-width: 600px) {
   .dlg { --cast: 56px; }
-  .dlg-line:not(.has-face), .dlg-scene { margin-left: 0; }
+  .dlg-scene { margin-left: 0; }
 }
 
 /* 연습문제 — 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨. 바로 아래에 그 문제의 함께 풀기 대화가 붙는다 */
@@ -670,13 +674,13 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="08-로그확률.html">8. 로그확률 — 문장의 확률은 어떻게 매기나</a></p>
 <h4 id="조회-학습할-때는-샘플링이-없다">조회: 학습할 때는 샘플링이 없다</h4>
-<p>로그확률을 구하려면 토큰마다 확률표가 필요하다. 그렇다면 100토큰짜리 응답의 로그확률을 구하는 일은 그 응답을 생성하는 일만큼 비쌀까? 그리고 생성할 때 쓰는 temperature 같은 설정은 이 숫자에 끼어들까? 생성과 학습에서 모델이 하는 일을 나란히 놓아 보자.</p>
-<h5 id="역사-teacher-forcing">역사: teacher forcing</h5>
-<p>정답 토큰을 입력으로 밀어 넣어 모든 위치의 예측을 한 번에 학습하는 방식은 순환 신경망 시절부터 있었다. 1989년 로널드 윌리엄스(Ronald J. Williams)와 데이비드 집서(David Zipser)가 <em>Neural Computation</em>에 실은 순환망 학습 알고리즘 논문에서 이 방식을 teacher forcing이라 불렀다. 순환망은 그래도 위치를 차례로 계산해야 했지만, 트랜스포머는 causal mask 덕분에 모든 위치를 동시에 계산한다.</p>
+<p>로그확률을 구하려면 토큰마다 확률표가 필요하다. 그렇다면 100토큰짜리 응답의 로그확률을 구하는 일은 그 응답을 생성하는 일만큼 비쌀까? 그리고 생성할 때 쓰는 샘플링 온도(temperature) 같은 설정은 이 숫자에 끼어들까? 생성과 학습에서 모델이 하는 일을 나란히 놓아 보자.</p>
+<h5 id="역사-티처-포싱">역사: 티처 포싱</h5>
+<p>정답 토큰을 입력으로 밀어 넣어 모든 위치의 예측을 한 번에 학습하는 방식은 순환 신경망 시절부터 있었다. 1989년 로널드 윌리엄스(Ronald J. Williams)와 데이비드 집서(David Zipser)가 <em>Neural Computation</em>에 실은 순환망 학습 알고리즘 논문에서 이 방식을 티처 포싱(teacher forcing — 학습 때 앞 토큰을 모델이 뽑은 것이 아니라 정답에서 가져오는 방식)이라 불렀다. 순환망은 그래도 위치를 차례로 계산해야 했지만, 트랜스포머는 causal mask 덕분에 모든 위치를 동시에 계산한다.</p>
 <h5 id="생성의-2단계-샘플링">생성의 2단계: 샘플링</h5>
 <p>생성할 때는 1단계로 얻은 확률표에서 토큰을 실제로 고르는 단계가 하나 더 있다.</p>
-<p><strong>[2단계: 샘플링]</strong> 표에서 토큰 하나를 고른다. temperature, top-k, top-p, min-p 같은 설정이 여기서 작동한다.</p>
-<table>
+<p><strong>[2단계: 샘플링]</strong> 표에서 토큰 하나를 고른다. 샘플링 온도, top-k, top-p, min-p 같은 설정이 여기서 작동한다.</p>
+<div class="table-scroll"><table>
 <thead>
 <tr>
 <th>설정</th>
@@ -685,7 +689,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </thead>
 <tbody>
 <tr>
-<td>temperature <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span></span></span></span></eq></td>
+<td>샘플링 온도 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span></span></span></span></eq> (이 절의 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span></span></span></span></eq> 는 응답 길이가 아니라 샘플링 온도)</td>
 <td>로짓을 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span></span></span></span></eq>로 나눈다. <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>&lt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">T&lt;1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7224em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></eq>이면 높은 확률을 더 높여 보수적으로, <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>&gt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">T&gt;1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7224em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></eq>이면 평탄하게 펴서 다양하게</td>
 </tr>
 <tr>
@@ -701,10 +705,10 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <td>최대 확률의 5% 미만인 토큰을 제거</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h5 id="학습할-때는-2단계가-없다">학습할 때는 2단계가 없다</h5>
 <p>DPO 학습에서는 응답이 이미 주어져 있다. 데이터셋에 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>w</mi></msub></mrow><annotation encoding="application/x-tex">y_w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0269em;">w</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> = “서울입니다”, <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> = &quot;부산입니다&quot;가 적혀 있다. 필요한 것은 샘플링이 아니라 <strong>조회</strong>다 — 1단계로 확률표를 얻은 뒤, 데이터셋의 토큰이 표에서 받은 확률을 읽어 온다.</p>
-<table>
+<div class="table-scroll"><table>
 <thead>
 <tr>
 <th></th>
@@ -721,14 +725,14 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <td>확률표 → 정해진 토큰의 확률 조회 → 로그를 더해 손실 계산</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>두 가지가 따라 나온다.</p>
 <ol>
 <li><strong>샘플링 설정은 DPO 학습 루프에 영향을 주지 않는다.</strong> 확률은 언제나 모델의 원래 분포(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">T=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></eq>)에서 조회한다. (데이터셋을 <em>만들 때</em>는 영향을 준다 — 다양한 응답을 얻으려 높은 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span></span></span></span></eq>를 쓸 수 있다.)</li>
-<li><strong>한 번의 순전파면 된다.</strong> 응답 전체를 입력으로 넣으면, 트랜스포머는 모든 위치의 확률표를 동시에 내놓는다. 이것을 teacher forcing이라 한다. 생성은 토큰 수만큼 순차 실행해야 하지만, 이미 있는 응답의 확률 조회는 병렬로 한 번에 끝난다. 미리 모아 둔 데이터셋만 쓰는(오프라인) DPO가 싸게 도는 이유 중 하나다.</li>
+<li><strong>한 번의 순전파면 된다.</strong> 응답 전체를 입력으로 넣으면, 트랜스포머는 모든 위치의 확률표를 동시에 내놓는다. 이것을 티처 포싱이라 한다. 생성은 토큰 수만큼 순차 실행해야 하지만, 이미 있는 응답의 확률 조회는 병렬로 한 번에 끝난다. 미리 모아 둔 데이터셋만 쓰는(오프라인) DPO가 싸게 도는 이유 중 하나다.</li>
 </ol>
 <h5 id="ml에서-온라인-rl에서는-샘플링이-돌아온다">ML에서: 온라인 RL에서는 샘플링이 돌아온다</h5>
-<p>온라인 RL은 사정이 다르다. PPO와 GRPO는 학습 중에 직접 샘플링하므로, 샘플링 설정과 조회 방식이 어긋나면 문제가 생긴다. 응답을 뽑는 쪽(생성 엔진)과 로그확률을 계산하는 쪽(학습기)이 서로 다른 프로그램으로 돌아가는 경우가 많아서, 둘이 같은 정책을 가리키는지 따로 챙겨야 한다 — 아래 문제 4.</p>
+<p>온라인 RL은 사정이 다르다. PPO와 GRPO(Group Relative Policy Optimization — 비평가 대신 같은 프롬프트에 뽑은 응답 여러 개의 평균 점수를 기준으로 삼는 온라인 방법)는 학습 중에 직접 샘플링하므로, 샘플링 설정과 조회 방식이 어긋나면 문제가 생긴다. 응답을 뽑는 쪽(생성 엔진)과 로그확률을 계산하는 쪽(학습기)이 서로 다른 프로그램으로 돌아가는 경우가 많아서, 둘이 같은 정책을 가리키는지 따로 챙겨야 한다 — 아래 문제 4.</p>
 <h5 id="문제-3-순전파는-몇-번">문제 3 — 순전파는 몇 번?</h5>
 <div class="exercise">
 <p>100토큰짜리 응답의 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><mi>y</mi><mo>∣</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log \pi_\theta(y \mid x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span></eq>를 구하려면 트랜스포머를 몇 번 실행해야 하는가? 같은 응답을 <em>생성</em>할 때는?</p>
@@ -742,28 +746,28 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">맞아요. 조회는 병렬, 생성은 순차예요.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">채점이랑 시험의 차이네요. 조교는 답안지 전체를 한 번에 채점하지만, 학생은 한 문제씩 풀어야 하는.</div></div>
 </div><blockquote>
-<p><strong>정리</strong> 로그확률 조회는 teacher forcing으로 <strong>한 번</strong>. 생성은 토큰마다 한 번씩 <strong>100번</strong>(앞 토큰의 계산 결과를 저장해 두는 KV 캐시가 있어도 순차).</p>
+<p><strong>정리</strong> 로그확률 조회는 티처 포싱으로 <strong>한 번</strong>. 생성은 토큰마다 한 번씩 <strong>100번</strong>(앞 토큰의 계산 결과를 저장해 두는 KV 캐시가 있어도 순차).</p>
 </blockquote>
-<h5 id="문제-4-킬러-샘플러의-temperature">문제 4 — (킬러) 샘플러의 temperature</h5>
+<h5 id="문제-4-킬러-샘플러의-샘플링-온도">문제 4 — (킬러) 샘플러의 샘플링 온도</h5>
 <div class="exercise">
-<p>GRPO 학습 코드에서 응답은 생성 엔진이 temperature 0.7로 샘플링하고, 학습기는 로그확률을 원래 로짓(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">T=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></eq>)으로 계산한다. 어떤 위치에서 모델의 분포가 [0.6, 0.3, 0.1]이라 하자. (가) 생성 엔진은 세 토큰을 각각 어떤 확률로 뽑는가? (나) 이 샘플로 정책 그래디언트를 계산하면 무엇이 어긋나는가? (다) 고치는 방법 두 가지를 제시하시오.</p>
+<p>GRPO 학습 코드에서 응답은 생성 엔진이 샘플링 온도 0.7로 샘플링하고, 학습기는 로그확률을 원래 로짓(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">T=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></eq>)으로 계산한다. 어떤 위치에서 모델의 분포가 [0.6, 0.3, 0.1]이라 하자. (가) 생성 엔진은 세 토큰을 각각 어떤 확률로 뽑는가? (나) 이 샘플로 정책 그래디언트를 계산하면 무엇이 어긋나는가? (다) 고치는 방법 두 가지를 제시하시오.</p>
 </div>
 <div class="dlg">
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M11.webp" alt="김민준 (자신만만)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">이건 본문에 나왔어요. temperature는 생성할 때만 쓰니까 학습에는 영향이 없어요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M11.webp" alt="김민준 (자신만만)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">이건 본문에 나왔어요. 샘플링 온도는 생성할 때만 쓰니까 학습에는 영향이 없어요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">본문이 그렇게 말한 건 어떤 학습이었죠?</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">DPO요… 데이터셋이 고정돼 있는. 근데 GRPO는 학습 중에 직접 뽑잖아요. 뽑는 데는 temperature가 쓰이고…</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">DPO요… 데이터셋이 고정돼 있는. 근데 GRPO는 학습 중에 직접 뽑잖아요. 뽑는 데는 샘플링 온도가 쓰이고…</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그럼 (가)부터 계산해 보죠.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">로짓을 0.7로 나누는 건 확률을 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mn>0.7</mn></mrow><annotation encoding="application/x-tex">1/0.7</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1/0.7</span></span></span></span></eq> 제곱하고 다시 정규화하는 거니까… 돌려보면 [0.690, 0.256, 0.053]이에요.</div></div>
-<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">근데 그래도 같은 정책 아니에요? temperature는 단조 변환이라 순서가 안 바뀌잖아요. 가장 확률 높은 토큰은 여전히 첫 번째고.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">근데 그래도 같은 정책 아니에요? 샘플링 온도는 단조 변환이라 순서가 안 바뀌잖아요. 가장 확률 높은 토큰은 여전히 첫 번째고.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">서연 학생, 정책 그래디언트의 기대값은 무엇의 순서를 필요로 했나요, 아니면 값을 필요로 했나요?</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S02.webp" alt="이서연 (생각)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble"><eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mi>y</mi></msub><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo><mi>R</mi><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo><mi mathvariant="normal">∇</mi><mi>log</mi><mo>⁡</mo><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\sum_y \pi_\theta(y) R(y) \nabla\log\pi_\theta(y)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1858em;vertical-align:-0.4358em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.0017em;"><span style="top:-2.4003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0359em;">y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4358em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mclose">)</span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mclose">)</span><span class="mord">∇</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mclose">)</span></span></span></span></eq> 니까… 값 자체요. 순서만 같아서는 안 되고, 뽑히는 빈도가 정확히 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub></mrow><annotation encoding="application/x-tex">\pi_\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 여야 해요.</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S07.webp" alt="이서연 (깨달음)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">첫 토큰은 0.6이어야 하는데 0.69로 뽑히고, 셋째는 0.1이어야 하는데 0.053으로 뽑히네요. 이미 확률 높은 토큰이 실제보다 자주 뽑혀요. 순서를 보존한다고 분포가 같은 건 아니었어요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 그러면 (나)는요?</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">샘플이 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub></mrow><annotation encoding="application/x-tex">\pi_\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 가 아니라 다른 분포에서 나왔으니까, 남이 만든 응답으로 정책 그래디언트를 계산한 거랑 같은 상황이에요. 그래디언트가 한쪽으로 치우쳐요. 흔한 답은 더 강화되고 드문 답은 덜 탐색되고.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">(다)는요?</div></div>
-<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">하나는 학습기도 로짓을 0.7로 나눠서 로그확률을 계산하는 거요. 그러면 우리가 최적화하는 정책이 &quot;temperature 0.7을 씌운 정책&quot;이 되고, 샘플이랑 일치해요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">하나는 학습기도 로짓을 0.7로 나눠서 로그확률을 계산하는 거요. 그러면 우리가 최적화하는 정책이 &quot;샘플링 온도 0.7을 씌운 정책&quot;이 되고, 샘플이랑 일치해요.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">다른 하나는 임포턴스 가중치(원하는 확률 ÷ 뽑힌 확률로 곱하는 수 — 신경망 파라미터가 아니다)요. 첫 토큰은 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.6</mn><mi mathvariant="normal">/</mi><mn>0.69</mn><mo>≈</mo><mn>0.87</mn></mrow><annotation encoding="application/x-tex">0.6/0.69 \approx 0.87</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">0.6/0.69</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.87</span></span></span></span></eq>, 셋째는 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.1</mn><mi mathvariant="normal">/</mi><mn>0.053</mn><mo>≈</mo><mn>1.87</mn></mrow><annotation encoding="application/x-tex">0.1/0.053 \approx 1.87</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">0.1/0.053</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1.87</span></span></span></span></eq> 을 곱해서 보정하는.</div></div>
-<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T13.webp" alt="선생님 (미소)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">둘 다 실제로 쓰는 방법이에요. 실무 RL 프레임워크들은 보통 첫 번째 방법을 써요. 그리고 temperature를 맞춰도 생성 엔진과 학습기의 수치 차이만으로 비슷한 어긋남이 생겨서 따로 보정해요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T13.webp" alt="선생님 (미소)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">둘 다 실제로 쓰는 방법이에요. 실무 RL 프레임워크들은 보통 첫 번째 방법을 써요. 그리고 샘플링 온도를 맞춰도 생성 엔진과 학습기의 수치 차이만으로 비슷한 어긋남이 생겨서 따로 보정해요.</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">확률론 시간에 &quot;단조 변환은 중앙값은 보존하지만 평균은 보존하지 않는다&quot;를 배웠는데, 그거네요. 순서에 관한 성질만 보존되는 거예요.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">실험 보고서 쓸 때 조교님이 &quot;측정한 조건이랑 분석한 조건이 다르면 그건 다른 실험&quot;이라고 했던 게 이거였구나.</div></div>
 </div><blockquote>

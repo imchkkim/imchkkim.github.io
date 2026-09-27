@@ -186,6 +186,9 @@ th, td {
   text-align: left;
 }
 th { background: var(--bg-code); font-weight: 600; }
+/* build.cjs wrapTables 가 표를 감싸는 상자: 넓은 표만 가로로 밀린다. 바깥 여백은 상자가 갖는다(앞뒤 문단과 여백이 겹치는 모양 유지) */
+.table-scroll { overflow-x: auto; margin: 1em 0; font-size: 0.95em; }
+.table-scroll > table { margin: 0; font-size: 1em; }
 
 /* ===== Lists ===== */
 ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
@@ -338,8 +341,13 @@ pre.mermaid {
   }
 }
 
+/* 목차 버튼(#sidebar-open, 오른쪽 위 top 1rem + 40px)이 보이는 폭: 본문 위 여백을 버튼 아래까지 늘려 첫 제목·장 이름 줄이 버튼 밑에 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4.25rem; }
+}
+
 @media (max-width: 600px) {
-  main { padding: 1rem 0.8rem 3rem; }
+  main { padding: 4.25rem 0.8rem 3rem; }
   h1 { font-size: 1.5rem; }
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
@@ -382,8 +390,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -514,8 +520,8 @@ svg.fig .saxis { stroke: var(--w-axis); fill: none; } svg.fig .sgrid { stroke: v
 svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 
 /* ===== 만화 대화 (```dialogue) — 규격: ~/.claude/skills/textbook-exercises/SKILL.md 「B. 표현」 =====
-   표정 그림이 있는 차례: 그림 + 그 아래 이름(figcaption), 왼쪽 선 없음.
-   그림이 없는 차례: 대사 앞에 이름, 인물 색 왼쪽 선. 말풍선 열은 그림 폭만큼 들여 맞춘다. 대사는 얇게(350). */
+   모든 차례에 표정 그림 + 그 아래 이름(figcaption), 왼쪽 선 없음({표정} 이 없으면 평상 표정, 없는 번호는 점선 자리표시 .dlg-face-empty).
+   지문(.dlg-scene)은 그림 폭만큼 들여 말풍선 열에 맞춘다. 대사는 얇게(350). 렌더러: lib/dialogue.cjs */
 .dlg {
   --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; --cast: 88px;
   margin: 1.5em 0 2em;
@@ -523,7 +529,6 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 [data-theme="dark"] .dlg { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
 .dlg-T { --who: var(--who-T); } .dlg-M { --who: var(--who-M); } .dlg-S { --who: var(--who-S); }
 .dlg-line { display: flex; gap: 0.9em; align-items: flex-start; margin: 0.7em 0; }
-.dlg-line:not(.has-face) { margin-left: calc(var(--cast) + 0.9em); }
 .dlg-cast { flex: 0 0 var(--cast); width: var(--cast); margin: 0; }
 .dlg-cast img {
   display: block; width: var(--cast); height: var(--cast); margin: 0;
@@ -546,11 +551,10 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 }
 .dlg-bubble strong { font-weight: 600; }
 .dlg-bubble code { font-size: 0.85em; }
-.dlg-name { font-weight: 700; color: var(--who); margin-right: 0.5em; }
 .dlg-scene { margin: 0.7em 0 0.7em calc(var(--cast) + 0.9em); color: var(--fg-muted); font-size: 0.85rem; font-style: italic; }
 @media (max-width: 600px) {
   .dlg { --cast: 56px; }
-  .dlg-line:not(.has-face), .dlg-scene { margin-left: 0; }
+  .dlg-scene { margin-left: 0; }
 }
 
 /* 연습문제 — 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨. 바로 아래에 그 문제의 함께 풀기 대화가 붙는다 */
@@ -680,7 +684,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </blockquote>
 <p>이 관찰은 레퍼런스 모델(학습을 시작할 때 복사해 얼려 둔 모델)의 역할과 연결된다. DPO 데이터가 특정 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>π</mi><mtext>ref</mtext></msub></mrow><annotation encoding="application/x-tex">\pi_\text{ref}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">ref</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>에 종속되는 구조적 이유는 수식에 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>π</mi><mtext>ref</mtext></msub></mrow><annotation encoding="application/x-tex">\pi_\text{ref}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">ref</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>가 들어가 있기 때문이다. 레퍼런스가 바뀌면 마진의 의미가 달라지고, 데이터 전체가 무효화된다.</p>
 <h5 id="ml에서-교재-개념들이-현장에서-부딪히는-지점">ML에서: 교재 개념들이 현장에서 부딪히는 지점</h5>
-<table>
+<div class="table-scroll"><table>
 <thead>
 <tr>
 <th>개념</th>
@@ -702,10 +706,10 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 <tr>
 <td>RL의 저랭크 업데이트</td>
-<td>적은 수의 방향만 바꾸는 업데이트. LoRA rank 128로 전체 파인튜닝에 준하는 효과. “RLHF로 인한 엄청난 변화가 극히 적은 FLOP으로 발생한다는 것이 뭔가 큰 의미가 있을 것이다” — 개발자의 관찰 (RLHF = 사람 선호로 모델을 강화학습하는 과정, FLOP = 연산량)</td>
+<td>적은 수의 방향만 바꾸는 업데이트. 이 사례의 설정인 LoRA rank 128로 전체 미세조정에 준하는 효과. “RLHF로 인한 엄청난 변화가 극히 적은 FLOP으로 발생한다는 것이 뭔가 큰 의미가 있을 것이다” — 개발자의 관찰 (RLHF = 사람 선호로 모델을 강화학습하는 과정, FLOP = 연산량)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>JoyCaption이 겪은 고생을 요약하면:</p>
 <ol>
 <li>데이터셋을 공들여 만들었지만 약한 예제뿐이었다 → 데이터셋을 만드는 일 자체의 어려움</li>

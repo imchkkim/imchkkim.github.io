@@ -5,7 +5,7 @@ GW.register("length-bias", (el) => {
     title: "긴 정답 vs 짧은 오답 — 누가 더 높은 점수를 받는가",
     caption:
       "선은 토큰을 하나씩 더할 때의 누적 로그확률(합). 점은 각 응답이 끝나는 지점이다. 합으로 비교하면 선이 길수록 불리하고, " +
-      "평균(토큰당 로그확률)으로 비교하면 길이가 사라진다. ORPO는 평균 로그확률을 확률로 되돌린 <span class='sym-pi'>P̄</span> 위에서 오즈 log(<span class='sym-pi'>P̄</span>/(1−<span class='sym-pi'>P̄</span>))를 비교한다.",
+      "평균(토큰당 로그확률)으로 비교하면 길이가 사라진다. 표의 셋째 줄은 평균 로그확률을 확률로 되돌린 <span class='sym-pi'>P̄</span> 위에서 오즈 log(<span class='sym-pi'>P̄</span>/(1−<span class='sym-pi'>P̄</span>))를 비교한다.",
   });
   const st = { nw: 12, pw: 0.8, nl: 4, pl: 0.6 };
   const add = (key, label, min, max, step, fmt) =>
@@ -30,8 +30,8 @@ GW.register("length-bias", (el) => {
     const sumW = st.nw * lw, sumL = st.nl * ll;
     const rows = [
       ["합 Σ log p (DPO가 쓰는 양)", sumW, sumL],
-      ["평균 (1/|y|) Σ log p (SimPO)", lw, ll],
-      ["평균 위의 로그오즈 (ORPO)", logodds(st.pw), logodds(st.pl)],
+      ["평균 (1/|y|) Σ log p", lw, ll],
+      ["평균 위의 로그오즈", logodds(st.pw), logodds(st.pl)],
     ];
     tbl.innerHTML =
       "<tr><th>비교 방식</th><th><span style='color:var(--sym-e000a5, #e000a5)'>y<sub>w</sub></span></th><th><span style='color:var(--sym-e000a5, #e000a5)'>y<sub>l</sub></span></th><th>이기는 쪽</th></tr>" +

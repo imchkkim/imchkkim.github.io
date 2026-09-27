@@ -186,6 +186,9 @@ th, td {
   text-align: left;
 }
 th { background: var(--bg-code); font-weight: 600; }
+/* build.cjs wrapTables 가 표를 감싸는 상자: 넓은 표만 가로로 밀린다. 바깥 여백은 상자가 갖는다(앞뒤 문단과 여백이 겹치는 모양 유지) */
+.table-scroll { overflow-x: auto; margin: 1em 0; font-size: 0.95em; }
+.table-scroll > table { margin: 0; font-size: 1em; }
 
 /* ===== Lists ===== */
 ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
@@ -338,8 +341,13 @@ pre.mermaid {
   }
 }
 
+/* 목차 버튼(#sidebar-open, 오른쪽 위 top 1rem + 40px)이 보이는 폭: 본문 위 여백을 버튼 아래까지 늘려 첫 제목·장 이름 줄이 버튼 밑에 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4.25rem; }
+}
+
 @media (max-width: 600px) {
-  main { padding: 1rem 0.8rem 3rem; }
+  main { padding: 4.25rem 0.8rem 3rem; }
   h1 { font-size: 1.5rem; }
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
@@ -382,8 +390,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -514,8 +520,8 @@ svg.fig .saxis { stroke: var(--w-axis); fill: none; } svg.fig .sgrid { stroke: v
 svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 
 /* ===== 만화 대화 (```dialogue) — 규격: ~/.claude/skills/textbook-exercises/SKILL.md 「B. 표현」 =====
-   표정 그림이 있는 차례: 그림 + 그 아래 이름(figcaption), 왼쪽 선 없음.
-   그림이 없는 차례: 대사 앞에 이름, 인물 색 왼쪽 선. 말풍선 열은 그림 폭만큼 들여 맞춘다. 대사는 얇게(350). */
+   모든 차례에 표정 그림 + 그 아래 이름(figcaption), 왼쪽 선 없음({표정} 이 없으면 평상 표정, 없는 번호는 점선 자리표시 .dlg-face-empty).
+   지문(.dlg-scene)은 그림 폭만큼 들여 말풍선 열에 맞춘다. 대사는 얇게(350). 렌더러: lib/dialogue.cjs */
 .dlg {
   --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; --cast: 88px;
   margin: 1.5em 0 2em;
@@ -523,7 +529,6 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 [data-theme="dark"] .dlg { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
 .dlg-T { --who: var(--who-T); } .dlg-M { --who: var(--who-M); } .dlg-S { --who: var(--who-S); }
 .dlg-line { display: flex; gap: 0.9em; align-items: flex-start; margin: 0.7em 0; }
-.dlg-line:not(.has-face) { margin-left: calc(var(--cast) + 0.9em); }
 .dlg-cast { flex: 0 0 var(--cast); width: var(--cast); margin: 0; }
 .dlg-cast img {
   display: block; width: var(--cast); height: var(--cast); margin: 0;
@@ -546,11 +551,10 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 }
 .dlg-bubble strong { font-weight: 600; }
 .dlg-bubble code { font-size: 0.85em; }
-.dlg-name { font-weight: 700; color: var(--who); margin-right: 0.5em; }
 .dlg-scene { margin: 0.7em 0 0.7em calc(var(--cast) + 0.9em); color: var(--fg-muted); font-size: 0.85rem; font-style: italic; }
 @media (max-width: 600px) {
   .dlg { --cast: 56px; }
-  .dlg-line:not(.has-face), .dlg-scene { margin-left: 0; }
+  .dlg-scene { margin-left: 0; }
 }
 
 /* 연습문제 — 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨. 바로 아래에 그 문제의 함께 풀기 대화가 붙는다 */
@@ -671,12 +675,12 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p class="chapter-crumb"><a href="18-GRPO의변종들.html">18. GRPO의 변종들 — 부품을 하나씩 의심하다</a></p>
 <h4 id="i-레시피의-시대-scalerl과-olmo-3">(i) 레시피의 시대: ScaleRL과 Olmo 3</h4>
 <p>부품마다 고친 변종이 쌓였다. 그렇다면 무엇을 골라 어떻게 조합해야 할까? 작은 실험에서 좋았던 조합이 계산량을 백 배로 늘려도 좋을까?</p>
-<p>개별 부품의 수정이 쌓이자, 어떤 조합이 <strong>규모를 키울 때</strong> 가장 좋은지 체계적으로 재는 연구가 나왔다.</p>
+<p>어떤 조합이 <strong>규모를 키울 때</strong> 가장 좋은지 체계적으로 재는 연구가 나왔다.</p>
 <p><strong>ScaleRL</strong>(Khatri et al., “The Art of Scaling Reinforcement Learning Compute for LLMs”, arXiv:2510.13786, 2025년 10월, Meta 등)은 40만 GPU 시간 이상의 실험으로 RL 성능이 계산량에 따라 <strong>시그모이드 곡선</strong>을 그린다고 보였다. 곡선은 두 숫자로 요약된다 — 도달할 수 있는 <strong>천장</strong> <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span></span></span></span></eq>와, 거기까지 가는 <strong>효율</strong> <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span></eq>. 핵심 발견: 손실을 어떻게 모으고 어드밴티지를 어떻게 정규화하는지는 주로 효율을 바꾸고 천장은 거의 바꾸지 않는다. 천장을 바꾸는 것은 손실 함수의 종류(그들은 CISPO를 택했다)와 정밀도 같은 선택이었다. 최종 레시피에는 이 장의 부품들이 거의 다 들어 있다: CISPO 손실, 학습을 기다리지 않고 따로 도는 생성(PipelineRL), 프롬프트 단위 손실 집계, 배치 단위 어드밴티지 정규화, FP32 출력층, 시그널 없는 그룹 제거, 정답률 0.9 이상 문제 영구 제외, 강제 길이 중단. 8B 모델 하나를 10만 GPU 시간까지 돌려, 5만 시간 시점의 곡선으로 예측한 천장(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo>≈</mo><mn>0.61</mn></mrow><annotation encoding="application/x-tex">A \approx 0.61</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.61</span></span></span></span></eq>)을 확인했다.</p>
 <p><strong>Olmo 3</strong>(Ai2, arXiv:2512.13961, 2025년 12월)의 OlmoRL은 완전 공개 모델 쪽의 레시피다: 시그널 없는 그룹 제거, 배치가 찰 때까지 계속 뽑는 <strong>능동 샘플링</strong>(DAPO 동적 샘플링의 효율적 버전), 토큰 단위 손실, σ 정규화 제거, Clip-Higher, 잘라낸 임포턴스 샘플링, KL 없음. 인프라 쪽(연속 배칭, 생성 중 파라미터 갱신)으로 RL 속도를 약 4배 높였다.</p>
 <p>두 레시피를 GRPO 원형과 나란히 놓으면, 원래 부품 중 <strong>그룹 베이스라인 말고는 거의 남지 않았다</strong>는 것을 알 수 있다.</p>
 <h5 id="지도-무엇이-무엇을-바꿨나">지도: 무엇이 무엇을 바꿨나</h5>
-<table>
+<div class="table-scroll"><table>
 <thead>
 <tr>
 <th>변종</th>
@@ -780,7 +784,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <td>—</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>(&quot;—&quot;는 원형 GRPO에서 그 부품을 특별히 바꾸지 않았거나 해당 논문이 초점을 두지 않았다는 뜻이다.)</p>
 <pre class="mermaid">graph TD
     RF[&quot;REINFORCE + 베이스라인&quot;] --&gt; PPO[&quot;PPO&quot;]

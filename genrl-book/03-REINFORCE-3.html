@@ -186,6 +186,9 @@ th, td {
   text-align: left;
 }
 th { background: var(--bg-code); font-weight: 600; }
+/* build.cjs wrapTables 가 표를 감싸는 상자: 넓은 표만 가로로 밀린다. 바깥 여백은 상자가 갖는다(앞뒤 문단과 여백이 겹치는 모양 유지) */
+.table-scroll { overflow-x: auto; margin: 1em 0; font-size: 0.95em; }
+.table-scroll > table { margin: 0; font-size: 1em; }
 
 /* ===== Lists ===== */
 ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
@@ -338,8 +341,13 @@ pre.mermaid {
   }
 }
 
+/* 목차 버튼(#sidebar-open, 오른쪽 위 top 1rem + 40px)이 보이는 폭: 본문 위 여백을 버튼 아래까지 늘려 첫 제목·장 이름 줄이 버튼 밑에 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4.25rem; }
+}
+
 @media (max-width: 600px) {
-  main { padding: 1rem 0.8rem 3rem; }
+  main { padding: 4.25rem 0.8rem 3rem; }
   h1 { font-size: 1.5rem; }
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
@@ -382,8 +390,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -514,8 +520,8 @@ svg.fig .saxis { stroke: var(--w-axis); fill: none; } svg.fig .sgrid { stroke: v
 svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 
 /* ===== 만화 대화 (```dialogue) — 규격: ~/.claude/skills/textbook-exercises/SKILL.md 「B. 표현」 =====
-   표정 그림이 있는 차례: 그림 + 그 아래 이름(figcaption), 왼쪽 선 없음.
-   그림이 없는 차례: 대사 앞에 이름, 인물 색 왼쪽 선. 말풍선 열은 그림 폭만큼 들여 맞춘다. 대사는 얇게(350). */
+   모든 차례에 표정 그림 + 그 아래 이름(figcaption), 왼쪽 선 없음({표정} 이 없으면 평상 표정, 없는 번호는 점선 자리표시 .dlg-face-empty).
+   지문(.dlg-scene)은 그림 폭만큼 들여 말풍선 열에 맞춘다. 대사는 얇게(350). 렌더러: lib/dialogue.cjs */
 .dlg {
   --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; --cast: 88px;
   margin: 1.5em 0 2em;
@@ -523,7 +529,6 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 [data-theme="dark"] .dlg { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
 .dlg-T { --who: var(--who-T); } .dlg-M { --who: var(--who-M); } .dlg-S { --who: var(--who-S); }
 .dlg-line { display: flex; gap: 0.9em; align-items: flex-start; margin: 0.7em 0; }
-.dlg-line:not(.has-face) { margin-left: calc(var(--cast) + 0.9em); }
 .dlg-cast { flex: 0 0 var(--cast); width: var(--cast); margin: 0; }
 .dlg-cast img {
   display: block; width: var(--cast); height: var(--cast); margin: 0;
@@ -546,11 +551,10 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 }
 .dlg-bubble strong { font-weight: 600; }
 .dlg-bubble code { font-size: 0.85em; }
-.dlg-name { font-weight: 700; color: var(--who); margin-right: 0.5em; }
 .dlg-scene { margin: 0.7em 0 0.7em calc(var(--cast) + 0.9em); color: var(--fg-muted); font-size: 0.85rem; font-style: italic; }
 @media (max-width: 600px) {
   .dlg { --cast: 56px; }
-  .dlg-line:not(.has-face), .dlg-scene { margin-left: 0; }
+  .dlg-scene { margin-left: 0; }
 }
 
 /* 연습문제 — 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨. 바로 아래에 그 문제의 함께 풀기 대화가 붙는다 */
@@ -670,10 +674,10 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="03-REINFORCE.html">3. REINFORCE — 샘플로 추정하고, 베이스라인을 빼다</a></p>
 <h4 id="프롬프트별-베이스라인-이-문제에서-평소보다-잘했나">프롬프트별 베이스라인: 이 문제에서 평소보다 잘했나</h4>
-<p>이동평균 하나를 모든 프롬프트에 쓰면 무슨 일이 생길까? 문제마다 난이도가 다른데, 기준점은 하나다.</p>
+<p>이동평균 하나를 모든 프롬프트에 쓰면 무슨 일이 생길까? 문제마다 난이도가 다른데, 베이스라인은 하나다.</p>
 <h5 id="쉬운-문제와-어려운-문제">쉬운 문제와 어려운 문제</h5>
 <p>쉬운 문제(“1+1은?”)는 거의 항상 맞히고 어려운 문제(올림피아드)는 거의 항상 틀린다고 하자.</p>
-<table>
+<div class="table-scroll"><table>
 <thead>
 <tr>
 <th></th>
@@ -708,13 +712,13 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <td><eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">-0.1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">0.1</span></span></span></span></eq></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>전역 기준에서는 쉬운 문제의 샘플 대부분이 양수 가중치를 받는다. 그래디언트의 상당 부분이 &quot;쉬운 문제를 푸는 방식&quot;을 반복 강화하는 데 쓰인다 — 틀린 방향은 아니지만 이미 잘하는 것에 힘을 낭비하고, 샘플마다 가중치가 크게 흔들린다. 프롬프트별 기준은 &quot;<strong>이 문제에서</strong> 평소보다 잘했나&quot;를 묻는다. 어려운 문제에서 드물게 맞힌 답이 큰 상을 받고, 쉬운 문제에서 드물게 틀린 답이 큰 벌을 받는다.</p>
 <div class="widget" data-widget="reinforce-variance"></div>
 <p>위젯에서 확인할 것:</p>
 <ul>
 <li>네 가지 베이스라인 모두에서 히스토그램의 중심은 참값(점선)에 머문다. <strong>베이스라인은 방향을 바꾸지 않는다.</strong></li>
-<li><eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi></mrow><annotation encoding="application/x-tex">c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span></eq>를 5로 올리고 베이스라인을 끄면 히스토그램이 넓어지고 학습 곡선 다섯 개가 따로 논다. 이동평균이나 같은 프롬프트 평균을 켜면 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi></mrow><annotation encoding="application/x-tex">c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span></eq>가 얼마든 모양이 그대로다 — 상수가 기준점에 흡수되기 때문이다.</li>
+<li><eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi></mrow><annotation encoding="application/x-tex">c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span></eq>를 5로 올리고 베이스라인을 끄면 히스토그램이 넓어지고 학습 곡선 다섯 개가 따로 논다. 이동평균이나 같은 프롬프트 평균을 켜면 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi></mrow><annotation encoding="application/x-tex">c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span></eq>가 얼마든 모양이 그대로다 — 상수가 베이스라인에 흡수되기 때문이다.</li>
 <li>배치 크기 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span></eq>을 4배로 늘려야 표준편차가 절반이 된다. 베이스라인은 샘플을 더 뽑지 않고 같은 효과를 낸다.</li>
 </ul>
 <h5 id="ml에서-같은-프롬프트에-여러-응답을-뽑는다">ML에서: 같은 프롬프트에 여러 응답을 뽑는다</h5>
@@ -725,7 +729,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </div>
 <div class="dlg">
 <div class="dlg-scene">칠판에 보상 [1, 0, 0, 1] 과 평균 0.5 가 적혀 있다.</div>
-<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">이번엔 같은 프롬프트의 네 응답 평균을 기준점으로 써요. 문제 3에서 자기 보상을 기준점으로 쓰면 안 된다고 했죠. 이건 괜찮을까요?</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">이번엔 같은 프롬프트의 네 응답 평균을 베이스라인으로 써요. 문제 3에서 자기 보상을 베이스라인으로 쓰면 안 된다고 했죠. 이건 괜찮을까요?</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">평균은 네 개를 섞은 거니까 괜찮지 않아요? 자기 하나만 쓴 게 아니잖아요.</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S06.webp" alt="이서연 (의심)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">섞였어도 자기 보상이 1/4만큼 들어가 있어. b가 y_i에 의존하니까 문제 3이랑 같은 이유로 증명이 깨지지 않아?</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">서연 학생, 깨진다면 얼마나 깨지는지 계산해 볼 수 있어요?</div></div>
@@ -806,7 +810,7 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 </script>
-<script src="widgets/common.js?v=dca053a0" defer></script>
+<script src="widgets/common.js?v=6a3d503c" defer></script>
 <script src="widgets/reinforce-variance.js?v=ec8e7d53" defer></script>
 </body>
 </html>

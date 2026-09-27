@@ -186,6 +186,9 @@ th, td {
   text-align: left;
 }
 th { background: var(--bg-code); font-weight: 600; }
+/* build.cjs wrapTables 가 표를 감싸는 상자: 넓은 표만 가로로 밀린다. 바깥 여백은 상자가 갖는다(앞뒤 문단과 여백이 겹치는 모양 유지) */
+.table-scroll { overflow-x: auto; margin: 1em 0; font-size: 0.95em; }
+.table-scroll > table { margin: 0; font-size: 1em; }
 
 /* ===== Lists ===== */
 ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
@@ -338,8 +341,13 @@ pre.mermaid {
   }
 }
 
+/* 목차 버튼(#sidebar-open, 오른쪽 위 top 1rem + 40px)이 보이는 폭: 본문 위 여백을 버튼 아래까지 늘려 첫 제목·장 이름 줄이 버튼 밑에 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4.25rem; }
+}
+
 @media (max-width: 600px) {
-  main { padding: 1rem 0.8rem 3rem; }
+  main { padding: 4.25rem 0.8rem 3rem; }
   h1 { font-size: 1.5rem; }
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
@@ -382,8 +390,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -514,8 +520,8 @@ svg.fig .saxis { stroke: var(--w-axis); fill: none; } svg.fig .sgrid { stroke: v
 svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 
 /* ===== 만화 대화 (```dialogue) — 규격: ~/.claude/skills/textbook-exercises/SKILL.md 「B. 표현」 =====
-   표정 그림이 있는 차례: 그림 + 그 아래 이름(figcaption), 왼쪽 선 없음.
-   그림이 없는 차례: 대사 앞에 이름, 인물 색 왼쪽 선. 말풍선 열은 그림 폭만큼 들여 맞춘다. 대사는 얇게(350). */
+   모든 차례에 표정 그림 + 그 아래 이름(figcaption), 왼쪽 선 없음({표정} 이 없으면 평상 표정, 없는 번호는 점선 자리표시 .dlg-face-empty).
+   지문(.dlg-scene)은 그림 폭만큼 들여 말풍선 열에 맞춘다. 대사는 얇게(350). 렌더러: lib/dialogue.cjs */
 .dlg {
   --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; --cast: 88px;
   margin: 1.5em 0 2em;
@@ -523,7 +529,6 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 [data-theme="dark"] .dlg { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
 .dlg-T { --who: var(--who-T); } .dlg-M { --who: var(--who-M); } .dlg-S { --who: var(--who-S); }
 .dlg-line { display: flex; gap: 0.9em; align-items: flex-start; margin: 0.7em 0; }
-.dlg-line:not(.has-face) { margin-left: calc(var(--cast) + 0.9em); }
 .dlg-cast { flex: 0 0 var(--cast); width: var(--cast); margin: 0; }
 .dlg-cast img {
   display: block; width: var(--cast); height: var(--cast); margin: 0;
@@ -546,11 +551,10 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 }
 .dlg-bubble strong { font-weight: 600; }
 .dlg-bubble code { font-size: 0.85em; }
-.dlg-name { font-weight: 700; color: var(--who); margin-right: 0.5em; }
 .dlg-scene { margin: 0.7em 0 0.7em calc(var(--cast) + 0.9em); color: var(--fg-muted); font-size: 0.85rem; font-style: italic; }
 @media (max-width: 600px) {
   .dlg { --cast: 56px; }
-  .dlg-line:not(.has-face), .dlg-scene { margin-left: 0; }
+  .dlg-scene { margin-left: 0; }
 }
 
 /* 연습문제 — 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨. 바로 아래에 그 문제의 함께 풀기 대화가 붙는다 */
@@ -672,7 +676,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <h4 id="크레딧-할당-성공-궤적의-어느-스텝이-잘한-것인가">크레딧 할당: 성공 궤적의 어느 스텝이 잘한 것인가</h4>
 <p>에이전트가 20스텝에 걸쳐 버그를 고쳤고, 마지막에 테스트 통과로 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">r = 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></eq>을 받았다. 20스텝 중 무엇이 잘한 것이고 무엇이 헛수고였나? 보상이 끝에 한 번만 오면, 그 점수를 스텝마다 나눠 주는 일 — <strong>크레딧 할당</strong>(credit assignment) — 이 학습의 핵심이 된다.</p>
 <h5 id="궤적-하나에-어드밴티지-하나">궤적 하나에 어드밴티지 하나</h5>
-<p>아래 그림의 궤적을 보자. 핵심 기여는 9번 스텝 하나이고, 탐색 12스텝과 실수 2스텝이 섞여 있다. GRPO는 궤적 전체에 어드밴티지 하나를 주므로 탐색 12스텝과 실수 2스텝도 핵심 기여와 똑같이 강화된다. 비평가(가치 함수)가 원래 들어온 이유가 바로 이것이다. 상태마다 앞으로 기대되는 보상 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>V</mi><mi>ϕ</mi></msub><mo stretchy="false">(</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V_\phi(s_t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.2222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">ϕ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></eq>를 알면, TD 오차(한 스텝 뒤의 예측으로 지금 예측을 고친 차이) <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mi>t</mi></msub><mo>=</mo><msub><mi>r</mi><mi>t</mi></msub><mo>+</mo><mi>γ</mi><msub><mi>V</mi><mi>ϕ</mi></msub><mo stretchy="false">(</mo><msub><mi>s</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo><mo>−</mo><msub><mi>V</mi><mi>ϕ</mi></msub><mo stretchy="false">(</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\delta_t = r_t + \gamma V_\phi(s_{t+1}) - V_\phi(s_t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0379em;">δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0379em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord mathnormal" style="margin-right:0.0556em;">γ</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.2222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">ϕ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.2222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">ϕ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></eq>로 어느 스텝이 기대를 넘었는지 가를 수 있다. GRPO가 비평가를 버리며 포기한 것이 정확히 이 해상도다. 단일 응답에서는 싼 대가였지만 수십 턴짜리 궤적에서는 비싸진다(아래 문제 2). 그림 맨 아래 문장의 PRM은 스텝마다 점수를 매기는 과정 보상 모델이다.</p>
+<p>아래 그림의 궤적을 보자. 핵심 기여는 9번 스텝 하나이고, 탐색 12스텝과 실수 2스텝이 섞여 있다. GRPO는 궤적 전체에 어드밴티지 하나를 주므로 핵심이 아닌 스텝도 핵심 기여와 똑같이 강화된다. 비평가(가치 함수)가 원래 들어온 이유가 바로 이것이다. 상태마다 앞으로 기대되는 보상 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>V</mi><mi>ϕ</mi></msub><mo stretchy="false">(</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V_\phi(s_t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.2222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">ϕ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></eq>를 알면, TD 오차(한 스텝 뒤의 예측으로 지금 예측을 고친 차이) <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mi>t</mi></msub><mo>=</mo><msub><mi>r</mi><mi>t</mi></msub><mo>+</mo><mi>γ</mi><msub><mi>V</mi><mi>ϕ</mi></msub><mo stretchy="false">(</mo><msub><mi>s</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo><mo>−</mo><msub><mi>V</mi><mi>ϕ</mi></msub><mo stretchy="false">(</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\delta_t = r_t + \gamma V_\phi(s_{t+1}) - V_\phi(s_t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0379em;">δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0379em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord mathnormal" style="margin-right:0.0556em;">γ</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.2222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">ϕ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.2222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">ϕ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></eq>로 어느 스텝이 기대를 넘었는지 가를 수 있다. GRPO가 비평가를 버리며 포기한 것이 정확히 이 해상도다. 단일 응답에서는 싼 대가였지만 수십 턴짜리 궤적에서는 비싸진다(아래 문제 2). 그림 맨 아래 문장의 PRM은 스텝마다 점수를 매기는 과정 보상 모델이다.</p>
 <svg class="fig" viewBox="0 0 580 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="20스텝 궤적의 크레딧 할당">
   <text class="t-strong" x="290" y="16" text-anchor="middle">크레딧 할당 문제: 20스텝 중 핵심은 어디?</text>
   <rect class="fneutral" x="14" y="30" width="21" height="50" rx="2"/>
@@ -736,14 +740,14 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   <text x="300" y="121" style="font-size:10px">후속 작업 (5)</text>
   <rect class="fbad" x="410" y="112" width="14" height="10" rx="2" opacity="0.55"/>
   <text x="430" y="121" style="font-size:10px">실수 (2)</text>
-  <text x="290" y="146" text-anchor="middle" style="font-size:11px">GRPO: 궤적 전체에 같은 어드밴티지 → 탐색 12스텝과 실수 2스텝도 똑같이 강화</text>
+  <text x="290" y="146" text-anchor="middle" style="font-size:11px">GRPO: 궤적 전체에 같은 어드밴티지 → 핵심이 아닌 스텝도 똑같이 강화</text>
   <text class="t2" x="290" y="162" text-anchor="middle" style="font-size:11px">가치 함수·PRM: 스텝마다 다른 값 → 핵심 기여만 골라 강화할 여지</text>
 </svg>
 <h5 id="ml에서-스텝-단위-학습-신호-시그널-를-얻는-방법들">ML에서: 스텝 단위 학습 신호(시그널)를 얻는 방법들</h5>
 <p><strong>궤적 모방 + 궤적 DPO.</strong> 전문가 궤적을 모아 SFT(전문가 궤적을 그대로 따라 하는 지도 미세조정, 곧 행동 클로닝)하고, 성공 궤적과 실패 궤적을 쌍으로 DPO를 돌린다. 로보틱스의 행동 클로닝과 같은 구조라 한계도 같다 — 분포 밖(전문가 궤적에 없던 상황)에서 무너지고, 궤적 단위의 쌍비교는 거칠다. 성공 궤적에도 나쁜 스텝이 있고 실패 궤적에도 좋은 스텝이 있다.</p>
 <p><strong>스텝 단위의 판단을 RL로 — ACT.</strong> Agentic Critical Training(arXiv:2603.08706, 2026년 3월)은 스텝마다 전문가 행동과 모델 자신의 행동을 나란히 놓고, 모델이 <strong>어느 쪽이 나은지</strong> 판단하게 한 뒤 판단이 맞으면 보상을 준다. 미리 만든 &quot;반성 텍스트&quot;를 SFT로 흉내 내는 대신, 행동의 질을 따지는 추론 자체를 RL로 기른다는 것이다. 모방 학습 대비 평균 5.07점, 일반 RL 대비 4.62점 향상을 보고했다. 남의 답을 흉내 내는 SFT만으로는 판단력이 길러지지 않는다는 문제가 에이전트 스텝 단위로 다시 나타난 셈이다.</p>
 <p><strong>검증 가능한 에이전트 태스크에 RL.</strong> 코드 수정 → 테스트 실행 → 통과 여부는 이진 보상이다. 검증기로 보상을 매기는 RLVR의 에이전틱 확장이고, 크레딧 할당이 거칠다는 문제는 그대로 남는다.</p>
-<table>
+<div class="table-scroll"><table>
 <thead>
 <tr>
 <th>시스템</th>
@@ -763,14 +767,14 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <td>학습 스크립트를 고치고 정해진 시간 동안 돌려 학습에 쓰지 않은 평가용 데이터의 bits-per-byte로 보상, PPO로 정책 갱신. 약 8 GPU 시간 뒤 2.681로 사람 전문가 기준(2.847)보다 낮은 값을 보고</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h5 id="끝의-1비트를-토큰에-나누는-네-가지-길">끝의 1비트를 토큰에 나누는 네 가지 길</h5>
 <p>검증기가 궤적 끝에 주는 것은 맞음 아니면 틀림, 곧 1비트다. 4,000토큰짜리 궤적이라면 토큰 하나에 돌아가는 정보는 4,000분의 1비트다. GRPO는 이 1비트를 모든 토큰에 똑같이 나눠 준다. 이 균일 배분이 틀린 것은 아니다. 궤적 하나의 어드밴티지를 그 궤적의 모든 토큰에 곱하는 것은 베이스라인을 뺀 REINFORCE 추정이라 기대값은 치우치지 않는다. 문제는 분산이다(아래 문제 2). 토큰마다 다른 몫을 주려는 방법들은 네 갈래로 나뉜다.</p>
 <p><strong>① 더 굴려서 정보를 산다.</strong> 궤적 중간의 한 지점에서 여러 번 이어 써 보고 검증기로 채점하면, 그 평균이 그 지점의 가치(여기서 이어 쓰면 결국 맞힐 확률)의 추정이 된다. VinePPO(Kazemnejad et al., arXiv:2410.01679, 2024년 10월)는 학습한 비평가 대신 이 몬테카를로 추정을 썼다. 추론 과제에서 가치망이 대안 스텝을 비교할 때 무작위 기준을 겨우 넘는다는 관찰이 출발점이었고, MATH와 GSM8K에서 PPO보다 짧은 벽시계 시간(최대 3배 빠르게)으로 앞섰다. 대가는 궤적 길이에 따라 늘어나는 추가 생성이다.</p>
 <p><strong>② 정책 자신의 통계로 다시 나눈다.</strong> 새로 굴리지 않고, 엔트로피처럼 정책이 이미 내놓은 숫자로 어드밴티지를 토큰마다 다르게 싣는다. 엔트로피가 높은 소수의 분기 토큰에만 그래디언트를 주는 방법이 여기 속한다. 추가 비용이 없지만 새 정보를 만들지는 못한다.</p>
-<p><strong>③ 정답을 본 자기 자신에게 묻는다.</strong> 같은 모델에 정답이나 풀이를 보여 준 뒤, 그 모델이 학생 궤적의 토큰마다 매기는 분포를 교사로 쓴다. 신호가 궤적당 1비트에서 토큰마다 어휘 전체의 분포 차이로 바뀐다. 이 장 뒤의 「시그널의 해상도」 절에 나오는 사후 강화 OPD가 같은 뿌리다. 교사가 실제 생성 때는 없는 정보를 보고 있으므로, 그 정보에 기대는 버릇이 학생에게 새어 들어가지 않게 막는 것이 이 갈래의 과제다.</p>
+<p><strong>③ 정답을 본 자기 자신에게 묻는다.</strong> 같은 모델에 정답이나 풀이를 보여 준 뒤, 그 모델이 학생 궤적의 토큰마다 매기는 분포를 교사로 쓴다. 신호가 궤적당 1비트에서 토큰마다 어휘 전체의 분포 차이로 바뀐다. 피드백에서 뽑은 힌트를 본 같은 모델을 교사로 쓰는 사후 강화 OPD(이 장 「시그널의 해상도」 절)도 같은 뿌리다. 교사가 실제 생성 때는 없는 정보를 보고 있으므로, 그 정보에 기대는 버릇이 학생에게 새어 들어가지 않게 막는 것이 이 갈래의 과제다.</p>
 <p><strong>④ 실행해서 처음 어긋난 곳을 찾는다.</strong> 코드처럼 실행할 수 있으면 추정하지 않고 관찰할 수 있다. EGCA(Execution-Grounded Credit Assignment, arXiv:2603.16158, 2026년 3월)는 테스트에 실패한 프로그램과 미리 마련해 둔 참조 해답을 같은 계측으로 실행해, 중간 상태가 <strong>처음</strong> 달라지는 구간에만 어드밴티지를 주고 그 뒤 토큰은 가린다. 가장 긴 증가 부분수열 문제에서 <code>&gt;</code> 를 <code>&gt;=</code> 로 쓴 버그는 입력 [1, 3, 3, 5]에서 같은 값 3 두 개를 비교하는 순간 처음 갈라진다. 균일 배분이라면 이 비교 연산자는 상관없는 토큰 수백 개와 똑같은 크기의 벌을 받는다. DeepSeek-Coder-Instruct 6.7B를 APPS+로 학습해 HumanEval pass@1 82.1%를 얻었다(같은 조건의 GRPO 79.0%).</p>
-<table>
+<div class="table-scroll"><table>
 <thead>
 <tr>
 <th>갈래</th>
@@ -805,7 +809,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <td>실행 가능한 검사 + 참조 해답</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>②는 같은 1비트를 다르게 나누어 분산을 줄이려는 거래이고, 나머지는 비용(①)이나 치우침(③)이나 준비물(④)을 치르고 정보를 더 들여오는 거래다.</p>
 <h5 id="문제-2-성공-궤적-안의-삽질">문제 2 — 성공 궤적 안의 삽질</h5>
 <div class="exercise">

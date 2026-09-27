@@ -6,7 +6,12 @@
   const NS = "http://www.w3.org/2000/svg";
   const GW = (window.GW = { reg: {} });
 
-  GW.register = (name, fn) => (GW.reg[name] = fn);
+  // 위젯 스크립트가 공통 스크립트보다 늦게 도착해도 그려지도록, 문서가 준비된 뒤의 등록은 그 자리에서 바로 그린다 (아래 init)
+  let ready = false;
+  GW.register = (name, fn) => {
+    GW.reg[name] = fn;
+    if (ready) document.querySelectorAll(`.widget[data-widget="${name}"]`).forEach(mount);
+  };
 
   function apply(e, props) {
     for (const [k, v] of Object.entries(props || {})) {
@@ -220,13 +225,26 @@
     return lg;
   };
 
+  // 자리 하나에 한 번만 그린다. 오류는 독자 화면에 쓰지 않고 기록(console)에만 남긴다
+  const mounted = new WeakSet();
+  function mount(el) {
+    const fn = GW.reg[el.dataset.widget];
+    if (!fn || mounted.has(el)) return;
+    mounted.add(el);
+    try { fn(el); } catch (e) { console.error("위젯 오류:", el.dataset.widget, e); }
+  }
+  // 이미 등록된 위젯을 그린다. 아직 도착하지 않은 위젯은 GW.register 가 도착할 때 그린다
   function init() {
-    document.querySelectorAll(".widget[data-widget]").forEach((el) => {
-      const fn = GW.reg[el.dataset.widget];
-      if (!fn) { el.textContent = "(위젯을 불러오지 못했습니다: " + el.dataset.widget + ")"; return; }
-      try { fn(el); } catch (e) { console.error(e); el.textContent = "(위젯 오류: " + e.message + ")"; }
-    });
+    ready = true;
+    document.querySelectorAll(".widget[data-widget]").forEach(mount);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else setTimeout(init, 0);
+  // 쪽을 다 받은 뒤에도 그리지 못한 자리는 기록에만 남긴다
+  addEventListener("load", () => {
+    init();
+    document.querySelectorAll(".widget[data-widget]").forEach((el) => {
+      if (!mounted.has(el)) console.error("위젯을 불러오지 못했습니다:", el.dataset.widget);
+    });
+  });
 })();

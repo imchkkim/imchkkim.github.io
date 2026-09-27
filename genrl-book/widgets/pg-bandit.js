@@ -6,7 +6,7 @@ GW.register("pg-bandit", (el) => {
     title: "세 개의 답 중 하나를 고르는 정책 — 그래디언트는 어디로 미는가",
     caption:
       "막대는 각 답을 고를 확률 <span class='sym-pi'>π</span>, 막대 위 화살표는 정확한 그래디언트가 로짓을 미는 방향과 크기(<span class='sym-pi'>π<sub>k</sub></span>(<span class='sym-R'>r<sub>k</sub></span> − <span class='sym-J'>J</span>)). " +
-      "‘기대값으로 한 걸음’은 VPG, ‘샘플 1개로 한 걸음’은 다음 장의 REINFORCE 다. 보상에 상수 c 를 더한 뒤 두 방식의 학습 곡선을 비교해 보라.",
+      "‘기대값으로 한 걸음’은 VPG, ‘샘플 1개로 한 걸음’은 뽑은 샘플로 추정해 걷는 방법(REINFORCE)이다. 보상에 상수 c 를 더한 뒤 두 방식의 학습 곡선을 비교해 보라.",
   });
   const ACT = ["서울입니다", "부산입니다", "서울이요"];
   const R = [1.0, 0.0, 0.6];
