@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -633,8 +636,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <h2 id="자화율-크게-흔들리는-계는-크게-따라온다">자화율: 크게 흔들리는 계는 크게 따라온다</h2>
 <p>임계점 바로 앞, 봉우리가 아직 0에 있지만 곧 갈라지려는 자리에서 m은 얼마나 흔들릴까? 그리고 그렇게 흔들리는 계를 바깥에서 조금 밀면 얼마나 따라올까?</p>
 <h3 id="임계점에서는-요동이-줄지-않는다">임계점에서는 요동이 줄지 않는다</h3>
-<p>서로 독립인 스핀 N개의 평균 방향은 스핀이 많을수록 덜 흔들린다. 독립 변수 N개의 평균이므로 분산이 1/N에 비례하고, 흔들림의 크기는 1/√N로 작아진다. 결합이 있으면 이 논리가 어긋난다. 평균의 분산은 스핀 쌍마다의 공분산을 모두 더한 것이어서, 스핀들이 서로 같은 방향을 따라가려 하면 공분산이 쌓여 분산이 커지기 때문이다. 작은 문제의 계에서 N × Var(m)을 재면 다음과 같다.</p>
-<table>
+<p>서로 독립인 스핀 N개의 평균 방향은 스핀이 많을수록 덜 흔들린다. 독립 변수 N개의 평균이므로 분산이 1/N에 비례하고, 흔들림의 크기는 1/√N로 작아진다. 결합이 있으면 이 논리가 어긋난다. 평균의 분산은 스핀 쌍마다의 공분산을 모두 더한 것이어서, 스핀들이 서로 같은 방향을 따라가려 하면 공분산이 쌓여 분산이 커지기 때문이다. 모든 쌍을 같은 결합 J/N으로 묶은 스핀 N개에서, 위를 향한 스핀 수로 배치를 묶어 세는 계산으로 N × Var(m)을 구하면 다음과 같다.</p>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>N</th>
@@ -663,9 +666,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <td>116.81</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>독립인 스핀이라면 N × Var(m)은 N과 상관없이 1이다. 임계점보다 결합이 약한 쪽(βJ &lt; 1)에서도 이 값은 N이 커지면 일정한 값 1/(1 − βJ), 곧 2와 10으로 수렴하므로, 흔들림은 여전히 1/√N로 줄되 결합이 강할수록 더 크게 흔들린다. 그런데 βJ = 1에서는 N을 10배 늘릴 때마다 N × Var(m)이 약 √10 ≈ 3.2배씩 자라며 수렴하지 않는다. 임계점에서는 스핀들이 서로 멀리까지 함께 움직여서, 많이 모아 평균을 내도 흔들림이 기대만큼 줄지 않는 것이다.</p>
-<p>βJ가 1보다 큰 쪽에서도 앞의 코드 출력을 보면 N × Var(m)이 N에 거의 비례한다. 이것은 흔들림이 커서가 아니라 m이 +0.86 근처와 −0.86 근처 두 곳에 나뉘어 있기 때문이므로, 그런 경우에는 한 봉우리 안의 흔들림을 따로 재야 한다.</p>
+<p>βJ가 1보다 큰 쪽에서도 같은 계산을 하면 N × Var(m)이 N에 거의 비례한다(βJ = 1.5에서 N = 100, 1000, 10000일 때 72.45, 735.97, 7370.10). 이것은 흔들림이 커서가 아니라 m이 +0.86 근처와 −0.86 근처 두 곳에 나뉘어 있기 때문이므로, 그런 경우에는 한 봉우리 안의 흔들림을 따로 재야 한다.</p>
 <h3 id="편향에-대한-응답">편향에 대한 응답</h3>
 <p>이렇게 크게 흔들리는 계를 바깥에서 조금 밀면 어떻게 될까? 모든 스핀에 같은 편향 b를 조금 걸었을 때 자화가 얼마나 따라 움직이는지를 재 보자. ln Z를 βb로 한 번 미분하면 N⟨m⟩, 두 번 미분하면 N²Var(m)이 나오므로, 편향에 대한 응답은 편향이 없을 때의 흔들림으로 정해진다. 이 응답을 <strong>자화율</strong> (편향에 대한 자화의 응답, magnetic susceptibility) χ라 하면 다음이 성립한다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#008b8b"><mi>χ</mi></mstyle><mo>=</mo><mfrac><mrow><mi mathvariant="normal">∂</mi><mo stretchy="false">⟨</mo><mstyle mathcolor="#dd6677"><mi>m</mi></mstyle><mo stretchy="false">⟩</mo></mrow><mrow><mi mathvariant="normal">∂</mi><mstyle mathcolor="#b8860b"><mi>b</mi></mstyle></mrow></mfrac><mo>=</mo><mfrac><mrow><mstyle mathcolor="#1f77b4"><mi>N</mi></mstyle><mtext> </mtext><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mo stretchy="false">(</mo><mstyle mathcolor="#dd6677"><mi>m</mi></mstyle><mo stretchy="false">)</mo></mrow><mrow><mstyle mathcolor="#7f7f7f"><mi>k</mi></mstyle><mstyle mathcolor="#8c564b"><mi>T</mi></mstyle></mrow></mfrac><mtext> </mtext><mover><mo stretchy="true" minsize="3.0em">→</mo><mpadded width="+0.6em" lspace="0.3em"><mrow><mtext> </mtext><mstyle mathcolor="#1f77b4"><mi>N</mi></mstyle><mo>→</mo><mi mathvariant="normal">∞</mi><mtext> </mtext></mrow></mpadded></mover><mtext> </mtext><mfrac><mn>1</mn><mrow><mstyle mathcolor="#7f7f7f"><mi>k</mi></mstyle><mtext> </mtext><mo stretchy="false">(</mo><mstyle mathcolor="#8c564b"><mi>T</mi></mstyle><mo>−</mo><mstyle mathcolor="#8c564b"><msub><mi>T</mi><mi>c</mi></msub></mstyle><mo stretchy="false">)</mo></mrow></mfrac><mspace width="2em"/><mo stretchy="false">(</mo><mstyle mathcolor="#8c564b"><mi>T</mi></mstyle><mo>&gt;</mo><mstyle mathcolor="#8c564b"><msub><mi>T</mi><mi>c</mi></msub></mstyle><mo separator="true">,</mo><mtext>  </mtext><mstyle mathcolor="#7f7f7f"><mi>k</mi></mstyle><mstyle mathcolor="#8c564b"><msub><mi>T</mi><mi>c</mi></msub></mstyle><mo>=</mo><mstyle mathcolor="#b8860b"><mi>J</mi></mstyle><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\textcolor{#008b8b}{\chi} = \frac{\partial \langle \textcolor{#dd6677}{m} \rangle}{\partial \textcolor{#b8860b}{b}} = \frac{\textcolor{#1f77b4}{N}\, \mathrm{Var}(\textcolor{#dd6677}{m})}{\textcolor{#7f7f7f}{k}\textcolor{#8c564b}{T}} \ \xrightarrow{\ \textcolor{#1f77b4}{N}\to\infty\ }\ \frac{1}{\textcolor{#7f7f7f}{k}\,(\textcolor{#8c564b}{T} - \textcolor{#8c564b}{T_c})} \qquad (\textcolor{#8c564b}{T} &gt; \textcolor{#8c564b}{T_c},\ \ \textcolor{#7f7f7f}{k}\textcolor{#8c564b}{T_c} = \textcolor{#b8860b}{J})
@@ -685,7 +688,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 \textcolor{#1f77b4}{N} &amp; \text{스핀의 수}
 \end{array}
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:7.2em;vertical-align:-3.35em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.85em;"><span style="top:-6.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#008b8b;">χ</span></span></span><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#b8860b;">b</span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathrm">Var</span></span><span class="mopen">(</span><span class="mord mathnormal" style="color:#dd6677;">m</span><span class="mclose">)</span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;color:#8c564b;">T</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord" style="color:#8c564b;"><span class="mord mathnormal" style="margin-right:0.1389em;color:#8c564b;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#8c564b;"><span class="mord mathnormal mtight" style="color:#8c564b;">c</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;color:#7f7f7f;">k</span></span></span><span style="top:-0.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em;color:#1f77b4;">N</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.35em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.85em;"><span style="top:-6.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">자화율</span><span class="mord"> (</span><span class="mord hangul_fallback">편향을</span><span class="mord"> </span><span class="mord hangul_fallback">조금</span><span class="mord"> </span><span class="mord hangul_fallback">걸었을</span><span class="mord"> </span><span class="mord hangul_fallback">때</span><span class="mord"> </span><span class="mord hangul_fallback">자화가</span><span class="mord"> </span><span class="mord hangul_fallback">따라</span><span class="mord"> </span><span class="mord hangul_fallback">움직이는</span><span class="mord"> </span><span class="mord hangul_fallback">비율</span><span class="mord">)</span></span></span></span><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">모든</span><span class="mord"> </span><span class="mord hangul_fallback">스핀에</span><span class="mord"> </span><span class="mord hangul_fallback">똑같이</span><span class="mord"> </span><span class="mord hangul_fallback">건</span><span class="mord"> </span><span class="mord hangul_fallback">편향</span></span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">편향이</span><span class="mord"> </span><span class="mord hangul_fallback">없을</span><span class="mord"> </span><span class="mord hangul_fallback">때</span><span class="mord"> </span><span class="mord hangul_fallback">자화의</span><span class="mord"> </span><span class="mord hangul_fallback">분산</span></span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">온도와</span><span class="mord"> </span><span class="mord hangul_fallback">임계</span><span class="mord"> </span><span class="mord hangul_fallback">온도</span><span class="mord"> (</span><span class="mord hangul_fallback">완전</span><span class="mord"> </span><span class="mord hangul_fallback">연결</span><span class="mord"> </span><span class="mord hangul_fallback">모형에서</span><span class="mord"> </span><span class="mord hangul_fallback">임계</span><span class="mord"> </span><span class="mord hangul_fallback">온도는</span><span class="mord"> J/k)</span></span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">볼츠만</span><span class="mord"> </span><span class="mord hangul_fallback">상수</span></span></span></span><span style="top:-0.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">스핀의</span><span class="mord"> </span><span class="mord hangul_fallback">수</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.35em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
-<p>편향이 없을 때 크게 흔들리는 계는 편향을 조금만 걸어도 크게 따라 움직인다. 임계점 위에서 자화율이 1/(<span class="sym" style="color:#8c564b">T</span> − <span class="sym" style="color:#8c564b">T_c</span>)에 비례한다는 것은 자석 실험에서 오래전부터 알려진 모양이고, 임계점에 다가갈수록 자화율은 끝없이 커진다. 유한한 <span class="sym" style="color:#1f77b4">N</span>에서는 이것이 무한대가 아니라 <span class="sym" style="color:#1f77b4">N</span>과 함께 자라는 값으로 나타나며, 위 표의 <span class="sym" style="color:#8c564b">β</span><span class="sym" style="color:#b8860b">J</span> = 1 칸이 그것이다. 독립 입자로 이루어진 계에서도 열용량 같은 응답에 봉우리가 생길 수는 있지만, 그 봉우리는 입자 하나당 높이가 <span class="sym" style="color:#1f77b4">N</span>과 상관없이 정해져 있다는 점에서 이것과 다르다.</p>
+<p>편향이 없을 때 크게 흔들리는 계는 편향을 조금만 걸어도 크게 따라 움직인다. 임계점 위에서 자화율이 1/(<span class="sym" style="color:#8c564b">T</span> − <span class="sym" style="color:#8c564b">T_c</span>)에 비례한다는 것은 자석 실험에서 오래전부터 알려진 모양이고, 임계점에 다가갈수록 자화율은 끝없이 커진다. 유한한 <span class="sym" style="color:#1f77b4">N</span>에서는 이것이 무한대가 아니라 <span class="sym" style="color:#1f77b4">N</span>과 함께 자라는 값으로 나타나며, 위 표의 <span class="sym" style="color:#8c564b">β</span><span class="sym" style="color:#b8860b">J</span> = 1 칸이 그것이다. 독립 입자로 이루어진 계에서도 열용량 같은 응답에 봉우리가 생길 수는 있지만(두 상태만 가진 입자들의 열용량이 특정 온도에서 그리는 쇼트키 봉우리, Schottky anomaly가 그 예다), 그 봉우리는 입자 하나당 높이가 <span class="sym" style="color:#1f77b4">N</span>과 상관없이 정해져 있다는 점에서 이것과 다르다.</p>
 <figure class="fig "><img src="images/ch11/c1_fluct_critical.png" alt="완전 연결 모형의 N × Var(m)(kT = 1이면 자화율 χ)를 βJ에 따라 그린 것. βJ &lt; 1에서는 N을 키우면 1/(1 − βJ)(점선)로 수렴하지만, βJ = 1에서는 N = 100, 1000, 10000일 때 11.45, 36.76, 116.81로 N을 10배 할 때마다 약 √10배씩 자란다. 세로축은 로그 눈금이다." loading="lazy"><figcaption>완전 연결 모형의 N × Var(m)(kT = 1이면 자화율 χ)를 βJ에 따라 그린 것. βJ &lt; 1에서는 N을 키우면 1/(1 − βJ)(점선)로 수렴하지만, βJ = 1에서는 N = 100, 1000, 10000일 때 11.45, 36.76, 116.81로 N을 10배 할 때마다 약 √10배씩 자란다. 세로축은 로그 눈금이다.</figcaption></figure>
 <div class="dialogue"><h3 id="문제-4-봉우리가-있으면-모두-상전이인가">문제 4. 봉우리가 있으면 모두 상전이인가</h3>
 <blockquote>
@@ -715,6 +718,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -742,13 +746,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

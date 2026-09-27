@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -638,10 +641,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <h3 id="커피-속-설탕과-쇠막대">커피 속 설탕과 쇠막대</h3>
 <p>σ²가 넓이이고 t가 시간이므로 D의 단위는 m²/s이다. 이 D를 <strong>확산 계수</strong> (단위 시간에 퍼지는 넓이, diffusion coefficient)라 하며, 이웃 평균 격자에서는 a = τ = 1이므로 D = 1/4이다.</p>
 <p>젓지 않은 커피 바닥에서 설탕이 녹아 퍼지는 것이 이 과정이다. 물속 설탕 분자의 확산 계수는 약 5 × 10⁻¹⁰ m²/s여서 한 축 방향으로 1 mm 퍼지는 데는 16분쯤 걸리지만, 1 cm 퍼지려면 그 100배인 하루 남짓이 걸린다. 설탕을 넣고 젓는 까닭은 먼 거리를 확산에 맡기지 않고 물의 흐름으로 옮기기 위해서다. 한쪽 끝을 불에 대 일정한 온도로 두는 쇠막대도 같다. 쇠의 열확산 계수는 약 2.3 × 10⁻⁵ m²/s이고, 공기로 새는 열을 무시하면 온도가 끝의 절반만큼 오른 지점은 0.95√(Dt)로 나아간다. 10 cm까지는 8분이지만 20 cm까지는 32분, 1 m까지는 반나절이 넘게 걸린다.</p>
-<figure class="fig "><img src="images/ch13/a2_sugar.png" alt="젓지 않은 커피 바닥의 설탕(D ≈ 5 × 10⁻¹⁰ m²/s). 한 축 방향으로 퍼진 폭 σ = √(2Dt)는 약 960초(16분)에 1 mm, 그 100배인 하루 남짓에 1 cm가 된다. 잔 바닥 4 cm를 실제 비율로 그렸다." loading="lazy"><figcaption>젓지 않은 커피 바닥의 설탕(D ≈ 5 × 10⁻¹⁰ m²/s). 한 축 방향으로 퍼진 폭 σ = √(2Dt)는 약 960초(16분)에 1 mm, 그 100배인 하루 남짓에 1 cm가 된다. 잔 바닥 4 cm를 실제 비율로 그렸다.</figcaption></figure>
+<figure class="fig "><img src="images/ch13/a2_sugar.png" alt="젓지 않은 커피 바닥의 설탕(D ≈ 5 × 10⁻¹⁰ m²/s). 한 축 방향으로 퍼진 폭 σ = √(2Dt)가 1 mm일 때와 1 cm일 때를 나란히 그렸다. 각각 얼마나 걸리는지는 아래 문제 1에서 직접 계산해 보자. 잔 바닥 4 cm를 실제 비율로 그렸다." loading="lazy"><figcaption>젓지 않은 커피 바닥의 설탕(D ≈ 5 × 10⁻¹⁰ m²/s). 한 축 방향으로 퍼진 폭 σ = √(2Dt)가 1 mm일 때와 1 cm일 때를 나란히 그렸다. 각각 얼마나 걸리는지는 아래 문제 1에서 직접 계산해 보자. 잔 바닥 4 cm를 실제 비율로 그렸다.</figcaption></figure>
 <figure class="fig "><img src="images/ch13/a3_iron_bar.png" alt="한쪽 끝을 불에 댄 쇠막대(열확산 계수 약 2.3 × 10⁻⁵ m²/s, 공기로 새는 열은 무시). 온도가 끝의 절반인 지점 0.95√(Dt)는 8분에 10 cm, 32분에 20 cm, 약 13시간에 1 m에 이른다." loading="lazy"><figcaption>한쪽 끝을 불에 댄 쇠막대(열확산 계수 약 2.3 × 10⁻⁵ m²/s, 공기로 새는 열은 무시). 온도가 끝의 절반인 지점 0.95√(Dt)는 8분에 10 cm, 32분에 20 cm, 약 13시간에 1 m에 이른다.</figcaption></figure>
 <div class="dialogue"><h3 id="문제-1-젓지-않은-커피의-설탕">문제 1. 젓지 않은 커피의 설탕</h3>
-<p>선생님의 수업. 김민준(학부 3학년, ML 강의 몇 개 수강)과 이서연(수학과 3학년)이 문제를 풀고, 선생님이 틀린 곳을 짚는다.</p>
 <blockquote>
 <p>물속 설탕 분자의 확산 계수를 D = 5.2 × 10⁻¹⁰ m²/s로 두고, 젓지 않은 커피 바닥에서 설탕이 한 축 방향으로 퍼진 폭을 σ = √(2Dt)로 잰다. (가) σ = 1 mm가 되는 데 걸리는 시간은? (나) 1 cm, 5 cm는? (다) 설탕을 저으면 왜 금방 고르게 달아지는가?</p>
 </blockquote>
@@ -670,6 +672,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -697,13 +700,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

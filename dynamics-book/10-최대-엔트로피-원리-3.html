@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -633,7 +636,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <h2 id="라그랑주-승수-세지-않고-최대-엔트로피-분포-찾기">라그랑주 승수: 세지 않고 최대 엔트로피 분포 찾기</h2>
 <p>원리는 적었지만, 평균을 지키는 분포는 끝없이 많다. 그 가운데 엔트로피가 가장 큰 것을 세지 않고 어떻게 찾아낼까?</p>
 <h3 id="역사-깁스의-정준-분포">역사: 깁스의 정준 분포</h3>
-<p>1902년 깁스는 『통계역학의 기본 원리』 11장에서, 평균 에너지가 같은 분포 가운데 정준 분포(볼츠만 분포)가 확률 지표(확률의 로그)의 평균이 가장 작음, 곧 엔트로피가 가장 큼을 보였다. 아래에서는 거꾸로, 엔트로피를 가장 크게 하는 분포를 찾아가는 쪽에서 같은 분포에 이른다.</p>
+<p>1902년 깁스는 자신의 책 『통계역학의 기본 원리』에서, 평균 에너지가 같은 분포 가운데 정준 분포(볼츠만 분포)가 확률 지표(확률의 로그)의 평균이 가장 작음, 곧 엔트로피가 가장 큼을 보였다. 아래에서는 거꾸로, 엔트로피를 가장 크게 하는 분포를 찾아가는 쪽에서 같은 분포에 이른다.</p>
 <h3 id="평균-에너지-하나가-알려진-경우">평균 에너지 하나가 알려진 경우</h3>
 <p>평균 에너지 하나가 알려진 경우를 풀어 보자. 상태 i의 에너지가 Eᵢ이고 평균 에너지가 Ē로 알려져 있다. 제약 없이 엔트로피만 키우면 균등 분포로 가 버리므로, 제약을 어기는 만큼 목적 함수를 깎는 항을 붙여 두어야 한다. 이렇게 제약마다 하나씩 붙이는 계수가 <strong>라그랑주 승수</strong> (제약을 지키게 하려고 붙이는 계수, Lagrange multiplier)다. 구체적으로는 목적 함수에서 (승수 × 제약이 어긋난 양)을 빼서 H(p) − λ₀(Σᵢpᵢ − 1) − β(ΣᵢpᵢEᵢ − Ē)를 만든 뒤, 이것을 pᵢ로 미분해 0으로 놓는다. 엔트로피를 미분하면 −ln pᵢ − 1이 나오므로 −ln pᵢ − 1 − λ₀ − βEᵢ = 0, 곧 확률의 로그가 에너지의 일차식이 된다. 확률의 합이 1이라는 제약(정규화 제약)의 승수 λ₀는 확률의 합을 1로 맞추는 상수로 흡수되어 1/Z가 된다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><munder><mrow><mi>max</mi><mo>⁡</mo></mrow><mstyle mathcolor="#e377c2"><mi>p</mi></mstyle></munder><mtext> </mtext><mstyle mathcolor="#9467bd"><mi>H</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#e377c2"><mi>p</mi></mstyle><mo stretchy="false">)</mo><mo>=</mo><mo>−</mo><munder><mo>∑</mo><mi>i</mi></munder><mstyle mathcolor="#e377c2"><msub><mi>p</mi><mi>i</mi></msub></mstyle><mi>ln</mi><mo>⁡</mo><mstyle mathcolor="#e377c2"><msub><mi>p</mi><mi>i</mi></msub></mstyle><mspace width="2em"/><mtext>조건: </mtext><munder><mo>∑</mo><mi>i</mi></munder><mstyle mathcolor="#e377c2"><msub><mi>p</mi><mi>i</mi></msub></mstyle><mo>=</mo><mn>1</mn><mo separator="true">,</mo><mtext>  </mtext><munder><mo>∑</mo><mi>i</mi></munder><mstyle mathcolor="#e377c2"><msub><mi>p</mi><mi>i</mi></msub></mstyle><mtext> </mtext><mstyle mathcolor="#ff7f0e"><msub><mi>E</mi><mi>i</mi></msub></mstyle><mo>=</mo><mstyle mathcolor="#ff7f0e"><mover accent="true"><mi>E</mi><mo>ˉ</mo></mover></mstyle></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>⟹</mo><mtext>  </mtext><mstyle mathcolor="#e377c2"><msub><mi>p</mi><mi>i</mi></msub></mstyle><mo>=</mo><mfrac><msup><mi>e</mi><mrow><mo>−</mo><mstyle mathcolor="#8c564b"><mi>β</mi></mstyle><mstyle mathcolor="#ff7f0e"><msub><mi>E</mi><mi>i</mi></msub></mstyle></mrow></msup><mstyle mathcolor="#667733"><mi>Z</mi></mstyle></mfrac><mo separator="true">,</mo><mspace width="2em"/><mstyle mathcolor="#667733"><mi>Z</mi></mstyle><mo>=</mo><munder><mo>∑</mo><mi>i</mi></munder><msup><mi>e</mi><mrow><mo>−</mo><mstyle mathcolor="#8c564b"><mi>β</mi></mstyle><mstyle mathcolor="#ff7f0e"><msub><mi>E</mi><mi>i</mi></msub></mstyle></mrow></msup></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
@@ -703,7 +706,7 @@ print(&quot;이웃 확률의 비:&quot;, np.round(p[1:] / p[:-1], 4), &quot; e^�
 # 이웃 확률의 비: [1.4493 1.4493 1.4493 1.4493 1.4493]  e^θ = 1.4493
 </code></pre>
 <p>뉴턴 방법은 평균 3.5에서 출발해 세 걸음 만에 승수 0.3710을 찾고, 굴림 1000번에서 센 분포는 이 최대 엔트로피 분포와 넷째 자리에서 한 칸 이내로 맞는다. 이웃 확률의 비는 다섯 개 모두 e^θ = 1.4493이다. 경우의 수를 세는 쪽은 굴림 수가 늘어날수록 계산이 무거워지지만, 승수를 찾는 쪽은 평균과 분산만 있으면 된다.</p>
-<figure class="widget-embed" id="widget-ch10-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">평균 눈과 최대 엔트로피 분포</span><a class="widget-open" href="widgets/ch10.html#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch10.html?w=w1&embed=1" title="평균 눈과 최대 엔트로피 분포" loading="lazy"></iframe><noscript><img src="images/ch10/wid_w1.png" alt="위젯 1: 평균 눈과 최대 엔트로피 분포 (평균 4.5에서 승수 β = −0.3710, 이웃한 눈의 확률 비 1.4493, 엔트로피 1.6136 nat, 온도 kT = 1/β = −2.695)"></noscript></figure>
+<figure class="widget-embed" id="widget-ch10-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">평균 눈과 최대 엔트로피 분포</span><a class="widget-open" href="widgets/ch10.html?v=a8dba79e#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch10.html?w=w1&embed=1&v=a8dba79e" title="평균 눈과 최대 엔트로피 분포" loading="lazy"></iframe><noscript><img src="images/ch10/wid_w1.png" alt="위젯 1: 평균 눈과 최대 엔트로피 분포 (평균 4.5에서 승수 β = −0.3710, 이웃한 눈의 확률 비 1.4493, 엔트로피 1.6136 nat, 온도 kT = 1/β = −2.695)"></noscript></figure>
 <h3 id="승수는-역온도-가장-큰-엔트로피의-기울기">승수는 역온도: 가장 큰 엔트로피의 기울기</h3>
 <p>라그랑주 승수로 구한 분포에서 <span class="sym" style="color:#8c564b">β</span>는 볼츠만 분포의 역온도와 꼭 같은 자리에 앉았다. 평균을 지키려고 붙인 계수가 왜 하필 역온도와 같은 자리에 서는 것일까?</p>
 <p>이 해를 엔트로피 식에 다시 넣으면 도달할 수 있는 가장 큰 엔트로피를 평균 에너지의 함수로 얻고, 그것을 평균 에너지로 미분하면 승수가 나온다.</p>
@@ -718,9 +721,9 @@ print(&quot;이웃 확률의 비:&quot;, np.round(p[1:] / p[:-1], 4), &quot; e^�
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:4.8em;vertical-align:-2.15em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.65em;"><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#9467bd;"><span class="mord mathnormal" style="margin-right:0.0813em;color:#9467bd;">H</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0813em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#9467bd;"><span class="mord mtight" style="color:#9467bd;"><span class="mop mtight" style="color:#9467bd;"><span class="mtight" style="color:#9467bd;">m</span><span class="mtight" style="color:#9467bd;">a</span><span class="mtight" style="color:#9467bd;">x</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord accent" style="color:#ff7f0e;"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8201em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;color:#ff7f0e;">E</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1667em;"><span class="mord" style="color:#ff7f0e;">ˉ</span></span></span></span></span></span></span><span class="mclose">)</span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0528em;color:#8c564b;">β</span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;color:#667733;">Z</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0528em;color:#8c564b;">β</span><span class="mclose">)</span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord accent" style="color:#ff7f0e;"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8201em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;color:#ff7f0e;">E</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1667em;"><span class="mord" style="color:#ff7f0e;">ˉ</span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.15em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.65em;"><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">평균</span><span class="mord"> </span><span class="mord hangul_fallback">에너지가</span><span class="mord"> </span></span><span class="mord accent" style="color:#ff7f0e;"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8201em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;color:#ff7f0e;">E</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1667em;"><span class="mord" style="color:#ff7f0e;">ˉ</span></span></span></span></span></span></span><span class="mord text"><span class="mord hangul_fallback">일</span><span class="mord"> </span><span class="mord hangul_fallback">때</span><span class="mord"> </span><span class="mord hangul_fallback">도달할</span><span class="mord"> </span><span class="mord hangul_fallback">수</span><span class="mord"> </span><span class="mord hangul_fallback">있는</span><span class="mord"> </span><span class="mord hangul_fallback">가장</span><span class="mord"> </span><span class="mord hangul_fallback">큰</span><span class="mord"> </span><span class="mord hangul_fallback">엔트로피</span></span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">라그랑주</span><span class="mord"> </span><span class="mord hangul_fallback">승수</span><span class="mord"> (</span><span class="mord hangul_fallback">역온도</span><span class="mord">)</span></span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">분배함수</span></span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">지켜야</span><span class="mord"> </span><span class="mord hangul_fallback">할</span><span class="mord"> </span><span class="mord hangul_fallback">평균</span><span class="mord"> </span><span class="mord hangul_fallback">에너지</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.15em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
 <p>셋째 식을 얻으려면 첫 식을 <span class="sym" style="color:#ff7f0e">Ē</span>로 미분하되 <span class="sym" style="color:#8c564b">β</span>도 <span class="sym" style="color:#ff7f0e">Ē</span>에 따라 움직인다는 것을 챙기면 된다. <span class="sym" style="color:#8c564b">β</span>가 움직여서 생기는 항은 <span class="sym" style="color:#ff7f0e">Ē</span> + ∂ln <span class="sym" style="color:#667733">Z</span>/∂<span class="sym" style="color:#8c564b">β</span>에 비례하는데, 둘째 식 때문에 이것이 0이라 <span class="sym" style="color:#8c564b">β</span>만 남는다. 라그랑주 승수는 일반적으로 「제약의 값을 조금 옮겼을 때 최적값이 늘어나는 비율」이라는 뜻을 갖는데, 여기서는 평균 에너지를 조금 올렸을 때 도달할 수 있는 엔트로피가 늘어나는 비율이다. 그리고 역온도는 경우의 수의 로그가 에너지에 따라 늘어나는 비율 ∂ln <span class="sym" style="color:#d62728">W</span>/∂<span class="sym" style="color:#ff7f0e">E</span>로 정의되는 양이다. 굴림이 <span class="sym" style="color:#1f77b4">N</span>번이면 평균을 지키는 수열의 수가 대략 e^(<span class="sym" style="color:#1f77b4">N</span>·<span class="sym" style="color:#9467bd">H_max</span>)이므로 둘은 같은 비율이다. 승수가 역온도 자리에 서는 것은 우연이 아니라 정의상 같은 양이기 때문이다.</p>
 <p>주사위에서 이 비율을 직접 확인할 수 있다. 평균 눈을 4.4, 4.5, 4.6으로 두면 가장 큰 엔트로피는 1.6486, 1.6136, 1.5743이고, 양옆의 차이를 0.2로 나눈 −0.371은 승수 <span class="sym" style="color:#8c564b">β</span> = −0.3710과 같다. 승수가 음수인 것은 평균을 균등 분포의 평균 3.5보다 높은 곳에 고정했기 때문인데, 그 영역에서는 평균을 더 올릴수록 엔트로피가 줄어든다. 에너지로 말하면 높은 에너지 쪽이 더 많이 채워진 음의 온도이고, 눈이 6에서 막혀 있는 주사위처럼 에너지 준위에 위쪽 끝이 있는 계에서만 가능한 일이다.</p>
-<figure class="widget-embed" id="widget-ch10-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">가장 큰 엔트로피의 기울기</span><a class="widget-open" href="widgets/ch10.html#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch10.html?w=w2&embed=1" title="가장 큰 엔트로피의 기울기" loading="lazy"></iframe><noscript><img src="images/ch10/wid_w2.png" alt="위젯 2: 가장 큰 엔트로피의 기울기 (평균 4.5에서 Hmax = 1.6136 nat, 접선의 기울기 = 승수 β = −0.3710, 양옆 ±0.1로 잰 기울기 −0.3714)"></noscript></figure>
+<figure class="widget-embed" id="widget-ch10-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">가장 큰 엔트로피의 기울기</span><a class="widget-open" href="widgets/ch10.html?v=a8dba79e#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch10.html?w=w2&embed=1&v=a8dba79e" title="가장 큰 엔트로피의 기울기" loading="lazy"></iframe><noscript><img src="images/ch10/wid_w2.png" alt="위젯 2: 가장 큰 엔트로피의 기울기 (평균 4.5에서 Hmax = 1.6136 nat, 접선의 기울기 = 승수 β = −0.3710, 양옆 ±0.1로 잰 기울기 −0.3714)"></noscript></figure>
 <h3 id="ml에서-샘플링-온도">ML에서: 샘플링 온도</h3>
-<p>언어 모델에서 다음 토큰을 뽑을 때는 로짓 <span class="sym" style="color:#ff7f0e">z</span>를 온도 <span class="sym" style="color:#8c564b">T</span>로 나눈 softmax(<span class="sym" style="color:#ff7f0e">z</span>/<span class="sym" style="color:#8c564b">T</span>)를 흔히 쓴다. 에너지를 −<span class="sym" style="color:#ff7f0e">z</span>로 두면 이것은 로짓의 평균 ⟨<span class="sym" style="color:#ff7f0e">z</span>⟩를 어떤 값에 정해 둔 최대 엔트로피 분포이고, 1/<span class="sym" style="color:#8c564b">T</span>가 그 제약의 승수, 곧 역온도다. <span class="sym" style="color:#8c564b">T</span>를 낮추면 로짓의 평균이 올라가는 대신 엔트로피가 줄고, 로짓의 평균을 조금 올릴 때 엔트로피가 줄어드는 비율이 바로 1/<span class="sym" style="color:#8c564b">T</span>다. 샘플링의 「온도」라는 이름은 비유가 아니라 이 자리에서 나온 것이다.</p>
+<p>언어 모델에서 다음 토큰을 뽑을 때는 로짓 <span class="sym" style="color:#ff7f0e">z</span>를 온도 <span class="sym" style="color:#8c564b">τ</span>로 나눈 softmax(<span class="sym" style="color:#ff7f0e">z</span>/<span class="sym" style="color:#8c564b">τ</span>)를 흔히 쓴다. 에너지를 −<span class="sym" style="color:#ff7f0e">z</span>로 두면 이것은 로짓의 평균 ⟨<span class="sym" style="color:#ff7f0e">z</span>⟩를 어떤 값에 정해 둔 최대 엔트로피 분포이고, 1/<span class="sym" style="color:#8c564b">τ</span>가 그 제약의 승수, 곧 역온도다. <span class="sym" style="color:#8c564b">τ</span>를 낮추면 로짓의 평균이 올라가는 대신 엔트로피가 줄고, 로짓의 평균을 조금 올릴 때 엔트로피가 줄어드는 비율이 바로 1/<span class="sym" style="color:#8c564b">τ</span>다. 샘플링의 「온도」라는 이름은 비유가 아니라 이 자리에서 나온 것이다.</p>
 
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="10-최대-엔트로피-원리-2.html">&larr; 최대 엔트로피 원리: 평균만 지키고 나머지는 가장 고르게</a><span class="page-count">3 / 8</span><a class="chapter-nav-next" href="10-최대-엔트로피-원리-4.html">soft 가치: 보상에 엔트로피를 더하면 &rarr;</a></nav>
@@ -739,6 +742,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -766,13 +770,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

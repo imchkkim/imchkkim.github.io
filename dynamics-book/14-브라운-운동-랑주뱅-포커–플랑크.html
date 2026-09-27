@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -633,7 +636,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <h2 id="이-장의-물음">이 장의 물음</h2>
 <p>경사하강에 잡음을 조금 섞으면 이상한 일이 생긴다. 손실 U(θ) = θ²/2를 θ = 3에서 출발해 학습률 η = 0.01로 경사하강하면 θ는 바닥 0으로 모여들어 멈춘다. 한 걸음마다 표준정규 잡음에 η를 곱해 더하면 θ는 0 둘레에서 조금 흔들릴 뿐이고, 마르코프 사슬(따로 돌리는 샘플러 하나) 4000개로 재 보면 그 분산은 0.0051이다. 그런데 잡음에 η 대신 √(2η)를 곱하면 흔들림이 갑자기 커져 분산이 0.997이 되고, θ의 값들을 모으면 표준정규분포, 곧 e^(−U)에 비례하는 분포가 나온다. 학습률을 0.1로 바꿔 보면 차이가 더 분명하다. η를 곱한 잡음에서는 분산이 0.052로 학습률을 따라 변하지만, √(2η)를 곱한 잡음에서는 1.04로 거의 그대로다. 웰링과 테(2011)는 이 성질을 큰 데이터의 베이즈 학습에 썼고, 논문 요약에 「표준적인 확률적 경사 최적화 알고리즘에 알맞은 양의 잡음을 더하면, 걸음 크기를 줄여 갈 때 반복값들이 참 사후분포의 샘플로 수렴함을 보인다」고 적었다. 이 방법이 SGLD(stochastic gradient Langevin dynamics)다.</p>
 <figure class="fig "><img src="images/ch14/a1_noise_size.png" alt="손실 U(θ) = θ²/2에서 경사하강(η = 0.01)에 잡음을 더해 사슬 4000개를 θ = 3에서 시간 30 동안 돌린 결과. 잡음에 η를 곱하면 분산 0.0051로 바닥 둘레에 모이고, √(2η)를 곱하면 분산 0.9972로 목표 분포 e^(−U)(표준정규분포)와 겹친다." loading="lazy"><figcaption>손실 U(θ) = θ²/2에서 경사하강(η = 0.01)에 잡음을 더해 사슬 4000개를 θ = 3에서 시간 30 동안 돌린 결과. 잡음에 η를 곱하면 분산 0.0051로 바닥 둘레에 모이고, √(2η)를 곱하면 분산 0.9972로 목표 분포 e^(−U)(표준정규분포)와 겹친다.</figcaption></figure>
-<p>확산 모델에서도 같은 모양이 나온다. DDPM(호·자인·아빌 2020)은 한 단계마다 샘플에 √(1 − ε)를 곱하고 표준편차 √ε인 잡음을 더한다(논문의 기호는 β이지만 역온도 β와 겹치므로 이 장에서는 ε로 쓴다). ε가 작으면 √(1 − ε) ≈ 1 − ε/2이므로, 이 단계는 U(x) = |x|²/2를 걸음 ε/2로 경사하강하면서 잡음 √(2 × ε/2)를 더하는 것과 같다. 분산을 끝없이 키우는 분산 폭발형과 달리 샘플을 원점 쪽으로 조금씩 당기므로, ε를 10⁻⁴에서 0.02까지 늘려 가며 1000단계를 지나면 원래 이미지는 0.0064배만 남고 분포는 데이터와 상관없이 거의 표준정규분포가 된다. 두 경우 모두 「에너지의 내리막으로 η만큼 가고, √(2η)만큼 흔든다」는 규칙을 쓰고, 도착하는 분포는 e^(−에너지)에 비례한다. 잡음은 왜 걸음의 제곱근만큼이어야 하고, 이 규칙은 왜 하필 볼츠만 분포에 도착할까?</p>
+<p>확산 모델에서도 같은 모양이 나온다. DDPM(denoising diffusion probabilistic model, 호·자인·아빌 2020)은 한 단계마다 샘플에 √(1 − ε)를 곱하고 표준편차 √ε인 잡음을 더한다(논문의 기호는 β이지만 역온도 β와 겹치므로 이 장에서는 ε로 쓴다). ε가 작으면 √(1 − ε) ≈ 1 − ε/2이므로, 이 단계는 U(x) = |x|²/2를 걸음 ε/2로 경사하강하면서 잡음 √(2 × ε/2)를 더하는 것과 같다. 분산을 끝없이 키우는 분산 폭발형과 달리 샘플을 원점 쪽으로 조금씩 당기므로, ε를 10⁻⁴에서 0.02까지 늘려 가며 1000단계를 지나면 원래 이미지는 0.0064배만 남고 분포는 데이터와 상관없이 거의 표준정규분포가 된다. 두 경우 모두 「에너지의 내리막으로 η만큼 가고, √(2η)만큼 흔든다」는 규칙을 쓰고, 도착하는 분포는 e^(−에너지)에 비례한다. 잡음은 왜 걸음의 제곱근만큼이어야 하고, 이 규칙은 왜 하필 볼츠만 분포에 도착할까?</p>
 <p>이 물음에 답하려면 몇 가지를 차례로 알아야 한다.</p>
 <ul>
 <li>잡음을 조금씩 더해 가는 샘플 하나는 어떤 길을 걷고, 그 길의 빠르기는 얼마라고 말할 수 있을까?</li>
@@ -657,7 +660,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.4em;vertical-align:-0.95em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathbf" style="color:#1b9e77;">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathbf" style="color:#8c547a;">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">한</span><span class="mord"> </span><span class="mord hangul_fallback">사람이</span><span class="mord"> n</span><span class="mord hangul_fallback">걸음</span><span class="mord"> </span><span class="mord hangul_fallback">뒤</span><span class="mord"> </span><span class="mord hangul_fallback">서</span><span class="mord"> </span><span class="mord hangul_fallback">있는</span><span class="mord"> </span><span class="mord hangul_fallback">칸</span><span class="mord"> (</span><span class="mord hangul_fallback">처음에는</span><span class="mord"> </span><span class="mord hangul_fallback">원점</span><span class="mord">)</span></span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">n</span><span class="mord hangul_fallback">번째</span><span class="mord"> </span><span class="mord hangul_fallback">걸음</span><span class="mord">: </span><span class="mord hangul_fallback">동전</span><span class="mord"> </span><span class="mord hangul_fallback">두</span><span class="mord"> </span><span class="mord hangul_fallback">개로</span><span class="mord"> </span><span class="mord hangul_fallback">고른</span><span class="mord"> </span><span class="mord hangul_fallback">한</span><span class="mord"> </span><span class="mord hangul_fallback">칸</span><span class="mord"> </span><span class="mord hangul_fallback">이동</span><span class="mord">, </span><span class="mord hangul_fallback">걸음마다</span><span class="mord"> </span><span class="mord hangul_fallback">새로</span><span class="mord"> </span><span class="mord hangul_fallback">던짐</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
 <p>이처럼 걸음마다 따로 뽑은 무작위 이동을 더해 가는 길을 <strong>랜덤 워크</strong> (무작위 걸음, random walk)라 한다.</p>
 <p>한 사람의 길은 제멋대로다. 왼쪽으로 세 번 연달아 갔다가 오른쪽으로 두 번 돌아오기도 하고, 100걸음 뒤에 출발점에 서 있기도 하고 15칸 떨어진 곳에 가 있기도 하다. 그러나 100만 명을 모아 보면 규칙이 보인다. n걸음 뒤 출발점에서 떨어진 거리 제곱의 평균과, 출발점에 서 있는 사람의 비율, 출발점에서 가로로 10칸 떨어진 칸 (10, 0)에 서 있는 사람의 비율을 재어 보자. 옆에는 한가운데 칸에만 1을 두고 모든 칸을 동시에 이웃 넷의 평균으로 바꾸기를 n번 되풀이했을 때 그 칸에 남는 값을 나란히 적었다.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>걸음 수 n</th>
@@ -694,7 +697,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <td>0.00124</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>세 가지가 눈에 띈다. 첫째, 거리 제곱의 평균이 걸음 수와 거의 같다. 100걸음 동안 한 칸씩 쉬지 않고 움직였는데도 출발점에서 떨어진 거리는 평균적으로 √100 = 10칸 남짓이다. 둘째, 사람들의 비율이 이웃 평균을 되풀이한 값과 소수 넷째 자리에서만 조금 다를 뿐 거의 같다. 한 사람 한 사람은 동전에 따라 제멋대로 걸었을 뿐, 누구도 이웃과 평균을 내지 않았는데 말이다. 셋째, 99걸음 뒤에는 원점에도 (10, 0)에도 아무도 없다. 칸을 바둑판처럼 두 색으로 칠하면 한 걸음마다 반드시 다른 색 칸으로 건너가므로, 홀수 걸음 뒤에는 모두 출발점과 다른 색 칸에 서 있다. 옆에 적은 이웃 평균의 값도 99번째에는 두 칸 모두 0이어서, 칸의 색이 똑같이 번갈아 빈다.</p>
 <figure class="fig "><img src="images/ch14/a2_walkers.png" alt="동전 두 개로 100걸음을 걸은 다섯 사람의 길과 도착 거리(4.5, 7.1, 8.6, 5.1, 10.2칸). 오른쪽은 1000명의 도착점으로, 거리 제곱의 평균이 100.3이고 모두 가로 + 세로가 짝수인 칸에 서 있다. 점선 원의 반지름은 √100 = 10칸." loading="lazy"><figcaption>동전 두 개로 100걸음을 걸은 다섯 사람의 길과 도착 거리(4.5, 7.1, 8.6, 5.1, 10.2칸). 오른쪽은 1000명의 도착점으로, 거리 제곱의 평균이 100.3이고 모두 가로 + 세로가 짝수인 칸에 서 있다. 점선 원의 반지름은 √100 = 10칸.</figcaption></figure>
 <p>그렇다면 한 사람의 걸음과 모든 칸의 동시 평균은 무슨 관계일까?</p>
@@ -718,7 +721,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <p>그런데 100걸음을 걸어 10칸 간 사람은 얼마나 빨리 움직인 것일까? 한 걸음에 한 칸이니 빠르기는 1이라고 해야 할까, 100걸음에 10칸이니 0.1이라고 해야 할까? 빠르기를 따지기 전에, 한 사람이 걸음 수에 비해 얼마나 멀리 가는지부터 살펴보자.</p>
 <p>격자 위에서 거리 제곱의 평균이 걸음 수와 거의 같았던 이유는 한 사람의 걸음으로 읽을 수 있다. n걸음 뒤 위치는 걸음 <span class="sym" style="color:#8c547a">s₁</span>, <span class="sym" style="color:#8c547a">s₂</span>, …, <span class="sym" style="color:#8c547a">sₙ</span>의 합이므로 거리의 제곱은 걸음마다의 제곱 |<span class="sym" style="color:#8c547a">sᵢ</span>|² = 1의 합 n에, 서로 다른 두 걸음의 곱 <span class="sym" style="color:#8c547a">sᵢ</span>·<span class="sym" style="color:#8c547a">sⱼ</span>의 합을 더한 것이다. 두 걸음은 서로 따로 던진 동전으로 정해지고 한 걸음의 평균 이동은 0이므로, 곱의 평균도 0이 되어 교차항이 모두 사라진다. 그래서 거리 제곱의 평균은 정확히 n이다. 여기서 쓴 것은 한 걸음의 평균 이동이 0이라는 것과 걸음들이 서로 독립이라는 것 두 가지뿐이다. 동전 대신 한 걸음에 정규분포를 따르는 변위를 쓰든 걸음 크기를 제멋대로 섞든, 평균이 0이고 서로 독립이면 분산이 걸음마다 더해진다.</p>
 <p>그러면 이 사람은 얼마나 빨리 움직인 것일까? 한 사람이 100만 걸음을 걷는 동안의 가로 위치를 Δ걸음 간격으로 재어, 한 구간에서 가로로 옮겨 간 거리의 절댓값을 Δ로 나눈 평균을 구하면 다음과 같다.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>재는 간격 Δ (걸음)</th>
@@ -741,7 +744,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <td>0.017</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>재는 간격을 네 배로 늘릴 때마다 빠르기가 절반이 된다. 한 구간에 옮겨 간 거리가 √Δ에 비례하므로 빠르기는 √Δ / Δ = 1/√Δ에 비례하는 것이다. 거꾸로 말하면 간격을 줄일수록 잰 빠르기는 한없이 커진다. 이 사람의 빠르기는 재는 간격에 따라 달라지므로 하나의 값으로 말할 수 없다.</p>
 <figure class="fig "><img src="images/ch14/a3_interval.png" alt="본문 코드의 한 사람 길(처음 4096걸음)을 256걸음, 16걸음, 한 걸음마다 찍은 가로 위치. 찍은 점 사이 거리의 합은 125, 551, 2029칸으로, 간격을 16분의 1로 줄일 때마다 약 4배가 되고 잰 빠르기도 0.031, 0.135, 0.495로 커진다." loading="lazy"><figcaption>본문 코드의 한 사람 길(처음 4096걸음)을 256걸음, 16걸음, 한 걸음마다 찍은 가로 위치. 찍은 점 사이 거리의 합은 125, 551, 2029칸으로, 간격을 16분의 1로 줄일 때마다 약 4배가 되고 잰 빠르기도 0.031, 0.135, 0.495로 커진다.</figcaption></figure>
 <h3 id="코드로-확인하기">코드로 확인하기</h3>
@@ -803,6 +806,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -830,13 +834,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

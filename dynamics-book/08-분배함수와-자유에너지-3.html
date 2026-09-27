@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -631,7 +634,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="08-분배함수와-자유에너지.html">8장 — 분배함수와 자유에너지</a></p>
 <h2 id="ln-z의-기울기-미분-한-번으로-꺼내는-평균-에너지">ln Z의 기울기: 미분 한 번으로 꺼내는 평균 에너지</h2>
-<p>ln Z와 엔트로피가 역온도 β를 기울기 변수로 하는 짝이라면, ln Z를 β로 미분하면 무엇이 나올까?</p>
+<p>분류기를 학습해 본 독자에게는 logsumexp를 로짓으로 미분하면 softmax 확률이 나온다는 사실이 익숙하다. ln Z도 로짓 자리에 −βEᵢ를 넣은 logsumexp다. 그렇다면 ln Z를 로짓이 아니라 역온도 β로 미분하면 무엇이 나올까?</p>
 <h3 id="평균-에너지와-엔트로피">평균 에너지와 엔트로피</h3>
 <p>변환한 함수의 기울기가 옛 변수라는 성질을 ln Z에 적용하면 승자의 에너지가 나와야 한다. 사실은 근사 없이도 성립한다. Σᵢe^(−βEᵢ)를 β로 미분하면 각 항에서 −Eᵢ가 내려오고, 이것을 Z로 나누면 볼츠만 확률로 평균한 에너지에 마이너스를 붙인 것이 된다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo stretchy="false">⟨</mo><mstyle mathcolor="#ff7f0e"><mi>E</mi></mstyle><mo stretchy="false">⟩</mo><mo>=</mo><mo>−</mo><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>ln</mi><mo>⁡</mo><mstyle mathcolor="#667733"><mi>Z</mi></mstyle></mrow><mrow><mi mathvariant="normal">∂</mi><mstyle mathcolor="#8c564b"><mi>β</mi></mstyle></mrow></mfrac><mo separator="true">,</mo><mspace width="2em"/><mstyle mathcolor="#9467bd"><mi>S</mi></mstyle><mo>=</mo><mstyle mathcolor="#7f7f7f"><mi>k</mi></mstyle><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mi>ln</mi><mo>⁡</mo><mstyle mathcolor="#667733"><mi>Z</mi></mstyle><mo>+</mo><mstyle mathcolor="#8c564b"><mi>β</mi></mstyle><mo stretchy="false">⟨</mo><mstyle mathcolor="#ff7f0e"><mi>E</mi></mstyle><mo stretchy="false">⟩</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo><mo>=</mo><mo>−</mo><mfrac><mrow><mi mathvariant="normal">∂</mi><mstyle mathcolor="#a000c8"><mi>F</mi></mstyle></mrow><mrow><mi mathvariant="normal">∂</mi><mstyle mathcolor="#8c564b"><mi>T</mi></mstyle></mrow></mfrac></mrow><annotation encoding="application/x-tex">\langle \textcolor{#ff7f0e}{E} \rangle = -\frac{\partial \ln \textcolor{#667733}{Z}}{\partial \textcolor{#8c564b}{\beta}}, \qquad \textcolor{#9467bd}{S} = \textcolor{#7f7f7f}{k}\big(\ln \textcolor{#667733}{Z} + \textcolor{#8c564b}{\beta} \langle \textcolor{#ff7f0e}{E} \rangle\big) = -\frac{\partial \textcolor{#a000c8}{F}}{\partial \textcolor{#8c564b}{T}}
@@ -688,7 +691,6 @@ print(f&quot;⟨E⟩ = {E_mean:.4f},  S = {S:.4f},  세어서 얻은 값 = {H_co
 <h3 id="ml에서-에너지-기반-모델의-기울기">ML에서: 에너지 기반 모델의 기울기</h3>
 <p>에너지 안에 매개변수 θ가 들어 있으면 ln <span class="sym" style="color:#667733">Z</span>를 θ로 미분해도 같은 방식으로 −<span class="sym" style="color:#8c564b">β</span>⟨∂<span class="sym" style="color:#ff7f0e">E</span>/∂θ⟩가 나온다. 에너지 기반 모델 <span class="sym" style="color:#bcbd22">p_θ</span>(<span class="sym" style="color:#1b9e77">x</span>) = e^(−<span class="sym" style="color:#8c564b">β</span><span class="sym" style="color:#ff7f0e">E_θ</span>(<span class="sym" style="color:#1b9e77">x</span>))/<span class="sym" style="color:#667733">Z</span>(θ)를 최대우도로 학습할 때 이 항이 기울기에 들어간다. 샘플 하나의 로그우도 −<span class="sym" style="color:#8c564b">β</span><span class="sym" style="color:#ff7f0e">E_θ</span>(<span class="sym" style="color:#1b9e77">x</span>) − ln <span class="sym" style="color:#667733">Z</span>(θ)를 θ로 미분하면 −<span class="sym" style="color:#8c564b">β</span>∂<span class="sym" style="color:#ff7f0e">E_θ</span>(<span class="sym" style="color:#1b9e77">x</span>)/∂θ + <span class="sym" style="color:#8c564b">β</span>⟨∂<span class="sym" style="color:#ff7f0e">E_θ</span>/∂θ⟩이고, 이것을 데이터로 평균하면 「데이터에서의 ⟨∂<span class="sym" style="color:#ff7f0e">E</span>/∂θ⟩」와 「모델에서의 ⟨∂<span class="sym" style="color:#ff7f0e">E</span>/∂θ⟩」의 차이가 된다. <span class="sym" style="color:#667733">Z</span>를 직접 계산할 수 없는 모델에서도 둘째 항은 모델에서 뽑은 샘플의 평균으로 어림할 수 있으니, 계산할 수 없는 정규화 상수의 기울기를 샘플링으로 바꿔 놓은 셈이다.</p>
 <div class="dialogue"><h3 id="문제-1-자유에너지에서-엔트로피-꺼내기">문제 1. 자유에너지에서 엔트로피 꺼내기</h3>
-<p>선생님의 수업. 김민준(학부 3학년, ML 강의 몇 개 수강)과 이서연(수학과 3학년)이 문제를 풀고, 선생님이 틀린 곳을 짚는다.</p>
 <blockquote>
 <p>(가) 2준위 입자 하나의 자유에너지 <span class="sym" style="color:#a000c8">F</span> = −<span class="sym" style="color:#7f7f7f">k</span><span class="sym" style="color:#8c564b">T</span> ln(1 + e^(−<span class="sym" style="color:#ff7f0e">ε</span>/<span class="sym" style="color:#7f7f7f">k</span><span class="sym" style="color:#8c564b">T</span>))에서 <span class="sym" style="color:#9467bd">S</span> = −∂<span class="sym" style="color:#a000c8">F</span>/∂<span class="sym" style="color:#8c564b">T</span>로 <span class="sym" style="color:#8c564b">β</span><span class="sym" style="color:#ff7f0e">ε</span> = ln 2일 때의 엔트로피를 구하라. (나) 온도 1에서 로짓 <span class="sym" style="color:#ff7f0e">z</span> = (2, 1, 0)인 softmax의 엔트로피를 logsumexp와 로짓 평균만으로 구하라.</p>
 </blockquote>
@@ -718,6 +720,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -745,13 +748,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

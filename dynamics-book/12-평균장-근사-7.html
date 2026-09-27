@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -631,7 +634,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="12-평균장-근사.html">12장 — 평균장 근사</a></p>
 <h2 id="선형-응답-버린-상관을-되찾는-길">선형 응답: 버린 상관을 되찾는 길</h2>
-<p>평균장은 두 변수가 평균에서 함께 벗어나는 몫, 곧 공분산을 버린다. 볼츠만 머신의 음의 단계를 평균장으로 대신하면 ⟨sᵢsⱼ⟩ ≈ mᵢmⱼ에 공분산이 없었고, 문제 2에서 곱 분포는 N × Var(m)을 정확한 값 대신 1로 보았다. 그런데 같은 문제에서 평균장 해가 편향에 따라 움직이는 정도를 재자, 그 값은 정확한 요동과 같았다. 버린 공분산을 평균장 해에서 되찾을 수 있을까?</p>
+<p>평균장은 두 변수가 평균에서 함께 벗어나는 몫, 곧 공분산을 버린다. 볼츠만 머신의 음의 단계를 평균장으로 대신하면 ⟨sᵢsⱼ⟩ ≈ mᵢmⱼ에 공분산이 없었고, 문제 2(모든 쌍을 J/N으로 묶은 스핀 N개)에서 곱 분포는 N × Var(m)을 정확한 값 대신 1로 보았다. 그런데 같은 문제에서 평균장 해가 편향에 따라 움직이는 정도를 재자, 그 값은 정확한 요동과 같았다. 버린 공분산을 평균장 해에서 되찾을 수 있을까?</p>
 <h3 id="요동과-응답">요동과 응답</h3>
 <p>버린 공분산을 되찾는 길은 요동과 응답의 관계에 있다. 정확한 모델에서는 ln Z를 βbᵢ와 βbⱼ로 한 번씩 미분하면 공분산이 나오므로, 뉴런 i의 평균이 편향 bⱼ에 얼마나 따라 움직이는지가 곧 Cov(sᵢ, sⱼ)다. 평균장 방정식의 해 mᵢ도 편향의 함수이므로, 이 응답을 평균장 방정식을 미분해 계산하면 곱 분포가 스스로는 표현하지 못한 상관을 근사할 수 있다. 이것을 <strong>선형 응답</strong> (편향을 조금 바꿀 때 평균이 따라 움직이는 비율로 공분산을 어림하는 방법, linear response)이라 한다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#008b8b"><msub><mi>χ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mstyle><mo>=</mo><mfrac><mrow><mi mathvariant="normal">∂</mi><mstyle mathcolor="#dd6677"><msub><mi>m</mi><mi>i</mi></msub></mstyle></mrow><mrow><mi mathvariant="normal">∂</mi><mo stretchy="false">(</mo><mstyle mathcolor="#8c564b"><mi>β</mi></mstyle><mstyle mathcolor="#b8860b"><msub><mi>b</mi><mi>j</mi></msub></mstyle><mo stretchy="false">)</mo></mrow></mfrac><mo>≈</mo><mrow><mi mathvariant="normal">C</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">v</mi></mrow><mo stretchy="false">(</mo><mstyle mathcolor="#1b9e77"><msub><mi>s</mi><mi>i</mi></msub></mstyle><mo separator="true">,</mo><mstyle mathcolor="#1b9e77"><msub><mi>s</mi><mi>j</mi></msub></mstyle><mo stretchy="false">)</mo><mo separator="true">,</mo><mspace width="2em"/><mo stretchy="false">(</mo><msup><mstyle mathcolor="#008b8b"><mi>χ</mi></mstyle><mrow><mo>−</mo><mn>1</mn></mrow></msup><msub><mo stretchy="false">)</mo><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mfrac><msub><mi>δ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mn>1</mn><mo>−</mo><msup><mstyle mathcolor="#dd6677"><msub><mi>m</mi><mi>i</mi></msub></mstyle><mn>2</mn></msup></mrow></mfrac><mo>−</mo><mstyle mathcolor="#8c564b"><mi>β</mi></mstyle><mstyle mathcolor="#b8860b"><msub><mi>J</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#008b8b}{\chi_{ij}} = \frac{\partial \textcolor{#dd6677}{m_i}}{\partial (\textcolor{#8c564b}{\beta}\textcolor{#b8860b}{b_j})} \approx \mathrm{Cov}(\textcolor{#1b9e77}{s_i}, \textcolor{#1b9e77}{s_j}), \qquad (\textcolor{#008b8b}{\chi}^{-1})_{ij} = \frac{\delta_{ij}}{1 - \textcolor{#dd6677}{m_i}^2} - \textcolor{#8c564b}{\beta}\textcolor{#b8860b}{J_{ij}}
@@ -647,7 +650,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 \end{array}
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:8.4em;vertical-align:-3.95em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4.45em;"><span style="top:-6.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#008b8b;"><span class="mord mathnormal" style="color:#008b8b;">χ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#008b8b;"><span class="mord mtight" style="color:#008b8b;"><span class="mord mathnormal mtight" style="margin-right:0.0572em;color:#008b8b;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathrm" style="margin-right:0.0139em;">Cov</span></span><span class="mopen">(</span><span class="mord" style="color:#1b9e77;"><span class="mord mathnormal" style="color:#1b9e77;">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#1b9e77;"><span class="mord mathnormal mtight" style="color:#1b9e77;">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord" style="color:#1b9e77;"><span class="mord mathnormal" style="color:#1b9e77;">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#1b9e77;"><span class="mord mathnormal mtight" style="margin-right:0.0572em;color:#1b9e77;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#dd6677;"><span class="mord mathnormal" style="color:#dd6677;">m</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#dd6677;"><span class="mord mathnormal mtight" style="color:#dd6677;">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#b8860b;"><span class="mord mathnormal" style="margin-right:0.0962em;color:#b8860b;">J</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0962em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#b8860b;"><span class="mord mtight" style="color:#b8860b;"><span class="mord mathnormal mtight" style="margin-right:0.0572em;color:#b8860b;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord" style="color:#b8860b;"><span class="mord mathnormal" style="color:#b8860b;">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#b8860b;"><span class="mord mathnormal mtight" style="margin-right:0.0572em;color:#b8860b;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0379em;">δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0379em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="color:#008b8b;">χ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span style="top:0.59em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0528em;color:#8c564b;">β</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4.45em;"><span style="top:-6.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">편향</span><span class="mord"> bⱼ</span><span class="mord hangul_fallback">를</span><span class="mord"> </span><span class="mord hangul_fallback">조금</span><span class="mord"> </span><span class="mord hangul_fallback">바꿀</span><span class="mord"> </span><span class="mord hangul_fallback">때</span><span class="mord"> </span><span class="mord hangul_fallback">평균장</span><span class="mord"> </span><span class="mord hangul_fallback">해</span><span class="mord"> mᵢ</span><span class="mord hangul_fallback">가</span><span class="mord"> </span><span class="mord hangul_fallback">따라</span><span class="mord"> </span><span class="mord hangul_fallback">움직이는</span><span class="mord"> </span><span class="mord hangul_fallback">비율</span><span class="mord"> (</span><span class="mord hangul_fallback">응답</span><span class="mord">)</span></span></span></span><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">두</span><span class="mord"> </span><span class="mord hangul_fallback">뉴런의</span><span class="mord"> </span><span class="mord hangul_fallback">공분산</span><span class="mord"> ⟨sᵢsⱼ⟩ − ⟨sᵢ⟩⟨sⱼ⟩ (</span><span class="mord hangul_fallback">요동</span><span class="mord">)</span></span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">평균장</span><span class="mord"> </span><span class="mord hangul_fallback">방정식의</span><span class="mord"> </span><span class="mord hangul_fallback">해</span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">결합</span><span class="mord"> </span><span class="mord hangul_fallback">계수와</span><span class="mord"> </span><span class="mord hangul_fallback">편향</span></span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">i = j</span><span class="mord hangul_fallback">이면</span><span class="mord"> 1, </span><span class="mord hangul_fallback">아니면</span><span class="mord"> 0</span></span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">응답</span><span class="mord"> χᵢⱼ</span><span class="mord hangul_fallback">를</span><span class="mord"> </span><span class="mord hangul_fallback">모은</span><span class="mord"> </span><span class="mord hangul_fallback">행렬</span><span class="mord"> χ</span><span class="mord hangul_fallback">의</span><span class="mord"> </span><span class="mord hangul_fallback">역행렬의</span><span class="mord"> (i, j) </span><span class="mord hangul_fallback">원소</span></span></span></span><span style="top:0.59em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">역온도</span><span class="mord"> 1/kT</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
 <p>오른쪽 식은 <span class="sym" style="color:#dd6677">mᵢ</span> = tanh(<span class="sym" style="color:#8c564b">β</span>(<span class="sym" style="color:#b8860b">bᵢ</span> + Σₖ<span class="sym" style="color:#b8860b">Jᵢₖ</span><span class="sym" style="color:#dd6677">mₖ</span>))의 양변을 <span class="sym" style="color:#8c564b">β</span><span class="sym" style="color:#b8860b">bⱼ</span>로 미분해 <span class="sym" style="color:#008b8b">χᵢⱼ</span>에 대해 푼 것이다.</p>
-<figure class="widget-embed" id="widget-ch12-w4"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">요동과 응답</span><a class="widget-open" href="widgets/ch12.html#w4" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch12.html?w=w4&embed=1" title="요동과 응답" loading="lazy"></iframe><noscript><img src="images/ch12/wid_w4.png" alt="위젯 4: 요동과 응답 (βJ = 0.7, N = 1000에서 정확한 N × Var(m) = 3.308, 평균장 해의 응답 1/(1 − βJ) = 3.333, 곱 분포 자체의 N × Var(m) = 1)"></noscript></figure>
+<figure class="widget-embed" id="widget-ch12-w4"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">요동과 응답</span><a class="widget-open" href="widgets/ch12.html?v=9ec74299#w4" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch12.html?w=w4&embed=1&v=9ec74299" title="요동과 응답" loading="lazy"></iframe><noscript><img src="images/ch12/wid_w4.png" alt="위젯 4: 요동과 응답 (βJ = 0.7, N = 1000에서 정확한 N × Var(m) = 3.308, 평균장 해의 응답 1/(1 − βJ) = 3.333, 곱 분포 자체의 N × Var(m) = 1)"></noscript></figure>
 <h3 id="ml에서-경사-하강-없이-결합을-계산하기">ML에서: 경사 하강 없이 결합을 계산하기</h3>
 <p>카펜과 로드리게스(1998)는 논문 요약에 「숨은 유닛이 없으면 학습 규칙의 고정점 방정식에서 가중치를 직접 계산할 수 있다. 따라서 이 경우에는 학습에 경사 하강 절차가 필요 없다」고 적었다. 이 장을 마친 독자는 이 문장을 「학습이 멈추는 곳에서는 모델의 평균과 공분산이 데이터의 것과 같다. 평균장 해를 데이터 평균에, 응답 <span class="sym" style="color:#008b8b">χ</span>를 데이터 공분산에 맞추면 위 식에서 결합이 <span class="sym" style="color:#b8860b">Jᵢⱼ</span> = −(데이터 공분산 행렬의 역행렬)ᵢⱼ/<span class="sym" style="color:#8c564b">β</span>(i ≠ j)로 곧바로 나온다」로 읽게 된다. 이 방법이 실제 데이터에서 얼마나 맞는지는 아래 문제 6에서 확인한다.</p>
 <div class="dialogue"><h3 id="문제-5-두-친구가-함께-나올-확률">문제 5. 두 친구가 함께 나올 확률</h3>
@@ -672,7 +675,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>멈추려면 편향 쪽에서 <span class="sym" style="color:#dd6677">m</span> = −0.64, 결합 쪽에서 <span class="sym" style="color:#dd6677">m</span>² = 0.512가 동시에 돼야 하는데, 0.64² = 0.4096이니까 둘을 함께 만족하는 <span class="sym" style="color:#dd6677">m</span>이 없어. 멈출 곳이 처음부터 없는 거야.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그렇게 학습된 모델이 실제로 무엇을 하는지 정확히 계산해 봐요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>결합 0.31, 편향 0에서 32개 상태를 다 더하면… 모두 발화하는 구간이 30%, 모두 침묵하는 구간도 30%예요. 뉴런의 실제 평균은 0.005고요. 데이터는 0.63%인데요! 평균장은 평균이 −0.70이라고 믿고 있었는데, 실제 모델은 모두 켜지거나 모두 꺼지는 두 봉우리였어요.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S09"><img src="images/cast/S09.webp" alt="이서연 S09" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>평균장은 침묵하는 봉우리 하나만 보고 「모델도 데이터처럼 꺼져 있다」고 답한 거네. 그래서 편향을 더 내릴 이유를 못 찾았고, 그사이 모델은 반대쪽 봉우리를 키웠고. 메트로폴리스 연쇄가 한쪽 봉우리에 갇혀서 모델 분포의 절반만 보던 거랑 같은 일이야. 샘플링을 안 했는데도 똑같이 절반만 봤어.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S09"><img src="images/cast/S09.webp" alt="이서연 S09" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>평균장은 침묵하는 봉우리 하나만 보고 「모델도 데이터처럼 꺼져 있다」고 답한 거네. 그래서 편향을 더 내릴 이유를 못 찾았고, 그사이 모델은 반대쪽 봉우리를 키웠고. 메트로폴리스 사슬이 한쪽 봉우리에 갇혀서 모델 분포의 절반만 보던 거랑 같은 일이야. 샘플링을 안 했는데도 똑같이 절반만 봤어.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M12"><img src="images/cast/M12.webp" alt="김민준 M12" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>기출문제를 절반만 풀어 보고 「이 과목은 다 안다」고 채점표를 매긴 거네요. 안 푼 절반에서 시험이 나오는데요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>이제 (다)요. 버린 공분산을 어디서 되찾을 수 있었죠?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S11"><img src="images/cast/S11.webp" alt="이서연 S11" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>요동과 응답이요. 정확한 모델에서는 평균이 편향에 따라 움직이는 비율이 공분산이니까, 평균장 방정식을 미분해서 얻는 응답 <span class="sym" style="color:#008b8b">χ</span>를 공분산으로 쓰면 돼요. 학습이 멈추는 곳에서는 모델의 평균과 공분산이 데이터와 같아야 하니까, <span class="sym" style="color:#dd6677">m</span>을 데이터 평균 −0.64로, <span class="sym" style="color:#008b8b">χ</span>를 데이터 공분산 행렬로 두면 (<span class="sym" style="color:#008b8b">χ</span>⁻¹)ᵢⱼ = δᵢⱼ/(1 − <span class="sym" style="color:#dd6677">mᵢ</span>²) − <span class="sym" style="color:#b8860b">Jᵢⱼ</span>에서 결합이 곧바로 나와요. 공분산 행렬은 대각이 1 − 0.64² = 0.590, 나머지가 0.102예요.</p></div></div>
@@ -701,6 +704,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -728,13 +732,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

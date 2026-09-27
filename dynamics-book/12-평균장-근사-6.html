@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -631,7 +634,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="12-평균장-근사.html">12장 — 평균장 근사</a></p>
 <h2 id="kl의-방향-근사가-참-분포보다-좁아지는-까닭">KL의 방향: 근사가 참 분포보다 좁아지는 까닭</h2>
-<p>질서 쪽으로 틀리는 것은 자석만의 사정일까? 첫머리의 정규분포 사후분포에는 격자도 이웃도 없는데, 좌표 상승으로 찾은 곱 분포는 참 분포보다 좁아졌다. 어느 쪽으로 틀릴지는 무엇이 정할까?</p>
+<p>질서 쪽으로 틀리는 것은 자석만의 사정일까? 이 장 첫머리의 사후분포(잠재변수 두 개의 상관계수가 0.9인 정규분포)에는 격자도 이웃도 없는데, 좌표 상승으로 찾은 곱 분포는 참 분포보다 좁아졌다. 어느 쪽으로 틀릴지는 무엇이 정할까?</p>
 <h3 id="봉우리-둘을-정규분포-하나로">봉우리 둘을 정규분포 하나로</h3>
 <p>틀리는 방향은 목적 함수의 모양에도 새겨져 있다. F[q] − F = kT × D_KL(q‖p)의 KL은 q로 평균을 낸 ln(q/p)이므로, 참 분포 p가 거의 0인 곳에 q가 확률을 조금이라도 두면 ln(q/p)가 커서 벌점이 크다. 반대로 p가 큰 곳을 q가 비워 두는 것은 q로 평균을 낼 때 그 자리가 거의 들어가지 않아 벌점이 작다. 그래서 q는 참 분포 안쪽의 확실한 곳에 머물며 참 분포보다 좁아지고, 봉우리가 둘이면 하나만 덮는다. 계산할 수 없는 p로 평균을 내야 하는 반대 방향의 KL, D_KL(p‖q)는 처음부터 쓸 수 없었으니, 이 치우침은 계산할 수 있는 기준을 고른 값이다.</p>
 <figure class="fig "><img src="images/ch12/c2_kl_direction.png" alt="봉우리가 둘인 p(±2, 표준편차 0.6, 반씩)를 정규분포 q 하나로 근사할 때의 두 후보. 아래 보라 띠는 각 자리가 DKL(q‖p)에 보태는 몫 q ln(q/p)다. 가운데를 넓게 덮는 q(표준편차 1.79)는 p가 거의 0인 골짜기에 확률을 두어 1.138 nat, 한 봉우리만 덮는 q(평균 2.00, 표준편차 0.60)는 0.692 nat이다." loading="lazy"><figcaption>봉우리가 둘인 p(±2, 표준편차 0.6, 반씩)를 정규분포 q 하나로 근사할 때의 두 후보. 아래 보라 띠는 각 자리가 DKL(q‖p)에 보태는 몫 q ln(q/p)다. 가운데를 넓게 덮는 q(표준편차 1.79)는 p가 거의 0인 골짜기에 확률을 두어 1.138 nat, 한 봉우리만 덮는 q(평균 2.00, 표준편차 0.60)는 0.692 nat이다.</figcaption></figure>
@@ -652,7 +655,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>코드에서 곱 분포의 표준편차가 0.436이었어요. D_KL(p‖q) 쪽은 주변 분포를 그대로 쓰니까 표준편차 1이고요. 이번엔 두 KL 값이 둘 다 0.830으로 같은데, 하나는 좁게 안쪽만, 하나는 넓게 바깥까지 덮어요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 사후분포의 불확실성이 중요하면 D_KL(p‖q) 쪽이 나은데, 왜 평균장은 굳이 좁아지는 쪽을 써요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M09"><img src="images/cast/M09.webp" alt="김민준 M09" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, D_KL(p‖q)를 계산하려면 p로 평균을 내야 하잖아. 그게 되면 애초에 근사할 필요가 없지. D_KL(q‖p)는 q로 평균을 내니까 E만 알면 되고, ln Z는 상수라서 빠지고.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 계산할 수 있는 쪽이 하나뿐이었고, 그 대가가 좁아지는 치우침이에요. 이 장 첫머리의 VAE가 자기 잠재변수를 지나치게 확신한 이유도 이거고요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 계산할 수 있는 쪽이 하나뿐이었고, 그 대가가 좁아지는 치우침이에요. 이 장 첫머리에서 대각 정규분포를 내놓는 VAE 인코더가 자기 잠재변수를 지나치게 확신한 이유도 이거고요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M12"><img src="images/cast/M12.webp" alt="김민준 M12" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>친구가 강남역 아니면 홍대입구에 있다고 할 때, D_KL(p‖q)식은 두 역을 다 챙기려고 그 사이 어딘가에서 넓게 기다리는 거고, D_KL(q‖p)식은 아무도 없는 곳에 서 있는 게 싫어서 한 역에 가서 기다리는 거네요. 운이 나쁘면 못 만나지만, 적어도 엉뚱한 데 서 있지는 않아요.</p></div></div>
 </div>
 </article>
@@ -672,6 +675,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -699,13 +703,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -631,7 +634,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <article class="chapter chapter-paged">
 <h1>8장 — 분배함수와 자유에너지</h1>
 <h2 id="이-장의-물음">이 장의 물음</h2>
-<p>VAE(변분 자기부호화기)를 한 번이라도 학습해 본 사람은 그 손실 함수가 두 항으로 되어 있다는 것을 안다. 디코더가 입력을 얼마나 잘 되살리는지 재는 재구성 항과, 인코더가 내놓은 잠재변수의 분포가 사전분포 N(0, I)에서 얼마나 멀어졌는지 재는 KL 항이다. 이 둘의 합에 마이너스를 붙인 양을 ELBO(evidence lower bound)라 부르고, 교과서는 이것이 데이터의 로그우도 ln p(x)의 하한이라고 가르친다. 그런데 왜 하필 이 두 항일까? 하한과 참값 사이의 틈은 무엇이고, KL 항 앞에 계수 β를 붙이는 β-VAE는 대체 무엇을 조절하는 걸까?</p>
+<p>VAE(변분 자기부호화기)를 한 번이라도 학습해 본 사람은 그 손실 함수가 두 항으로 되어 있다는 것을 안다. 디코더가 입력을 얼마나 잘 되살리는지 재는 재구성 항과, 인코더가 내놓은 잠재변수의 분포가 사전분포 N(0, I)에서 얼마나 멀어졌는지 재는 KL 항(KL은 두 분포가 얼마나 다른지 재는 양인 Kullback–Leibler 발산의 머리글자)이다. 이 둘의 합에 마이너스를 붙인 양을 ELBO(evidence lower bound)라 부르고, 교과서는 이것이 데이터의 로그우도 ln p(x)의 하한이라고 가르친다. 그런데 왜 하필 이 두 항일까? 하한과 참값 사이의 틈은 무엇이고, KL 항 앞에 계수 β를 붙이는 β-VAE는 대체 무엇을 조절하는 걸까?</p>
 <p>이 물음에 답하려면 조금 멀리 돌아가야 한다. 이 장은 다음 물음들에 차례로 답하면서 VAE의 손실로 돌아온다.</p>
 <ul>
 <li>볼츠만 분포에서 상태 하나는 에너지가 낮을수록 흔한데, 실제로 관찰되는 에너지는 왜 가장 낮은 에너지가 아닐까?</li>
@@ -641,11 +644,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <li>분류기가 매번 계산하고 버리던 logsumexp는 입력에 대해 무엇을 말해 줄까?</li>
 </ul>
 <h2 id="에너지와-엔트로피의-겨루기-관찰되는-에너지는-바닥이-아니다">에너지와 엔트로피의 겨루기: 관찰되는 에너지는 바닥이 아니다</h2>
-<p>볼츠만 분포에서 미시상태 하나의 확률은 e^(−βE)에 비례하므로, 에너지가 낮은 상태일수록 흔하다. 그렇다면 열원과 맞닿은 계를 들여다보면 늘 가장 낮은 에너지가 관찰될까? 두 상태만 가질 수 있는 입자 몇 개로 직접 세어 보자.</p>
+<p>볼츠만 분포에서 미시상태 하나의 확률은 e^(−βE)에 비례하므로(β는 열원의 역온도 1/kT), 에너지가 낮은 상태일수록 흔하다. 그렇다면 열원과 맞닿은 계를 들여다보면 늘 가장 낮은 에너지가 관찰될까? 두 상태만 가질 수 있는 입자 몇 개로 직접 세어 보자.</p>
 <h3 id="2준위-입자-세-개와-서른-개">2준위 입자 세 개와 서른 개</h3>
 <p>에너지 0인 바닥 상태와 에너지 ε인 들뜬 상태, 이렇게 두 상태만 가질 수 있는 입자 N개가 온도 T인 열원과 맞닿아 있다고 하자. 입자끼리는 에너지를 주고받지 않는다. 계산을 쉽게 하려고 βε = ln 2인 온도, 곧 들뜬 상태의 볼츠만 인자 e^(−βε)가 정확히 1/2인 온도를 고른다.</p>
 <p>입자가 세 개이면 미시상태는 2³ = 8개다. 미시상태 하나하나로 보면 모두 바닥 상태인 미시상태의 볼츠만 인자가 1로 가장 크고, 입자 하나가 들뜬 미시상태는 1/2로 그 절반이다. 그런데 입자 하나가 들뜬 미시상태는 세 개이므로, 에너지가 ε인 쪽의 비중은 합쳐서 3 × 1/2 = 1.5가 되어 바닥 상태의 1을 이긴다. 에너지 값별로 정리하면 다음과 같다.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>들뜬 입자 수 n</th>
@@ -685,11 +688,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <td>−2.079</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>마지막 칸은 비중의 로그다. 로그를 취하면 곱이 합으로 바뀌어서, 에너지 값마다 경우의 수가 주는 점수 ln g와 에너지가 매기는 벌점 βnε가 따로 보인다. 에너지를 올리면 벌점이 늘지만 그만큼 상태의 수도 늘어 점수를 벌어 온다. 이 차이를 앞으로 에너지 값의 「점수」라 부르자. 점수가 가장 큰 에너지 값이 가장 자주 관찰되며, 여기서는 n = 1이다.</p>
 <figure class="fig "><img src="images/ch08/a1_three_particles.png" alt="입자 세 개의 미시상태 여덟 개(주황 = 들뜬 입자, βε = ln 2). 미시상태 하나로는 모두 바닥 상태인 것(볼츠만 인자 1)이 가장 흔하지만, 에너지 값별로 합치면 1/2짜리 세 개가 모인 n = 1(비중 1.5)이 이긴다." loading="lazy"><figcaption>입자 세 개의 미시상태 여덟 개(주황 = 들뜬 입자, βε = ln 2). 미시상태 하나로는 모두 바닥 상태인 것(볼츠만 인자 1)이 가장 흔하지만, 에너지 값별로 합치면 1/2짜리 세 개가 모인 n = 1(비중 1.5)이 이긴다.</figcaption></figure>
 <p>입자를 30개로 늘려 같은 계산을 하면 다음 표를 얻는다. 입자들이 서로 독립이라 분배함수는 입자 하나의 분배함수를 거듭제곱한 Z = (1 + e^(−βε))^N = 1.5^N이고, 마지막 칸의 확률은 비중을 이 Z로 나눈 것이다.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>n</th>
@@ -757,7 +760,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <td>0.0000</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>에너지만 보면 n = 0이 가장 좋고, 경우의 수만 보면 절반이 들뜬 n = 15가 가장 좋다. 실제 승자는 그 사이의 n = 10, 곧 입자의 3분의 1이 들뜬 상태다. 입자 하나가 들떠 있을 확률이 1/(1 + e^(βε)) = 1/3이었으니 당연한 결과이기도 하다.</p>
 <h3 id="점수를-물리의-말로">점수를 물리의 말로</h3>
 <p>점수를 물리의 말로 옮겨 보자. 경우의 수의 로그에 볼츠만 상수를 곱한 것이 엔트로피 S(E) = k ln g(E)이므로, 점수에 −kT를 곱하면 E − TS(E)가 된다. 그러니 점수가 가장 큰 에너지는 E − TS(E)가 가장 작은 에너지다.</p>
@@ -765,7 +768,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <p>승자의 위치는 E − TS(E)를 E로 미분해 0으로 놓으면 나온다. 그러면 dS/dE = 1/T, 곧 「계 자신의 온도가 열원의 온도와 같아지는 에너지」가 승자다. 이 최소화에는 더 직접적인 뜻도 있다. 계가 에너지 E를 가지면 열원은 그만큼을 내준 것이므로 열원의 엔트로피는 E/T만큼 줄어 있다. 따라서 계와 열원을 합친 전체 엔트로피는 S(E) − E/T + (상수)이고, 여기에 −T를 곱한 것이 E − TS(E)다. E − TS를 가장 작게 하는 것은 계와 열원을 합친 전체의 경우의 수를 가장 크게 하는 것과 같은 일이다. 새로운 원리가 생긴 것이 아니라, 에너지를 주고받는 두 계는 전체 경우의 수가 가장 큰 나눠 갖기에서 멈춘다는 원리를 열원의 몫까지 계산에 넣어 계 쪽의 말로만 다시 쓴 것이다.</p>
 <h3 id="입자-수를-늘리면-가장-큰-항">입자 수를 늘리면: 가장 큰 항</h3>
 <p>지금까지는 에너지 값마다 점수를 매겨 승자 하나를 찾았다. 그런데 분배함수 Z는 승자 하나가 아니라 에너지 값마다의 비중을 모두 더한 것이다. 승자 하나는 그 합에서 얼마나 큰 몫을 차지할까? 이번에는 모든 항을 더한 ln Z와 가장 큰 항 하나의 점수를 나란히 놓고 입자 수를 늘려 보자.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>N</th>
@@ -810,7 +813,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <td>0.997</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>입자가 세 개일 때는 가장 큰 항이 ln Z의 3분의 1밖에 설명하지 못하지만, 입자가 3,000개이면 99.7%를 설명한다. 차이도 조금씩 자라기는 하지만, ln Z가 입자 수에 비례해 10배씩 커지는 동안 차이는 1.1 남짓씩만 늘어난다. Z는 N + 1개의 항을 모두 더한 것인데, 입자가 많아지면 왜 그 로그가 가장 큰 항 하나로 거의 정해질까?</p>
 <figure class="fig "><img src="images/ch08/a2_lnZ_max_term.png" alt="입자 수를 3, 30, 300, 3,000으로 늘릴 때 들뜬 입자 비율의 확률(위)과 ln Z 가운데 가장 큰 항 하나의 점수가 차지하는 몫(아래). 봉우리는 1/3에서 점점 좁아지고, 몫은 0.333, 0.846, 0.975, 0.997로 1에 다가간다." loading="lazy"><figcaption>입자 수를 3, 30, 300, 3,000으로 늘릴 때 들뜬 입자 비율의 확률(위)과 ln Z 가운데 가장 큰 항 하나의 점수가 차지하는 몫(아래). 봉우리는 1/3에서 점점 좁아지고, 몫은 0.333, 0.846, 0.975, 0.997로 1에 다가간다.</figcaption></figure>
 <h3 id="합의-로그와-가장-큰-항">합의 로그와 가장 큰 항</h3>
@@ -839,7 +842,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 \approx &amp; \text{계가 크면 차이가 무시할 만큼 작아진다}
 \end{array}
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:8.4em;vertical-align:-3.95em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4.45em;"><span style="top:-6.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;color:#7f7f7f;">k</span></span></span><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;color:#8c564b;">T</span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;color:#667733;">Z</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0576em;color:#ff7f0e;">E</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0576em;color:#9467bd;">S</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0576em;color:#ff7f0e;">E</span><span class="mclose">)</span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#d62728;">g</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0576em;color:#ff7f0e;">E</span><span class="mclose">)</span></span></span><span style="top:0.59em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mrel">≈</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4.45em;"><span style="top:-6.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">볼츠만</span><span class="mord"> </span><span class="mord hangul_fallback">상수</span><span class="mord"> (ML</span><span class="mord hangul_fallback">에서는</span><span class="mord"> 1)</span></span></span></span><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">열원의</span><span class="mord"> </span><span class="mord hangul_fallback">온도</span></span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">분배함수</span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">계의</span><span class="mord"> </span><span class="mord hangul_fallback">에너지</span><span class="mord"> </span><span class="mord hangul_fallback">값</span></span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">에너지가</span><span class="mord"> E</span><span class="mord hangul_fallback">인</span><span class="mord"> </span><span class="mord hangul_fallback">상태들의</span><span class="mord"> </span><span class="mord hangul_fallback">엔트로피</span></span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">축퇴도</span></span></span></span><span style="top:0.59em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">계가</span><span class="mord"> </span><span class="mord hangul_fallback">크면</span><span class="mord"> </span><span class="mord hangul_fallback">차이가</span><span class="mord"> </span><span class="mord hangul_fallback">무시할</span><span class="mord"> </span><span class="mord hangul_fallback">만큼</span><span class="mord"> </span><span class="mord hangul_fallback">작아진다</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
-<figure class="widget-embed" id="widget-ch08-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">에너지와 경우의 수의 겨루기</span><a class="widget-open" href="widgets/ch08.html#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch08.html?w=w1&embed=1" title="에너지와 경우의 수의 겨루기" loading="lazy"></iframe><noscript><img src="images/ch08/wid_w1.png" alt="위젯 1: 에너지와 경우의 수의 겨루기 (입자 30개, βε = ln 2에서 승자 n = 10, ln Z = 12.164, 가장 큰 점수 10.287)"></noscript></figure>
+<figure class="widget-embed" id="widget-ch08-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">에너지와 경우의 수의 겨루기</span><a class="widget-open" href="widgets/ch08.html?v=9af872c9#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch08.html?w=w1&embed=1&v=9af872c9" title="에너지와 경우의 수의 겨루기" loading="lazy"></iframe><noscript><img src="images/ch08/wid_w1.png" alt="위젯 1: 에너지와 경우의 수의 겨루기 (입자 30개, βε = ln 2에서 승자 n = 10, ln Z = 12.164, 가장 큰 점수 10.287)"></noscript></figure>
 <h3 id="ml에서-logsumexp는-부드러운-max다">ML에서: logsumexp는 부드러운 max다</h3>
 <p>분류기의 로짓에 쓰는 logsumexp도 같은 부등식을 따른다. 클래스가 1,000개이면 logsumexp는 가장 큰 로짓보다 크고, 가장 큰 로짓에 ln 1000 = 6.9를 더한 값보다 작다. 라이브러리가 logsumexp를 계산하는 방식도 이 부등식을 그대로 따른다. 로짓이 89만 넘어도 float32에서 e^z가 넘쳐 버리므로, 가장 큰 로짓 m을 먼저 빼고 m + ln Σᵢe^(<span class="sym" style="color:#ff7f0e">zᵢ</span> − m)으로 계산한다. 앞의 m이 가장 큰 항이고, 뒤의 로그는 0과 ln(클래스 수) 사이에서 나머지 항들이 보태는 몫이다.</p>
 
@@ -860,6 +863,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -887,13 +891,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

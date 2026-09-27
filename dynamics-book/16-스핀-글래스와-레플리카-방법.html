@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -631,7 +634,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <article class="chapter chapter-paged">
 <h1>16장 — 스핀 글래스와 레플리카 방법</h1>
 <h2 id="이-장의-물음">이 장의 물음</h2>
-<p>입력이 100개인 퍼셉트론을 생각해 보자. 편향 없이 입력의 가중합 부호로 +1이나 −1을 내는, 가장 단순한 선형 분류기다. 표준정규분포에서 뽑은 무작위 입력 벡터 P개에 동전을 던져 라벨을 붙인 뒤, 모든 라벨을 맞히는 가중치가 있는지를 선형계획법으로 확인한다. 문제를 200번씩 새로 뽑아 보면 P가 160일 때는 99.5%가 외워지고, 180이면 91%, 200이면 49%, 220이면 11.5%로 떨어지며, 240이면 한 번도 외워지지 않는다. 입력 수의 두 배 근처에서 외울 수 있는 문제가 외울 수 없는 문제로 바뀌는 것이다. 입력을 400개로 늘리면 이 바뀜은 더 날카로워져, 입력 수의 1.8배에서는 거의 늘 외워지고 2.2배에서는 거의 외워지지 않는다. 심층 신경망도 마찬가지다. 장·벵지오·하르트·레흐트·비냘스(2017)는 이미지 분류용 합성곱 신경망이 무작위로 바꾼 라벨도, 구조 없는 잡음 이미지도 「쉽게 맞춘다」고 보고했다.</p>
+<p>장·벵지오·하르트·레흐트·비냘스(2017)는 이미지 분류용 합성곱 신경망이 무작위로 바꾼 라벨도, 구조 없는 잡음 이미지도 「쉽게 맞춘다」고 보고했다. 그렇다면 가장 단순한 분류기는 무작위 라벨을 몇 개까지 외울 수 있을까? 입력이 100개인 퍼셉트론을 생각해 보자. 편향 없이 입력의 가중합 부호로 +1이나 −1을 내는, 가장 단순한 선형 분류기다. 표준정규분포에서 뽑은 무작위 입력 벡터 P개에 동전을 던져 라벨을 붙인 뒤, 모든 라벨을 맞히는 가중치가 있는지를 선형계획법으로 확인한다. 문제를 200번씩 새로 뽑아 보면 P가 160일 때는 99.5%가 외워지고, 180이면 91%, 200이면 49%, 220이면 11.5%로 떨어지며, 240이면 한 번도 외워지지 않는다. 입력 수의 두 배 근처에서 외울 수 있는 문제가 외울 수 없는 문제로 바뀌는 것이다. 입력을 400개로 늘리면 이 바뀜은 더 날카로워져, 입력 수의 1.8배에서는 거의 늘 외워지고 2.2배에서는 거의 외워지지 않는다.</p>
 <figure class="fig "><img src="images/ch16/a1_perceptron.png" alt="무작위 라벨을 모두 맞히는 가중치가 있을 확률. 선은 커버의 셈으로 구한 정확한 값이고(입력 100개에서 P/N = 1.6·1.8·2·2.2·2.4일 때 0.999·0.933·0.5·0.088·0.005, 입력 400개에서는 1.8배 0.999·2.2배 0.003), 동그라미는 본문의 선형계획법 결과(99.5%·91%·49%·11.5%·0%)다. 입력이 많을수록 경계가 P/N = 2에 날카롭게 선다." loading="lazy"><figcaption>무작위 라벨을 모두 맞히는 가중치가 있을 확률. 선은 커버의 셈으로 구한 정확한 값이고(입력 100개에서 P/N = 1.6·1.8·2·2.2·2.4일 때 0.999·0.933·0.5·0.088·0.005, 입력 400개에서는 1.8배 0.999·2.2배 0.003), 동그라미는 본문의 선형계획법 결과(99.5%·91%·49%·11.5%·0%)다. 입력이 많을수록 경계가 P/N = 2에 날카롭게 선다.</figcaption></figure>
 <p>여기서 두 가지가 눈에 띈다. 외울 수 있는지는 데이터를 뽑을 때마다 달라지는 운의 문제인데도, 입력이 많아지면 답이 거의 하나로 정해진다. 그리고 경계의 값 2는 특정한 데이터 하나가 아니라 무작위로 뽑힌 데이터 전체가 가진 성질이다. 이런 값을 계산하려면 데이터를 고정한 채 조건을 모두 만족하는 가중치가 얼마나 많은지를 재고, 그 양의 로그를 데이터에 대해 평균해야 한다. 이것은 결합 계수가 무작위로 뽑히는 스핀 계에서 ln Z의 평균을 구하는 문제와 모양이 같다. 이 계산에 이르려면 다음 물음들을 차례로 풀어야 한다.</p>
 <ul>
@@ -648,7 +651,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <figure class="fig fig-portrait"><img src="images/ch16/portrait_anderson.jpg" alt="필립 워런 앤더슨(1923–2020). 2003년 예일 대학교에서 JdH 촬영. 출처: Wikimedia Commons, CC BY-SA 3.0(일부를 잘라 씀)" loading="lazy"><figcaption>필립 워런 앤더슨(1923–2020). 2003년 예일 대학교에서 JdH 촬영. 출처: Wikimedia Commons, CC BY-SA 3.0(일부를 잘라 씀)</figcaption></figure>
 <h3 id="스핀-16개의-무작위-결합">스핀 16개의 무작위 결합</h3>
 <p>스핀 16개의 모든 쌍 (i, j)를 결합 J_ij로 묶되, 결합은 평균 0, 분산 1/16인 정규분포에서 무작위로 뽑는다. 에너지는 E(s) = −Σ_(i&lt;j) J_ij s_i s_j이므로 결합이 양수인 쌍은 같은 방향을, 음수인 쌍은 반대 방향을 좋아한다. 결합을 한 번 뽑으면 배치(configuration: 계를 이루는 것 하나하나의 상태를 빠짐없이 적은 목록, 곧 배치 공간의 한 점. 여기서는 스핀 16개가 저마다 +1인지 −1인지 적은 수 16개. ML의 미니배치와 다르다) 2¹⁶ = 65536개를 모두 더해 Z를 정확히 구할 수 있다. 결합을 300번 뽑아 스핀 하나당 ln Z를 평균한 값과, 평균 Z의 로그를 스핀 수로 나눈 값을 나란히 적으면 다음과 같다.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>역온도 β</th>
@@ -677,7 +680,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <td>2.496</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>가운데 칸은 표본 없이 손으로 계산한 값이다. 볼츠만 인자는 쌍마다의 인자 e^(βJ_ij s_i s_j)의 곱이고 결합들은 서로 독립이므로, 평균도 쌍마다 따로 내면 된다. 분산이 σ²인 정규 변수 J에 대해 e^(cJ)의 평균은 e^(c²σ²/2)이므로 쌍 하나의 평균은 배치와 상관없이 e^(β²/(2N))이다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mover accent="true"><mstyle mathcolor="#667733"><mi>Z</mi></mstyle><mo stretchy="true">‾</mo></mover><mo>=</mo><munder><mo>∑</mo><mstyle mathcolor="#1b9e77"><mi>s</mi></mstyle></munder><munder><mo>∏</mo><mrow><mi>i</mi><mo>&lt;</mo><mi>j</mi></mrow></munder><mover accent="true"><msup><mi>e</mi><mrow><mstyle mathcolor="#8c564b"><mi>β</mi></mstyle><mstyle mathcolor="#b8860b"><msub><mi>J</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mstyle><mstyle mathcolor="#1b9e77"><msub><mi>s</mi><mi>i</mi></msub></mstyle><mstyle mathcolor="#1b9e77"><msub><mi>s</mi><mi>j</mi></msub></mstyle></mrow></msup><mo stretchy="true">‾</mo></mover><mo>=</mo><msup><mn>2</mn><mstyle mathcolor="#1f77b4"><mi>N</mi></mstyle></msup><mtext> </mtext><msup><mi>e</mi><mrow><msup><mstyle mathcolor="#8c564b"><mi>β</mi></mstyle><mn>2</mn></msup><mo stretchy="false">(</mo><mstyle mathcolor="#1f77b4"><mi>N</mi></mstyle><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mn>4</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\overline{\textcolor{#667733}{Z}} = \sum_{\textcolor{#1b9e77}{s}} \prod_{i&lt;j} \overline{e^{\textcolor{#8c564b}{\beta} \textcolor{#b8860b}{J_{ij}} \textcolor{#1b9e77}{s_i} \textcolor{#1b9e77}{s_j}}} = 2^{\textcolor{#1f77b4}{N}}\, e^{\textcolor{#8c564b}{\beta}^2 (\textcolor{#1f77b4}{N} - 1)/4}
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8833em;"></span><span class="mord overline"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8833em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;color:#667733;">Z</span></span></span><span style="top:-3.8033em;"><span class="pstrut" style="height:3em;"></span><span class="overline-line" style="border-bottom-width:0.04em;"></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.4638em;vertical-align:-1.4138em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.9em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="color:#1b9e77;">s</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.25em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mrel mtight">&lt;</span><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∏</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.4138em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord overline"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9912em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7912em;"><span style="top:-3.0051em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0528em;color:#8c564b;">β</span><span class="mord mtight" style="color:#b8860b;"><span class="mord mathnormal mtight" style="margin-right:0.0962em;color:#b8860b;">J</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3281em;"><span style="top:-2.357em;margin-left:-0.0962em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight" style="color:#b8860b;"><span class="mord mtight" style="color:#b8860b;"><span class="mord mathnormal mtight" style="margin-right:0.0572em;color:#b8860b;">ij</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2819em;"><span></span></span></span></span></span></span><span class="mord mtight" style="color:#1b9e77;"><span class="mord mathnormal mtight" style="color:#1b9e77;">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3281em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight" style="color:#1b9e77;"><span class="mord mathnormal mtight" style="color:#1b9e77;">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span><span class="mord mtight" style="color:#1b9e77;"><span class="mord mathnormal mtight" style="color:#1b9e77;">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3281em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight" style="color:#1b9e77;"><span class="mord mathnormal mtight" style="margin-right:0.0572em;color:#1b9e77;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2819em;"><span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.9112em;"><span class="pstrut" style="height:3em;"></span><span class="overline-line" style="border-bottom-width:0.04em;"></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0369em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.109em;color:#1f77b4;">N</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:1.0369em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0528em;color:#8c564b;">β</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913em;"><span style="top:-2.931em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.109em;color:#1f77b4;">N</span><span class="mbin mtight">−</span><span class="mord mtight">1</span><span class="mclose mtight">)</span><span class="mord mtight">/4</span></span></span></span></span></span></span></span></span></span></span></span></span></div>
@@ -712,6 +715,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -739,13 +743,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

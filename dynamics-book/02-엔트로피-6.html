@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -640,7 +643,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <p>그런데 같은 1948년 논문에서 섀넌은 식보다 먼저 영어 글을 흉내 내는 실험을 보여 준다. 글자를 뽑는 규칙을 한 단계씩 영어에 가깝게 바꾸어 가며 가짜 문장을 지어 본 것이다. 기호는 알파벳 26개와 공백을 더한 27가지다.</p>
 <p>첫 단계에서는 27가지를 모두 같은 확률로 뽑았다. 둘째 단계에서는 E는 12%, W는 2%처럼 영어 글에 글자가 나오는 비율대로 뽑았는데, 여기까지는 이미 책으로 나와 있던 글자 빈도표와 난수표로 충분했다. 셋째 단계부터가 문제였다. 바로 앞 글자에 따라 다음 글자의 확률이 달라지게 하려면 &quot;T 다음에 H가 올 확률&quot;처럼 글자 짝마다 확률을 적은 표가 있어야 하고, 앞 두 글자를 보려면 표의 칸이 27 × 27 × 27 = 19,683개로 늘어난다.</p>
 <p>섀넌은 이 표를 만들지 않고 책 한 권을 표 대신 썼다. 책을 아무 데나 펴서 아무 글자나 하나 고르고 적는다. 다른 쪽을 펴서 그 글자가 나올 때까지 읽다가, 나오면 바로 뒤의 글자를 적는다. 또 다른 쪽을 펴서 이번에는 방금 적은 글자를 찾고, 그 뒤의 글자를 적는다. 이렇게 하면 &quot;T 다음에는 H가 자주 온다&quot;는 사실을 숫자로 옮겨 적지 않아도, 그 책에서 T 뒤에 H가 실제로 오는 비율대로 H가 뽑힌다. 찾는 대상을 글자 두 개, 단어 하나로 늘리면 같은 방법으로 더 긴 앞 문맥을 흉내 낼 수 있다. 논문에 실린 결과는 다음과 같다.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>다음 글자를 뽑는 규칙</th>
@@ -665,7 +668,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <td>THE HEAD AND IN FRONTAL ATTACK ON AN ENGLISH WRITER THAT THE CHARACTER OF THIS POINT IS …</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>앞을 많이 볼수록 문장은 영어를 닮아 간다. 거꾸로 말하면, 영어에서 다음 글자는 앞 글자들을 알면 상당 부분 이미 정해져 있다는 뜻이다. 섀넌은 여덟 글자쯤까지의 앞 문맥만 따져도 영어 글의 절반쯤은 언어의 짜임새가 정하고, 쓰는 사람이 자유롭게 고르는 것은 나머지 절반뿐이라고 어림했다.</p>
 <h3 id="역사-아내에게-다음-글자-맞히게-하기">역사: 아내에게 다음 글자 맞히게 하기</h3>
 <p>표든 책이든, 앞 문맥을 몇 글자 이상으로 늘리기는 어렵다. 그래서 1951년 논문 「인쇄된 영어의 예측과 엔트로피」에서 섀넌은 사람의 머릿속을 확률표로 썼다. 상대가 처음 보는 글 한 대목을 골라 첫 글자를 맞혀 보게 한다. 맞히면 맞았다고 알려 주고 다음 글자로 넘어가고, 틀리면 틀렸다고만 말해 다시 맞히게 한다. 그리고 글자마다 몇 번째 추측에서 맞혔는지를 적는다.</p>
@@ -712,6 +715,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -739,13 +743,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

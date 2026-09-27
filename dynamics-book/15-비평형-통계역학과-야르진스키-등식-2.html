@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -633,7 +636,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <h2 id="야르진스키-등식-어떤-빠르기로-바꾸든">야르진스키 등식: 어떤 빠르기로 바꾸든</h2>
 <p>한순간에 조일 때는 샘플이 옛 분포에 그대로 있어서 적분 한 줄로 ⟨e^(−β𝒲)⟩ = Z₁/Z₀를 확인할 수 있었다. 그러나 조이는 시간이 0.1이나 1일 때는 칸 사이에 알갱이가 움직이므로, 다 조인 순간의 샘플은 옛 덫의 평형에도 새 덫의 평형에도 있지 않다. 그런데도 표의 마지막 칸이 0.693을 지킨 것은 어떤 조건 덕분일까?</p>
 <h3 id="역사-부등식이-등식이-되기까지">역사: 부등식이 등식이 되기까지</h3>
-<p>온도가 일정한 계를 한 상태에서 다른 상태로 바꾸려면 일을 해 주어야 하고, 그 일은 자유에너지의 증가보다 작을 수 없다. 둘이 같아지는 것은 한없이 천천히 바꾸는 가역 과정뿐이고, 조금이라도 서두르면 남는 일이 열로 흩어진다. 자유에너지 차이를 알려면 한없이 천천히 바꾸거나, 아니면 평형 분포에서 뽑은 샘플로 따로 계산해야 했다. 1900년대의 계산 방법들은 이 두 극단에서 나왔다. 1935년 커크우드는 매개변수를 한없이 천천히 바꾸며 평균 힘을 적분하는 방법(열역학적 적분)을, 1954년 츠반치히는 에너지를 한 번에 바꾼 차이의 지수 평균을 내는 방법을 적었다.</p>
+<p>온도가 일정한 계를 한 상태에서 다른 상태로 바꾸려면 일을 해 주어야 하고, 그 일은 자유에너지의 증가보다 작을 수 없다. 둘이 같아지는 것은 한없이 천천히 바꾸는 가역 과정뿐이고, 조금이라도 서두르면 남는 일이 열로 흩어진다. 자유에너지 차이를 알려면 한없이 천천히 바꾸거나, 아니면 평형 분포에서 뽑은 샘플로 따로 계산해야 했다. 20세기의 계산 방법들은 이 두 극단에서 나왔다. 1935년 커크우드는 매개변수를 한없이 천천히 바꾸며 평균 힘을 적분하는 방법(열역학적 적분)을, 1954년 츠반치히는 에너지를 한 번에 바꾼 차이의 지수 평균을 내는 방법을 적었다.</p>
 <p>1996년 6월 워싱턴 대학교 핵이론연구소에 있던 크리스토퍼 야르진스키는 『피지컬 리뷰 레터스』에 짧은 논문을 보냈고, 논문은 이듬해 「자유에너지 차이에 대한 비평형 등식」이라는 제목으로 실렸다. 논문 요약의 첫 문장은 이렇다. 「계의 두 설정 사이의 평형 자유에너지 차이를, 한 설정에서 다른 설정으로 매개변수를 바꾸는 동안 해 준 일을 유한한 시간에 잰 값들을 여러 번 모은 것(앙상블)으로 나타내는 식을 유도한다.」 여기서 설정은 κ = 1인 덫과 κ = 4인 덫처럼 매개변수 값으로 정한 조건이다. 한없이 천천히 바꾸는 커크우드의 방법과 한 번에 바꾸는 츠반치히의 방법이 이 식의 두 끝이고, 그 사이의 어떤 빠르기로 바꾸어도 된다는 것이 새로운 점이었다. 평균을 내는 방법만 바꾸면 부등식이 등식이 된다. 1998년과 1999년 개빈 크룩스는 이 등식을 마르코프 사슬에서 증명하고, 앞으로 간 경로와 거꾸로 간 경로의 확률 비를 구했다.</p>
 <p>2002년 리파르트와 부스타만테의 연구진은 RNA 분자 하나의 양 끝을 구슬 두 개에 이어 한 구슬은 광학 집게로, 다른 구슬은 가는 유리관(마이크로피펫) 끝에 붙잡고, 접힌 상태에서 펴진 상태로 잡아당기며 한 일을 쟀다. 빨리 당길수록 잰 일은 더 크게 퍼졌고 그 평균은 자유에너지 차이보다 컸다. 그러나 비가역적으로 당겨 잰 일들로 계산한 지수 평균은 가역적으로 천천히 당길 때 든 일의 평균(자유에너지 차이를 따로 어림한 가장 믿을 만한 값)과 kT의 절반 안에서 맞았다. 평형을 기다리지 않은 측정에서 평형의 양을 얻는다는 등식의 약속이 분자 하나에서 확인된 것이다.</p>
 <h3 id="한없이-천천히-조이기">한없이 천천히 조이기</h3>
@@ -650,8 +653,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 \textcolor{#736000}{f} &amp; \text{끝 위치로 계산하는 아무 함수}
 \end{array}
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:6.0091em;vertical-align:-2.7546em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.2546em;"><span style="top:-5.4146em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">⟨</span><span class="mord">⋅</span><span class="mclose">⟩</span></span></span><span style="top:-4.2054em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;color:#667733;">Z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">λ</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mop op-symbol small-op" style="margin-right:0.1945em;position:relative;top:-0.0006em;">∫</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mathnormal mtight" style="margin-right:0.0528em;color:#8c564b;">β</span><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.109em;color:#a6761d;">U</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3488em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">λ</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1512em;"><span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal" style="color:#1b9e77;">x</span></span></span><span style="top:-3.0054em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">Δ</span><span class="mord mathnormal" style="margin-right:0.1389em;color:#a000c8;">F</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;color:#a000c8;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight">λ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3567em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0715em;">K</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1433em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2503em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;color:#a000c8;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight">λ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3173em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2501em;"><span></span></span></span></span></span></span></span></span><span style="top:-1.8054em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="color:#e377c2;">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight">λ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3567em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0715em;">K</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1433em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2503em;"><span></span></span></span></span></span></span></span></span><span style="top:-0.6054em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1076em;color:#736000;">f</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.7546em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.2546em;"><span style="top:-5.4146em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">처음</span><span class="mord"> </span><span class="mord hangul_fallback">위치와</span><span class="mord"> </span><span class="mord hangul_fallback">움직임의</span><span class="mord"> </span><span class="mord hangul_fallback">무작위성</span><span class="mord"> </span><span class="mord hangul_fallback">전체에</span><span class="mord"> </span><span class="mord hangul_fallback">대한</span><span class="mord"> </span><span class="mord hangul_fallback">평균</span><span class="mord"> (</span><span class="mord hangul_fallback">경로들의</span><span class="mord"> </span><span class="mord hangul_fallback">평균</span><span class="mord">)</span></span></span></span><span style="top:-4.2054em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">매개변수가</span><span class="mord"> </span></span><span class="mord mathnormal">λ</span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">일</span><span class="mord"> </span><span class="mord hangul_fallback">때의</span><span class="mord"> </span><span class="mord hangul_fallback">분배함수</span></span></span></span><span style="top:-3.0054em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">처음과</span><span class="mord"> </span><span class="mord hangul_fallback">끝</span><span class="mord"> </span><span class="mord hangul_fallback">평형</span><span class="mord"> </span><span class="mord hangul_fallback">상태의</span><span class="mord"> </span><span class="mord hangul_fallback">자유에너지</span><span class="mord"> </span><span class="mord hangul_fallback">차이</span></span></span></span><span style="top:-1.8054em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">끝</span><span class="mord"> </span><span class="mord hangul_fallback">매개변수의</span><span class="mord"> </span><span class="mord hangul_fallback">평형</span><span class="mord"> </span><span class="mord hangul_fallback">분포</span><span class="mord"> (</span><span class="mord hangul_fallback">알갱이가</span><span class="mord"> </span><span class="mord hangul_fallback">실제로</span><span class="mord"> </span><span class="mord hangul_fallback">도착한</span><span class="mord"> </span><span class="mord hangul_fallback">분포와는</span><span class="mord"> </span><span class="mord hangul_fallback">다르다</span><span class="mord">)</span></span></span></span><span style="top:-0.6054em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">끝</span><span class="mord"> </span><span class="mord hangul_fallback">위치로</span><span class="mord"> </span><span class="mord hangul_fallback">계산하는</span><span class="mord"> </span><span class="mord hangul_fallback">아무</span><span class="mord"> </span><span class="mord hangul_fallback">함수</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.7546em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
-<figure class="widget-embed" id="widget-ch15-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">조이는 시간과 일의 분포</span><a class="widget-open" href="widgets/ch15.html#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch15.html?w=w1&embed=1" title="조이는 시간과 일의 분포" loading="lazy"></iframe><noscript><img src="images/ch15/wid_w1.png" alt="위젯 1: 조이는 시간과 일의 분포 (조이는 시간 1, 사슬 2만 개에서 ⟨𝒲⟩ = 0.933(정확한 값 0.936), −ln⟨e^(−𝒲)⟩ = 0.693, 끝의 ⟨x²⟩ 0.284를 e^(−𝒲)로 가중하면 0.247)"></noscript></figure>
-<p>까닭은 앞의 한순간 계산을 칸마다 되풀이해 보면 드러난다. 첫 칸에서 매개변수를 바꾸며 샘플에 가중치 e^(−<span class="sym" style="color:#8c564b">β</span>(<span class="sym" style="color:#a6761d">U_λ₁</span> − <span class="sym" style="color:#a6761d">U_λ₀</span>))를 곱하면, 가중치를 단 샘플들은 <span class="sym" style="color:#667733">Z_λ₁</span>/<span class="sym" style="color:#667733">Z_λ₀</span>배 된 <span class="sym" style="color:#e377c2">p_λ₁</span>을 나타낸다. 그다음 움직임은 <span class="sym" style="color:#e377c2">p_λ₁</span>을 바꾸지 않으므로 가중치를 단 분포도 바꾸지 않는다. 칸마다 이것을 되풀이하면 분배함수의 비가 사슬처럼 곱해져 <span class="sym" style="color:#667733">Z_λK</span>/<span class="sym" style="color:#667733">Z_λ₀</span>만 남고, 끝에서 가중치를 단 샘플들은 끝 매개변수의 평형 분포 <span class="sym" style="color:#e377c2">p_λK</span>를 정확히 나타낸다. 오른쪽 식이 이것이고, <span class="sym" style="color:#736000">f</span> = 1로 두면 왼쪽 식이 된다. 샘플 자체는 평형에서 얼마든지 뒤처져 있어도 되고, 뒤처진 만큼은 가중치가 갚는다. 이 왼쪽 식을 <strong>야르진스키 등식</strong> (평형에서 출발해 매개변수를 어떤 빠르기로 바꾸든, 일의 지수 평균이 처음과 끝 평형 상태의 자유에너지 차이를 준다는 등식, Jarzynski equality)이라 한다.</p>
+<figure class="widget-embed" id="widget-ch15-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">조이는 시간과 일의 분포</span><a class="widget-open" href="widgets/ch15.html?v=91fb1880#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch15.html?w=w1&embed=1&v=91fb1880" title="조이는 시간과 일의 분포" loading="lazy"></iframe><noscript><img src="images/ch15/wid_w1.png" alt="위젯 1: 조이는 시간과 일의 분포 (조이는 시간 1, 사슬 2만 개에서 ⟨𝒲⟩ = 0.933(정확한 값 0.936), −ln⟨e^(−𝒲)⟩ = 0.693, 끝의 ⟨x²⟩ 0.284를 e^(−𝒲)로 가중하면 0.247)"></noscript></figure>
+<p>까닭은 앞의 한순간 계산을 칸마다 되풀이해 보면 드러난다. 첫 칸에서 매개변수를 바꾸며 샘플에 가중치 e^(−<span class="sym" style="color:#8c564b">β</span>(<span class="sym" style="color:#a6761d">U_λ₁</span> − <span class="sym" style="color:#a6761d">U_λ₀</span>))를 곱하면, 가중치를 단 샘플들은 <span class="sym" style="color:#667733">Z_λ₁</span>/<span class="sym" style="color:#667733">Z_λ₀</span>배 된 <span class="sym" style="color:#e377c2">p_λ₁</span>을 나타낸다. 그다음 움직임은 <span class="sym" style="color:#e377c2">p_λ₁</span>을 바꾸지 않으므로 가중치를 단 분포도 바꾸지 않는다. 칸마다 이것을 되풀이하면 분배함수의 비가 차례로 곱해지며 가운데 것이 모두 지워져 <span class="sym" style="color:#667733">Z_λK</span>/<span class="sym" style="color:#667733">Z_λ₀</span>만 남고, 끝에서 가중치를 단 샘플들은 끝 매개변수의 평형 분포 <span class="sym" style="color:#e377c2">p_λK</span>를 정확히 나타낸다. 오른쪽 식이 이것이고, <span class="sym" style="color:#736000">f</span> = 1로 두면 왼쪽 식이 된다. 샘플 자체는 평형에서 얼마든지 뒤처져 있어도 되고, 뒤처진 만큼은 가중치가 갚는다. 이 왼쪽 식을 <strong>야르진스키 등식</strong> (평형에서 출발해 매개변수를 어떤 빠르기로 바꾸든, 일의 지수 평균이 처음과 끝 평형 상태의 자유에너지 차이를 준다는 등식, Jarzynski equality)이라 한다.</p>
 <h3 id="코드로-확인하기">코드로 확인하기</h3>
 <p>용수철 덫 실험을 그대로 돌린다. 덫의 용수철 상수를 1에서 4로 올리는 동안 일을 재고, 일의 평균과 지수 평균, 다 조인 순간의 위치 분산을 조이는 시간별로 비교한다. 이 덫에서는 랑주뱅 방정식의 한 걸음을 정확히 풀 수 있어서 그 식을 그대로 썼다.</p>
 <pre><code class="language-python">import numpy as np
@@ -709,6 +712,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -736,13 +740,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

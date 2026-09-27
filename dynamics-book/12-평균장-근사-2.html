@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -676,9 +679,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <p>경제학과 공학에서도 같은 생각이 나왔다. 2006년 프랑스의 라스리와 리옹, 캐나다의 황, 말라메, 케인스는 서로 따로, 참가자가 아주 많은 게임을 다루는 평균장 게임 이론을 내놓았다. 출퇴근길 운전자는 다른 운전자 하나하나가 아니라 도로 전체가 얼마나 막히는지를 보고 길을 고르고, 모두가 그렇게 고른 결과가 다시 막히는 정도를 정한다. 그래서 짐작한 막힘으로 각자의 선택을 구하고 그 선택으로 막힘을 다시 계산해, 둘이 맞는 상태를 답으로 삼는다. 자석, 원자, 도로 모두에서 상대가 너무 많으면 평균 하나를 상대하게 하고, 그 평균이 스스로를 다시 만들어 낼 때까지 되풀이한다.</p>
 </aside>
 <h3 id="ml에서-볼츠만-머신의-평균장-학습">ML에서: 볼츠만 머신의 평균장 학습</h3>
-<p>볼츠만 머신의 학습 규칙은 결합 <span class="sym" style="color:#b8860b">Jᵢⱼ</span>를 ⟨<span class="sym" style="color:#1b9e77">sᵢ</span><span class="sym" style="color:#1b9e77">sⱼ</span>⟩_데이터 − ⟨<span class="sym" style="color:#1b9e77">sᵢ</span><span class="sym" style="color:#1b9e77">sⱼ</span>⟩_모델에 비례해 바꾼다. 빼는 둘째 항, 곧 모델 쪽 평균을 구하는 음의 단계(negative phase)에는 모델의 샘플이 필요한데, 상전이 아래에서는 샘플링하는 마르코프 사슬가 한쪽 봉우리에 갇혀 모델 분포의 절반만 본다. 샘플링은 무척 느리기도 했다.</p>
+<p>볼츠만 머신의 학습 규칙은 결합 <span class="sym" style="color:#b8860b">Jᵢⱼ</span>를 ⟨<span class="sym" style="color:#1b9e77">sᵢ</span><span class="sym" style="color:#1b9e77">sⱼ</span>⟩_데이터 − ⟨<span class="sym" style="color:#1b9e77">sᵢ</span><span class="sym" style="color:#1b9e77">sⱼ</span>⟩_모델에 비례해 바꾼다. 빼는 둘째 항, 곧 모델 쪽 평균을 구하는 음의 단계(negative phase)에는 모델의 샘플이 필요한데, 상전이(조건이 한 값을 지날 때 계의 전형적인 상태가 갑자기 바뀌는 현상, phase transition)가 일어나는 온도 아래에서는 샘플링하는 마르코프 사슬이 한쪽 봉우리에 갇혀 모델 분포의 절반만 본다. 샘플링은 무척 느리기도 했다.</p>
 <p>1987년 텍사스 오스틴의 기업 연구소 MCC에 있던 카스텐 피터슨과 제임스 앤더슨은 이 항을 평균장으로 대신했다. 그들은 논문 요약에 「시간이 많이 드는 상관의 확률적 측정을 결정론적 평균장 방정식의 해로 대체한다」고 쓰고, XOR·인코더·선 대칭 문제에서 10~30배 빨라졌다고 보고했다. 자기 일관 방정식으로 <span class="sym" style="color:#dd6677">mᵢ</span>를 구하고 짝 평균마저 두 평균의 곱으로 한 번 더 근사해 ⟨<span class="sym" style="color:#1b9e77">sᵢ</span><span class="sym" style="color:#1b9e77">sⱼ</span>⟩_모델 ≈ <span class="sym" style="color:#dd6677">mᵢ</span><span class="sym" style="color:#dd6677">mⱼ</span>로 두면(논문의 표기로는 VᵢVⱼ) 샘플링이 필요 없고, 그들은 이 방정식이 본래 병렬적이어서 병렬 계산기에 곧바로 올릴 수 있다는 점도 강조했다.</p>
-<p>평균장은 샘플링하지 않으니 연쇄처럼 갇히지는 않지만, 봉우리가 둘인 모델에서 처음부터 한 봉우리를 골라 답한다는 점에서는 같은 절반만 본다. 게다가 <span class="sym" style="color:#dd6677">mᵢ</span><span class="sym" style="color:#dd6677">mⱼ</span>에는 두 뉴런이 평균에서 함께 벗어나는 몫, 곧 공분산이 들어 있지 않다.</p>
+<p>평균장은 샘플링하지 않으니 사슬처럼 갇히지는 않지만, 봉우리가 둘인 모델에서 처음부터 한 봉우리를 골라 답한다는 점에서는 같은 절반만 본다. 게다가 <span class="sym" style="color:#dd6677">mᵢ</span><span class="sym" style="color:#dd6677">mⱼ</span>에는 두 뉴런이 평균에서 함께 벗어나는 몫, 곧 공분산이 들어 있지 않다.</p>
 
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="12-평균장-근사.html">&larr; 곱 분포: 결합된 스핀 둘을 동전 둘로 흉내 내기</a><span class="page-count">2 / 8</span><a class="chapter-nav-next" href="12-평균장-근사-3.html">변분 추론: 인자를 하나씩 바꾸는 규칙 &rarr;</a></nav>
@@ -697,6 +700,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -724,13 +728,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

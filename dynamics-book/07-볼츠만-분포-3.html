@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -653,7 +656,7 @@ i &amp; \text{미시상태 번호}
 <p>온도의 양 끝도 이 식에서 바로 읽힌다. <span class="sym" style="color:#8c564b">T</span> → 0이면 <span class="sym" style="color:#8c564b">β</span> → ∞라서 에너지가 가장 낮은 상태, 곧 바닥 상태(ground state)를 뺀 모든 볼츠만 인자가 0으로 가고 계는 바닥 상태에만 있게 된다. <span class="sym" style="color:#8c564b">T</span> → ∞이면 <span class="sym" style="color:#8c564b">β</span> → 0이라서 모든 볼츠만 인자가 1이 되고, 모든 미시상태가 같은 확률을 갖는다. 볼츠만 분포는 바닥 상태 하나에 몰린 분포와 완전히 고른 분포 사이를 온도 하나로 잇는다.</p>
 <h3 id="ml에서-softmax는-볼츠만-분포다-움직이는-것-분포">ML에서: softmax는 볼츠만 분포다 (움직이는 것: 분포)</h3>
 <p>온도 <span class="sym" style="color:#8c564b">τ</span>인 softmax <span class="sym" style="color:#e377c2">pᵢ</span> = e^(<span class="sym" style="color:#ff7f0e">zᵢ</span>/<span class="sym" style="color:#8c564b">τ</span>)/Σⱼe^(<span class="sym" style="color:#ff7f0e">zⱼ</span>/<span class="sym" style="color:#8c564b">τ</span>)는 에너지를 <span class="sym" style="color:#ff7f0e">Eᵢ</span> = −<span class="sym" style="color:#ff7f0e">zᵢ</span>, 역온도를 <span class="sym" style="color:#8c564b">β</span> = 1/<span class="sym" style="color:#8c564b">τ</span>로 둔 볼츠만 분포다. 물리에서는 에너지가 낮을수록 선호되고 ML에서는 로짓이 높을수록 선호되므로 마이너스가 하나 붙는다. 두 언어를 나란히 놓으면 다음과 같다.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>볼츠만 분포</th>
@@ -694,10 +697,9 @@ i &amp; \text{미시상태 번호}
 <td>균등 분포</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>softmax라는 이름은 1989~1990년 브라이들이 분류 신경망의 출력을 확률로 읽는 논문에서 지수함수로 정규화하는 출력층에 붙인 것이다. 가장 큰 값 하나만 고르는 argmax를 부드럽게 만든 것이라는 뜻인데, 표의 마지막 두 줄이 말하듯 온도를 0으로 보내면 정말 argmax가 된다.</p>
 <div class="dialogue"><h3 id="문제-1-softmax를-볼츠만-분포로-번역하기">문제 1. softmax를 볼츠만 분포로 번역하기</h3>
-<p>선생님의 수업. 김민준(학부 3학년, ML 강의 몇 개 수강)과 이서연(수학과 3학년)이 문제를 풀고, 선생님이 틀린 곳을 짚는다.</p>
 <blockquote>
 <p>로짓 <span class="sym" style="color:#ff7f0e">z</span> = (2, 1, 0)을 온도 <span class="sym" style="color:#8c564b">τ</span> = 0.5인 softmax로 확률로 바꾼다. 이것을 볼츠만 분포로 읽을 때 각 후보의 에너지, 역온도 <span class="sym" style="color:#8c564b">β</span>, 분배함수 <span class="sym" style="color:#667733">Z</span>와 ln <span class="sym" style="color:#667733">Z</span>는 무엇인가? 또 온도를 에너지 안에 흡수해 처음부터 <span class="sym" style="color:#ff7f0e">E</span>′ = −<span class="sym" style="color:#ff7f0e">z</span>/<span class="sym" style="color:#8c564b">τ</span> 하나로 쓰면 무엇을 잃는가?</p>
 </blockquote>
@@ -710,7 +712,7 @@ i &amp; \text{미시상태 번호}
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>열원이요. <span class="sym" style="color:#ff7f0e">E</span>는 작은 계의 상태마다 정해진 값이고, <span class="sym" style="color:#8c564b">β</span>는 맞닿은 열원의 ln <span class="sym" style="color:#d62728">W</span>가 에너지에 따라 줄어드는 비율이었어요. …아, 둘은 출처가 달라요. 같은 계를 다른 열원에 붙이면 <span class="sym" style="color:#ff7f0e">E</span>는 그대로고 <span class="sym" style="color:#8c564b">β</span>만 바뀌어요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래서 나눠 두면 「같은 모델을 다른 조건에서 쓴다」는 말을 할 수 있어요. 학습이 끝난 분류기의 로짓은 그대로 두고 검증 데이터로 <span class="sym" style="color:#8c564b">τ</span> 하나만 맞춰 과신을 줄이는 온도 보정(temperature scaling, Guo 외 2017)이 그 예예요. 정답률은 그대로이고 확신의 정도만 바뀌죠. 흡수해 버리면 이런 조절을 하려고 모델을 다시 학습해야 해요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>언어 모델도 체크포인트는 그대로 두고 generate()의 temperature 인자만 바꾸잖아요. 에너지는 체크포인트에, 온도는 함수 인자에 들어 있었던 거네요.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S11"><img src="images/cast/S11.webp" alt="이서연 S11" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>온도가 로짓과 nat 사이의 환율이라는 얘기를 들었을 때는 그냥 눈금 같았는데, 환율을 정하는 게 바깥의 열원이라서 따로 떼어 둘 수 있는 거였어.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S11"><img src="images/cast/S11.webp" alt="이서연 S11" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>온도가 로짓과 nat(자연로그 ln으로 잰 값에 붙이는 단위) 사이의 환율이라는 얘기를 들었을 때는 그냥 눈금 같았는데, 환율을 정하는 게 바깥의 열원이라서 따로 떼어 둘 수 있는 거였어.</p></div></div>
 </div>
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="07-볼츠만-분포-2.html">&larr; 열원: 덩어리 하나마다 같은 비율로</a><span class="page-count">3 / 11</span><a class="chapter-nav-next" href="07-볼츠만-분포-4.html">온도: 에너지 차이를 kT로 잰다 &rarr;</a></nav>
@@ -729,6 +731,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -756,13 +759,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

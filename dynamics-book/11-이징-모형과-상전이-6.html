@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -635,7 +638,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <h3 id="두-봉우리-사이의-골짜기">두 봉우리 사이의 골짜기</h3>
 <p>실제로 관찰되는 계는 +0.86 근처나 −0.86 근처 가운데 한쪽에만 있다. 두 봉우리 사이의 0 근처는 스핀 1000개에서도 봉우리보다 약 e^115배 드물어서, 한쪽 봉우리에 들어간 계가 다른 쪽으로 건너가려면 그 드문 배치들을 지나야 하기 때문이다. 이렇게 규칙은 대칭인데 계가 그 대칭을 따르지 않는 상태에 머무는 것을 <strong>자발적 대칭 깨짐</strong> (규칙은 대칭인데 계가 한쪽을 골라 머무는 것, spontaneous symmetry breaking)이라 한다. 쇠붙이 자석을 퀴리 온도 위로 달구면 자화가 사라지고, 식히면 어느 방향으로든 다시 자화되는 것이 이 현상이다. 어느 방향이 될지는 식는 동안 걸려 있던 아주 작은 편향이나 우연이 정한다.</p>
 <h3 id="ml에서-샘플러가-한쪽-봉우리에-갇힌다">ML에서: 샘플러가 한쪽 봉우리에 갇힌다</h3>
-<p>에너지 기반 모델에서 샘플을 뽑을 때는 흔히 깁스 샘플링이나 메트로폴리스 방법 같은 마르코프 사슬를 쓰는데, 대칭이 깨지는 자리 아래에서는 이것이 막힌다. 앞의 스핀 100개에서 스핀 하나씩 뒤집기를 시도하는 메트로폴리스 샘플러를 돌리고, 스핀 수만큼 시도하는 것을 한 번의 훑기라 하자. 자화의 부호가 바뀐 횟수를 세면 βJ = 1.1에서는 2만 번의 훑기 동안 730번이지만 1.2에서는 182번으로 줄고, 1.5에서는 10만 번을 훑어도 한 번도 없다. 두 봉우리 사이의 골짜기가 봉우리보다 약 e^12배 드물어서, 연쇄가 한쪽 무리에 갇혀 다른 무리를 보지 못하는 것이다. 그 연쇄의 샘플로 평균을 내면 분포의 절반만 보고 평균을 내는 셈이 된다.</p>
+<p>에너지 기반 모델에서 샘플을 뽑을 때는 흔히 깁스 샘플링이나 메트로폴리스 방법 같은 마르코프 사슬(Markov chain, 지금 상태를 조금씩 바꿔 가며 샘플을 잇달아 뽑는 방법)을 쓰는데, 대칭이 깨지는 자리 아래에서는 이것이 막힌다. 앞의 스핀 100개에서 스핀 하나씩 뒤집기를 시도하는 메트로폴리스 샘플러를 돌리고, 스핀 수만큼 시도하는 것을 한 번의 훑기라 하자. 자화의 부호가 바뀐 횟수를 세면 βJ = 1.1에서는 2만 번의 훑기 동안 730번이지만 1.2에서는 182번으로 줄고, 1.5에서는 10만 번을 훑어도 한 번도 없다. 두 봉우리 사이의 골짜기가 봉우리보다 약 e^12배 드물어서, 사슬이 한쪽 무리에 갇혀 다른 무리를 보지 못하는 것이다. 그 사슬의 샘플로 평균을 내면 분포의 절반만 보고 평균을 내는 셈이 된다.</p>
 <div class="dialogue"><h3 id="문제-5-편향을-걸면">문제 5. 편향을 걸면</h3>
 <blockquote>
 <p>완전 연결 이징 모형의 βJ = 1.5에서 모든 스핀에 같은 편향 b를 건다. (가) βb = 0.001, 0.01일 때 N = 100, 1000, 10000의 ⟨m⟩을 구하라. (나) 스핀 하나당 점수를 H((1 + m)/2) + βJm²/2로 적으면, 큰 N에서 (1/N)ln Z는 m에 대해 (점수 + βbm)의 최댓값이다. 이것을 m의 함수로 되돌리면 원래 점수가 나오는가? (다) 되돌린 함수가 원래 점수와 다른 곳에서 계는 실제로 어떤 상태인가?</p>
@@ -650,6 +653,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>스핀들이 제각각인 상태는 점수가 0.6931이니까 아니고… 일부는 +0.86 무리, 나머지는 −0.86 무리로 나뉜 상태를 섞은 거예요. 두 무리의 점수가 같으니까 섞는 비율을 바꿔도 점수가 그대로고요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>격자 위의 진짜 자석에서는 이게 위로 자화된 구역과 아래로 자화된 구역이 나란히 있는 모습이에요. 끓는 물에서 물과 김이 섞여 있는 동안 온도가 그대로인 것과 같은 구조죠. 모든 쌍이 묶인 계에는 공간이 없어서 구역으로 나뉘지 못하고, 대신 m = 0 근처의 배치가 드물어질 뿐이에요. 스핀 100개에서 그 드문 정도가 e^12.2배였고요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M09"><img src="images/cast/M09.webp" alt="김민준 M09" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아까 제가 열용량 봉우리를 끓는 물이랑 같이 본 게 틀린 이유가 이거네요. 끓는 물은 물과 김, 두 모습을 섞는 쪽이었어요. 섞는 동안에는 열을 넣어도 온도가 안 올라가는 거고요.</p></div></div>
+<figure class="widget-embed" id="widget-ch11-w4"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">편향과 오목 껍질</span><a class="widget-open" href="widgets/ch11.html?v=48be8bf1#w4" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch11.html?w=w4&embed=1&v=48be8bf1" title="편향과 오목 껍질" loading="lazy"></iframe><noscript><img src="images/ch11/wid_w4.png" alt="위젯 4: 편향과 오목 껍질 (βJ = 1.3, N = 1000, βb = 0.002에서 ⟨m⟩ = 0.681, N → ∞의 m = 0.754, 곧은 선의 높이 0.7424와 양 끝 ±0.7521)"></noscript></figure>
 </div>
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="11-이징-모형과-상전이-5.html">&larr; 자화율: 크게 흔들리는 계는 크게 따라온다</a><span class="page-count">6 / 10</span><a class="chapter-nav-next" href="11-이징-모형과-상전이-7.html">홉필드 네트워크: 기억은 에너지의 골짜기다 &rarr;</a></nav>
@@ -668,6 +672,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -695,13 +700,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

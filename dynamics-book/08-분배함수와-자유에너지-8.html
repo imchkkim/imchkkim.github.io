@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -634,7 +637,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <p>VAE를 쓰다 보면 KL 항 앞에 계수 β를 붙인 변형을 만난다. Higgins 외(2017)의 β-VAE는 이 β를 1보다 크게 잡아 잠재변수가 더 잘 분리되도록 했다. 계수 하나를 바꿨을 뿐인데 인코더가 내놓는 q는 어떻게 달라질까? 그리고 그때 목적 함수의 최댓값은 여전히 로그우도의 하한일까?</p>
 <h3 id="kl-항에-붙은-계수">KL 항에 붙은 계수</h3>
 <p>ELBO의 KL 항은 사전분포 몫의 에너지 평균 ⟨−ln p(h)⟩_q에서 엔트로피 H(q)를 뺀 것이다. 그러니 KL 항 앞에 붙은 β는 엔트로피 항 앞에도 붙는다. 변분 원리에서 엔트로피 항 앞에 붙은 계수가 온도였고, 온도가 높을수록 분포가 고르게 퍼지고 낮을수록 에너지가 가장 낮은 상태 하나로 몰렸다. β도 같은 자리에 서 있으니 비슷한 역할을 하리라 짐작할 수 있다. 잠재변수가 네 개뿐인 아래 위젯에서 β를 움직이며 가장 좋은 q가 어디로 옮겨 가는지 보고, 정확한 계산은 문제 6에서 해 보자.</p>
-<figure class="widget-embed" id="widget-ch08-w3"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">β-VAE의 β</span><a class="widget-open" href="widgets/ch08.html#w3" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch08.html?w=w3&embed=1" title="β-VAE의 β" loading="lazy"></iframe><noscript><img src="images/ch08/wid_w3.png" alt="위젯 3: β-VAE의 β (잠재변수 네 개 예에서 β = 1이면 가장 좋은 q가 사후분포 (0.074, 0.222, 0.370, 0.333)이고 최댓값이 ln p(x) = −1.3093과 같다)"></noscript></figure>
+<figure class="widget-embed" id="widget-ch08-w3"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">β-VAE의 β</span><a class="widget-open" href="widgets/ch08.html?v=9af872c9#w3" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch08.html?w=w3&embed=1&v=9af872c9" title="β-VAE의 β" loading="lazy"></iframe><noscript><img src="images/ch08/wid_w3.png" alt="위젯 3: β-VAE의 β (잠재변수 네 개 예에서 β = 1이면 가장 좋은 q가 사후분포 (0.074, 0.222, 0.370, 0.333)이고 최댓값이 ln p(x) = −1.3093과 같다)"></noscript></figure>
 <div class="dialogue"><h3 id="문제-6-잠재변수-세-개짜리-elbo">문제 6. 잠재변수 세 개짜리 ELBO</h3>
 <blockquote>
 <p>잠재변수 h가 1, 2, 3 가운데 하나이고 사전분포는 p(h) = (0.5, 0.3, 0.2)이다. 관측값 x 하나에 대한 우도는 p(x | h) = (0.1, 0.4, 0.8)이다. (가) ln p(x)를 구하라. (나) q가 사전분포일 때, 사후분포일 때, h = 3에 몰린 분포 (0, 0, 1)일 때 각각 ELBO = ⟨ln p(x | h)⟩_q − D_KL(q‖p(h))와 ln p(x)와의 틈을 구하라. (다) β-VAE처럼 KL 항에 β를 곱한 목적 함수를 가장 크게 하는 q와 그 최댓값을 β = 0.5, 2에서 구하라.</p>
@@ -675,6 +678,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -702,13 +706,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

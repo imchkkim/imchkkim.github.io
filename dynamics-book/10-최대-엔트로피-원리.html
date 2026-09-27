@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -647,7 +650,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <p>이 물음은 미국의 물리학자 에드윈 제인스가 1962년 브랜다이스 대학의 여름학교 강의에서 던진 것이다. 주사위를 여러 번 던졌더니 평균 눈이 공정한 주사위의 3.5가 아니라 4.5였다고 할 때, 각 눈의 확률을 어떻게 매겨야 하는가? 이후 「브랜다이스 주사위 문제」라 불리게 된 이 질문에 그가 내놓은 답은 0.054, 0.079, 0.114, 0.165, 0.240, 0.347이었다. 이 답이 어디서 나오는지는 짐작하지 않고 세어서 확인할 수 있다.</p>
 <h3 id="후보들과-세어서-얻은-분포">후보들과 세어서 얻은 분포</h3>
 <p>평균 4.5를 지키는 분포는 얼마든지 있다. 몇 가지 후보를 적고, 각 후보가 얼마나 고르게 퍼져 있는지를 엔트로피(nat)로 재어 보자.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>후보</th>
@@ -702,10 +705,10 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <td>1.595</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>넷 모두 평균은 정확히 4.5다. 그런데 가와 나는 친구가 말하지 않은 것을 단정한다. 1, 2, 3, 6이 한 번도 나오지 않았다는 말은 들은 적이 없는데 확률을 0으로 적었기 때문이다. 다도 1과 2를 지웠다. 라는 모든 눈을 살려 두었지만, 확률이 눈에 대해 곧은 선으로 늘어난다는 가정은 어디서 왔는지 알 수 없다. 어느 후보도 평균 말고는 아무것도 가정하지 않았다고 말하기 어렵다.</p>
 <p>그래서 이번에는 짐작하지 말고 세어 보자. 주사위를 N번 던져 나올 수 있는 눈의 수열은 6^N가지이고, 평균 말고는 아무것도 모르므로 이 수열들 사이에 차별을 두지 않는다. 그중 평균이 정확히 4.5인 수열, 곧 눈의 합이 4.5N인 수열만 남기고, 남은 수열 가운데 첫 굴림이 1, 2, …, 6인 것이 각각 몇 개인지 센다. N = 2이면 합이 9인 수열은 (3, 6), (4, 5), (5, 4), (6, 3) 네 개뿐이므로 첫 굴림은 3~6이 4분의 1씩이고, 후보 다와 같다. N = 4이면 합이 18인 수열은 80개이고, 첫 굴림이 1~6인 것은 차례로 3, 6, 10, 15, 21, 25개다. 굴림 수를 늘려 가며 같은 비율을 계산하면 다음과 같다.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>N</th>
@@ -760,12 +763,12 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <td>1.6136</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <figure class="fig "><img src="images/ch10/a1_dice_count.png" alt="공정한 주사위를 네 번 던져 눈의 합이 18(평균 4.5)인 수열 80개를 첫 굴림의 눈으로 나눈 것. 첫 굴림이 16인 수열은 3, 6, 10, 15, 21, 25개다. 첫 굴림이 클수록 나머지 세 번이 채울 합이 작아지고, 그 합을 만드는 방법이 많아진다." loading="lazy"><figcaption>공정한 주사위를 네 번 던져 눈의 합이 18(평균 4.5)인 수열 80개를 첫 굴림의 눈으로 나눈 것. 첫 굴림이 16인 수열은 3, 6, 10, 15, 21, 25개다. 첫 굴림이 클수록 나머지 세 번이 채울 합이 작아지고, 그 합을 만드는 방법이 많아진다.</figcaption></figure>
 <p>N = 1000이면 평균이 정확히 4.5인 수열만 해도 10⁶⁹⁸개가 넘지만, 첫 굴림의 비율은 넷째 자리에서만 조금씩 움직일 뿐 한 분포에 자리를 잡는다. 제인스가 내놓은 답과 같은 분포다. 이 분포의 엔트로피 1.6136은 네 후보 어느 것보다 크고, 후보 라의 1.595보다도 크다. 세어서 얻은 분포는 어떤 모양일까? 후보 라처럼 눈에 대해 곧은 선으로 늘어날까?</p>
 <h3 id="이웃한-눈의-확률-비">이웃한 눈의 확률 비</h3>
 <p>세어서 얻은 비율에서 이웃한 두 눈의 확률 비, 곧 (눈 2의 확률)/(눈 1의 확률), (눈 3의 확률)/(눈 2의 확률), …을 차례로 계산해 보자.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>N</th>
@@ -802,7 +805,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <td>1.448</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>굴림 수가 늘어날수록 다섯 개의 비가 한 값 1.449로 모인다. 눈이 하나 커질 때마다 확률이 같은 배수로 늘어난다는 뜻이므로, 확률은 눈의 지수함수이고 그 로그는 눈에 대해 곧은 선이다. 1.449 = e^0.371이므로 한 번의 굴림에서 눈 k가 나올 확률은 e^(0.371k)에 비례하고, 여섯 값의 합이 1이 되도록 나누면 (0.0544, 0.0788, 0.1142, 0.1654, 0.2398, 0.3475)를 얻는다. 곧은 선으로 늘어나는 것은 확률 자체가 아니라 확률의 로그였다. 후보 라는 곧은 선을 잘못된 곳에 그은 셈이다.</p>
 <figure class="fig "><img src="images/ch10/a2_log_line.png" alt="평균 눈 4.5의 최대 엔트로피 분포(분홍)와 후보 라(회색). 왼쪽은 확률, 오른쪽은 확률의 로그다. 최대 엔트로피 분포는 눈이 1 커질 때마다 확률이 1.449배가 되어 로그가 기울기 0.371인 곧은 선이고, 확률이 곧은 선으로 늘어나는 후보 라는 로그가 휜다." loading="lazy"><figcaption>평균 눈 4.5의 최대 엔트로피 분포(분홍)와 후보 라(회색). 왼쪽은 확률, 오른쪽은 확률의 로그다. 최대 엔트로피 분포는 눈이 1 커질 때마다 확률이 1.449배가 되어 로그가 기울기 0.371인 곧은 선이고, 확률이 곧은 선으로 늘어나는 후보 라는 로그가 휜다.</figcaption></figure>
 <p>왜 지수함수가 나오는지는 센 방법을 다시 보면 알 수 있다. 첫 굴림이 f이면 나머지 N − 1번의 굴림이 합 4.5N − f를 채워야 하므로, 첫 굴림이 f인 수열의 수는 나머지 굴림이 그 합을 만드는 방법의 수와 같다. 나머지 굴림이 아주 많으면 첫 굴림의 눈이 1 늘 때 나머지 굴림이 채워야 할 합은 1 줄고, 그 방법의 수의 로그는 그 합이 1 줄 때마다 거의 같은 양씩 줄어든다. 로그가 같은 양씩 줄면 방법의 수는 같은 비율로 줄고, 그 비율이 이웃한 눈의 확률 비로 나타난다. N = 10에서 비가 흔들린 것은 나머지가 아홉 번뿐이라 첫 굴림 하나가 나머지 굴림이 채울 합을 눈에 띄게 바꾸었기 때문이다. 열원과 맞닿은 작은 계에서 볼츠만 인자가 나오는 것과 같은 계산이고, 여기서는 나머지 굴림들이 열원 노릇을 한다.</p>
@@ -826,6 +829,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -853,13 +857,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

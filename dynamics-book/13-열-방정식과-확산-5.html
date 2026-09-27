@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -631,7 +634,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="13-열-방정식과-확산.html">13장 — 열 방정식과 확산</a></p>
 <h2 id="그래프-라플라시안-그래프-위의-열-방정식">그래프 라플라시안: 그래프 위의 열 방정식</h2>
-<p>격자에서는 이웃 평균이 열 방정식이 되고, 촘촘한 무늬부터 지웠다. 그런데 이 장의 첫머리에서 GCN의 전파를 되풀이하자 가라테 클럽 회원들의 특징이 서로 닮아 갔다. 격자가 아닌 그래프 위에서도 같은 일이 일어나는 것일까?</p>
+<p>격자에서는 이웃 평균이 열 방정식이 되고, 촘촘한 무늬부터 지웠다. 그런데 이 장의 첫머리에서 가라테 클럽 그래프(회원 34명, 친구 관계 78개)에 GCN의 전파, 곧 자기 자신과 이웃들의 특징을 평균 내는 일을 되풀이하자 회원들의 특징이 서로 닮아 갔다. 격자가 아닌 그래프 위에서도 같은 일이 일어나는 것일까?</p>
 <h3 id="gcn의-전파-단계">GCN의 전파 단계</h3>
 <p>GCN(킵프·웰링 2017)의 한 층은 노드 특징에 전파 행렬 Â를 곱하고 가중치 행렬을 곱한 뒤 비선형 함수를 쓴다. 가중치와 비선형 함수를 떼어 내면 남는 전파 단계가 바로 이웃 평균이다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msup><mstyle mathcolor="#1b9e77"><mi>X</mi></mstyle><mrow><mo stretchy="false">(</mo><mi mathvariant="normal">ℓ</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mover accent="true"><mstyle mathcolor="#8c5200"><mi>A</mi></mstyle><mo>^</mo></mover><mtext> </mtext><msup><mstyle mathcolor="#1b9e77"><mi>X</mi></mstyle><mrow><mo stretchy="false">(</mo><mi mathvariant="normal">ℓ</mi><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><msup><mstyle mathcolor="#1b9e77"><mi>X</mi></mstyle><mrow><mo stretchy="false">(</mo><mi mathvariant="normal">ℓ</mi><mo stretchy="false">)</mo></mrow></msup><mo>−</mo><mo stretchy="false">(</mo><mi>I</mi><mo>−</mo><mover accent="true"><mstyle mathcolor="#8c5200"><mi>A</mi></mstyle><mo>^</mo></mover><mo stretchy="false">)</mo><mtext> </mtext><msup><mstyle mathcolor="#1b9e77"><mi>X</mi></mstyle><mrow><mo stretchy="false">(</mo><mi mathvariant="normal">ℓ</mi><mo stretchy="false">)</mo></mrow></msup><mo separator="true">,</mo><mspace width="2em"/><msub><mover accent="true"><mstyle mathcolor="#8c5200"><mi>A</mi></mstyle><mo>^</mo></mover><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mfrac><mrow><mo stretchy="false">(</mo><mstyle mathcolor="#6d45e6"><mi>A</mi></mstyle><mo>+</mo><mi>I</mi><msub><mo stretchy="false">)</mo><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><msqrt><mrow><mo stretchy="false">(</mo><msub><mstyle mathcolor="#1f77b4"><mi>deg</mi><mo>⁡</mo></mstyle><mi>i</mi></msub><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><msub><mstyle mathcolor="#1f77b4"><mi>deg</mi><mo>⁡</mo></mstyle><mi>j</mi></msub><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msqrt></mfrac></mrow><annotation encoding="application/x-tex">\textcolor{#1b9e77}{X}^{(\ell+1)} = \hat{\textcolor{#8c5200}{A}}\,\textcolor{#1b9e77}{X}^{(\ell)} = \textcolor{#1b9e77}{X}^{(\ell)} - (I - \hat{\textcolor{#8c5200}{A}})\,\textcolor{#1b9e77}{X}^{(\ell)}, \qquad \hat{\textcolor{#8c5200}{A}}_{ij} = \frac{(\textcolor{#6d45e6}{A} + I)_{ij}}{\sqrt{(\textcolor{#1f77b4}{\deg}_i + 1)(\textcolor{#1f77b4}{\deg}_j + 1)}}
@@ -653,8 +656,8 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 I - \hat{\textcolor{#8c5200}{A}} &amp; \text{그래프 라플라시안: 자기 값 − 이웃 평균 (격자의 −∇²에 해당)}
 \end{array}
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:6.2615em;vertical-align:-2.8808em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.3808em;"><span style="top:-5.4928em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0785em;color:#1b9e77;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.888em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">(</span><span class="mord mtight">ℓ</span><span class="mclose mtight">)</span></span></span></span></span></span></span></span></span></span></span><span style="top:-4.2928em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#6d45e6;">A</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">I</span></span></span><span style="top:-3.0928em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop"><span class="mop" style="color:#1f77b4;"><span style="color:#1f77b4;">d</span><span style="color:#1f77b4;">e</span><span style="margin-right:0.0139em;color:#1f77b4;">g</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2175em;"><span style="top:-2.4559em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2441em;"><span></span></span></span></span></span></span></span></span><span style="top:-1.786em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="color:#8c5200;">A</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1111em;"><span class="mord">^</span></span></span></span></span></span></span></span></span><span style="top:-0.4792em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0785em;">I</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="color:#8c5200;">A</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1111em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.8808em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.3808em;"><span style="top:-5.4928em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">ℓ</span><span class="mord text"><span class="mord hangul_fallback">층</span><span class="mord"> </span><span class="mord hangul_fallback">뒤의</span><span class="mord"> </span><span class="mord hangul_fallback">노드</span><span class="mord"> </span><span class="mord hangul_fallback">특징</span><span class="mord"> (</span><span class="mord hangul_fallback">행</span><span class="mord"> </span><span class="mord hangul_fallback">하나가</span><span class="mord"> </span><span class="mord hangul_fallback">노드</span><span class="mord"> </span><span class="mord hangul_fallback">하나</span><span class="mord">)</span></span></span></span><span style="top:-4.2928em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">인접</span><span class="mord"> </span><span class="mord hangul_fallback">행렬</span><span class="mord"> (</span><span class="mord hangul_fallback">이웃이면</span><span class="mord"> 1), </span><span class="mord hangul_fallback">단위</span><span class="mord"> </span><span class="mord hangul_fallback">행렬</span><span class="mord"> (</span><span class="mord hangul_fallback">자기</span><span class="mord"> </span><span class="mord hangul_fallback">연결</span><span class="mord">)</span></span></span></span><span style="top:-3.0928em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">노드</span><span class="mord"> i</span><span class="mord hangul_fallback">의</span><span class="mord"> </span><span class="mord hangul_fallback">이웃</span><span class="mord"> </span><span class="mord hangul_fallback">수</span></span></span></span><span style="top:-1.786em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">GCN</span><span class="mord hangul_fallback">의</span><span class="mord"> </span><span class="mord hangul_fallback">전파</span><span class="mord"> </span><span class="mord hangul_fallback">행렬</span><span class="mord">: </span><span class="mord hangul_fallback">자기</span><span class="mord"> </span><span class="mord hangul_fallback">자신과</span><span class="mord"> </span><span class="mord hangul_fallback">이웃들을</span><span class="mord"> </span><span class="mord hangul_fallback">이웃</span><span class="mord"> </span><span class="mord hangul_fallback">수로</span><span class="mord"> </span><span class="mord hangul_fallback">나눠</span><span class="mord"> </span><span class="mord hangul_fallback">낸</span><span class="mord"> </span><span class="mord hangul_fallback">평균</span></span></span></span><span style="top:-0.4792em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">그래프</span><span class="mord"> </span><span class="mord hangul_fallback">라플라시안</span><span class="mord">: </span><span class="mord hangul_fallback">자기</span><span class="mord"> </span><span class="mord hangul_fallback">값</span><span class="mord"> − </span><span class="mord hangul_fallback">이웃</span><span class="mord"> </span><span class="mord hangul_fallback">평균</span><span class="mord"> (</span><span class="mord hangul_fallback">격자의</span><span class="mord"> −∇²</span><span class="mord hangul_fallback">에</span><span class="mord"> </span><span class="mord hangul_fallback">해당</span><span class="mord">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.8808em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
-<p>I − <span class="sym" style="color:#8c5200">Â</span>는 자기 값과 이웃 평균의 차이를 재는 행렬, 곧 그래프 위의 라플라시안이므로 한 층은 그래프 위에서 열 방정식을 한 걸음 가는 것이다. 층을 쌓으면 <span class="sym" style="color:#8c5200">Â</span>의 고윳값 λ에 해당하는 무늬가 λ^ℓ로 줄고, 고윳값이 1인 무늬 하나만 남는다. 그 무늬는 노드마다 √(이웃 수 + 1)에 비례하는 벡터라서, 깊은 층의 특징은 모든 노드가 같은 방향을 향하고 길이만 이웃 수에 따라 다르다. 코사인 유사도가 1로 가는 까닭이다. 가라테 클럽 그래프에서 두 번째로 큰 고윳값은 0.896이어서, 32층이면 그 무늬도 0.896의 32제곱, 약 0.03배로 줄어든다.</p>
-<figure class="widget-embed" id="widget-ch13-w4"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">GCN의 과평활화</span><a class="widget-open" href="widgets/ch13.html#w4" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch13.html?w=w4&embed=1" title="GCN의 과평활화" loading="lazy"></iframe><noscript><img src="images/ch13/wid_w4.png" alt="위젯 4: GCN의 과평활화 (자기 연결이 있는 전파만 32층 되풀이하면 코사인 유사도 평균 0.9992, 두 번째로 큰 고윳값 0.896의 32제곱 0.030, 가장 작은 고윳값 −0.420)"></noscript></figure>
+<p>I − <span class="sym" style="color:#8c5200">Â</span>는 자기 값과 이웃 평균의 차이를 재는 행렬이다. 이것을 <strong>그래프 라플라시안</strong> (그래프 위에서 자기 값과 이웃 평균의 차이를 재는 행렬, graph Laplacian)이라 한다. 그러니 한 층은 그래프 위에서 열 방정식을 한 걸음 가는 것이다. <span class="sym" style="color:#8c5200">Â</span>를 곱해도 모양은 그대로이고 크기만 몇 배가 되는 무늬가 있는데, 그 배율을 고윳값(eigenvalue)이라 한다. 층을 쌓으면 <span class="sym" style="color:#8c5200">Â</span>의 고윳값 λ에 해당하는 무늬가 λ^ℓ로 줄고, 고윳값이 1인 무늬 하나만 남는다. 그 무늬는 노드마다 √(이웃 수 + 1)에 비례하는 벡터라서, 깊은 층의 특징은 모든 노드가 같은 방향을 향하고 길이만 이웃 수에 따라 다르다. 코사인 유사도가 1로 가는 까닭이다. 가라테 클럽 그래프에서 두 번째로 큰 고윳값은 0.896이어서, 32층이면 그 무늬도 0.896의 32제곱, 약 0.03배로 줄어든다.</p>
+<figure class="widget-embed" id="widget-ch13-w4"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">GCN의 과평활화</span><a class="widget-open" href="widgets/ch13.html?v=70f641fa#w4" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch13.html?w=w4&embed=1&v=70f641fa" title="GCN의 과평활화" loading="lazy"></iframe><noscript><img src="images/ch13/wid_w4.png" alt="위젯 4: GCN의 과평활화 (자기 연결이 있는 전파만 32층 되풀이하면 코사인 유사도 평균 0.9992, 두 번째로 큰 고윳값 0.896의 32제곱 0.030, 가장 작은 고윳값 −0.420)"></noscript></figure>
 <h3 id="코드-gcn의-과평활화">코드: GCN의 과평활화</h3>
 <p>가라테 클럽 그래프에서 가중치와 비선형 함수 없이 GCN의 전파만 되풀이하고, 매 층 처음 특징을 되먹이는 경우와 비교한다. 그래프는 networkx에 들어 있는 것을 쓴다.</p>
 <pre><code class="language-python">import numpy as np, networkx as nx
@@ -693,7 +696,7 @@ print(f&quot;고윳값 1의 벡터가 √(이웃 수 + 1)에 비례하는가: {n
 <p>전파만 하면 32층에서 코사인 유사도 평균이 0.999가 되고, 살아남는 무늬는 √(이웃 수 + 1)에 비례하는 고윳값 1의 벡터다. 자기 연결은 가장 작은 고윳값을 −0.715에서 −0.420으로 끌어올린다. 처음 특징을 10% 되먹이면 유사도가 0.509에서 멈춘다.</p>
 <h3 id="ml에서-과평활화와-그-처방">ML에서: 과평활화와 그 처방</h3>
 <p>리와 동료들이 쓴 「라플라시안 평활화」라는 말을, 이 장을 마친 독자는 「GCN 한 층은 그래프 위 열 방정식의 한 걸음이다. 층을 쌓는 것은 시간을 흘려 보내는 것이고, 시간이 흐르면 모든 무늬가 줄어 고윳값 1인 무늬 하나만 남는다」로 읽게 된다.</p>
-<p><span class="sym" style="color:#6d45e6">A</span> + I의 자기 연결은 격자의 게으른 평균과 같은 역할을 한다. 자기 연결이 없으면 가라테 클럽 그래프의 가장 작은 고윳값이 −0.715라서 층을 지날 때마다 부호를 바꾸며 천천히 줄어드는 무늬가 생기는데, 자기 연결을 넣으면 가장 작은 고윳값이 −0.420으로 올라간다. 우와 동료들(2019)은 가중치 사이의 비선형 함수를 모두 뺀 GCN이 「고정된 저역 통과 필터 뒤에 선형 분류기를 붙인 것」에 해당함을 보였는데, 촘촘한 무늬부터 지우고 완만한 무늬를 남기는 저역 통과 필터는 열 방정식의 다른 이름이다. 과평활화를 막는 방법들은 대개 열 방정식에 무언가를 더한다. APPNP(가스타이거 외 2019)처럼 매 층 처음 특징을 일정 비율 되먹이면 노드 특징이 끝까지 평평해지지 않고 서로 다른 채로 머문다.</p>
+<p><span class="sym" style="color:#6d45e6">A</span> + I의 자기 연결은 격자의 게으른 평균과 같은 역할을 한다. 자기 연결이 없으면 가라테 클럽 그래프의 가장 작은 고윳값이 −0.715라서 층을 지날 때마다 부호를 바꾸며 천천히 줄어드는 무늬가 생기는데, 자기 연결을 넣으면 가장 작은 고윳값이 −0.420으로 올라간다. 우와 동료들(2019)은 가중치 사이의 비선형 함수를 모두 뺀 GCN이 「고정된 저역 통과 필터 뒤에 선형 분류기를 붙인 것」에 해당함을 보였는데, 촘촘한 무늬부터 지우고 완만한 무늬를 남기는 저역 통과 필터는 열 방정식의 다른 이름이다. 과평활화를 막는 방법들은 대개 열 방정식에 무언가를 더한다. APPNP(approximate personalized propagation of neural predictions, 가스타이거 외 2019)처럼 매 층 처음 특징을 일정 비율 되먹이면 노드 특징이 끝까지 평평해지지 않고 서로 다른 채로 머문다.</p>
 <div class="dialogue"><h3 id="문제-3-친구-넷의-여행-예산">문제 3. 친구 넷의 여행 예산</h3>
 <blockquote>
 <p>친구 넷 가, 나, 다, 라가 한 줄로 친하다(가–나, 나–다, 다–라). 여행 예산으로 가, 나, 다는 10만 원, 라는 50만 원을 생각한다. 매일 저녁 모두가 동시에 자기와 친한 친구들의 예산 평균으로 생각을 바꾼다(가는 가·나의 평균, 나는 가·나·다의 평균). (가) 예산은 어디로 모이고, 얼마나 빨리 모이는가? (나) 모두가 매일 자기 처음 생각을 10% 섞으면(0.9 × 평균 + 0.1 × 처음 생각) 어떻게 되는가?</p>
@@ -747,6 +750,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -774,13 +778,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

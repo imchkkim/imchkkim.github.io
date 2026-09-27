@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -633,11 +636,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <h2 id="불안정한-문제-거꾸로-가는-열-방정식">불안정한 문제: 거꾸로 가는 열 방정식</h2>
 <p>앞으로 가는 동안 무늬마다 e^(−Dk²t)로 줄어든다면, 나중 모양의 무늬마다 e^(+Dk²t)를 곱해 처음 모양을 되찾을 수 있지 않을까?</p>
 <h3 id="거꾸로-가면-자라는-무늬">거꾸로 가면 자라는 무늬</h3>
-<p>시간을 거꾸로 돌리면 이 그림이 뒤집힌다. 거꾸로 가는 열 방정식에서 무늬는 e^(+Dk²t)로 자라고, 가장 빨리 사라졌던 촘촘한 무늬가 가장 빨리 커진다. D = 1/2, t = 8이면 파수 1, 2, 3, 5인 무늬가 각각 55배, 8.9 × 10⁶배, 4.3 × 10¹⁵배, 2.7 × 10⁴³배로 커진다. 수학적으로는 나중 모양이 처음 모양을 하나로 정하지만, 앞으로 가는 동안 파수 3인 무늬는 e^(−36) ≈ 2.3 × 10⁻¹⁶배로 줄어 배정밀도 부동소수점의 반올림 오차보다 작아진다. 그 뒤로 이 무늬의 기록은 반올림 오차에 묻히고, 거꾸로 돌리면 그 오차가 10¹⁵배 넘게 부풀어 답을 덮는다. 격자를 촘촘히 할수록 더 큰 파수가 들어오므로 오히려 더 빨리 망가진다. 이처럼 자료의 작은 오차가 답에서 한없이 커지는 문제를 <strong>불안정한 문제</strong> (자료를 조금만 바꿔도 답이 크게 바뀌는 문제, ill-posed problem)라 하며, 거꾸로 가는 열 방정식이 그 대표적인 예다.</p>
+<p>앞으로 가는 동안에는 촘촘한 무늬일수록 빨리 사라졌는데, 시간을 거꾸로 돌리면 이 순서가 뒤집힌다. 거꾸로 가는 열 방정식에서 무늬는 e^(+Dk²t)로 자라고, 가장 빨리 사라졌던 촘촘한 무늬가 가장 빨리 커진다. D = 1/2, t = 8이면 파수 1, 2, 3, 5인 무늬가 각각 55배, 8.9 × 10⁶배, 4.3 × 10¹⁵배, 2.7 × 10⁴³배로 커진다. 수학적으로는 나중 모양이 처음 모양을 하나로 정하지만, 앞으로 가는 동안 파수 3인 무늬는 e^(−36) ≈ 2.3 × 10⁻¹⁶배로 줄어 배정밀도 부동소수점의 반올림 오차보다 작아진다. 그 뒤로 이 무늬의 기록은 반올림 오차에 묻히고, 거꾸로 돌리면 그 오차가 10¹⁵배 넘게 부풀어 답을 덮는다. 격자를 촘촘히 할수록 더 큰 파수가 들어오므로 오히려 더 빨리 망가진다. 이처럼 자료의 작은 오차가 답에서 한없이 커지는 문제를 <strong>불안정한 문제</strong> (자료를 조금만 바꿔도 답이 크게 바뀌는 문제, ill-posed problem)라 하며, 거꾸로 가는 열 방정식이 그 대표적인 예다.</p>
 <aside class="sidenote"><p class="sidenote-title">보법 노트 · 불안정한 문제는 가정을 하나 더해 길들인다</p>
 <p>결과에서 원인을 거꾸로 찾는 문제는 흔히 불안정하다. 이때는 자료만으로 답을 정하려 하지 않고, 답이 어떠해야 하는지에 대한 가정을 하나 더해 고를 수 있는 답을 좁힌다. 방금 본 거꾸로 가는 열 방정식이 그런 가정을 기다리는 대표적인 문제다.</p>
 <p>이런 문제가 이름을 얻은 것은 20세기 초다. 1902년 프랑스의 수학자 아다마르는 편미분 방정식 논문에서, 물리적 뜻이 있는 문제라면 답이 있고 하나뿐이어야 한다고 보았다. 여기에 자료를 조금 바꾸면 답도 조금만 바뀌어야 한다는 조건이 더해져, 이 세 조건을 갖춘 문제를 잘 놓인 문제(well-posed problem)라 부르게 되었다. 아다마르는 이 조건을 어기는 문제는 물리적으로 뜻이 없다고 여겼다고 전해진다. 그러나 지표에서 잰 중력이나 전기 저항으로 땅속 구조를 추정하는 문제, 흐린 사진이나 의료 영상을 되살리는 문제처럼 실제로 풀어야 하는 문제 가운데 많은 수가 바로 그런 문제였다.</p>
-<p>1963년 소련의 수학자 티호노프는 이런 문제를 다루는 방법을 내놓았다. 자료와 딱 맞는 답 대신, 자료와 어긋난 정도에 답 자체의 크기를 조금 더한 값이 가장 작은 답을 고르는 것이다. 자료가 거의 정하지 못하는 부분은 억지로 키우지 말고 작게 두라는 가정이다. 거꾸로 가는 열 방정식에 쓰면 굵은 무늬는 거의 그대로 되살리고, 반올림 오차에 묻힌 촘촘한 무늬는 수십 자릿수로 부풀리는 대신 0 가까이에 둔다. ML에서 손실에 가중치의 제곱합을 조금 더하는 L2 정칙화, 곧 가중치 감쇠도 같은 식이다. 땅속 구조, 흐린 사진, 신경망의 가중치 모두 자료만으로는 흔들리는 답을 가정 하나로 붙들어 맨다.</p>
+<p>1963년 소련의 수학자 티호노프는 이런 문제를 다루는 방법을 내놓았다. 자료와 딱 맞는 답 대신, 자료와 어긋난 정도에 답 자체의 크기를 조금 더한 값이 가장 작은 답을 고르는 것이다. 자료가 거의 정하지 못하는 부분은 억지로 키우지 말고 작게 두라는 가정이다. 거꾸로 가는 열 방정식에 쓰면 굵은 무늬는 거의 그대로 되살리고, 반올림 오차에 묻힌 촘촘한 무늬는 수십 자릿수로 부풀리는 대신 0 가까이에 둔다. ML에서 손실에 가중치의 제곱합을 조금 더하는 L2 규제(regularization), 곧 가중치 감쇠도 같은 식이다. 땅속 구조, 흐린 사진, 신경망의 가중치 모두 자료만으로는 흔들리는 답을 가정 하나로 붙들어 맨다.</p>
 </aside>
 <h3 id="ml에서-열-퍼짐을-거꾸로-돌리는-생성-모델">ML에서: 열 퍼짐을 거꾸로 돌리는 생성 모델</h3>
 <p>리사넨, 헤이노넨, 솔린(2023)은 열 퍼짐을 되돌리는(inverse heat dissipation) 생성 모델에서 열 방정식을 다른 공간에서 돌렸다. 데이터 공간에서 분포를 퍼뜨리는 대신, 이미지 한 장을 2차원 평면 위의 온도 분포로 보고 픽셀 평면에서 열 방정식을 돌린 것이다. 앞으로 가면 이미지가 점점 흐려져 결국 평균 색 하나만 남고, 모델은 이것을 거꾸로 돌리는 법을 배워 이미지를 만든다. 논문 요약은 열 방정식을 「이미지의 2차원 평면에서 돌리면 촘촘한 규모의 정보를 국소적으로 지우는 편미분 방정식」이라 소개한다. 거꾸로 가는 열 방정식은 불안정하므로, 그들은 앞으로 가는 과정에 작은 잡음을 더하고 되돌리는 과정을 확률적으로 만들었다. 이 장을 마친 독자라면 이 모델이 굵은 윤곽과 색부터 그리고 가는 무늬를 나중에 채우는 이유를 푸리에 모드가 줄어드는 순서에서 곧바로 읽을 수 있다. 가장 늦게 사라진 무늬가 가장 먼저 돌아오는 것이다. 같은 논문 요약은 보통의 확산 모델에도 「굵은 것에서 가는 것으로」 가는 성향이 숨어 있음을 스펙트럼 분석으로 보였다. 자연 이미지는 촘촘한 무늬일수록 크기가 작아서, 모든 파수에 같은 크기로 더해지는 잡음이 촘촘한 무늬부터 덮기 때문이다.</p>
@@ -674,6 +677,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -701,13 +705,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

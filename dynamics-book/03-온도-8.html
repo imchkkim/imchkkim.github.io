@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -631,7 +634,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="03-온도.html">3장 — 온도</a></p>
 <h2 id="softmax의-온도-로짓을-nat으로-바꾸는-환율">softmax의 온도: 로짓을 nat으로 바꾸는 환율</h2>
-<p>이 장을 연 물음으로 돌아가자. LLM에서 답을 뽑을 때 조절하는 temperature는 물리의 온도와 같은 역할을 하고 있을까? 물리에서 kT는 &quot;에너지 몇 J(줄)이 1 nat인가&quot;를 정하는 환율이었다.</p>
+<p>이 장을 연 물음으로 돌아가자. LLM에서 답을 뽑을 때 조절하는 temperature는 물리의 온도와 같은 역할을 하고 있을까? 물리에서 kT는 &quot;에너지 몇 J(줄)이 1 nat인가&quot;를 정하는 환율이었다. nat은 자연로그 ln으로 잰 값에 붙이는 단위로, 경우의 수가 e배가 되면 ln W가 1 nat 늘어난다.</p>
 <h3 id="확률-비의-로그">확률 비의 로그</h3>
 <p>먼저 가장 익숙한 softmax부터 보자. 온도 τ가 있는 softmax pᵢ ∝ e^(zᵢ/τ)에서 두 후보의 확률 비를 로그로 쓰면 다음과 같다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>ln</mi><mo>⁡</mo><mfrac><mstyle mathcolor="#e377c2"><msub><mi>p</mi><mi>i</mi></msub></mstyle><mstyle mathcolor="#e377c2"><msub><mi>p</mi><mi>j</mi></msub></mstyle></mfrac><mo>=</mo><mfrac><mrow><mstyle mathcolor="#ff7f0e"><msub><mi>z</mi><mi>i</mi></msub></mstyle><mo>−</mo><mstyle mathcolor="#ff7f0e"><msub><mi>z</mi><mi>j</mi></msub></mstyle></mrow><mstyle mathcolor="#8c564b"><mi>τ</mi></mstyle></mfrac></mrow><annotation encoding="application/x-tex">\ln \frac{\textcolor{#e377c2}{p_i}}{\textcolor{#e377c2}{p_j}} = \frac{\textcolor{#ff7f0e}{z_i} - \textcolor{#ff7f0e}{z_j}}{\textcolor{#8c564b}{\tau}}
@@ -646,10 +649,10 @@ i, j &amp; \text{비교하는 두 후보의 번호}
 \end{array}
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:7.2em;vertical-align:-3.35em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.85em;"><span style="top:-6.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#e377c2;"><span class="mord mathnormal" style="color:#e377c2;">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#e377c2;"><span class="mord mathnormal mtight" style="color:#e377c2;">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#e377c2;"><span class="mord mathnormal" style="color:#e377c2;">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#e377c2;"><span class="mord mathnormal mtight" style="margin-right:0.0572em;color:#e377c2;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#ff7f0e;"><span class="mord mathnormal" style="margin-right:0.044em;color:#ff7f0e;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#ff7f0e;"><span class="mord mathnormal mtight" style="color:#ff7f0e;">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#ff7f0e;"><span class="mord mathnormal" style="margin-right:0.044em;color:#ff7f0e;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#ff7f0e;"><span class="mord mathnormal mtight" style="margin-right:0.0572em;color:#ff7f0e;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1132em;color:#8c564b;">τ</span></span></span><span style="top:-0.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">i</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.35em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.85em;"><span style="top:-6.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">후보</span><span class="mord"> i</span><span class="mord hangul_fallback">가</span><span class="mord"> </span><span class="mord hangul_fallback">뽑힐</span><span class="mord"> </span><span class="mord hangul_fallback">확률</span></span></span></span><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">후보</span><span class="mord"> j</span><span class="mord hangul_fallback">가</span><span class="mord"> </span><span class="mord hangul_fallback">뽑힐</span><span class="mord"> </span><span class="mord hangul_fallback">확률</span></span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">후보</span><span class="mord"> i</span><span class="mord hangul_fallback">의</span><span class="mord"> </span><span class="mord hangul_fallback">로짓</span></span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">후보</span><span class="mord"> j</span><span class="mord hangul_fallback">의</span><span class="mord"> </span><span class="mord hangul_fallback">로짓</span></span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">softmax</span><span class="mord hangul_fallback">의</span><span class="mord"> </span><span class="mord hangul_fallback">온도</span></span></span></span><span style="top:-0.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">비교하는</span><span class="mord"> </span><span class="mord hangul_fallback">두</span><span class="mord"> </span><span class="mord hangul_fallback">후보의</span><span class="mord"> </span><span class="mord hangul_fallback">번호</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.35em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
 <p>이 식을 읽어 보면, 로짓 차이가 <span class="sym" style="color:#8c564b">τ</span>만큼 벌어질 때 확률 비는 1 nat, 곧 e배가 된다. 다시 말해 <span class="sym" style="color:#8c564b">τ</span>는 &quot;로짓 몇 단위가 1 nat인가&quot;를 정하는 환율이다. 물리에서 <span class="sym" style="color:#7f7f7f">k</span><span class="sym" style="color:#8c564b">T</span>가 &quot;에너지 몇 J(줄)이 1 nat인가&quot;를 정하는 것과 같은 자리에 있는 셈이다.</p>
-<figure class="widget-embed" id="widget-ch03-w3"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">softmax의 온도</span><a class="widget-open" href="widgets/ch03.html#w3" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch03.html?w=w3&embed=1" title="softmax의 온도" loading="lazy"></iframe><noscript><img src="images/ch03/w3.png" alt="위젯 3 정지 화면. 로짓 (2, 1, 0)을 τ = 1로 softmax하면 확률은 (0.665, 0.245, 0.090), 엔트로피는 0.83 nat이고, 첫 두 후보의 확률 비는 정확히 1 nat이다."></noscript></figure>
+<figure class="widget-embed" id="widget-ch03-w3"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">softmax의 온도</span><a class="widget-open" href="widgets/ch03.html?v=b58306a3#w3" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch03.html?w=w3&embed=1&v=b58306a3" title="softmax의 온도" loading="lazy"></iframe><noscript><img src="images/ch03/w3.png" alt="위젯 3 정지 화면. 로짓 (2, 1, 0)을 τ = 1로 softmax하면 확률은 (0.665, 0.245, 0.090), 엔트로피는 0.83 nat이고, 첫 두 후보의 확률 비는 정확히 1 nat이다."></noscript></figure>
 <h3 id="숫자로-보기">숫자로 보기</h3>
 <p>실제 숫자로 확인해 보자. 로짓 <span class="sym" style="color:#ff7f0e">z</span> = (2, 1, 0)에 대해 온도를 바꿔 가며 계산하면 다음과 같다.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th><span class="sym" style="color:#8c564b">τ</span></th>
@@ -690,7 +693,7 @@ i, j &amp; \text{비교하는 두 후보의 번호}
 <td>3</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>표에서 보듯 온도를 올리면 같은 로짓 차이가 더 적은 nat으로 환산되므로 분포가 퍼지고, 반대로 온도를 낮추면 확률이 가장 큰 로짓에 모인다. LLM에서 샘플링할 때 조절하는 temperature가 바로 이 <span class="sym" style="color:#8c564b">τ</span>다.</p>
 <h3 id="ml에서-지식-증류">ML에서: 지식 증류</h3>
 <p>높은 온도가 쓸모 있는 예로 <strong>지식 증류</strong> (knowledge distillation, Hinton 외 2015)가 있다. 지식 증류에서는 큰 모델의 출력을 높은 온도로 펼쳐서 작은 모델에게 가르친다. 왜 굳이 온도를 높일까? <span class="sym" style="color:#8c564b">τ</span> = 1에서는 오답들의 확률이 거의 0이라서 그 사이의 순서가 잘 보이지 않는다. 이를테면 개 사진이 고양이와는 조금 닮았고 트럭과는 닮지 않았다는 정보가 그렇다. 온도를 높이면 이렇게 묻혀 있던 &quot;오답 사이의 순서&quot;가 드러난다.</p>
@@ -740,6 +743,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -767,13 +771,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

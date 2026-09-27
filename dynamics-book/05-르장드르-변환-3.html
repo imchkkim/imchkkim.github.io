@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -635,7 +638,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <h3 id="이중-우물">이중 우물</h3>
 <p>먼저 물리 교재의 계산법이 막힌다. s = 0이면 f′(x) = 0인 점이 x = −1, 0, 1 세 개라서 「기울기가 s인 점」이 하나로 정해지지 않기 때문이다. 하지만 sup으로 쓴 정의는 여전히 쓸 수 있고, 세 후보 가운데 sx − f(x)가 가장 큰 것을 고르면 된다. 이렇게 수치로 구한 f*는 f*(0) = 0, f*(±1) ≈ 1.056, f*(±2) ≈ 2.207로 매끄러운 볼록 함수다. 사실 f가 어떤 함수든 f*는 항상 볼록이다. s의 직선들 sx − f(x)에서 가장 높은 것을 이은 함수이기 때문이다.</p>
 <p>문제는 한 번 더 변환해서 돌아올 때 생긴다. f*의 켤레 f**를 격자 위에서 계산하면 다음과 같다.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>x</th>
@@ -665,7 +668,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 <td>1.5625</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>골짜기 밖에서는 원래 함수가 그대로 돌아오지만, 두 골짜기 사이 −1 ≤ x ≤ 1에서는 불룩 솟은 부분이 사라지고 높이 0의 평평한 바닥이 남는다. 이유는 접선 그림으로 보면 분명하다. 곡선 아래에서 자를 밀어 올리면 자는 두 골짜기 바닥에 먼저 걸리므로, 그 사이의 불룩 솟은 곳에는 어떤 기울기의 자도 닿지 못한다. 자의 위치만 기록한 f*에는 그 부분의 정보가 애초에 들어 있지 않은 것이다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#bb5522"><msup><mi>f</mi><mrow><mo>∗</mo><mo>∗</mo></mrow></msup></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#1b9e77"><mi>x</mi></mstyle><mo stretchy="false">)</mo><mo>≤</mo><mstyle mathcolor="#4363d8"><mi>f</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#1b9e77"><mi>x</mi></mstyle><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\textcolor{#bb5522}{f^{**}}(\textcolor{#1b9e77}{x}) \le \textcolor{#4363d8}{f}(\textcolor{#1b9e77}{x})
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord" style="color:#bb5522;"><span class="mord mathnormal" style="margin-right:0.1076em;color:#bb5522;">f</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7387em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#bb5522;"><span class="mord mtight" style="color:#bb5522;"><span class="mord mtight" style="color:#bb5522;">∗∗</span></span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="color:#1b9e77;">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1076em;color:#4363d8;">f</span><span class="mopen">(</span><span class="mord mathnormal" style="color:#1b9e77;">x</span><span class="mclose">)</span></span></span></span></span></div>
@@ -702,12 +705,12 @@ for xv in [0.0, 0.5, 1.5]:
 # 1.5 1.5625 1.5625
 </code></pre>
 <p>두 번 변환한 결과가 골짜기 밖(<span class="sym" style="color:#1b9e77">x</span> = 1.5)에서는 원래 값과 같고, 두 골짜기 사이(<span class="sym" style="color:#1b9e77">x</span> = 0, 0.5)에서는 0으로 내려가 있다. 격자 계산은 모든 <span class="sym" style="color:#1b9e77">x</span>를 빠짐없이 훑으므로 <span class="sym" style="color:#4363d8">f</span>′(<span class="sym" style="color:#1b9e77">x</span>) = <span class="sym" style="color:#dd6677">s</span>의 해가 여러 개여도 알아서 가장 큰 것을 고른다는 점도 눈여겨볼 만하다. 한 가지 주의할 점은 격자의 범위다. <span class="sym" style="color:#bb5522">f*</span>가 +∞인 기울기에서도 격자 계산은 유한한 값을 내놓는데, 이 값은 격자를 넓힐수록 계속 커진다. 값이 격자 범위에 따라 변하는지 확인하는 것이 「사실은 무한대」를 가려내는 가장 쉬운 방법이다.</p>
-<figure class="widget-embed" id="widget-ch05-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 이중 우물을 두 번 변환하기</span><a class="widget-open" href="widgets/ch05.html#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch05.html?w=w2&embed=1" title="위젯 2: 이중 우물을 두 번 변환하기" loading="lazy"></iframe><noscript><img src="images/ch05/img_w2.png" alt="위젯 2 정지 화면: 이중 우물 (x² − 1)² 아래에서 기울기 0.5인 자는 오른쪽 골짜기 근처(x ≈ 1.04)에 닿고, x = 0의 봉우리에는 어떤 자도 닿지 않는다. 두 번 변환한 f**(연한 벽돌색)는 −1과 1 사이에서 평평하다"></noscript></figure>
+<figure class="widget-embed" id="widget-ch05-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 이중 우물을 두 번 변환하기</span><a class="widget-open" href="widgets/ch05.html?v=51527d94#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch05.html?w=w2&embed=1&v=51527d94" title="위젯 2: 이중 우물을 두 번 변환하기" loading="lazy"></iframe><noscript><img src="images/ch05/img_w2.png" alt="위젯 2 정지 화면: 이중 우물 (x² − 1)² 아래에서 기울기 0.5인 자는 오른쪽 골짜기 근처(x ≈ 1.04)에 닿고, x = 0의 봉우리에는 어떤 자도 닿지 않는다. 두 번 변환한 f**(연한 벽돌색)는 −1과 1 사이에서 평평하다"></noscript></figure>
 <h3 id="ml에서-쌍대-문제의-틈">ML에서: 쌍대 문제의 틈</h3>
 <p>ML에서도 같은 일이 일어난다. 볼록하지 않은 최적화 문제를 그 짝 문제(쌍대 문제, dual problem: 제약마다 가격을 매겨 원래 문제의 아래쪽 경계를 구하는 문제)로 풀면 원래 문제가 아니라 그 볼록 껍질을 푸는 셈이 되므로, 쌍대 문제의 답은 원래 답의 하한만 주고 둘 사이에 틈이 남는다. 최적화 이론에서 쌍대성 간극(duality gap)이라 부르는 것이 바로 그 틈이다.</p>
 <div class="dialogue"><h3 id="문제-3-두-번-하면-정말-제자리인가">문제 3. 두 번 하면 정말 제자리인가</h3>
 <blockquote>
-<p><span class="sym" style="color:#4363d8">f</span>(<span class="sym" style="color:#1b9e77">x</span>) = (<span class="sym" style="color:#1b9e77">x</span>² − 1)²에 대해 f*(0)과 <span class="sym" style="color:#bb5522">f**</span>(0)을 구하라.</p>
+<p><span class="sym" style="color:#4363d8">f</span>(<span class="sym" style="color:#1b9e77">x</span>) = (<span class="sym" style="color:#1b9e77">x</span>² − 1)²에 대해 <span class="sym" style="color:#bb5522">f*</span>(0)과 <span class="sym" style="color:#bb5522">f**</span>(0)을 구하라.</p>
 </blockquote>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S11"><img src="images/cast/S11.webp" alt="이서연 S11" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>두 번 변환하면 제자리니까 <span class="sym" style="color:#bb5522">f**</span>(0)은 계산할 것도 없이 <span class="sym" style="color:#4363d8">f</span>(0) = 1이에요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>저는 <span class="sym" style="color:#bb5522">f*</span>(0)부터 할게요. <span class="sym" style="color:#4363d8">f</span>′(<span class="sym" style="color:#1b9e77">x</span>) = 4<span class="sym" style="color:#1b9e77">x</span>³ − 4<span class="sym" style="color:#1b9e77">x</span> = 0을 풀면 <span class="sym" style="color:#1b9e77">x</span> = 0이 바로 보이니까, <span class="sym" style="color:#bb5522">f*</span>(0) = 0·0 − <span class="sym" style="color:#4363d8">f</span>(0) = −1.</p></div></div>
@@ -738,6 +741,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -765,13 +769,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>

@@ -133,6 +133,10 @@ table {
   margin: 1em 0;
   font-size: 0.95em;
 }
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
 th, td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
@@ -249,11 +253,6 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
-.speaker {
-  font-weight: 700;
-  color: var(--who);
-  margin-right: 0.5em;
-}
 .cast {
   flex: 0 0 88px;
   width: 88px;
@@ -422,6 +421,10 @@ pre.mermaid {
   h2 { font-size: 1.3rem; }
   pre { font-size: 0.8em; padding: 0.8em; }
 }
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
 
 /* ===== Chapter Navigation ===== */
 .chapter-nav {
@@ -467,8 +470,6 @@ pre.mermaid {
 .site-nav a { color: var(--fg-muted); text-decoration: none; }
 .site-nav a:hover { color: var(--accent); }
 .site-nav + h1 { margin-top: 1rem; }
-/* 좁은 화면에선 왼쪽 위 고정 목차 버튼(☰)과 겹치지 않게 비켜 선다 */
-@media (max-width: 960px) { .site-nav { padding-left: 3rem; } }
 @media print { .site-nav { display: none; } }
 .toc-list {
   list-style: none;
@@ -526,7 +527,7 @@ figure.fig-portrait {
 }
 figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
-h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { clear: both; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
 /* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
 .portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
 .portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
@@ -554,6 +555,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, table, pre { 
 .math-legend .katex-display > .katex { text-align: left; }
 /* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
 [data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
 
 /* ===== 인터랙티브 위젯 ===== */
 .widget-embed {
@@ -670,8 +673,8 @@ for step in (euler, leapfrog):
 </code></pre>
 <p>처음 에너지는 0.5인데, 오일러 방법으로는 100걸음 뒤에 1.3524, 1000걸음 뒤에는 10479.58이 되어 그네가 하늘 끝까지 날아간다. 이유는 행렬식에 있다. 이 그네에서 오일러 방법의 한 걸음은 (q, p)에 행렬 [[1, Δt], [−Δt, 1]]을 곱하는 것이고, 그 행렬식은 1 + Δt² = 1.01이다. 한 걸음마다 넓이가 1% 늘어나니 상태는 원을 따라 돌지 못하고 바깥으로 나선을 그리며, 에너지도 정확히 매 걸음 1.01배가 되어 0.5 × 1.01^100 = 1.3524가 된다.</p>
 <h3 id="leapfrog의-행렬식이-1인-까닭">leapfrog의 행렬식이 1인 까닭</h3>
-<p>반면 leapfrog의 행렬식은 정확히 1이다. 같은 기울기를 쓰고 갱신 순서만 바꿨을 뿐인데 왜 넓이가 늘지 않을까? 세 단계가 각각 운동량만 바꾸거나 위치만 바꾸는 전단 변환(한 변수를 다른 변수의 함수만큼 밀어 주는 변환, shear map)이고, 그런 변환의 야코비 행렬은 대각선이 모두 1인 삼각행렬이라 행렬식이 1이기 때문이다. 에너지는 0.5에서 조금씩 흔들리지만 10만 걸음을 가도 0.49875와 0.5 사이를 벗어나지 않는다. 사실 이 그네에서 leapfrog는 조금 변형된 에너지 p²/(2(1 − Δt²/4)) + q²/2를 정확히 보존하므로 진짜 에너지도 멀리 벗어날 수 없다.</p>
-<figure class="widget-embed" id="widget-ch06-w3"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">오일러 대 leapfrog</span><a class="widget-open" href="widgets/ch06.html#w3" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch06.html?w=w3&embed=1" title="오일러 대 leapfrog" loading="lazy"></iframe><noscript><img src="images/ch06/wid_w3.png" alt="위젯 3: 오일러 방법 대 leapfrog (Δt = 0.1, 100걸음)"></noscript></figure>
+<p>반면 leapfrog의 행렬식은 정확히 1이다. 같은 기울기를 쓰고 갱신 순서만 바꿨을 뿐인데 왜 넓이가 늘지 않을까? 세 단계가 각각 운동량만 바꾸거나 위치만 바꾸는 전단 변환(한 변수를 다른 변수의 함수만큼 밀어 주는 변환, shear map)이고, 그런 변환의 야코비 행렬은 대각선이 모두 1인 삼각행렬이라 행렬식이 1이기 때문이다. 이렇게 넓이를 정확히 지키는 적분법을 <strong>심플렉틱 적분법</strong> (위상공간의 넓이 구조를 보존하는 적분법, symplectic integrator)이라 한다. 에너지는 0.5에서 조금씩 흔들리지만 10만 걸음을 가도 0.49875와 0.5 사이를 벗어나지 않는다. 사실 이 그네에서 leapfrog는 조금 변형된 에너지 p²/(2(1 − Δt²/4)) + q²/2를 정확히 보존하므로 진짜 에너지도 멀리 벗어날 수 없다.</p>
+<figure class="widget-embed" id="widget-ch06-w3"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">오일러 대 leapfrog</span><a class="widget-open" href="widgets/ch06.html?v=ff4b166e#w3" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/ch06.html?w=w3&embed=1&v=ff4b166e" title="오일러 대 leapfrog" loading="lazy"></iframe><noscript><img src="images/ch06/wid_w3.png" alt="위젯 3: 오일러 방법 대 leapfrog (Δt = 0.1, 100걸음)"></noscript></figure>
 <h3 id="ml에서-넓이를-지키는-결합층">ML에서: 넓이를 지키는 결합층</h3>
 <p>이산 normalizing flow의 초기 모델인 NICE(Dinh 외, 2014)의 덧셈 결합층(additive coupling layer)은 입력을 두 부분으로 나눠 한쪽을 그대로 두고 다른 쪽에 신경망 출력을 더하므로, 야코비 행렬식이 1인 부피 보존 변환이다. 이것은 leapfrog의 반 걸음, 곧 위치는 그대로 두고 운동량에 −(Δt/2)∇U(q)를 더하는 전단 변환과 같은 모양이다. leapfrog 한 걸음은 신경망 대신 정해진 함수(위치에너지의 기울기와 운동량)를 쓴 결합층 세 개를 쌓은 것이라고 볼 수 있다.</p>
 <figure class="fig "><img src="images/ch06/c1_leapfrog_shears.png" alt="leapfrog 한 걸음은 넓이를 바꾸지 않는 전단 변환 세 개의 합성이고, 각 단계는 NICE의 덧셈 결합층과 같은 모양이다. 오일러 방법 한 걸음은 넓이를 1 + Δt²배로 늘린다(보기 쉽게 Δt = 0.5로 그림)." loading="lazy"><figcaption>leapfrog 한 걸음은 넓이를 바꾸지 않는 전단 변환 세 개의 합성이고, 각 단계는 NICE의 덧셈 결합층과 같은 모양이다. 오일러 방법 한 걸음은 넓이를 1 + Δt²배로 늘린다(보기 쉽게 Δt = 0.5로 그림).</figcaption></figure>
@@ -685,7 +688,7 @@ for step in (euler, leapfrog):
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>걸음을 줄이면 날아가는 시점을 늦출 뿐 막지는 못해요. HMC나 분자 시뮬레이션처럼 오래 굴려야 하는 곳에서는 치명적이죠. 민준 학생, 코드에서 한 줄만 바꿔 볼까요? 운동량을 먼저 갱신하고, 위치는 새 운동량으로 옮기는 거예요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>p ← p − Δt·q를 먼저 하고 q ← q + Δt·p를 새 p로… Δt = 0.1로 10만 걸음 돌렸는데 에너지가 0.476과 0.526 사이에서만 왔다 갔다 해요. 한 줄 순서만 바꿨는데요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>민준아, 행렬식을 봐. 운동량만 바꾸는 단계는 [[1, 0], [−Δt, 1]], 위치만 바꾸는 단계는 [[1, Δt], [0, 1]]이라 둘 다 행렬식이 1이야. 동시에 갱신한 원래 방법은 [[1, Δt], [−Δt, 1]]이라 1 + Δt²이었고.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 넓이가 매 걸음 1%씩 늘면 상태는 나선을 그리며 바깥으로 나갈 수밖에 없어요. 넓이를 정확히 지키는 적분법을 <strong>심플렉틱 적분법</strong> (위상공간의 넓이 구조를 보존하는 적분법, symplectic integrator)이라 부르고, 방금 민준 학생이 만든 것과 leapfrog가 대표적이에요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 넓이가 매 걸음 1%씩 늘면 상태는 나선을 그리며 바깥으로 나갈 수밖에 없어요. 넓이를 정확히 지키는 적분법이 심플렉틱 적분법이고, 방금 민준 학생이 만든 것과 leapfrog가 대표적이에요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 넓이를 지킨다고 에너지까지 지키는 건 아니잖아요. 0.476에서 0.526까지 흔들리는 걸 보면요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>맞아요. 넓이 보존과 에너지 보존은 다른 성질이에요. 다만 심플렉틱 적분법은 원래 에너지와 조금 다른 「변형된 에너지」를 거의 정확히 보존해서, 진짜 에너지가 한쪽으로 흘러가지 않고 그 근처에서 흔들리기만 해요. 그리고 leapfrog는 앞뒤가 대칭이라 흔들리는 폭도 훨씬 작아요. 같은 Δt에서 0.49875에서 0.5 사이였죠.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.webp" alt="김민준 M08" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>과제에서 시뮬레이션이 터지면 늘 학습률 줄이듯이 Δt부터 줄였는데, 적분법 자체를 바꿔야 하는 경우가 있네요.</p></div></div>
@@ -707,6 +710,7 @@ toggle.addEventListener('click', () => {
   const t = curTheme() === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', t);
   setTheme(t);
+  renderMermaid();
 });
 
 // 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
@@ -734,13 +738,30 @@ addEventListener('keydown', e => {
   if (a) location.href = a.href;
 });
 
-// Mermaid
-if (document.querySelector('pre.mermaid')) {
-  import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(m => {
-    m.default.initialize({ startOnLoad: false, theme: curTheme() === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
-    m.default.run();
-  });
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
 }
+renderMermaid();
 </script>
 </body>
 </html>
