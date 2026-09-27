@@ -234,18 +234,15 @@ pre.mermaid {
   padding: 1em 0;
 }
 
-/* ===== Theme Toggle ===== */
+/* ===== Theme Toggle (목차 머리 안) ===== */
 #theme-toggle {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 1000;
   background: var(--bg-code);
   border: 1px solid var(--border);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 1.2em;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  font-size: 1em;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -279,6 +276,7 @@ pre.mermaid {
   border-bottom: 1px solid var(--border);
 }
 .sidebar-header h2 { font-size: 1.1rem; margin: 0; border: none; padding: 0; }
+.sidebar-actions { display: flex; align-items: center; gap: 0.4rem; }
 
 #sidebar-close {
   background: none;
@@ -312,7 +310,7 @@ pre.mermaid {
 #sidebar-open {
   position: fixed;
   top: 1rem;
-  left: 1rem;
+  right: 1rem;
   z-index: 998;
   background: var(--bg-code);
   border: 1px solid var(--border);
@@ -631,12 +629,13 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </head>
 <body>
 
-<button id="theme-toggle" aria-label="다크모드 전환">&#x1F319;</button>
-
 <nav id="sidebar">
   <div class="sidebar-header">
     <h2><a href="index.html" style="color:inherit;text-decoration:none">목차</a></h2>
-    <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
+    <div class="sidebar-actions">
+      <button id="theme-toggle" aria-label="다크모드 전환">&#x1F319;</button>
+      <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
+    </div>
   </div>
   <ol><li><a href="00-서문.html">생성모델의 강화학습 — DPO에서 GRPO까지</a></li>
 <li><a href="01-DPO맛보기.html">1. DPO 맛보기 — 한 줄 수식이 하는 일</a></li>
@@ -753,7 +752,19 @@ async function renderMermaid() {
   if (!mermaidNodes.length) return;
   if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  mermaidLib.initialize({ startOnLoad: false, theme: isDark ? 'dark' : 'default', securityLevel: 'loose' });
+  // 다크: mermaid 내장 dark 는 회색 상자·회색 라벨 띠가 페이지 배경과 어긋난다 → 페이지 CSS 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(isDark ? {
+    startOnLoad: false, securityLevel: 'loose', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--w-surface'), primaryTextColor: v('--w-ink'), primaryBorderColor: v('--w-axis'),
+      secondaryColor: v('--w-surface'), tertiaryColor: v('--w-surface'),
+      lineColor: v('--w-ink-2'), textColor: v('--w-ink-2'),
+      clusterBkg: v('--w-surface'), clusterBorder: v('--w-axis'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--w-ink'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'loose' });
   mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
   await mermaidLib.run({ nodes: mermaidNodes });
 }

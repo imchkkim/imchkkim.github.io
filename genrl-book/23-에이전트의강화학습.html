@@ -234,18 +234,15 @@ pre.mermaid {
   padding: 1em 0;
 }
 
-/* ===== Theme Toggle ===== */
+/* ===== Theme Toggle (목차 머리 안) ===== */
 #theme-toggle {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 1000;
   background: var(--bg-code);
   border: 1px solid var(--border);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 1.2em;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  font-size: 1em;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -279,6 +276,7 @@ pre.mermaid {
   border-bottom: 1px solid var(--border);
 }
 .sidebar-header h2 { font-size: 1.1rem; margin: 0; border: none; padding: 0; }
+.sidebar-actions { display: flex; align-items: center; gap: 0.4rem; }
 
 #sidebar-close {
   background: none;
@@ -312,7 +310,7 @@ pre.mermaid {
 #sidebar-open {
   position: fixed;
   top: 1rem;
-  left: 1rem;
+  right: 1rem;
   z-index: 998;
   background: var(--bg-code);
   border: 1px solid var(--border);
@@ -631,12 +629,13 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </head>
 <body>
 
-<button id="theme-toggle" aria-label="다크모드 전환">&#x1F319;</button>
-
 <nav id="sidebar">
   <div class="sidebar-header">
     <h2><a href="index.html" style="color:inherit;text-decoration:none">목차</a></h2>
-    <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
+    <div class="sidebar-actions">
+      <button id="theme-toggle" aria-label="다크모드 전환">&#x1F319;</button>
+      <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
+    </div>
   </div>
   <ol><li><a href="00-서문.html">생성모델의 강화학습 — DPO에서 GRPO까지</a></li>
 <li><a href="01-DPO맛보기.html">1. DPO 맛보기 — 한 줄 수식이 하는 일</a></li>
@@ -754,9 +753,34 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tbody>
 </table>
 <p>이것은 RL의 원래 문제 설정과 훨씬 더 가깝다. 사실 “한 번 생성” 설정이 RL의 관점에서는 퇴화된(degenerate) 특수 케이스였다.</p>
-<p><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Reinforcement_learning_diagram.svg" alt="강화학습 에이전트-환경 상호작용 루프"></p>
+<svg class="fig" viewBox="0 0 560 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="강화학습 에이전트-환경 상호작용 루프">
+  <defs>
+    <marker id="loop-act" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="f2" d="M0,0 L10,5 L0,10 Z"/></marker>
+    <marker id="loop-obs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="f3" d="M0,0 L10,5 L0,10 Z"/></marker>
+  </defs>
+  <rect class="fa3 s3" x="200" y="18" width="160" height="60" rx="10" stroke-width="2"/>
+  <text class="t-strong" x="280" y="44" text-anchor="middle">환경</text>
+  <text class="t-muted" x="280" y="63" text-anchor="middle" style="font-size:10px">도구 · 파일 · 웹 · 테스트</text>
+  <line class="s1" x1="280" y1="122" x2="280" y2="134" stroke-width="2"/>
+  <circle class="f1" cx="280" cy="119" r="4"/>
+  <rect class="fa1 s1" x="252" y="134" width="56" height="36" rx="9" stroke-width="2"/>
+  <circle class="f1" cx="269" cy="151" r="5"/>
+  <circle class="f1" cx="291" cy="151" r="5"/>
+  <line class="s1" x1="272" y1="162" x2="288" y2="162" stroke-width="2" stroke-linecap="round"/>
+  <rect class="fa1 s1" x="260" y="174" width="40" height="30" rx="6" stroke-width="2"/>
+  <path class="s1" d="M260 182 L244 172 M300 182 L316 172" stroke-width="2" stroke-linecap="round"/>
+  <path class="s1" d="M270 204 L270 214 M290 204 L290 214" stroke-width="2" stroke-linecap="round"/>
+  <text class="t-strong" x="280" y="234" text-anchor="middle">에이전트 (LLM)</text>
+  <path class="s2" d="M322 186 C 450 186, 450 48, 366 48" stroke-width="2" marker-end="url(#loop-act)"/>
+  <text class="t2" x="440" y="112" style="font-weight:700">행동 aₜ</text>
+  <text class="t-muted" x="440" y="130" style="font-size:10px">도구 호출 · 텍스트</text>
+  <path class="s3" d="M194 48 C 110 48, 110 186, 238 186" stroke-width="2" marker-end="url(#loop-obs)"/>
+  <text class="t3" x="120" y="104" text-anchor="end" style="font-weight:700">관찰 oₜ₊₁</text>
+  <text class="t3" x="120" y="124" text-anchor="end" style="font-weight:700">보상 rₜ₊₁</text>
+  <text class="t-muted" x="120" y="142" text-anchor="end" style="font-size:10px">도구 출력 · 테스트 결과</text>
+</svg>
 <blockquote>
-<p><em>RL의 기본 구조: 에이전트가 환경에서 행동(action)하고, 보상(reward)과 상태(state)를 관찰한다. LLM RL은 이 루프가 1회로 퇴화한 것이고, 에이전틱 RL은 원래의 다회 루프로 돌아간다. (CC0, Megajuice, Wikimedia Commons)</em></p>
+<p><em>RL의 기본 구조: 에이전트가 환경에서 행동(action)하고, 보상(reward)과 관찰(observation)을 돌려받는다. LLM RL은 이 루프가 1회로 퇴화한 것이고, 에이전틱 RL은 원래의 다회 루프로 돌아간다.</em></p>
 </blockquote>
 <pre class="mermaid">graph LR
     subgraph llm[&quot;LLM RL (1스텝 MDP)&quot;]
@@ -829,7 +853,19 @@ async function renderMermaid() {
   if (!mermaidNodes.length) return;
   if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  mermaidLib.initialize({ startOnLoad: false, theme: isDark ? 'dark' : 'default', securityLevel: 'loose' });
+  // 다크: mermaid 내장 dark 는 회색 상자·회색 라벨 띠가 페이지 배경과 어긋난다 → 페이지 CSS 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(isDark ? {
+    startOnLoad: false, securityLevel: 'loose', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--w-surface'), primaryTextColor: v('--w-ink'), primaryBorderColor: v('--w-axis'),
+      secondaryColor: v('--w-surface'), tertiaryColor: v('--w-surface'),
+      lineColor: v('--w-ink-2'), textColor: v('--w-ink-2'),
+      clusterBkg: v('--w-surface'), clusterBorder: v('--w-axis'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--w-ink'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'loose' });
   mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
   await mermaidLib.run({ nodes: mermaidNodes });
 }
