@@ -1,27 +1,42 @@
 // 3지선다 정책 그래디언트: 소프트맥스 정책 π = softmax(z), 보상 r.
 // 정확한 그래디언트 ∂J/∂z_k = π_k (r_k − J)  vs  샘플 1개 추정 (r_a + c)(e_a − π).
-// 보상에 상수 c 를 더해도 정확한 그래디언트는 그대로지만, 샘플 추정은 요동친다 → Ch3 의 분산 문제 예고.
+// 보상에 상수 c 를 더해도 정확한 그래디언트는 그대로지만, 샘플 추정은 요동친다 (샘플로 추정하는 방법의 분산 문제 예고).
+// 단추 셋: 「본문 예」(로짓 −0.6, 0.9, 0 / 보상 1, 0, 0.6, c = 0), 「문제 5」(로짓 0, 0, 0), 「문제 6」(보상 0, 0, 0 에 c = 5 → 모든 답이 5점).
+// 문제 6 을 보상 5 로 두지 않고 c = 5 로 두는 것은 J 그래프의 세로축(0~1)과 J 가 c 를 빼고 재는 약속을 그대로 쓰기 위해서다.
+// 난수 씨앗 7 이라 「처음으로」 뒤 첫 샘플은 늘 같다(로짓 0 이면 A). 설명글에는 문제의 답을 적지 않는다.
 GW.register("pg-bandit", (el) => {
   const f = GW.frame(el, {
     title: "세 개의 답 중 하나를 고르는 정책 — 그래디언트는 어디로 미는가",
     caption:
       "막대는 각 답을 고를 확률 <span class='sym-pi'>π</span>, 막대 위 화살표는 정확한 그래디언트가 로짓을 미는 방향과 크기(<span class='sym-pi'>π<sub>k</sub></span>(<span class='sym-R'>r<sub>k</sub></span> − <span class='sym-J'>J</span>)). " +
-      "‘기대값으로 한 걸음’은 VPG, ‘샘플 1개로 한 걸음’은 뽑은 샘플로 추정해 걷는 방법(REINFORCE)이다. 보상에 상수 c 를 더한 뒤 두 방식의 학습 곡선을 비교해 보라.",
+      "‘기대값으로 한 걸음’은 VPG, ‘샘플 1개로 한 걸음’은 뽑은 샘플로 추정해 걷는 방법(REINFORCE)이다. 보상에 상수 c 를 더한 뒤 두 방식의 학습 곡선을 비교해 보라. " +
+      "‘문제 5’, ‘문제 6’ 단추는 아래 두 문제의 처음 로짓과 보상을 불러온다. 수치판에는 방금 한 걸음에 쓴 그래디언트가 나온다. 풀이를 마친 뒤 견주어 보라.",
   });
   const ACT = ["서울입니다", "부산입니다", "서울이요"];
-  const R = [1.0, 0.0, 0.6];
-  const Z0 = [-0.6, 0.9, 0.0];
+  const PRESETS = {
+    body: { z: [-0.6, 0.9, 0.0], r: [1.0, 0.0, 0.6], label: "본문 예" },
+    p5: { z: [0, 0, 0], r: [1.0, 0.0, 0.6], label: "문제 5" },
+    p6: { z: [-0.6, 0.9, 0.0], r: [0, 0, 0], c: 5, label: "문제 6" },
+  };
+  let R = PRESETS.body.r.slice();
+  let Z0 = PRESETS.body.z.slice();
   const lr = 0.8;
-  let z = Z0.slice(), c = 0, hist = [], rng = GW.rng(7), stepN = 0, mode = null;
+  let z = Z0.slice(), c = 0, hist = [], rng = GW.rng(7), stepN = 0, mode = null, lastG = null;
 
   const softmax = (v) => { const m = Math.max(...v); const e = v.map((x) => Math.exp(x - m)); const s = e.reduce((a, b) => a + b); return e.map((x) => x / s); };
   const J = (p) => p.reduce((a, pk, k) => a + pk * R[k], 0);
 
+  const presetBar = GW.h("div", { class: "w-controls" }, f.controls);
+  GW.segmented(presetBar, {
+    options: Object.entries(PRESETS).map(([k, v]) => [k, v.label]),
+    value: "body",
+    onchange: (k) => { Z0 = PRESETS[k].z.slice(); R = PRESETS[k].r.slice(); c = PRESETS[k].c || 0; sC.value = c; reset(); },
+  });
   GW.button(f.controls, "기대값으로 한 걸음 (VPG)", () => step("exact"));
   GW.button(f.controls, "샘플 1개로 한 걸음", () => step("sample"));
   GW.button(f.controls, "20걸음", () => { for (let i = 0; i < 20; i++) step(mode || "exact", true); draw(); });
   GW.button(f.controls, "처음으로", reset);
-  GW.slider(f.controls, { label: "보상에 더할 상수 c", min: -2, max: 5, step: 0.5, value: 0, fmt: (v) => GW.fmt(v, 1), oninput: (v) => { c = v; reset(); } });
+  const sC = GW.slider(f.controls, { label: "보상에 더할 상수 c", min: -2, max: 5, step: 0.5, value: 0, fmt: (v) => GW.fmt(v, 1), oninput: (v) => { c = v; reset(); } });
 
   const row = GW.h("div", { style: { display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "0.8rem" } }, f.stage);
   const left = GW.h("div", {}, row), right = GW.h("div", {}, row);
@@ -29,19 +44,21 @@ GW.register("pg-bandit", (el) => {
   GW.legend(right, [["cs-J", "<span class=\"sym-J\">J</span> (기대 보상)"]]);
   const line = GW.chart(right, { w: 300, h: 226, x: [0, 40], y: [0, 1], xlabel: "걸음", ylabel: "J", margin: { l: 40 }, label: "기대 보상 변화" });
 
-  function reset() { z = Z0.slice(); hist = [J(softmax(z))]; rng = GW.rng(7); stepN = 0; mode = null; draw(); }
+  function reset() { z = Z0.slice(); hist = [J(softmax(z))]; rng = GW.rng(7); stepN = 0; mode = null; lastG = null; draw(); }
 
   function step(kind, silent) {
     mode = kind;
     const p = softmax(z);
     const Jv = J(p);
     if (kind === "exact") {
-      for (let k = 0; k < 3; k++) z[k] += lr * p[k] * (R[k] - Jv); // 상수 c 는 상쇄되어 사라진다
+      lastG = p.map((pk, k) => pk * (R[k] - Jv)); // 상수 c 는 상쇄되어 사라진다
+      for (let k = 0; k < 3; k++) z[k] += lr * lastG[k];
     } else {
       let u = rng(), a = 0;
       while (a < 2 && u > p[a]) { u -= p[a]; a++; }
       const w = R[a] + c;
-      for (let k = 0; k < 3; k++) z[k] += lr * w * ((k === a ? 1 : 0) - p[k]);
+      lastG = p.map((pk, k) => w * ((k === a ? 1 : 0) - pk));
+      for (let k = 0; k < 3; k++) z[k] += lr * lastG[k];
       f.lastSample = { a, w };
     }
     stepN++;
@@ -72,7 +89,8 @@ GW.register("pg-bandit", (el) => {
     line.path(hist.map((v, i) => [i, v]), "cs-J");
     line.dot(hist.length - 1, hist[hist.length - 1], "fs-J", 4);
     const ls = f.lastSample && mode === "sample" ? ` · 방금 뽑은 답 <b>${ACT[f.lastSample.a]}</b>, 가중치 <span class='sym-R'>r</span>+c = <b>${GW.fmt(f.lastSample.w, 1)}</b>` : "";
-    f.readout.innerHTML = `걸음 <b>${stepN}</b> · 기대 보상 <span class="sym-J">J</span> = <b>${Jv.toFixed(3)}</b>${ls}`;
+    const gs = lastG ? ` · 방금 쓴 그래디언트 (∂/∂z₁, ∂/∂z₂, ∂/∂z₃) = (<b>${lastG.map((g) => GW.fmt(g, 2)).join(", ")}</b>)` : "";
+    f.readout.innerHTML = `걸음 <b>${stepN}</b> · 기대 보상 <span class="sym-J">J</span> = <b>${Jv.toFixed(3)}</b>${ls}${gs}`;
   }
   reset();
 });

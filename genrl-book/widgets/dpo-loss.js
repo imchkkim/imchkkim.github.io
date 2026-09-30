@@ -7,12 +7,12 @@
 GW.register("dpo-loss", (el) => {
   const sets = {
     default: {
-      title: "DPO 손실 — 원본 대비 마진을 얼마나 더 벌렸나",
+      title: "DPO 손실 — 레퍼런스 대비 마진을 얼마나 더 벌렸나",
       caption:
         "가로축은 학습 모델의 선호마진 <span class='sym-pi'>Δ<sub>θ</sub></span>. 곡선은 <span class='sym-pi'>Δ<sub>θ</sub></span> = <span class='sym-ref'>Δ<sub>ref</sub></span> 인 지점(점선)에서 항상 손실 0.693 을 지난다 — " +
-        "원본과 똑같이 구분하면 아직 할 일이 남아 있다는 뜻이다. 그래디언트 크기 <span class='sym-A'>σ(−βz)</span>는 마진을 충분히 벌리면 0 으로 사라진다.",
-      ref: "원본",
-      refWa: "원본과",
+        "레퍼런스와 똑같이 구분하면 아직 할 일이 남아 있다는 뜻이다. 그래디언트 크기 <span class='sym-A'>σ(−βz)</span>는 마진을 충분히 벌리면 0 으로 사라진다.",
+      ref: "레퍼런스",
+      refWa: "레퍼런스와",
       start: "A",
       presets: {
         A: { dref: 2.1972, dth: 2.9444, label: "상황 A" },

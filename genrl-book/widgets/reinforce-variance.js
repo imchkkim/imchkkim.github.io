@@ -1,15 +1,30 @@
 // REINFORCE 의 분산과 베이스라인.
-// Ch2 의 세 답 정책(π = softmax(z), r = [1, 0, 0.6])에서 배치 N 개로 그래디언트를 추정한다.
+// 세 답 정책(π = softmax(z), r = [1, 0, 0.6])에서 배치 N 개로 그래디언트를 추정한다.
 // 왼쪽: 처음 정책에서 "서울입니다" 로짓 성분의 추정치 1,500번 — 흩어진 정도(분산)
 // 오른쪽: 같은 설정으로 5번 따로 학습한 곡선 — 흩어진 추정이 학습을 어떻게 흔드는가
+// 선택지 묶음은 원고의 위젯 줄에 붙은 data-set 으로 고른다.
+//   data-set="baseline" : 「베이스라인」 절 — 없음 / 고정 b = 0.5 / 이동평균
+//   (없음)               : 「프롬프트별 베이스라인」 절 — 위 셋 + 같은 프롬프트 평균(자기 뺀 평균 / 자기 포함 평균), 문제 7 의 값 단추
+// 설명글에는 문제의 답(추정치 평균이 참값의 몇 배인가)을 적지 않는다.
 GW.register("reinforce-variance", (el) => {
-  const f = GW.frame(el, {
-    title: "베이스라인이 흔들림을 얼마나 줄이는가",
-    caption:
-      "모든 설정에서 추정치의 평균(점선 근처)은 참값 0.098 에 머문다 — 베이스라인은 방향을 바꾸지 않는다. " +
-      "바뀌는 것은 폭이다. 보상에 상수 c 를 더하고 베이스라인을 끄면 히스토그램이 넓게 퍼지고 학습 곡선 다섯 개가 제각각 흩어진다. " +
-      "‘같은 프롬프트 평균’은 <span style='color:var(--sym-5f970c, #5f970c)'>N</span>개 중 자기를 뺀 나머지의 평균을 베이스라인으로 쓴다 (RLOO·GRPO 의 씨앗).",
-  });
+  const Nsym = "<span style='color:var(--sym-5f970c, #5f970c)'>N</span>";
+  const sets = {
+    baseline: {
+      modes: ["none", "const", "ema"],
+      caption:
+        "점선은 참값이다. 보상에 더할 상수 c 를 올리고 베이스라인을 끄거나 켜서, 히스토그램의 중심과 폭, 학습 곡선 다섯 개가 흩어진 정도를 견줘 보라. " +
+        "이동평균은 지난 배치들의 평균 보상을 베이스라인으로 쓴다.",
+    },
+    default: {
+      modes: ["none", "const", "ema", "loo", "incl"],
+      caption:
+        "‘자기 뺀 평균’과 ‘자기 포함 평균’은 같은 프롬프트에서 한 번에 뽑은 " + Nsym + "개의 보상으로 베이스라인을 만든다. 앞의 것은 자기를 뺀 나머지의 평균, 뒤의 것은 자기까지 넣은 평균이다. ‘없음’은 베이스라인을 쓰지 않는다. " +
+        "추정치 평균을 참값(점선)과 견줘 보라. 단추는 아래 문제 7 의 값(" + Nsym + " = 4, c = 0, 자기 포함)을 불러온다.",
+      preset: { label: "문제 7 값 불러오기", mode: "incl", c: 0, N: 4 },
+    },
+  };
+  const S = sets[el.dataset.set] || sets.default;
+  const f = GW.frame(el, { title: "베이스라인이 흔들림을 얼마나 줄이는가", caption: S.caption });
   const R = [1.0, 0.0, 0.6];
   const Z0 = [-0.6, 0.9, 0.0];
   const LR = 0.5, STEPS = 40, SEEDS = 5, HIST_N = 1500;
@@ -19,14 +34,25 @@ GW.register("reinforce-variance", (el) => {
   const Jof = (p) => p.reduce((a, pk, k) => a + pk * R[k], 0);
   const sample = (p, u) => { let a = 0; while (a < 2 && u > p[a]) { u -= p[a]; a++; } return a; };
 
-  GW.segmented(f.controls, {
-    options: [["none", "베이스라인 없음"], ["const", "고정 <span class=\"sym-V\">b</span> = 0.5"], ["ema", "이동평균"], ["loo", "같은 프롬프트 평균"]],
+  // 선택지가 다섯이면 휴대폰 폭에서 단추 글자가 한 자씩 꺾이므로 짧은 이름을 쓴다.
+  const MODE_LABEL = S.modes.length > 3
+    ? { none: "없음", const: "고정 <span class=\"sym-V\">b</span> = 0.5", ema: "이동평균", loo: "자기 뺀 평균", incl: "자기 포함 평균" }
+    : { none: "베이스라인 없음", const: "고정 <span class=\"sym-V\">b</span> = 0.5", ema: "이동평균" };
+  const seg = GW.segmented(f.controls, {
+    options: S.modes.map((m) => [m, MODE_LABEL[m]]),
     value: st.mode,
     onchange: (v) => { st.mode = v; draw(); },
   });
-  GW.slider(f.controls, { label: "보상에 더할 상수 c", min: 0, max: 5, step: 0.5, value: st.c, fmt: (v) => GW.fmt(v, 1), oninput: (v) => { st.c = v; draw(); } });
-  GW.slider(f.controls, { label: "배치 크기 <span style='color:var(--sym-5f970c, #5f970c)'>N</span>", min: 1, max: 16, step: 1, value: st.N, fmt: (v) => String(v), oninput: (v) => { st.N = v; draw(); } });
+  const sC = GW.slider(f.controls, { label: "보상에 더할 상수 c", min: 0, max: 5, step: 0.5, value: st.c, fmt: (v) => GW.fmt(v, 1), oninput: (v) => { st.c = v; draw(); } });
+  const sN = GW.slider(f.controls, { label: "배치 크기 " + Nsym, min: 1, max: 16, step: 1, value: st.N, fmt: (v) => String(v), oninput: (v) => { st.N = v; draw(); } });
   GW.button(f.controls, "다시 뽑기", () => { st.seed++; draw(); });
+  if (S.preset) {
+    GW.button(f.controls, S.preset.label, () => {
+      Object.assign(st, { mode: S.preset.mode, c: S.preset.c, N: S.preset.N });
+      seg.set(st.mode); sC.value = st.c; sN.value = st.N;
+      draw();
+    });
+  }
 
   const row = GW.h("div", { style: { display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "0.8rem" } }, f.stage);
   const left = GW.h("div", {}, row), right = GW.h("div", {}, row);
@@ -41,9 +67,11 @@ GW.register("reinforce-variance", (el) => {
     if (st.mode === "none") return rs.map((r) => r);
     if (st.mode === "const") return rs.map((r) => r - 0.5);
     if (st.mode === "ema") return rs.map((r) => r - b);
+    const s = rs.reduce((a, x) => a + x, 0);
+    // incl: 자기까지 넣은 평균.
+    if (st.mode === "incl") return rs.map((r) => r - s / n);
     // loo: 자기를 뺀 나머지 평균. N=1 이면 비교할 대상이 없으므로 b=0.
     if (n < 2) return rs.map((r) => r);
-    const s = rs.reduce((a, x) => a + x, 0);
     return rs.map((r) => r - (s - r) / (n - 1));
   }
 
@@ -105,7 +133,7 @@ GW.register("reinforce-variance", (el) => {
     }
     const fm = finals.reduce((a, x) => a + x, 0) / SEEDS;
     const fsd = Math.sqrt(finals.reduce((a, x) => a + (x - fm) ** 2, 0) / (SEEDS - 1));
-    const warn = st.mode === "loo" && st.N < 2 ? " · <b><span style='color:var(--sym-5f970c, #5f970c)'>N</span> = 1 이면 비교할 다른 샘플이 없어 베이스라인이 0 이 된다</b>" : "";
+    const warn = st.mode === "loo" && st.N < 2 ? " · <b>" + Nsym + " = 1 이면 비교할 다른 샘플이 없어 베이스라인이 0 이 된다</b>" : "";
     f.readout.innerHTML =
       `추정치 평균 <b>${GW.fmt(mean, 3)}</b> (참값 ${GW.fmt(truth, 3)}) · 표준편차 <b>${GW.fmt(sd, 3)}</b> · ` +
       `40걸음 뒤 <span class='sym-J'>J</span> 의 편차(5회) <b>${GW.fmt(fsd, 3)}</b>` + warn;

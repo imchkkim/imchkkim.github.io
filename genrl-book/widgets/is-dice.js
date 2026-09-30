@@ -1,12 +1,16 @@
 // 임포턴스 샘플링 주사위: 찌그러진 주사위(π_old)로 던져서 공정한 주사위(π_θ)의 기대값 3.5 를 추정.
 // 한 번의 실험(N번 던지기)을 300번 반복해 네 추정량의 퍼짐(분산)을 비교한다.
+// ‘던진 눈’ 칸: 적은 눈으로 낸 세 추정값(보정 없음, 횟수로 나눈 IS, 가중치 합으로 나눈 IS)을 보인다.
+//   단추 「본문 예」 = 1,1,2,1,3,4 (5장 임포턴스 샘플링 절 본문), 「문제 2」 = 1,1,2,1,3,4,6. 계산은 지금 고른 π_old 로 한다.
+// 설명글에는 문제의 답을 적지 않는다.
 GW.register("is-dice", (el) => {
   const f = GW.frame(el, {
     title: "임포턴스 샘플링 — 찌그러진 주사위로 공정한 주사위의 평균 맞히기",
     caption:
       "목표는 공정한 주사위의 기대값 3.5. 점 하나가 ‘N번 던지는 실험’ 한 번의 추정값이고, 실험을 300번 반복했다. " +
       "보정 없는 평균은 한쪽으로 기울고(치우침), 임포턴스 가중치는 중심은 맞추지만 <span class='sym-ref'>π<sub>old</sub></span>가 찌그러질수록 크게 퍼진다(분산). " +
-      "가중치를 [0.8, 1.2]로 자르면 퍼짐은 줄지만 다시 치우친다 — PPO가 고른 절충이다.",
+      "가중치를 [0.8, 1.2]로 자르면 퍼짐은 줄지만 다시 치우친다 — PPO가 고른 절충이다. " +
+      "‘던진 눈’ 칸에 눈을 쉼표로 적으면 그 눈으로 낸 추정값이 칸 바로 아래에 나온다. 단추는 본문의 여섯 번과 문제 2의 일곱 번을 넣는다.",
   });
   const OLD = {
     "약간": [0.22, 0.2, 0.17, 0.16, 0.13, 0.12],
@@ -15,9 +19,32 @@ GW.register("is-dice", (el) => {
   };
   let key = "보통", N = 20, seed = 1;
   GW.h("span", { class: "w-slider-label", html: "<span class=\"sym-ref\">π_old</span> 찌그러짐", style: { color: "var(--w-ink-2)" } }, f.controls);
-  GW.segmented(f.controls, { options: Object.keys(OLD).map((k) => [k, k]), value: key, onchange: (k) => { key = k; draw(); } });
+  GW.segmented(f.controls, { options: Object.keys(OLD).map((k) => [k, k]), value: key, onchange: (k) => { key = k; draw(); drawOwn(); } });
   GW.slider(f.controls, { label: "한 실험당 던지는 횟수 N", min: 5, max: 200, step: 5, value: N, oninput: (v) => { N = v; draw(); } });
   GW.button(f.controls, "다시 던지기", () => { seed++; draw(); });
+
+  // 던진 눈을 직접 넣어 세 추정값 보기
+  const THROWS = { body: [1, 1, 2, 1, 3, 4], p2: [1, 1, 2, 1, 3, 4, 6] };
+  const own = GW.h("div", { class: "w-controls" }, el);
+  GW.h("span", { class: "w-slider-label", text: "던진 눈", style: { color: "var(--w-ink-2)" } }, own);
+  const inp = GW.h("input", { type: "text", value: THROWS.body.join(","), style: { width: "11em", font: "inherit", background: "var(--w-surface)", color: "var(--w-ink)", border: "1px solid var(--w-axis)", borderRadius: "4px", padding: "2px 6px" }, "aria-label": "던진 눈" }, own);
+  GW.button(own, "본문 예", () => { inp.value = THROWS.body.join(","); drawOwn(); });
+  GW.button(own, "문제 2", () => { inp.value = THROWS.p2.join(","); drawOwn(); });
+  const ownOut = GW.h("div", { class: "w-readout" }, el);
+  el.insertBefore(own, f.caption);
+  el.insertBefore(ownOut, f.caption);
+  inp.addEventListener("input", () => drawOwn());
+  function drawOwn() {
+    const ys = inp.value.split(/[^0-9]+/).filter(Boolean).map(Number).filter((v) => v >= 1 && v <= 6);
+    if (!ys.length) { ownOut.innerHTML = "1부터 6까지의 눈을 쉼표로 적어 보라."; return; }
+    const p = OLD[key];
+    let sy = 0, sw = 0, swy = 0;
+    for (const y of ys) { const w = 1 / 6 / p[y - 1]; sy += y; sw += w; swy += w * y; }
+    ownOut.innerHTML =
+      `눈 ${ys.length}개 (${key}) — 보정 없음 <b>${(sy / ys.length).toFixed(2)}</b> · ` +
+      `IS 그대로(횟수로 나눔) <b>${(swy / ys.length).toFixed(2)}</b> · ` +
+      `IS 정규화(<span class="sym-ratio">w</span>의 합 <b>${sw.toFixed(2)}</b>로 나눔) <b>${(swy / sw).toFixed(2)}</b>`;
+  }
 
   const row = GW.h("div", { style: { display: "grid", gridTemplateColumns: "minmax(0,0.8fr) minmax(0,1.2fr)", gap: "0.8rem" } }, f.stage);
   const left = GW.h("div", {}, row), right = GW.h("div", {}, row);
@@ -81,4 +108,5 @@ GW.register("is-dice", (el) => {
       .join(" · ") + ` — 가장 큰 가중치 <b>${Math.max(...w).toFixed(1)}</b>`;
   }
   draw();
+  drawOwn();
 });
