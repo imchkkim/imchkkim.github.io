@@ -637,7 +637,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="09-샘플러.html">9장 — 샘플러: 같은 길을 걷는 여러 걸음법</a></li>
 <li><a href="10-어텐션과-트랜스포머.html">10장 — 어텐션과 트랜스포머: 멀리 떨어진 칸끼리 읽기</a></li>
 <li><a href="11-잠재-디퓨전.html">11장 — 잠재 디퓨전: 작게 줄여 놓고 퍼뜨리기</a></li>
-<li><a href="12-디퓨전-트랜스포머.html">12장 — 디퓨전 트랜스포머</a></li>
+<li><a href="12-디퓨전-트랜스포머.html">12장 — 디퓨전 트랜스포머: U-Net 자리에 트랜스포머를</a></li>
 <li><a href="13-가이던스.html">13장 — 가이던스: 조건 쪽으로 더 세게</a></li>
 <li><a href="14-글을-읽는-인코더.html">14장 — 글을 읽는 인코더: CLIP의 마지막 층에서 언어모델의 여러 층으로</a></li>
 <li><a href="15-그림으로-조건-걸기.html">15장 — 그림으로 조건 걸기: 참조 이미지 여러 장</a></li>
@@ -669,6 +669,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>가운데 식은 <span class="sym" style="color:#1b9e77">x<sub>t</sub></span>를 만든 식을 <span class="sym" style="color:#1b9e77">x₀</span>에 대해 풀고 양변의 평균을 낸 것이다. 오른쪽 식은 트위디 공식 <span class="sym" style="color:#4c5d80">α<sub>t</sub></span><span class="sym" style="color:#1b9e77">x̂₀</span> = <span class="sym" style="color:#1b9e77">x<sub>t</sub></span> + <span class="sym" style="color:#4c5d80">σ<sub>t</sub></span>²<span class="sym" style="color:#b0892a">s</span>에 가운데 식을 넣으면 나온다. 앞의 두 점 데이터(<span class="sym" style="color:#4c5d80">α</span> = 1, <span class="sym" style="color:#4c5d80">σ</span> = 0.5)의 자리 0.3에서 확인하면, 원래 점의 평균이 0.834, 섞인 잡음의 평균이 (0.3 − 0.834)/0.5 = −1.067, 바늘이 1.067/0.5 = 2.135다. 앞에서 기록을 평균 내 얻은 바늘과 같다.</p>
 <figure class="fig "><img src="images/ch05/three_targets.png" alt="왼쪽: 데이터 ±1, 잡음 σ = 0.5에서 잡음 섞인 점 xₜ마다의 원래 점의 평균 x̂₀(초록), 섞인 잡음의 평균 ε̂(짙은 청록), 스코어 s(황토). 셋은 식 한 줄로 서로 바뀐다. 오른쪽: 맞힐 값의 크기. 스코어 타깃 −ε/σ의 표준편차는 1/σ로 잡음이 옅을수록 커지고, 잡음 타깃 ε는 언제나 1이다." loading="lazy"><figcaption>왼쪽: 데이터 ±1, 잡음 σ = 0.5에서 잡음 섞인 점 xₜ마다의 원래 점의 평균 x̂₀(초록), 섞인 잡음의 평균 ε̂(짙은 청록), 스코어 s(황토). 셋은 식 한 줄로 서로 바뀐다. 오른쪽: 맞힐 값의 크기. 스코어 타깃 −ε/σ의 표준편차는 1/σ로 잡음이 옅을수록 커지고, 잡음 타깃 ε는 언제나 1이다.</figcaption></figure>
 <p>세 출력은 같은 정보를 다른 꼴로 적은 것이다. 무엇을 맞히게 하느냐는 무엇을 배우느냐가 아니라, 맞힐 숫자의 크기를 잡음 수준마다 고르게 만들어 학습을 쉽게 하느냐의 문제다. 신경망이 섞은 잡음을 맞히게 하는 이 꼴을 <strong>잡음 예측</strong> (섞인 잡음을 맞히도록 신경망의 출력을 정하기 / ε-prediction)이라 하고, 그 신경망을 <span class="sym" style="color:#1f6066">ε<sub>θ</sub></span>(<span class="sym" style="color:#1b9e77">x<sub>t</sub></span>, <span class="sym" style="color:#a67a63">t</span>)로 적는다.</p>
+<p>다만 「같은 정보」라는 말에는 단서가 붙어 있다. 신경망이 셋 가운데 어느 것이든 끝까지 맞힐 만큼 넉넉하다는 단서다. 매니폴드 가설대로라면 깨끗한 그림은 넓은 공간의 좁은 면 근처에 모여 있고, 섞은 잡음은 모든 방향으로 고르게 퍼져 있다. 출력을 내보내는 길이 좁은 신경망에게도 둘을 맞히는 일이 똑같이 쉬울까?</p>
 <h3 id="ml에서-샘플러는-모두-x-₀로-바꿔-읽는다">ML에서: 샘플러는 모두 x̂₀로 바꿔 읽는다</h3>
 <p>모델마다 신경망이 내놓는 것은 다르다. 잡음을 내놓는 모델, 원래 그림을 내놓는 모델, 둘을 섞은 다른 양을 내놓는 모델이 함께 쓰인다. 샐리먼스(Tim Salimans)와 호는 2022년 논문에서 걸음 수가 적을 때 더 안정하다는 새 출력 꼴을 내놓았고, 이것이 흔히 「v-예측」이라 부르는 것이다. 그림 생성 도구 ComfyUI는 모델이 무엇을 내놓든 샘플러에 넘기기 전에 원래 그림의 어림으로 바꾼다. 잡음을 내놓는 모델이면 「입력 − 출력 × 잡음 크기」를 계산한다(<code>comfy/model_sampling.py</code> 의 <code>EPS</code>). 이 코드는 <span class="sym" style="color:#4c5d80">α</span> = 1인 꼴로 그림을 다루므로 가운데 식에서 <span class="sym" style="color:#4c5d80">α<sub>t</sub></span>가 빠진 모양이다.</p>
 <div class="dialogue"><h3 id="문제-4-만점이-다른-과목">문제 4. 만점이 다른 과목</h3>

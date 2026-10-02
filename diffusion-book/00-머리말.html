@@ -625,7 +625,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
-  <ol><li><a href="00-머리말.html" class="active">머리말</a></li>
+  <ol><li><a href="00-머리말.html" class="active">머리말</a><ul class="sidebar-toc"><li><a href="#ksampler-의-칸들">KSampler 의 칸들</a></li><li><a href="#누구를-위한-책인가">누구를 위한 책인가</a></li><li><a href="#두-줄기가-엮이는-지도">두 줄기가 엮이는 지도</a></li><li><a href="#드래곤볼-레이더">드래곤볼 레이더</a></li><li><a href="#다섯-권의-지도">다섯 권의 지도</a></li><li><a href="#이-책을-읽는-법">이 책을 읽는 법</a></li></ul></li>
 <li><a href="01-MLP로-만든-VAE.html">1장 — MLP로 만든 VAE: 첫 생성 모델</a></li>
 <li><a href="02-퍼짐.html">2장 — 퍼짐: 그림에 잡음을 섞으면</a></li>
 <li><a href="03-합성곱.html">3장 — 합성곱: 이웃만 보는 MLP</a></li>
@@ -637,7 +637,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="09-샘플러.html">9장 — 샘플러: 같은 길을 걷는 여러 걸음법</a></li>
 <li><a href="10-어텐션과-트랜스포머.html">10장 — 어텐션과 트랜스포머: 멀리 떨어진 칸끼리 읽기</a></li>
 <li><a href="11-잠재-디퓨전.html">11장 — 잠재 디퓨전: 작게 줄여 놓고 퍼뜨리기</a></li>
-<li><a href="12-디퓨전-트랜스포머.html">12장 — 디퓨전 트랜스포머</a></li>
+<li><a href="12-디퓨전-트랜스포머.html">12장 — 디퓨전 트랜스포머: U-Net 자리에 트랜스포머를</a></li>
 <li><a href="13-가이던스.html">13장 — 가이던스: 조건 쪽으로 더 세게</a></li>
 <li><a href="14-글을-읽는-인코더.html">14장 — 글을 읽는 인코더: CLIP의 마지막 층에서 언어모델의 여러 층으로</a></li>
 <li><a href="15-그림으로-조건-걸기.html">15장 — 그림으로 조건 걸기: 참조 이미지 여러 장</a></li>
@@ -649,7 +649,279 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter">
 <h1>머리말</h1>
-<p>이 책은 쓰는 중이다. 목차의 장들을 차례로 채워 간다.</p>
+<h2 id="ksampler-의-칸들">KSampler 의 칸들</h2>
+<p>그림 생성 도구 ComfyUI 에서 그림을 만드는 마디(KSampler)를 열면 칸이 여럿 있다. 시드(seed), 걸음 수(steps, 기본 20), cfg(기본 8.0), 샘플러 이름(sampler_name), 걸음 일정 이름(scheduler), 그리고 문장을 받는 positive 와 negative, 잠재 그림을 받는 latent_image. 샘플러 칸에는 이름이 마흔네 개, 걸음 일정 칸에는 아홉 개가 있다(2026년 8월의 ComfyUI 코드 기준). 이 칸들을 이리저리 바꿔 가며 좋은 그림을 뽑는 사람은 많다. 그런데 칸 하나를 바꿨을 때 계산의 어느 자리가 바뀌는지까지 말할 수 있는 사람은 드물다.</p>
+<p>이 책을 다 읽으면 그 칸들이 모두 식의 한 자리로 보인다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>칸</th>
+<th>계산의 어느 자리인가</th>
+<th>다루는 장</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>seed</td>
+<td>출발점의 잡음, 그리고 걸음마다 다시 넣는 잡음을 정하는 수</td>
+<td>7장 「랑주뱅과 역방향 미분방정식: 샘플을 뽑는 길」</td>
+</tr>
+<tr>
+<td>steps, sampler_name, scheduler</td>
+<td>잡음에서 그림까지 가는 하나의 길을 몇 걸음에, 어떤 걸음법으로, 어느 잡음 크기에 디디며 걸을지</td>
+<td>9장 「샘플러: 같은 길을 걷는 여러 걸음법」</td>
+</tr>
+<tr>
+<td>cfg, negative</td>
+<td>조건을 넣은 예측과 넣지 않은 예측의 차이를 몇 배로 키울지, 그 「넣지 않은」 자리에 무엇을 둘지</td>
+<td>13장 「가이던스: 조건 쪽으로 더 세게」</td>
+</tr>
+<tr>
+<td>positive 에 넣는 글</td>
+<td>문장이 어떤 벡터 줄이 되어 신경망의 어디로 들어가는지</td>
+<td>14장 「글을 읽는 인코더: CLIP의 마지막 층에서 언어모델의 여러 층으로」</td>
+</tr>
+<tr>
+<td>latent_image</td>
+<td>그림을 가로세로 여러 배 줄인 잠재 그림. 생성은 이 작은 그림 위에서 일어난다</td>
+<td>11장 「잠재 디퓨전: 작게 줄여 놓고 퍼뜨리기」</td>
+</tr>
+<tr>
+<td>model</td>
+<td>잡음 섞인 잠재 그림을 읽고 잡음(또는 속도)을 맞히는 신경망. U-Net 에서 트랜스포머로 바뀌었다</td>
+<td>6장 「U-Net: 여러 해상도로 잡음을 읽는다」, 12장 「디퓨전 트랜스포머: U-Net 자리에 트랜스포머를」</td>
+</tr>
+</tbody>
+</table></div>
+<p>책의 제목이 그 길을 말한다. 출발점은 독자가 이미 아는 MLP(층을 여러 겹 쌓아 입력을 출력으로 바꾸는 가장 기본적인 신경망)이고, 도착점은 FLUX.1, Qwen-Image, Z-Image 같은 요즘 그림 생성 모델의 몸통인 디퓨전 트랜스포머다. 이 모델들의 잡음 예측 신경망에는 합성곱 층이 하나도 없다. 그 사이를 잇는 것이 이 책이다.</p>
+<h2 id="누구를-위한-책인가">누구를 위한 책인가</h2>
+<p>신경망을 조금은 다뤄 본 사람을 독자로 생각했다. 손글씨 숫자를 맞히는 분류기를 PyTorch 로 한 번쯤 학습시켜 봤고, 역전파가 손실의 기울기를 층마다 거꾸로 전해 주는 계산이라는 것을 아는 정도다. 그래서 MLP 는 따로 한 장을 두지 않고, 1장 「MLP로 만든 VAE: 첫 생성 모델」에서 첫 생성 모델을 만드는 도구로 짧게 되짚는다. 수학은 미분과 확률의 기초면 된다. 정규분포, 평균과 분산, 조건부 확률을 들어 봤으면 나머지는 쓰는 자리에서 푼다.</p>
+<p>이 책은 개념을 「앞의 무엇이 모자라서 다음이 나왔는가」의 순서로 늘어놓는다. 정답을 맞히던 MLP 에게 「3을 하나 그려 봐」라고 하면 흐린 평균 그림이 나온다. 그 흐림을 고치려다 VAE 가 나오고, VAE 그림이 여전히 흐릿해서 잡음 섞기가 나온다. 장마다 첫 페이지 「이 장의 물음」은 앞에서 막힌 곳에서 시작하고, 마지막 페이지 「자주 하는 실수와 요약」은 「이제 이것은 할 수 있지만 저것은 아직 막혀 있다」는 「막힌 곳」으로 끝난다. 다음 장은 그 막힌 곳에서 출발한다.</p>
+<p>본문과 코드 출력에 나오는 숫자는 모두 직접 돌린 코드에서 나온 값이다. 모델의 층 수, 채널 수, 샘플러의 계산은 기억이 아니라 공개된 코드(ComfyUI 등)와 원 논문에서 확인했다. 다만 조건 걸기와 영상을 다룬 장의 모델 이름은 2026년의 사례다. 이 분야의 모델은 몇 달이면 바뀐다. 이름은 바뀌어도 「왜 층을 여러 개 뽑는가」, 「왜 참조 그림을 같은 토큰 줄에 이어 붙이는가」 같은 까닭은 오래 남으므로, 본문의 줄기는 그 까닭에 두었다.</p>
+<p><strong>다루지 않는 것.</strong> 생성 모델 이야기는 VAE 에서 시작한다. 정규화 흐름(normalizing flow), GAN, LSTM·RNN 은 다루지 않는다. 8장 「플로우 매칭: 길을 통째로 배우기」는 이름이 정규화 흐름과 비슷하지만 다른 것이다. 열 방정식의 유도, 랑주뱅 방정식의 물리, 최적 수송의 수학처럼 깊은 이론은 결론과 쓰임만 적고, 유도는 아래 「다섯 권의 지도」의 이론 책으로 잇는다.</p>
+<h2 id="두-줄기가-엮이는-지도">두 줄기가 엮이는 지도</h2>
+<p>이 책에는 줄기가 둘 있다. 하나는 <strong>구조</strong>, 곧 그림을 읽고 그림을 내놓는 신경망을 어떻게 짓느냐다. MLP 에서 합성곱, U-Net, 어텐션과 트랜스포머를 거쳐 잠재 공간으로 내려간다. 다른 하나는 <strong>이론</strong>, 곧 잡음과 데이터 사이의 길을 어떻게 정하고 어떻게 걷느냐다. VAE 에서 퍼짐, 스코어, 잡음 맞히기, 역방향 미분방정식, 플로우 매칭, 샘플러로 간다. 두 줄기는 한 장씩 엇갈려 나오다가 12장 「디퓨전 트랜스포머」에서 만난다. 그 뒤로는 만든 모델에 조건을 거는 법(13장 「가이던스」부터 15장 「그림으로 조건 걸기」까지)과 시간 축이 붙은 영상(16장 「영상 생성」)이 이어진다.</p>
+<pre class="mermaid">flowchart TB
+  subgraph S[&quot;구조: 그림을 읽는 신경망&quot;]
+    direction LR
+    c1[&quot;1장 MLP&quot;] --&gt; c3[&quot;3장 합성곱&quot;] --&gt; c6[&quot;6장 U-Net&quot;] --&gt; c10[&quot;10장 어텐션과 트랜스포머&quot;] --&gt; c11[&quot;11장 잠재 디퓨전&quot;]
+  end
+  subgraph T[&quot;이론: 잡음과 데이터 사이의 길&quot;]
+    direction LR
+    t1[&quot;1장 VAE&quot;] --&gt; t2[&quot;2장 퍼짐&quot;] --&gt; t4[&quot;4장 스코어&quot;] --&gt; t5[&quot;5장 잡음을 맞히는 신경망&quot;] --&gt; t7[&quot;7장 랑주뱅과 역방향 미분방정식&quot;] --&gt; t8[&quot;8장 플로우 매칭&quot;] --&gt; t9[&quot;9장 샘플러&quot;]
+  end
+  c11 --&gt; m12[&quot;12장 디퓨전 트랜스포머&quot;]
+  t9 --&gt; m12
+  m12 --&gt; g13[&quot;13장 가이던스&quot;] --&gt; g14[&quot;14장 글을 읽는 인코더&quot;] --&gt; g15[&quot;15장 그림으로 조건 걸기&quot;] --&gt; v16[&quot;16장 영상 생성&quot;] --&gt; a17[&quot;부록 A 강화학습으로 이어지는 다리&quot;]
+</pre>
+<p>장마다 무엇에 막혀서 무엇을 묻는지를 한 줄씩 적으면 이렇다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>장</th>
+<th>줄기</th>
+<th>앞에서 막혀서 묻는 것</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1장 「MLP로 만든 VAE: 첫 생성 모델」</td>
+<td>구조 + 이론</td>
+<td>맞출 정답이 없는 「그려 봐」를 정답 맞히기에 익숙한 신경망에게 어떻게 가르칠까. 오토인코더, VAE, 재매개변수화, ELBO(로그우도 아래에 받친 바닥)</td>
+</tr>
+<tr>
+<td>2장 「퍼짐: 그림에 잡음을 섞으면」</td>
+<td>이론</td>
+<td>VAE 그림은 흐릿하다. 인코더를 배우지 말고 잡음 섞기로 고정하면, 그 길은 어떻게 생겼을까</td>
+</tr>
+<tr>
+<td>3장 「합성곱: 이웃만 보는 MLP」</td>
+<td>구조</td>
+<td>그림 크기의 MLP 는 층 하나에 가중치가 수천억 개다. 이웃만 보고, 모든 자리가 같은 비율을 쓰면</td>
+</tr>
+<tr>
+<td>4장 「스코어: 퍼지기 전으로 되돌리는 방향」</td>
+<td>이론</td>
+<td>퍼진 분포를 식 그대로 거꾸로 풀면 터진다. 점 하나하나를 되돌리려면 무엇을 알아야 할까</td>
+</tr>
+<tr>
+<td>5장 「잡음을 맞히는 신경망: DDPM과 잡음 제거 스코어 매칭」</td>
+<td>이론 + 구조</td>
+<td>모르는 분포의 바늘을 그림만 가지고 어떻게 배울까. VAE 의 ELBO 가 그대로 손실이 된다</td>
+</tr>
+<tr>
+<td>6장 「U-Net: 여러 해상도로 잡음을 읽는다」</td>
+<td>구조</td>
+<td>합성곱은 멀리 보지 못하고, 숫자 하나인 잡음 수준도 신경망에 넣어야 한다</td>
+</tr>
+<tr>
+<td>7장 「랑주뱅과 역방향 미분방정식: 샘플을 뽑는 길」</td>
+<td>이론</td>
+<td>바늘을 배웠으니 이제 걸어야 한다. 걸음마다 잡음을 왜 다시 넣을까</td>
+</tr>
+<tr>
+<td>8장 「플로우 매칭: 길을 통째로 배우기」</td>
+<td>이론</td>
+<td>휜 길을 천 걸음 걷기는 느리다. 처음부터 곧은 길을 정해 그 속도를 배우면</td>
+</tr>
+<tr>
+<td>9장 「샘플러: 같은 길을 걷는 여러 걸음법」</td>
+<td>이론</td>
+<td>길은 정했지만 몇 걸음에 어떻게 걸을지는 정하지 않았다. 오일러부터 2차 방법, 걸음 일정, 증류까지</td>
+</tr>
+<tr>
+<td>10장 「어텐션과 트랜스포머: 멀리 떨어진 칸끼리 읽기」</td>
+<td>구조</td>
+<td>U-Net 이 끼워 넣은 「멀리 읽는 부품」은 무엇일까. 셀프·크로스 어텐션, 위치 인코딩, 앞에서 계산한 것을 적어 두고 다시 쓰는 KV 캐시</td>
+</tr>
+<tr>
+<td>11장 「잠재 디퓨전: 작게 줄여 놓고 퍼뜨리기」</td>
+<td>구조</td>
+<td>큰 그림에서 직접 퍼뜨리면 계산이 너무 크다. 첫 생성 모델로 만든 VAE 를 압축기로 다시 꺼내고, 되살리기를 우선하는 압축기와 뜻을 잘 담는 인코더 사이의 목표 충돌까지</td>
+</tr>
+<tr>
+<td>12장 「디퓨전 트랜스포머: U-Net 자리에 트랜스포머를」</td>
+<td>만남</td>
+<td>U-Net 을 떠난 까닭(멀리 떨어진 조각끼리 정보가 오가는 통로), 잠재 그림을 토큰으로 자르는 패치, 시간을 정규화의 배율로 넣는 adaLN-Zero, 글과 그림을 한 줄로 읽는 합동 어텐션, 주요 모델 견주기, 잡음 대신 그림 자체를 맞히는 쪽으로 돌아가는 흐름</td>
+</tr>
+<tr>
+<td>13장 「가이던스: 조건 쪽으로 더 세게」</td>
+<td>조건</td>
+<td>조건을 넣고 배워도 모델은 조건을 반쯤만 따른다</td>
+</tr>
+<tr>
+<td>14장 「글을 읽는 인코더: CLIP의 마지막 층에서 언어모델의 여러 층으로」</td>
+<td>조건</td>
+<td>가이던스는 조건을 세게 할 뿐, 조건 벡터가 문장을 잘못 담으면 소용없다</td>
+</tr>
+<tr>
+<td>15장 「그림으로 조건 걸기: 참조 이미지 여러 장」</td>
+<td>조건</td>
+<td>「이 얼굴」, 「이 옷」은 글로 전해지지 않는다. 참조 그림 여러 장은 어디로 들어가야 할까</td>
+</tr>
+<tr>
+<td>16장 「영상 생성: 시퀀스와 디퓨전 사이」</td>
+<td>영상</td>
+<td>그림이 줄을 이루면 길이와 오류 누적이 문제가 된다. 학습 때 과거를 어디서 가져올까</td>
+</tr>
+<tr>
+<td>부록 A 「강화학습으로 이어지는 다리」</td>
+<td>다리</td>
+<td>디퓨전 모델을 사람의 선호나 보상으로 다듬으려면 언어모델의 무엇이 디퓨전의 어디에 서야 할까</td>
+</tr>
+</tbody>
+</table></div>
+<p>처음부터 차례로 읽기를 권한다. 줄기가 둘이어도 장마다 바로 앞 장의 막힌 곳에서 출발하기 때문이다. 이를테면 6장 「U-Net」은 5장 「잡음을 맞히는 신경망」이 정한 일을 맡을 신경망을 짓고, 9장 「샘플러」가 걸음마다 부르는 신경망의 속은 10장 「어텐션과 트랜스포머」부터 12장 「디퓨전 트랜스포머」까지에서 다시 짓는다.</p>
+<h2 id="드래곤볼-레이더">드래곤볼 레이더</h2>
+<p>이론 줄기에는 비유 하나가 처음부터 끝까지 따라다닌다. 넓은 평야에 드래곤볼 일곱 개가 숨어 있다. 볼마다 전파를 내보내고, 그 신호는 볼에서 멀어질수록 약해진다. 평야 아무 데나 떨어진 참가자 수천 명은 레이더를 하나씩 받고, 바늘만 보며 걷는다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>비유</th>
+<th>이 책에서 가리키는 것</th>
+<th>처음 나오는 장</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>평야와 드래곤볼</td>
+<td>그림 공간과 데이터가 몰린 봉우리</td>
+<td>4장 「스코어」</td>
+</tr>
+<tr>
+<td>레이더 바늘</td>
+<td>스코어: 로그 밀도가 가장 빨리 커지는 쪽</td>
+<td>4장 「스코어」</td>
+</tr>
+<tr>
+<td>새벽 안개</td>
+<td>잡음 수준. 안개가 짙을수록 바늘은 「대충 저쪽」만 가리킨다</td>
+<td>4장 「스코어」</td>
+</tr>
+<tr>
+<td>과거 대회의 기록</td>
+<td>그림에 잡음을 섞어 본 기록 한 줄. 이것으로 레이더를 만든다</td>
+<td>5장 「잡음을 맞히는 신경망」</td>
+</tr>
+<tr>
+<td>바람</td>
+<td>거꾸로 걸을 때 걸음마다 다시 넣는 잡음</td>
+<td>7장 「랑주뱅과 역방향 미분방정식」</td>
+</tr>
+<tr>
+<td>길 수첩</td>
+<td>자리와 시각마다 「이쪽으로 이만한 빠르기로」를 적어 둔 속도장</td>
+<td>8장 「플로우 매칭」</td>
+</tr>
+</tbody>
+</table></div>
+<p>13장 「가이던스」와 16장 「영상 생성」은 「바늘」이라는 낱말만 이어 쓴다. 구조 줄기의 장에는 이 큰 비유 대신 절마다 작은 일상 비유(지도 앱의 축척, 단톡방, 모자이크 벽 같은 것)를 두었다.</p>
+<h2 id="다섯-권의-지도">다섯 권의 지도</h2>
+<p>이 책은 다섯 권짜리 묶음의 한 권이다. 다섯 권은 두 줄로 선다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>줄</th>
+<th>책</th>
+<th>독자에게 하는 일</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>큰 줄기</td>
+<td>『MLP에서 디퓨전 트랜스포머까지』(이 책), <a href="https://lameproof.com/genrl-book/">『생성모델의 강화학습』</a></td>
+<td>처음부터 끝까지 읽는 책. 이 책이 그림을 만드는 모델을 짓고, 강화학습 책이 만든 모델을 사람의 선호와 보상으로 다듬는다</td>
+</tr>
+<tr>
+<td>토대</td>
+<td><a href="https://lameproof.com/dynamics-book/">『ML 입문자를 위한 동역학』</a>, <a href="https://lameproof.com/diffgeo-book/">『미분기하학의 언어들』</a>, <a href="https://lameproof.com/infogeo-book/">『정보기하학』</a></td>
+<td>큰 줄기를 읽다가 이론이 더 궁금해질 때 찾아 들어가는 책</td>
+</tr>
+</tbody>
+</table></div>
+<p>열 방정식, 랑주뱅 방정식, KL 발산 같은 이론이 이 책에 처음 나오는 자리에서는 이 책만으로 따라올 수 있을 만큼 두세 문장으로 소개하고, 유도와 깊은 설명은 토대 책의 그 절로 잇는다. 그 자리에는 본문과 모양이 다른 <strong>길잡이</strong> 상자가 있다. 상자 머리에 책 이름과 절 제목이, 안에 그 절에서 무엇을 더 얻는지 한두 문장과 링크가 있다. 예를 들어 2장 「퍼짐」의 열 방정식에는 동역학 책 「열 방정식: 이웃 평균을 연속으로 쓰면」으로, 7장 「랑주뱅과 역방향 미분방정식」의 랑주뱅 샘플링에는 같은 책 「랑주뱅 방정식: 힘에 끌려가며 흔들리는 길」로, 1장 「MLP로 만든 VAE」의 KL 발산에는 정보기하학 책 「KL 발산: 방향이 있는 확률의 자」로 가는 길잡이가 있다. 부록 A 는 강화학습 책 19장 「디퓨전에서 DPO를 쓰려면」으로 이어진다. 길잡이는 건너뛰어도 이 책을 따라오는 데 지장이 없다.</p>
+<h2 id="이-책을-읽는-법">이 책을 읽는 법</h2>
+<p><strong>절 하나, 개념 하나.</strong> 장은 개념 하나에 한 페이지씩인 절들로 이루어진다. 절은 대개 물음으로 시작해, 그 개념이 나오기까지 사람들이 무엇에 막혔는지를 담은 「역사」 소절, 숫자로 손에 쥘 수 있는 작은 예제, 그 개념을 한눈에 보여 주는 그림, 실제 모델에서 그 개념이 어디에 있는지 짚는 「ML에서」 소절, 연습문제의 순서로 간다. 해당하는 내용이 없는 절은 몇 단계를 건너뛴다.</p>
+<p><strong>수식 색과 기호 표.</strong> 수식의 기호는 개념마다 정해 둔 색으로 칠했고, 수식 바로 아래에 기호마다 뜻을 적은 작은 표를 붙였다. 이 책에서 가장 자주 나오는 식, 그림에 잡음을 섞는 식으로 보이면 이렇다.</p>
+<div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#1b9e77"><msub><mi>x</mi><mi>t</mi></msub></mstyle><mo>=</mo><mstyle mathcolor="#4c5d80"><msub><mi>α</mi><mi>t</mi></msub></mstyle><mtext> </mtext><mstyle mathcolor="#1b9e77"><msub><mi>x</mi><mn>0</mn></msub></mstyle><mo>+</mo><mstyle mathcolor="#4c5d80"><msub><mi>σ</mi><mi>t</mi></msub></mstyle><mtext> </mtext><mstyle mathcolor="#1f6066"><mi>ε</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#1b9e77}{x_t} = \textcolor{#4c5d80}{\alpha_t}\,\textcolor{#1b9e77}{x_0} + \textcolor{#4c5d80}{\sigma_t}\,\textcolor{#1f6066}{\varepsilon}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord" style="color:#1b9e77;"><span class="mord mathnormal" style="color:#1b9e77;">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#1b9e77;"><span class="mord mathnormal mtight" style="color:#1b9e77;">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord" style="color:#4c5d80;"><span class="mord mathnormal" style="margin-right:0.0037em;color:#4c5d80;">α</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0037em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#4c5d80;"><span class="mord mathnormal mtight" style="color:#4c5d80;">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord" style="color:#1b9e77;"><span class="mord mathnormal" style="color:#1b9e77;">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#1b9e77;"><span class="mord mtight" style="color:#1b9e77;">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord" style="color:#4c5d80;"><span class="mord mathnormal" style="margin-right:0.0359em;color:#4c5d80;">σ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#4c5d80;"><span class="mord mathnormal mtight" style="color:#4c5d80;">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="color:#1f6066;">ε</span></span></span></span></span></div>
+<div class="math-block math-legend"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#1b9e77"><msub><mi>x</mi><mn>0</mn></msub></mstyle><mo separator="true">,</mo><mtext> </mtext><mstyle mathcolor="#1b9e77"><msub><mi>x</mi><mi>t</mi></msub></mstyle></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>데이터(잡음을 섞기 전의 그림), 시간 t까지 잡음을 섞은 그림</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#1f6066"><mi>ε</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>표준정규 잡음: 칸마다 따로 뽑은 평균 0, 분산 1의 수</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#4c5d80"><msub><mi>α</mi><mi>t</mi></msub></mstyle><mo separator="true">,</mo><mtext> </mtext><mstyle mathcolor="#4c5d80"><msub><mi>σ</mi><mi>t</mi></msub></mstyle></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>잡음 일정: 시간 t에 그림이 남는 비율과 잡음의 크기</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#a67a63"><mi>t</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>시간 (0 데이터, 1 가장 짙은 잡음)</mtext></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{ll}
+\textcolor{#1b9e77}{x_0},\ \textcolor{#1b9e77}{x_t} &amp; \text{데이터(잡음을 섞기 전의 그림), 시간 t까지 잡음을 섞은 그림} \\
+\textcolor{#1f6066}{\varepsilon} &amp; \text{표준정규 잡음: 칸마다 따로 뽑은 평균 0, 분산 1의 수} \\
+\textcolor{#4c5d80}{\alpha_t},\ \textcolor{#4c5d80}{\sigma_t} &amp; \text{잡음 일정: 시간 t에 그림이 남는 비율과 잡음의 크기} \\
+\textcolor{#a67a63}{t} &amp; \text{시간 (0 데이터, 1 가장 짙은 잡음)}
+\end{array}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:4.8em;vertical-align:-2.15em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.65em;"><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#1b9e77;"><span class="mord mathnormal" style="color:#1b9e77;">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#1b9e77;"><span class="mord mtight" style="color:#1b9e77;">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord" style="color:#1b9e77;"><span class="mord mathnormal" style="color:#1b9e77;">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#1b9e77;"><span class="mord mathnormal mtight" style="color:#1b9e77;">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#1f6066;">ε</span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#4c5d80;"><span class="mord mathnormal" style="margin-right:0.0037em;color:#4c5d80;">α</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0037em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#4c5d80;"><span class="mord mathnormal mtight" style="color:#4c5d80;">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord" style="color:#4c5d80;"><span class="mord mathnormal" style="margin-right:0.0359em;color:#4c5d80;">σ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#4c5d80;"><span class="mord mathnormal mtight" style="color:#4c5d80;">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#a67a63;">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.15em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.65em;"><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">데이터</span><span class="mord">(</span><span class="mord hangul_fallback">잡음을</span><span class="mord"> </span><span class="mord hangul_fallback">섞기</span><span class="mord"> </span><span class="mord hangul_fallback">전의</span><span class="mord"> </span><span class="mord hangul_fallback">그림</span><span class="mord">), </span><span class="mord hangul_fallback">시간</span><span class="mord"> t</span><span class="mord hangul_fallback">까지</span><span class="mord"> </span><span class="mord hangul_fallback">잡음을</span><span class="mord"> </span><span class="mord hangul_fallback">섞은</span><span class="mord"> </span><span class="mord hangul_fallback">그림</span></span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">표준정규</span><span class="mord"> </span><span class="mord hangul_fallback">잡음</span><span class="mord">: </span><span class="mord hangul_fallback">칸마다</span><span class="mord"> </span><span class="mord hangul_fallback">따로</span><span class="mord"> </span><span class="mord hangul_fallback">뽑은</span><span class="mord"> </span><span class="mord hangul_fallback">평균</span><span class="mord"> 0, </span><span class="mord hangul_fallback">분산</span><span class="mord"> 1</span><span class="mord hangul_fallback">의</span><span class="mord"> </span><span class="mord hangul_fallback">수</span></span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">잡음</span><span class="mord"> </span><span class="mord hangul_fallback">일정</span><span class="mord">: </span><span class="mord hangul_fallback">시간</span><span class="mord"> t</span><span class="mord hangul_fallback">에</span><span class="mord"> </span><span class="mord hangul_fallback">그림이</span><span class="mord"> </span><span class="mord hangul_fallback">남는</span><span class="mord"> </span><span class="mord hangul_fallback">비율과</span><span class="mord"> </span><span class="mord hangul_fallback">잡음의</span><span class="mord"> </span><span class="mord hangul_fallback">크기</span></span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">시간</span><span class="mord"> (0 </span><span class="mord hangul_fallback">데이터</span><span class="mord">, 1 </span><span class="mord hangul_fallback">가장</span><span class="mord"> </span><span class="mord hangul_fallback">짙은</span><span class="mord"> </span><span class="mord hangul_fallback">잡음</span><span class="mord">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.15em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
+<p>데이터와 그림은 언제나 초록(<span class="sym" style="color:#1b9e77">x</span>), 잡음은 짙은 청록(<span class="sym" style="color:#1f6066">ε</span>), 잡음 일정은 회청(<span class="sym" style="color:#4c5d80">α<sub>t</sub></span>, <span class="sym" style="color:#4c5d80">σ<sub>t</sub></span>)이다. 같은 개념은 책 전체에서, 그리고 위젯과 그림 안에서도 같은 색이다. 본문 속 짧은 식도 같은 색으로 칠했다. 색을 구별하기 어렵다면 기호 표만으로도 읽을 수 있게 썼다.</p>
+<p><strong>이 책의 약속 몇 가지.</strong> 시간 <span class="sym" style="color:#a67a63">t</span>는 0이 데이터, 1이 순수한 잡음이고, 그림을 만들 때는 <span class="sym" style="color:#a67a63">t</span>를 1에서 0으로 줄이며 걷는다. 논문에 따라 방향을 거꾸로 적기도 하니, 논문을 함께 읽을 때는 이것부터 확인하자. 표준정규 잡음은 언제나 <span class="sym" style="color:#1f6066">ε</span>이고, z 는 주로 VAE 와 잠재 디퓨전의 잠재 변수에 쓴다. 사람 이름은 원어의 성을 한글로 적고 처음 나올 때 원어를 함께 적는다.</p>
+<p><strong>위젯.</strong> 「직접 움직여 보기」 줄이 있는 자리에는 값을 바꿔 가며 결과를 바로 보는 위젯이 들어 있다. 위젯에 「문제 N 불러오기」 단추가 있으면 그 문제의 값이 들어가므로, 손으로 푼 답을 위젯으로 맞춰 볼 수 있다.</p>
+<p><strong>설계 노트.</strong> 본문 곁의 「설계 노트」 상자는 모델을 만든 사람들이 왜 그렇게 설계했는지, 그리고 같은 판단이 전혀 다른 분야에서도 통한 사례를 모은 곁글이다. 1장 「MLP로 만든 VAE」의 「잴 수 없는 값 대신 잴 수 있는 바닥을 올린다」, 12장 「디퓨전 트랜스포머」의 「새 부품은 아무것도 바꾸지 않는 상태로 끼운다」처럼 제목이 곧 그 생각의 방식이다. 본문 흐름 밖의 이야기라 건너뛰어도 된다.</p>
+<p><strong>연습문제와 함께 풀기.</strong> 개념 절 끝에는 문제가 붙어 있다. 문제는 가능한 곳마다 세 계단으로 놓았다. 같은 계산을 일상의 일로 먼저 해 보는 가벼운 문제, 본문의 수학을 다른 쪽에서 다시 확인하는 문제, 그 개념이 실제 모델에서 쓰이는 문제 순서다. 억지스러운 계단은 비워 두었다. 문제마다 아래에 세 사람이 그 문제를 실제로 풀며 틀리고 바로잡는 대화가 이어진다. 대화를 읽기 전에 먼저 혼자 풀어 보길 권한다. 장의 마지막 페이지에는 그 대화에서 학생들이 실제로 틀린 곳을 「자주 하는 실수」 표로 모았다.</p>
+<p>대화에 나오는 세 사람은 다음과 같다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>인물</th>
+<th>소개</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>선생님</strong></td>
+<td>강의자. 정답을 먼저 말하는 대신 모순이 드러나는 질문을 던진다.</td>
+</tr>
+<tr>
+<td><strong>김민준</strong></td>
+<td>학부 3학년. ML 강의를 몇 개 들었고 softmax, numpy, PyTorch 과제를 해 본 수준이다. 코드로 먼저 돌려 보고 답이 빠르다.</td>
+</tr>
+<tr>
+<td><strong>이서연</strong></td>
+<td>수학과 3학년. 해석학과 선형대수는 탄탄하지만 물리 감각은 약하다. 이상한 결과를 스스로 알아채고 조건과 범위를 따진다.</td>
+</tr>
+</tbody>
+</table></div>
+<p>한 문제에서 두 학생은 서로 다른 이유로 틀리거나 한 명만 틀린다. 두 학생이 틀리는 곳은 대개 독자가 그 개념을 처음 만났을 때 틀리는 곳이기도 하다. 학생끼리는 반말을, 선생님께는 존댓말을 쓰고, 선생님은 두 사람을 「민준 학생」, 「서연 학생」이라고 부른다.</p>
+<p>책을 덮을 무렵 KSampler 의 칸을 다시 열어 보자. cfg 를 8에서 3으로 내리면 걸음마다 무엇이 줄어드는지, 샘플러를 euler 에서 dpmpp_2m 으로 바꾸면 신경망을 부르는 횟수는 그대로인데 무엇이 나아지는지, 시드가 정하는 것이 어디까지인지가 먼저 떠오른다면 이 책은 제 몫을 한 것이다.</p>
 
 </article>
 <nav class="chapter-nav"><span></span><a class="chapter-nav-next" href="01-MLP로-만든-VAE.html">MLP: 정답이 하나일 때 잘 맞히는 함수 &rarr;</a></nav>
