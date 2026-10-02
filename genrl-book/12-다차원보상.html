@@ -485,6 +485,11 @@ pre.mermaid {
 .w-svg .w-dot { stroke: var(--w-surface); stroke-width: 2; fill: var(--w-muted); }
 .w-svg .dash { stroke-dasharray: 5 4; }
 .w-svg .thin { stroke-width: 1.2; }
+/* 휴대폰 폭: 위젯 그래프의 폭 560 좌표가 약 330px 로 줄어 눈금·이름표가 6~7px 로 보인다. 그 글자만 키운다(넓은 화면은 그대로) */
+@media (max-width: 600px) {
+  .w-svg .w-tick { font-size: 16px; }
+  .w-svg .w-axis-label, .w-svg .w-label { font-size: 17px; }
+}
 .w-svg .c1 { stroke: var(--w-1); } .w-svg .f1 { fill: var(--w-1); }
 .w-svg .c2 { stroke: var(--w-2); } .w-svg .f2 { fill: var(--w-2); }
 .w-svg .c3 { stroke: var(--w-3); } .w-svg .f3 { fill: var(--w-3); }
@@ -653,7 +658,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="09-길이편향.html">9. 길이 편향 — 합이 공정한가?</a></li>
 <li><a href="10-레퍼런스모델.html">10. 레퍼런스 모델 — 이 목줄은 왜 묶여 있나?</a></li>
 <li><a href="11-브래들리테리모델.html">11. Bradley-Terry — 시그모이드는 왜 거기 있는가?</a></li>
-<li><a href="12-다차원보상.html" class="active">12. 다차원 보상 — 스칼라를 넘어서</a><ul class="sidebar-toc"><li><a href="12-다차원보상.html" class="current">파레토 프론티어: 모든 축에서 이기는 응답은 없다</a></li><li><a href="12-다차원보상-2.html">가중합: 벡터 보상을 숫자 하나로</a></li><li><a href="12-다차원보상-3.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="12-다차원보상.html" class="active">12. 다차원 보상 — 스칼라를 넘어서</a><ul class="sidebar-toc"><li><a href="12-다차원보상.html" class="current">파레토 프론티어: 모든 축에서 이기는 응답은 없다</a></li><li><a href="12-다차원보상-2.html">가중합: 벡터 보상을 숫자 하나로</a></li><li><a href="12-다차원보상-3.html">스칼라 보상의 빈틈: 최적화는 가중치를 글자 그대로 읽는다</a></li><li><a href="12-다차원보상-4.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="13-DPO의진화.html">13. DPO의 진화 — 하나의 알고리즘이 낳은 가계도</a></li>
 <li><a href="14-온라인과오프라인.html">14. 온라인과 오프라인 — 이상과 현실 사이에서</a></li>
 <li><a href="15-실전사례.html">15. 실전사례 — 현장의 목소리, JoyCaption의 DPO 실전기</a></li>
@@ -676,20 +681,74 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <h4 id="의문">의문</h4>
 <p>쌍비교로 학습한 Bradley-Terry(BT — 두 응답의 점수 차를 시그모이드로 승률로 바꾸는 모델) 보상 모델은 응답마다 점수 <strong>하나</strong>만 준다. 정책(응답을 뽑는 모델)을 학습하는 정책 그래디언트 속 보상 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span></eq> 도 스칼라다. 그런데 좋은 답은 여러 면에서 좋다 — 정확하고, 간결하고, 안전하고, 친절하다. 보상이 숫자 하나가 아니라 벡터라면, <strong>&quot;이 응답이 좋다&quot;는 판단을 어떻게 내리는가?</strong></p>
 <h4 id="파레토-프론티어-모든-축에서-이기는-응답은-없다">파레토 프론티어: 모든 축에서 이기는 응답은 없다</h4>
-<p>한 응답은 더 정확하고 다른 응답은 더 간결하다. 이 둘 중 어느 쪽이 &quot;더 좋다&quot;고 말할 수 있을까? 말할 수 없다면, 적어도 “확실히 나쁜” 응답은 어떻게 가려낼까?</p>
-<h5 id="역사-파레토의-최적">역사: 파레토의 최적</h5>
-<p>이 물음에 이름을 준 사람은 이탈리아의 경제학자 빌프레도 파레토(Vilfredo Pareto)다. 그는 1906년 『정치경제학 교본(Manuale di economia politica)』에서, 누군가의 처지를 나쁘게 하지 않고는 다른 누구의 처지도 더 낫게 할 수 없는 상태를 따졌다. 사람 대신 평가 기준을 놓으면 그대로 여러 목표를 동시에 다루는 최적화의 언어가 된다.</p>
+<p>선호 데이터를 만드는 사람은 같은 프롬프트에 나온 두 응답을 놓고 하루에도 수백 번 둘 중 하나를 고른다. 그런데 한 응답은 더 정확하고 다른 응답은 더 간결한 경우가 흔하다. 이 둘 중 어느 쪽이 &quot;더 좋다&quot;고 말할 수 있을까? 말할 수 없다면, 적어도 “확실히 나쁜” 응답은 어떻게 가려낼까?</p>
+<h5 id="역사-더할-수-없는-만족을-더하지-않고-비교하기">역사: 더할 수 없는 만족을 더하지 않고 비교하기</h5>
+<p>이 물음에 이름을 준 사람은 이탈리아의 빌프레도 파레토(Vilfredo Pareto)다. 그는 원래 토목 기사였다. 1869년 토리노의 공과대학에서 공학 박사 학위를 받고 국영 철도 회사와 제철소에서 일했고, 경제학에 본격적으로 뛰어든 것은 마흔 중반이 되어서였다.</p>
+<p>그 무렵 경제학은 사람마다의 만족(효용)을 숫자로 재어 더할 수 있다고 보았다. 공리주의 철학이 내건 「최대 다수의 최대 행복」도 모두의 만족을 더한 합을 키우자는 말이다. 파레토는 이 덧셈을 버렸다. 한 사람이 무엇을 무엇보다 더 좋아하는지 그 순서만 알면 경제를 다룰 수 있고, 그 좋음이 몇 점인지는 잴 필요가 없다고 처음으로 짚은 사람이 그였다. 좋음은 잴 수 없다고 본 그는 1906년 『정치경제학 교본(Manuale di economia politica)』에서, 점수를 더하지 않고도 내릴 수 있는 판정만 남겼다. 누군가의 처지를 나쁘게 하지 않고는 다른 누구의 처지도 더 낫게 할 수 없는 상태라면, 거기서 모두가 동의할 만큼 나아질 길은 없다. 이 판정에는 사람 사이의 만족을 바꿔 주는 환율이 필요 없다.</p>
+<p>사람 대신 평가 기준을 놓으면 그대로 여러 목표를 동시에 다루는 최적화의 언어가 된다. 정확성 1점과 간결성 1점을 어떻게 바꿀지 정하지 않고도, “확실히 나쁜” 응답은 가려낼 수 있다.</p>
 <h5 id="자동차-고르기-지배와-프론티어">자동차 고르기: 지배와 프론티어</h5>
-<p>자동차를 고른다고 하자. 성능(마력)과 연비 두 가지만 따진다. 스포츠카는 성능이 좋고 연비가 나쁘다. 경차는 반대다. 세단과 하이브리드는 그 사이 어딘가다. 넷 중 누구도 다른 차보다 <strong>두 가지 모두에서</strong> 낫지는 않다. 이런 차들을 <strong>파레토 최적</strong>이라 하고, 그 점들을 이은 경계를 <strong>파레토 프론티어</strong>라 한다. 프론티어 위의 어느 점이 &quot;최고&quot;인지는 차가 아니라 <strong>운전자의 가중치</strong>(기준마다 곱하는 수 — 신경망 파라미터가 아니다)가 정한다. 출퇴근용이면 경차, 서킷용이면 스포츠카.</p>
-<p>어느 날 신차가 나와서 하이브리드보다 성능도 연비도 좋다면, 신차는 하이브리드를 <strong>지배</strong>(dominate)한다. 하이브리드는 더 이상 파레토 최적이 아니다. 프론티어가 바깥으로 밀려난 것이다.</p>
-<p>LLM 응답도 똑같다. 정확성과 간결성을 두 축으로 놓자.</p>
-<ul>
-<li>정확성을 올리면 설명이 길어져 간결성이 떨어진다.</li>
-<li>안전성을 올리면 거절이 늘어 유용성이 떨어진다.</li>
-<li>모든 차원을 동시에 최대화할 수는 없다 → 프론티어가 존재한다.</li>
-<li>하지만 모델 자체가 좋아지면 “짧으면서도 정확한” 응답이 가능해진다 → 프론티어가 바깥으로 밀려난다.</li>
-</ul>
-<div class="widget" data-widget="pareto"></div>
+<p>자동차를 고른다고 하자. 성능과 연비 두 가지만 10점 만점으로 매긴다(설명을 위해 정한 점수다).</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>차</th>
+<th>스포츠카</th>
+<th>세단</th>
+<th>하이브리드</th>
+<th>경차</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>성능</td>
+<td>10</td>
+<td>8</td>
+<td>5</td>
+<td>2</td>
+</tr>
+<tr>
+<td>연비</td>
+<td>2</td>
+<td>6</td>
+<td>8</td>
+<td>9</td>
+</tr>
+</tbody>
+</table></div>
+<p>성능이 오를수록 연비는 떨어진다. 넷 중 누구도 다른 차보다 <strong>두 가지 모두에서</strong> 낫지는 않다. 이런 차들을 <strong>파레토 최적</strong>이라 하고, 그 점들을 이은 경계를 <strong>파레토 프론티어</strong>라 한다. 프론티어 위의 어느 점이 &quot;최고&quot;인지는 차가 아니라 <strong>운전자의 가중치</strong>(기준마다 곱하는 수 — 신경망 파라미터가 아니다)가 정한다. 연비를 아주 중시하면 경차, 성능을 아주 중시하면 스포츠카.</p>
+<p>어느 날 성능 6, 연비 8.5인 신차가 나왔다. 하이브리드(5, 8)보다 성능도 연비도 좋으므로, 신차는 하이브리드를 <strong>지배</strong>(dominate)한다. 하이브리드는 더 이상 파레토 최적이 아니다. 프론티어가 바깥으로 밀려난 것이다.</p>
+<svg class="fig" viewBox="0 0 560 390" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="성능과 연비 평면의 네 차와 신차. 신차에서 왼쪽 아래로 칠한 영역 안의 하이브리드는 두 기준 모두에서 밀린다">
+  <rect class="fa2" x="70" y="75" width="276" height="255"/>
+  <line class="s2" x1="346" y1="75" x2="346" y2="330" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <line class="s2" x1="70" y1="75" x2="346" y2="75" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <line class="saxis" x1="70" y1="330" x2="545" y2="330" stroke-width="1.2"/>
+  <line class="saxis" x1="70" y1="330" x2="70" y2="20" stroke-width="1.2"/>
+  <text x="70" y="354" text-anchor="middle" style="font-size:16px">0</text>
+  <text x="300" y="354" text-anchor="middle" style="font-size:16px">5</text>
+  <text x="530" y="354" text-anchor="middle" style="font-size:16px">10</text>
+  <text x="58" y="336" text-anchor="end" style="font-size:16px">0</text>
+  <text x="58" y="186" text-anchor="end" style="font-size:16px">5</text>
+  <text x="58" y="36" text-anchor="end" style="font-size:16px">10</text>
+  <text class="t-strong" x="545" y="382" text-anchor="end" style="font-size:17px">성능 →</text>
+  <text class="t-strong" x="8" y="16" style="font-size:17px">↑ 연비</text>
+  <polyline class="s1" points="70,60 162,60 162,75 346,75 346,150 438,150 438,270 530,270 530,330" stroke-width="2.5"/>
+  <text class="t1" x="360" y="118" style="font-size:17px">파레토 프론티어</text>
+  <text class="t2" x="190" y="235" text-anchor="middle" style="font-size:17px">신차가 지배하는 곳</text>
+  <circle class="f1" cx="530" cy="270" r="8"/>
+  <text x="516" y="302" text-anchor="end" style="font-size:17px">스포츠카</text>
+  <circle class="f1" cx="438" cy="150" r="8"/>
+  <text x="452" y="156" style="font-size:17px">세단</text>
+  <circle class="fsurface" cx="300" cy="90" r="8" style="stroke:var(--w-muted);stroke-width:2"/>
+  <text class="t-muted" x="288" y="122" text-anchor="end" style="font-size:17px">하이브리드</text>
+  <circle class="f1" cx="162" cy="60" r="8"/>
+  <text x="148" y="56" text-anchor="end" style="font-size:17px">경차</text>
+  <circle class="f2" cx="346" cy="75" r="9"/>
+  <text class="t-strong" x="360" y="70" style="font-size:17px">신차</text>
+</svg>
+<p>파란 계단이 신차가 나온 뒤의 프론티어다. 신차에서 왼쪽 아래로 칠한 곳에 든 차는 성능도 연비도 신차보다 낮다. 하이브리드가 그 안에 들어갔다. 경차는 연비 9가 신차의 8.5보다 높아 그 밖에 있고, 스포츠카와 세단은 성능이 신차보다 높아 그 밖에 있다.</p>
+<p>LLM 응답도 똑같다. 정확성과 간결성을 두 축으로 놓자. 정확성을 올리면 설명이 길어져 간결성이 떨어지고, 안전성을 올리면 거절이 늘어 유용성이 떨어진다. 모든 차원을 동시에 최대로 만들 수는 없으니 프론티어가 생긴다. 하지만 모델 자체가 좋아지면 “짧으면서도 정확한” 응답이 가능해지고, 신차처럼 프론티어를 바깥으로 밀어낸다.</p>
+<p>아래 위젯은 응답 아홉 개를 정확성·간결성 평면에 놓았다. 채운 점은 파레토 최적, 빈 점은 지배당한 응답이다. 「모델 개선」을 켜면 새 응답 E가 들어온다. 어느 점이 빈 점으로 바뀌는지 보라.</p>
+<div class="widget" data-widget="pareto" data-set="p2"></div>
 <p>위젯의 응답 아홉 개의 좌표는 다음과 같다(정확성, 간결성 순. 위젯의 새 응답 E 는 「모델 개선」을 켤 때만 나타나므로 아래 문제에서는 뺀다).</p>
 <div class="table-scroll"><table>
 <thead>
@@ -734,25 +793,46 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tbody>
 </table></div>
 <h5 id="ml에서-프리트레인은-프론티어를-rl은-자리를-정한다">ML에서: 프리트레인은 프론티어를, RL은 자리를 정한다</h5>
-<p>이 그림을 학습 단계의 언어로 옮기면, <strong>프리트레인이 프론티어의 위치를 정하고, RL은 프론티어 위의 어디에 설지를 정한다.</strong> 더 좋은 프리트레인은 프론티어 자체를 밀어낸다. RL이 할 수 있는 일은 대부분 그 위에서 자리를 옮기는 것이다.</p>
-<h5 id="문제-1-누가-지배당했나">문제 1 — 누가 지배당했나</h5>
+<p>이 그림을 학습 단계의 언어로 옮기면, <strong>프리트레인이 프론티어의 위치를 정하고, RL은 프론티어 위의 어디에 설지를 정한다.</strong> 까닭은 RL이 확률을 옮기는 방식에 있다. 정책 그래디언트는 모델이 직접 뽑아 본 응답에만 보상을 매기고, 그 응답들의 확률을 올리거나 내린다. 지금 모델이 거의 뽑지 않는 응답, 이를테면 아직 쓸 줄 모르는 “짧으면서도 정확한” 답은 보상을 받을 기회부터 드물다. 그래서 RL은 대개 이미 뽑히는 응답들 사이에서 비중을 옮기고, 프론티어 자체를 밀어내는 일은 더 좋은 프리트레인이 맡는다.</p>
+<p>실험도 이 그림과 맞는다. 같은 문제를 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span></eq> 번 풀게 해 한 번이라도 맞히는 비율로 베이스 모델(RL을 하기 전의 모델)과 RL 모델을 견준 연구(Yue et al. 2025)에서, <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span></eq> 가 작을 때는 RL 모델이 앞섰지만 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span></eq> 를 수십~수백으로 늘리면 베이스 모델이 따라잡고 앞질렀다. RL이 새 답을 만들기보다 이미 뽑을 수 있던 답에 확률을 모았다는 뜻이다.</p>
+<h5 id="문제-1-장학금-후보는-누구인가">문제 1 — 장학금 후보는 누구인가</h5>
 <div class="exercise">
-<p>위젯의 응답 A, B, C, D, F, G, H, I, J 가운데 지배당한 응답을 모두 찾고, 각각 누구에게 지배당하는지 쓰시오.</p>
+<p>같은 학과 친구 넷의 (전공 평점, 교양 평점)이 가 (4.2, 3.0), 나 (3.8, 3.9), 다 (3.5, 3.6), 라 (3.0, 4.3)이다. 장학금 심사는 먼저 「다른 누구에게도 두 평점 모두에서 밀리지 않는 사람」만 후보로 올린다. 후보는 누구인가?</p>
 </div>
 <div class="dlg">
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">코드로 두 축 다 크거나 같은 점이 있는지 다 비교했어요. G(0.55, 0.45)는 B(0.85, 0.5)한테, I(0.75, 0.35)도 B한테, J는 거의 다한테, H(0.35, 0.6)는 D(0.45, 0.85)한테 지배당해요.</div></div>
-<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">H는 C한테도 지배당해. C가 0.62, 0.64로 둘 다 크잖아.</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">그럼 C도 G를 지배하네. 근데 C 자체는? B가 정확성이 더 높으니까 C는 B한테 지배당하는 거 아냐?</div></div>
-<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, C와 B의 간결성은요?</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.webp" alt="김민준 (당황)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">C가 0.64, B가 0.5… C가 간결성은 더 높네요. 한쪽만 이기면 지배가 아니죠. 두 축 모두에서 밀려야 지배당하는 거고.</div></div>
-<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">맞아요. 지배는 &quot;모든 차원에서 같거나 낫고, 적어도 하나에서 낫다&quot;예요.</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">학점이랑 비슷하네요. 전공 평점은 제가 높고 교양 평점은 친구가 높으면, 누가 &quot;완전히 더 잘했다&quot;고 할 수 없는.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">평균을 내 봤어요. 가 3.6, 나 3.85, 다 3.55, 라 3.65. 나가 1등이니까 후보는 나예요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 가는 전공에서 누구에게 지나요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.webp" alt="김민준 (당황)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">전공 4.2면… 아무한테도 안 지네요. 가는 두 평점 모두에서 밀린 적이 없어요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">하나씩 견줘 보면 돼. 다는 나한테 전공 3.5 대 3.8, 교양 3.6 대 3.9로 둘 다 져. 나머지 셋은 서로 한 과목씩 이기고 지고.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그럼 후보는요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">가, 나, 라 셋이에요. 다만 빠져요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M07.webp" alt="김민준 (깨달음)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">평균은 &quot;두 과목을 반반으로 친다&quot;고 비중을 미리 정해 버린 거네요. 후보를 고르는 단계에서는 그 비중을 아직 안 정했는데요.</div></div>
 </div><blockquote>
-<p><strong>정리</strong> 지배당한 응답: G(B, C에게), H(C, D에게), I(B에게), J(여럿에게). A, B, C, D, F는 파레토 최적이다. 한 축에서만 앞서는 것은 지배가 아니다.</p>
+<p><strong>정리</strong> 후보는 가, 나, 라. 다는 나에게 두 평점 모두에서 밀린다. 평균 1등 하나만 고르면 두 과목의 비중(반반)을 미리 정한 셈이다.</p>
+</blockquote>
+<h5 id="문제-2-새로-들어온-두-응답">문제 2 — 새로 들어온 두 응답</h5>
+<div class="exercise">
+<p>위젯의 아홉 응답에 새 응답 둘이 더해진다: K(0.62, 0.60), L(0.90, 0.30). 각각 지배당하는가? 지배당한다면 누구에게인가?</p>
+</div>
+<p>위젯의 「문제 2의 새 응답 K, L 추가」를 켜면 자기 풀이와 견줄 수 있다.</p>
+<div class="dlg">
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">L부터 볼게요. A(0.95, 0.2)와 B(0.85, 0.5)를 직선으로 이으면 정확성 0.90에서 높이가 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.5</mn><mo>−</mo><mn>0.3</mn><mo>×</mo><mfrac><mn>0.05</mn><mn>0.1</mn></mfrac><mo>=</mo><mn>0.35</mn></mrow><annotation encoding="application/x-tex">0.5 - 0.3 \times \frac{0.05}{0.1} = 0.35</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">0.5</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">0.3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.1901em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0.1</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0.05</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.35</span></span></span></span></eq> 예요. L은 0.30이라 그 선 아래에 있어요. 프론티어 안쪽이니까 지배당했어요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그 선 위의 점 (0.90, 0.35)는 실제로 있는 응답이에요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.webp" alt="김민준 (당황)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">아뇨, 선 위에 있는 응답은 A랑 B뿐이고 그 사이는 비어 있어요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그럼 실제 응답 가운데 L을 두 축 모두에서 이기는 게 있는지 보죠.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">A는 정확성 0.95로 이기지만 간결성 0.2로 지고, B는 간결성 0.5로 이기지만 정확성 0.85로 져요. 나머지는 정확성에서 다 L한테 지고요. 아무도 없네요. L은 지배당하지 않아요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그럼 K도 쉬워. C(0.62, 0.64)랑 정확성이 0.62로 똑같으니까, C가 K를 두 축 &quot;모두&quot;에서 이긴 건 아니잖아. K도 지배당하지 않아.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">서연 학생, K 대신 C를 받으면 잃는 게 있어요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S02.webp" alt="이서연 (생각)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">정확성은 그대로고 간결성은 0.60에서 0.64로 오르니… 잃는 건 없고 얻는 것만 있어요. K를 고를 까닭이 없네요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래서 지배는 &quot;모든 차원에서 같거나 낫고, 적어도 하나에서 낫다&quot;로 정해요. 같은 축이 있어도 돼요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S07.webp" alt="이서연 (깨달음)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그럼 K는 C에게 지배당해요. &quot;두 축 모두에서 낫다&quot;를 엄격한 부등호로만 읽어서 동점을 놓쳤어요. 해석학에서 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo></mrow><annotation encoding="application/x-tex">\le</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mrel">≤</span></span></span></span></eq> 를 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&lt;</mo></mrow><annotation encoding="application/x-tex">&lt;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mrel">&lt;</span></span></span></span></eq> 로 잘못 써서 증명이 틀어지는 거랑 같네요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">아까 장학금 문제에서 평균이 높다고 후보가 되는 게 아니었던 것처럼, 선 아래에 있다고 지배당하는 것도 아니네요. 지배는 실제로 있는 응답하고만 견주는 거고요.</div></div>
+</div><blockquote>
+<p><strong>정리</strong> L은 누구에게도 지배당하지 않는다. A와 B를 이은 선분 아래에 있지만, 그 선분 위의 점은 실제 응답이 아니다. K는 C에게 지배당한다(정확성이 같고 간결성이 낮다). 지배는 실제로 있는 응답끼리 「모든 차원에서 같거나 낫고, 적어도 하나에서 낫다」로 가린다.</p>
 </blockquote>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="11-브래들리테리모델-3.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 3</span><a class="chapter-nav-next" href="12-다차원보상-2.html">가중합: 벡터 보상을 숫자 하나로 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="11-브래들리테리모델-4.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="12-다차원보상-2.html">가중합: 벡터 보상을 숫자 하나로 &rarr;</a></nav>
 </main>
 
 <script type="module">
@@ -815,6 +895,6 @@ addEventListener('keydown', e => {
 });
 </script>
 <script src="widgets/common.js?v=6a3d503c" defer></script>
-<script src="widgets/pareto.js?v=894c648d" defer></script>
+<script src="widgets/pareto.js?v=2c845def" defer></script>
 </body>
 </html>

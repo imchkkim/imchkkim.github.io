@@ -43,6 +43,13 @@ GW.register("reinforce-variance", (el) => {
     value: st.mode,
     onchange: (v) => { st.mode = v; draw(); },
   });
+  // 짧은 이름으로도 다섯 단추가 휴대폰 폭에 다 안 들어가 「없음」이 한 자씩 꺾인다: 단추는 꺾지 않고 줄을 넘긴다.
+  if (S.modes.length > 3) {
+    const segs = f.controls.querySelectorAll(".w-seg");
+    const segEl = segs[segs.length - 1];
+    segEl.style.flexWrap = "wrap";
+    segEl.querySelectorAll("button").forEach((b) => { b.style.whiteSpace = "nowrap"; });
+  }
   const sC = GW.slider(f.controls, { label: "보상에 더할 상수 c", min: 0, max: 5, step: 0.5, value: st.c, fmt: (v) => GW.fmt(v, 1), oninput: (v) => { st.c = v; draw(); } });
   const sN = GW.slider(f.controls, { label: "배치 크기 " + Nsym, min: 1, max: 16, step: 1, value: st.N, fmt: (v) => String(v), oninput: (v) => { st.N = v; draw(); } });
   GW.button(f.controls, "다시 뽑기", () => { st.seed++; draw(); });

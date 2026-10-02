@@ -1,5 +1,7 @@
 // 파레토 프론티어와 가중합: 정확성 × 간결성 평면의 응답들.
-// 가중치 w 를 돌리면 가중합이 고르는 응답이 프론티어 위를 이동한다. 오목하게 들어간 C 는 어떤 w 로도 선택되지 않는다.
+// 가중치 w 를 돌리면 가중합이 고르는 응답이 프론티어 위를 이동한다.
+// 원고의 위젯 줄에 붙은 data-set 으로 단추를 더한다. 없으면 응답 아홉 개와 「모델 개선」만.
+//   data-set="p2" : 12장 「파레토 프론티어」 절 — 문제 2 의 새 응답 K(0.62, 0.60), L(0.90, 0.30) 을 켜는 단추
 GW.register("pareto", (el) => {
   const f = GW.frame(el, {
     title: "파레토 프론티어 — 가중치를 돌리면 누가 뽑히나",
@@ -19,9 +21,11 @@ GW.register("pareto", (el) => {
     { id: "J", x: 0.3, y: 0.3 },
   ];
   const E = { id: "E", x: 0.7, y: 0.72, note: "개선된 모델의 새 응답" };
-  let w = 0.5, withE = false;
+  const P2 = [{ id: "K", x: 0.62, y: 0.6 }, { id: "L", x: 0.9, y: 0.3 }];
+  let w = 0.5, withE = false, withP2 = false;
   GW.slider(f.controls, { label: "정확성 가중치 w", min: 0, max: 1, step: 0.01, value: w, fmt: (v) => `${v.toFixed(2)} / 간결성 ${(1 - v).toFixed(2)}`, oninput: (v) => { w = v; draw(); } });
   GW.toggle(f.controls, { label: "모델 개선: 새 응답 E 추가", value: false, onchange: (v) => { withE = v; draw(); } });
+  if (el.dataset.set === "p2") GW.toggle(f.controls, { label: "문제 2의 새 응답 K, L 추가", value: false, onchange: (v) => { withP2 = v; draw(); } });
   GW.legend(f.stage, [["c1", "파레토 프론티어"], ["cm dash", "가중합 등고선", "dash"]]);
   const c = GW.chart(f.stage, { x: [0, 1], y: [0, 1], xlabel: "정확성", ylabel: "간결성", w: 460, h: 380, label: "정확성과 간결성의 파레토 프론티어" });
   c.clip();
@@ -29,7 +33,7 @@ GW.register("pareto", (el) => {
   const dominated = (p, pts) => pts.some((q) => q !== p && q.x >= p.x && q.y >= p.y && (q.x > p.x || q.y > p.y));
   function draw() {
     c.layer.innerHTML = ""; c.top.innerHTML = "";
-    const pts = withE ? [...base, E] : base;
+    const pts = [...base, ...(withE ? [E] : []), ...(withP2 ? P2 : [])];
     const front = pts.filter((p) => !dominated(p, pts)).sort((a, b) => a.x - b.x);
     // 계단식 프론티어 (지배 영역의 경계)
     const step = [[0, front[0].y]];

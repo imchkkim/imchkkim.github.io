@@ -485,6 +485,11 @@ pre.mermaid {
 .w-svg .w-dot { stroke: var(--w-surface); stroke-width: 2; fill: var(--w-muted); }
 .w-svg .dash { stroke-dasharray: 5 4; }
 .w-svg .thin { stroke-width: 1.2; }
+/* 휴대폰 폭: 위젯 그래프의 폭 560 좌표가 약 330px 로 줄어 눈금·이름표가 6~7px 로 보인다. 그 글자만 키운다(넓은 화면은 그대로) */
+@media (max-width: 600px) {
+  .w-svg .w-tick { font-size: 16px; }
+  .w-svg .w-axis-label, .w-svg .w-label { font-size: 17px; }
+}
 .w-svg .c1 { stroke: var(--w-1); } .w-svg .f1 { fill: var(--w-1); }
 .w-svg .c2 { stroke: var(--w-2); } .w-svg .f2 { fill: var(--w-2); }
 .w-svg .c3 { stroke: var(--w-3); } .w-svg .f3 { fill: var(--w-3); }
@@ -676,92 +681,89 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <h4 id="오프라인-데이터-정제-시간-제약-없이-여러-번-거른다">오프라인 데이터 정제: 시간 제약 없이 여러 번 거른다</h4>
 <p>온라인의 짐이 이만큼 무겁다면, 오프라인은 그 짐을 피하는 것 말고 무엇을 얻는가? 오프라인의 진짜 강점은 &quot;한 번 만들면 끝&quot;이 아니라, <strong>시간 제약 없이 데이터를 정제할 수 있다</strong>는 것이다.</p>
 <h5 id="오프라인-데이터셋-구축-실제-파이프라인의-여러-패스-pass">오프라인 데이터셋 구축 — 실제 파이프라인의 여러 패스(pass)</h5>
-<blockquote>
-<p><strong>[Pass 1] 후보 생성 (Candidate Generation)</strong><br>
-프롬프트 하나당 N개(보통 8–64개)의 응답을 모델에서 샘플링한다.<br>
-샘플링 온도(temperature)를 높여서 다양성을 확보한다.</p>
-<ul>
-<li>JoyCaption은 프롬프트당 10개 응답을 생성했다.</li>
-</ul>
-</blockquote>
-<blockquote>
-<p><strong>[Pass 2] 중복 제거 (Deduplication)</strong><br>
-거의 동일한 응답 쌍을 제거한다.<br>
-코사인 유사도, n-gram 오버랩, 또는 임베딩 기반 클러스터링.</p>
-<ul>
-<li>같은 말을 다르게 한 것뿐인 응답 쌍은 학습 신호(시그널)가 약하다.</li>
-</ul>
-</blockquote>
-<blockquote>
-<p><strong>[Pass 3] 1차 필터링 (Rejection Sampling / Heuristic Filter)</strong><br>
-명백히 나쁜 응답을 걸러낸다:</p>
-<ul>
-<li>반복 루프 탐지 (n-gram 반복 비율)</li>
-<li>형식 위반 (지시를 따르지 않은 응답)</li>
-<li>길이 이상치 (너무 짧거나 너무 긴 응답)</li>
-</ul>
-<p>다만 너무 쉽게 걸러지는 응답(완전히 망가진 출력)만 비선호로 남기면 배울 것이 적다. 모델이 거의 내놓지 않는 답을 비선호로 두면 이미 낮은 확률을 더 낮출 뿐이기 때문이다. 걸러내는 것은 쓸모없는 데이터이지, 모델의 전형적 실수가 아니다.</p>
-</blockquote>
-<blockquote>
-<p><strong>[Pass 4] 심사 (Judging / Rating)</strong><br>
-남은 응답들을 심사 모델(judge)에 통과시킨다.</p>
-<ul>
-<li>단순 쌍비교(“A가 나은가 B가 나은가”)보다 개별 점수 매기기(1–10점)가 마진 정보를 더 많이 준다.</li>
-<li>JoyCaption은 SOTA급 VLM(이미지를 보고 글을 쓰는 언어모델)에게 응답마다 1–10점을 매기게 했다. 여러 심사 모델을 섞으면 한 모델의 편향을 다른 모델이 상쇄할 수 있다</li>
-</ul>
-</blockquote>
-<blockquote>
-<p><strong>[Pass 5] 마진 기반 큐레이션 (Margin-Based Curation)</strong><br>
-점수 차이가 작은 쌍을 버린다.</p>
-<ul>
-<li>DPO가 학습하려면 마진이 넓어야 한다.</li>
-<li>JoyCaption의 첫 시도 실패 원인이 정확히 이것: “비슷비슷한 응답 쌍으로는 모델이 방향을 못 잡는다.”</li>
-<li>BeeS: 보상 마진으로 약 10%만 골라 학습했더니 전체 데이터보다 오히려 성능이 좋았다 — 핵심은 &quot;많은 데이터&quot;가 아니라 “강한 데이터”</li>
-</ul>
-</blockquote>
-<blockquote>
-<p><strong>[Pass 6] 최종 검수 (Human Spot-Check)</strong><br>
-자동 파이프라인을 통과한 데이터셋의 랜덤 샘플을 인간이 직접 확인.</p>
-<ul>
-<li>judge 지시문의 버그, 체계적 편향, 예상치 못한 패턴 탐지</li>
-<li>JoyCaption 제작자도 작은 표본을 직접 읽어 보며 심사 지시문을 여러 번 고쳤다</li>
-</ul>
-</blockquote>
-<blockquote>
-<p>이 전체 과정에 며칠에서 몇 주가 걸린다.<br>
-하지만 시간 제약이 없으므로:</p>
-<ul>
-<li>각 패스를 독립적으로 실행하고 결과를 검사할 수 있다</li>
-<li>파이프라인에 버그가 있으면 해당 패스만 다시 돌린다</li>
-<li>데이터 분포를 시각화하고, 태스크별 균형을 조정할 수 있다</li>
-<li>전체를 버리고 처음부터 다시 만들어도 모델은 영향받지 않는다</li>
-</ul>
-<p>온라인에서는 이 모든 것이 매 배치마다, 실시간으로 일어나야 한다.<br>
-어떤 패스도 &quot;나중에 고치겠다&quot;가 불가능하다.</p>
-</blockquote>
+<p>오프라인 선호 데이터셋은 보통 한 번에 만들지 않고 여러 번 걸러서 만든다. 한 번 거르는 단계를 패스라고 부른다. 흔히 쓰는 순서는 아래 여섯 패스다.</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>패스</th>
+<th>하는 일</th>
+<th>왜 하나</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 후보 생성</td>
+<td>프롬프트 하나당 응답 N개를 모델에서 샘플링한다. 샘플링 온도(temperature)를 높여 다양성을 확보한다. Llama 3는 프롬프트마다 보통 10~30개, SimPO 실험은 5개, JoyCaption은 10개를 뽑았다</td>
+<td>고를 거리가 있어야 좋은 쌍이 나온다</td>
+</tr>
+<tr>
+<td>2 중복 제거</td>
+<td>거의 동일한 응답을 뺀다. 코사인 유사도, n-gram 오버랩(겹치는 낱말 묶음), 임베딩 기반 클러스터링을 쓴다</td>
+<td>같은 말을 다르게 한 것뿐인 응답 쌍은 학습 신호(시그널)가 약하다</td>
+</tr>
+<tr>
+<td>3 1차 거르기</td>
+<td>명백히 나쁜 응답을 걸러 낸다. 반복 루프(n-gram 반복 비율), 형식 위반(지시를 따르지 않은 응답), 길이 이상치(너무 짧거나 너무 긴 응답)</td>
+<td>쓸모없는 데이터를 뺀다</td>
+</tr>
+<tr>
+<td>4 심사</td>
+<td>남은 응답을 심사 모델(응답을 채점하는 다른 언어모델)에 통과시킨다. 단순 쌍비교(“A가 나은가 B가 나은가”)보다 응답마다 1~10점을 매기게 한다</td>
+<td>점수가 있으면 두 응답의 차이(마진)까지 안다. 여러 심사 모델을 섞으면 한 모델의 심사 편향을 다른 모델이 상쇄할 수 있다</td>
+</tr>
+<tr>
+<td>5 마진 기반 고르기</td>
+<td>점수 차이가 작은 쌍을 버린다</td>
+<td>DPO가 방향을 잡으려면 마진이 넓어야 한다. 비슷비슷한 응답 쌍으로는 모델이 무엇을 올리고 내릴지 모른다</td>
+</tr>
+<tr>
+<td>6 사람의 표본 확인</td>
+<td>자동 파이프라인을 통과한 데이터셋에서 무작위로 뽑은 표본을 사람이 직접 읽는다</td>
+<td>심사 지시문의 버그, 체계적 편향, 예상치 못한 패턴을 찾는다</td>
+</tr>
+</tbody>
+</table></div>
+<svg class="fig" viewBox="0 0 560 455" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="오프라인 선호 데이터를 여섯 패스로 거르는 깔때기: 후보 생성, 중복 제거, 1차 거르기, 심사, 마진으로 고르기, 사람이 표본 확인">
+  <defs><marker id="funnel14-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="fneutral" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
+  <path class="fa1" d="M20,12 L540,12 L515,64 L45,64 Z"/>
+  <text class="t-strong" x="280" y="45" text-anchor="middle" style="font-size:17px">1 후보 생성</text>
+  <path class="fa2" d="M45,72 L515,72 L490,124 L70,124 Z"/>
+  <text class="t-strong" x="280" y="105" text-anchor="middle" style="font-size:17px">2 중복 제거</text>
+  <path class="fa1" d="M70,132 L490,132 L465,184 L95,184 Z"/>
+  <text class="t-strong" x="280" y="165" text-anchor="middle" style="font-size:17px">3 1차 거르기</text>
+  <path class="fa2" d="M95,192 L465,192 L435,244 L125,244 Z"/>
+  <text class="t-strong" x="280" y="225" text-anchor="middle" style="font-size:17px">4 심사 (점수 매기기)</text>
+  <path class="fa1" d="M125,252 L435,252 L405,304 L155,304 Z"/>
+  <text class="t-strong" x="280" y="285" text-anchor="middle" style="font-size:17px">5 마진으로 고르기</text>
+  <path class="fa2" d="M155,312 L405,312 L385,364 L175,364 Z"/>
+  <text class="t-strong" x="280" y="345" text-anchor="middle" style="font-size:17px">6 사람이 표본 확인</text>
+  <line class="sink" x1="280" y1="372" x2="280" y2="398" stroke-width="2" marker-end="url(#funnel14-arrow)"/>
+  <text class="t-strong" x="280" y="422" text-anchor="middle" style="font-size:17px">학습에 쓸 선호 쌍</text>
+  <text class="t-muted" x="280" y="444" text-anchor="middle" style="font-size:16px">폭은 남는 양의 느낌만 보인 것이다</text>
+</svg>
+<p>3번 패스에는 단서가 하나 붙는다. 너무 쉽게 걸러지는 응답(완전히 망가진 출력)만 비선호로 남기면 배울 것이 적다. 모델이 거의 내놓지 않는 답을 비선호로 두면 이미 낮은 확률을 더 낮출 뿐이기 때문이다. 걸러 내는 것은 쓸모없는 데이터이지, 모델의 전형적 실수가 아니다.</p>
+<p>5번 패스의 효과는 생각보다 크다. 덩(Xun Deng)과 동료들의 BeeS(2025)는 보상 마진이 큰 쌍을 골라 공개 선호 데이터셋 UltraFeedback의 약 10%만으로 DPO를 돌렸다. 그랬더니 사람 선호를 흉내 내는 자동 평가 AlpacaEval 2에서 전체 데이터로 학습할 때보다 오히려 3~8% 높았다. 핵심은 &quot;많은 데이터&quot;가 아니라 &quot;강한 데이터&quot;다.</p>
+<p>이 전체 과정은 학습과 따로 돈다. 시간 제약이 없으므로 각 패스를 독립적으로 실행하고, 패스마다 남은 결과를 검사할 수 있다. 데이터 분포를 그려 보고 태스크별 균형을 조정할 수도 있다. 전체를 버리고 처음부터 다시 만들어도 모델은 영향받지 않는다. 온라인에서는 이 모든 일이 배치마다, 학습이 도는 동안 일어나야 한다.</p>
 <h5 id="ml에서-dpo가-폭발적으로-퍼진-이유">ML에서: DPO가 폭발적으로 퍼진 이유</h5>
-<blockquote>
-<p><strong>오프라인 DPO의 다른 장점:</strong></p>
-<ul>
-<li><strong>학습은 일반적인 미세조정과 같다</strong> — 기존 인프라를 그대로 사용. 생성과 학습이 분리되어 자원 관리 용이.</li>
-<li><strong>재현성이 높다</strong> — 같은 데이터, 같은 하이퍼파라미터 → 같은 결과. 온라인은 생성-평가-학습 루프의 확률적 요소 때문에 재현 어려움.</li>
-</ul>
-<p>이것이 DPO가 폭발적으로 인기를 얻은 이유다.<br>
-“PPO의 성능을 DPO의 편의성으로” — 이것이 DPO의 약속이었다.</p>
-</blockquote>
-<h5 id="문제-2-오프라인의-장점">문제 2 — 오프라인의 장점</h5>
+<p>오프라인 DPO에는 장점이 두 가지 더 있다. 첫째, 학습은 일반적인 미세조정과 같다. 기존 학습 인프라를 그대로 쓰고, 생성과 학습이 분리되어 있어 자원 관리가 쉽다. 둘째, 재현성이 높다. 같은 데이터와 같은 하이퍼파라미터면 같은 결과가 나온다. 온라인은 생성·평가·학습 루프에 확률적 요소가 끼어 있어 재현이 어렵다.</p>
+<p>이것이 DPO가 폭발적으로 인기를 얻은 이유다. DPO 논문(라파일로프(Rafael Rafailov)와 동료들, 2023)이 내세운 것도 이 점이었다. 미세조정하는 동안 모델에서 응답을 뽑을 필요가 없고, 실험한 과제에서 PPO 기반 RLHF와 같거나 나은 결과를 냈다. PPO의 성능을 미세조정의 편의로 얻는 것, 그것이 DPO의 약속이었다.</p>
+<h5 id="문제-3-버그는-사흘-뒤에-보였다">문제 3 — 버그는 사흘 뒤에 보였다</h5>
 <div class="exercise">
-<p>본문이 꼽은 오프라인 학습의 실무적 장점 두 가지를 쓰고, 각각이 온라인에서는 왜 불가능한지 한 줄로 설명하시오.</p>
+<p>온라인 학습을 사흘 돌린 뒤에야 심사 지시문에 버그가 있었다는 것을 알았다. 목록으로 된 답에 내용과 상관없이 2점씩 더 주고 있었다. 생성한 응답과 받은 점수는 배치마다 모두 기록해 두었다. (가) 기록 가운데 지시문을 고쳐 다시 쓸 수 있는 것은 무엇인가? (나) 같은 버그가 오프라인 파이프라인의 4번 패스(심사)에 있었다면, 여섯 패스 가운데 무엇을 다시 돌리면 되는가?</p>
 </div>
 <div class="dlg">
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">첫째, 데이터가 고정이라 더 많이 모을 수 있어요. 둘째, 학습 코드가 그냥 미세조정이라 인프라가 단순하고 재현이 돼요.</div></div>
-<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 데이터 양이 장점이라면 JoyCaption은 왜 모은 데이터의 대부분을 버렸을까요?</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M02.webp" alt="김민준 (생각)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">마진이 좁은 쌍은 버렸죠… 양이 아니라 걸러낼 시간이 있다는 게 장점이었네요. 여러 패스로 검사하고, 버그가 있으면 그 패스만 다시 돌리고.</div></div>
-<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 그럼 온라인에서는 왜 그게 안 되죠?</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">매 배치가 &quot;지금 모델&quot;이 만든 거라 걸러낼 시간이 없고, 같은 설정으로 다시 돌려도 생성이 달라지니까 재현도 어려워요.</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">마감 전날 몰아서 쓰는 보고서랑 한 달 동안 초안 고치는 보고서 차이네요. 분량이 아니라 고칠 시간이 품질을 만드는.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M11.webp" alt="김민준 (자신만만)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">응답은 다 기록해 뒀으니 지시문만 고쳐서 다시 채점하면 돼요. 오프라인이랑 다를 게 없죠.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 둘째 날 배치의 응답은 어느 모델이 뽑았죠? 그 모델은 무슨 점수로 학습한 모델이에요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.webp" alt="김민준 (난처함)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">첫날 버그 점수로 학습한 모델이요… 목록에 2점씩 더 받았으니 둘째 날 모델은 이미 목록을 더 많이 써요. 점수를 다시 매겨도 응답 자체가 목록 쪽으로 쏠려 있네요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그럼 첫날 응답은 살릴 수 있겠다. 첫날은 버그 점수로 배우기 전이니까.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">서연 학생, 첫날 마지막 배치를 뽑은 모델은 언제의 모델이죠?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S02.webp" alt="이서연 (생각)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">첫날 아침부터 버그 점수로 몇백 걸음 배운 모델이요. 깨끗한 건 맨 처음 배치 하나뿐이에요. 그것도 처음 모델로 다시 시작할 때 첫 걸음에서만 지금 모델이 뽑은 데이터고요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S07.webp" alt="이서연 (아하)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">온라인 데이터는 그것을 뽑은 순간의 모델에 묶여 있구나. 채점이 틀리면 점수만 틀린 게 아니라 다음 데이터를 만드는 모델까지 오염돼요. 다시 쓸 게 거의 없어요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 그럼 오프라인이라면, 심사 패스 앞에서 만든 결과물은 어디에 남아 있죠?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">후보 생성, 중복 제거, 1차 거르기의 결과는 디스크에 그대로 있어요. 응답은 학습 전 모델이 뽑은 거라 버그와 상관도 없고요. 고친 지시문으로 4번 심사부터 다시 돌리고, 5번 마진 고르기와 6번 표본 확인을 다시 한 뒤 모델만 다시 학습하면 돼요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">마감 전날 몰아서 쓴 보고서는 틀린 데 하나를 고치려면 통째로 다시 써야 하는데, 한 달 동안 단계마다 초안을 남긴 보고서는 틀린 단계부터 고치면 되는 거랑 같네요. 분량이 아니라 고칠 시간과 남겨 둔 중간 결과가 품질을 만드는.</div></div>
 </div><blockquote>
-<p><strong>정리</strong> (1) 시간 제약 없는 다단계 정제 — 온라인은 배치마다 실시간이라 불가능. (2) 일반 미세조정과 같은 인프라·높은 재현성 — 온라인은 생성·평가·학습 루프의 확률성 때문에 어렵다. 데이터의 <em>양</em>은 장점이 아니다.</p>
+<p><strong>정리</strong> (가) 거의 없다. 온라인 응답은 그것을 뽑은 순간의 모델에 묶여 있고, 첫 배치 뒤의 모델은 모두 버그 점수로 학습한 모델이다. 점수를 다시 매겨도 응답 자체가 목록 쪽으로 쏠려 있다. (나) 4번 심사부터 5번, 6번 패스를 다시 돌리고 학습만 다시 한다. 1~3번 패스의 결과는 학습 전 모델이 뽑은 응답이라 그대로 쓴다. 오프라인의 강점은 데이터의 <em>양</em>이 아니라, 시간 제약 없이 패스마다 결과를 남기고 고칠 수 있다는 것이다.</p>
 </blockquote>
 
 </section>

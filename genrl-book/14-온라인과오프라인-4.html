@@ -485,6 +485,11 @@ pre.mermaid {
 .w-svg .w-dot { stroke: var(--w-surface); stroke-width: 2; fill: var(--w-muted); }
 .w-svg .dash { stroke-dasharray: 5 4; }
 .w-svg .thin { stroke-width: 1.2; }
+/* 휴대폰 폭: 위젯 그래프의 폭 560 좌표가 약 330px 로 줄어 눈금·이름표가 6~7px 로 보인다. 그 글자만 키운다(넓은 화면은 그대로) */
+@media (max-width: 600px) {
+  .w-svg .w-tick { font-size: 16px; }
+  .w-svg .w-axis-label, .w-svg .w-label { font-size: 17px; }
+}
 .w-svg .c1 { stroke: var(--w-1); } .w-svg .f1 { fill: var(--w-1); }
 .w-svg .c2 { stroke: var(--w-2); } .w-svg .f2 { fill: var(--w-2); }
 .w-svg .c3 { stroke: var(--w-3); } .w-svg .f3 { fill: var(--w-3); }
@@ -674,7 +679,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="14-온라인과오프라인.html">14. 온라인과 오프라인 — 이상과 현실 사이에서</a></p>
 <h4 id="반복-dpo-온라인과-오프라인-사이의-다이얼">반복 DPO: 온라인과 오프라인 사이의 다이얼</h4>
-<p>온라인은 비싸고 위험하고, 오프라인은 분포가 이동한다. 앞 절의 위젯이 보여 준 것처럼 둘 사이가 연속적인 다이얼이라면, 그 중간 어딘가에 온라인의 성능과 오프라인의 편의성을 함께 잡는 자리가 있지 않을까? 세 방식의 구조를 나란히 놓으면 다음과 같다.</p>
+<p>온라인은 비싸고 위험하고, 오프라인은 분포가 이동한다. 데이터가 얼마나 낡는지를 정규분포 장난감으로 재 보았을 때, 학습 도중에 데이터를 새로 만드는 횟수(라운드 수)를 1에서 걸음 수까지 올리면 오프라인에서 온라인까지가 연속적인 다이얼처럼 이어졌다. 그렇다면 그 중간 어딘가에 온라인의 성능과 오프라인의 편의성을 함께 잡는 자리가 있지 않을까? 세 방식의 구조를 나란히 놓으면 다음과 같다.</p>
 <pre class="mermaid">graph TB
     subgraph offline[&quot;오프라인 DPO&quot;]
         direction TB
@@ -699,51 +704,17 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
     class online m-orange
     class iterative m-green
 </pre><h5 id="역사-llama의-반복-학습과-여러-절충안">역사: Llama의 반복 학습과 여러 절충안</h5>
-<p>온라인의 성능 + 오프라인의 편의성을 동시에 잡으려는 시도들:</p>
-<blockquote>
-<p><strong>Iterative DPO (Llama 3 방식)</strong></p>
-<ul>
-<li>여러 라운드의 오프라인 학습. Llama 3는 거절 샘플링(여러 응답을 뽑아 좋은 것만 남기기) + SFT(좋은 응답을 그대로 따라 쓰게 하는 지도 학습) + DPO를 한 라운드로 묶어 6라운드를 돌렸다 (Llama 2는 같은 반복 구조를 거절 샘플링과 PPO로 5라운드)</li>
-<li>매 라운드 사이에 현재 모델로 새 데이터셋 생성</li>
-<li>“반쯤 온라인”: 온라인의 분포 추적 + 오프라인의 안정성</li>
-<li>라운드 사이에 모델을 검수할 수 있다는 실무적 이점</li>
-<li>JoyCaption도 이 방식: 2라운드 반복으로 결함률(엉터리 출력 비율) 9.6%→1.5%</li>
-</ul>
-</blockquote>
-<blockquote>
-<p><strong>Online DPO</strong></p>
-<ul>
-<li>온폴리시 데이터 + 보상 모델로 실시간 평가</li>
-<li>분포 이동 없음, 하지만 온라인 학습의 세 가지 짐(모델을 계속 갱신하는 비용, 데이터셋을 계속 만들어 내는 어려움, 드리프트 위험)을 모두 감수</li>
-</ul>
-</blockquote>
-<blockquote>
-<p><strong>COPO</strong></p>
-<ul>
-<li>탐색 보너스를 추가하여 모드 붕괴 방지</li>
-<li>온라인 학습의 자기 붕괴형 드리프트에 대한 직접적 대응</li>
-</ul>
-</blockquote>
-<blockquote>
-<p><strong>Self-Play</strong></p>
-<ul>
-<li>자기 자신과 대국 → 데이터 생성이 자동</li>
-<li>데이터셋을 계속 만들어 내는 비용 문제를 해결하지만, 드리프트 위험은 증가</li>
-</ul>
-</blockquote>
-<h5 id="ml에서-실무-컨센서스">ML에서: 실무 컨센서스</h5>
-<blockquote>
-<p>검증 불가능한 영역에서 흔히 쓰는 조합:<br>
-레퍼런스 없는 선호 최적화(SimPO 등) + 현재 모델이 생성한 데이터 + 마진 기반 큐레이션</p>
-<p>또는 반복(Iterative) 접근. 경험적으로 라운드를 몇 번 늘리면 좋아지지만, 많이 늘린다고 계속 좋아지지는 않는다(아래 문제 4).</p>
-<ul>
-<li>라운드가 많아지면 리워드 해킹 위험이 누적</li>
-<li>최적 라운드 수는 태스크와 보상 모델 품질에 의존</li>
-</ul>
-</blockquote>
-<h5 id="문제-4-킬러-라운드를-늘리면-무조건-좋은가">문제 4 — (킬러) 라운드를 늘리면 무조건 좋은가</h5>
+<p>한 번 만든 데이터가 낡는다면 가장 쉬운 처방은 학습을 몇 토막으로 나누고 토막마다 데이터를 새로 만드는 것이다. 메타의 Llama 2(2023)가 이 길을 갔다. 그때까지 가장 나은 모델로 응답을 새로 뽑아 다시 학습하는 일을 다섯 번 되풀이했고, 판마다 RLHF-V1부터 V5까지 이름을 붙였다. 넷째 판까지는 거절 샘플링(여러 응답을 뽑아 보상 모델 점수가 가장 좋은 것만 남겨 따라 쓰게 하기)만 썼고, 그 뒤에야 거절 샘플링 위에 PPO를 얹었다.</p>
+<p>Llama 3(2024)는 같은 반복 구조를 여섯 라운드로 돌리되 PPO 자리에 DPO를 넣었다. 한 라운드는 거절 샘플링 + SFT(좋은 응답을 그대로 따라 쓰게 하는 지도 학습) + DPO였다. DPO에는 앞 라운드에서 가장 나았던 모델들로 새로 모은 선호 데이터를 주로 썼는데, 논문은 그 까닭을 학습 데이터가 각 라운드에서 최적화되는 정책의 분포에 더 가까워지기 때문이라고 적었다. 반쯤 온라인인 셈이다. 데이터는 라운드마다 정책을 따라가고, 라운드 안에서는 오프라인의 안정성을 누린다. PPO 같은 온폴리시 알고리즘도 시도했지만, 큰 모델에서는 DPO가 연산을 덜 쓰고 지시 따르기 평가(IFEval)에서 더 나았다고 한다. 라운드 사이에 모델을 검수하고 방향을 고칠 수 있다는 것도 실무적 이점이다. JoyCaption도 이 방식을 써서, 2라운드 반복으로 결함률(엉터리 출력 비율)을 9.6%에서 1.5%로 낮췄다.</p>
+<p>라운드를 끝까지 잘게 나누면 걸음마다 데이터를 새로 만드는 Online DPO가 된다. 구글 딥마인드의 궈(Shangmin Guo)와 동료들(2024)은 학습 걸음마다 지금 모델로 응답 두 개를 뽑고, 언어모델 심사자가 그 자리에서 어느 쪽이 나은지 판정하게 했다(온라인 AI 피드백, OAIF). 온폴리시 데이터와 실시간 평가로 분포 이동은 없어졌고, 사람 평가자들은 이렇게 온라인으로 학습한 모델을 같은 방법의 오프라인판보다 평균 약 66%의 비율로 더 낫다고 골랐다. 하지만 온라인 학습의 세 가지 짐(모델을 계속 갱신하는 비용, 데이터셋을 계속 만들어 내는 어려움, 드리프트 위험)을 모두 감수한다.</p>
+<p>온라인으로 가면서 되살아난 드리프트를 겨냥한 시도도 나왔다. 바이(Chenjia Bai)와 동료들의 COPO(2025, 카운트 기반 온라인 선호 최적화)는 지금까지 모은 데이터에서 드물게 나온 응답일수록 탐색 보너스를 얹는다. 데이터가 모델이 이미 잘 내는 응답으로만 채워지지 않고 처음 데이터셋 밖까지 나가 보게 해서, 온라인 학습의 자기 붕괴형 드리프트에 직접 대응한다.</p>
+<p>판정하는 쪽을 아예 없앤 길도 있다. 천(Zixiang Chen)과 동료들의 SPIN(2024, 자기 대국 미세조정)은 사람이 쓴 SFT 답을 좋은 응답으로, 앞 라운드의 자기 모델이 쓴 답을 나쁜 응답으로 짝지어, 자기 자신과 대국하듯 데이터를 자동으로 만든다. 데이터셋을 계속 만들어 내는 비용 문제는 해결된다. 다만 맞수가 언제나 &quot;사람이 쓴 답 대 지난번의 내 답&quot;이라, 내 답이 사람이 쓴 답과 구별되지 않게 되면 거기서 멈춘다. 논문은 그 지점이 학습 목표의 최적점임을 보였다.</p>
+<h5 id="ml에서-실제로-쓰인-조합">ML에서: 실제로 쓰인 조합</h5>
+<p>검증할 정답이 없는 영역에서 실제로 쓰인 조합 하나를 보자. 멍(Yu Meng)과 동료들의 SimPO(2024)는 레퍼런스 모델 없이 문장 로그확률의 길이 평균을 보상처럼 쓰는 선호 최적화다. 이 논문의 한 실험은 데이터도 지금 모델로 만들었다. 프롬프트마다 SFT 모델로 응답 다섯 개를 뽑고(샘플링 온도 0.8), 보상 모델로 채점해 가장 높은 것을 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>w</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_w}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0269em;color:var(--sym-e000a5, #e000a5);">w</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>, 가장 낮은 것을 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>l</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_l}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0197em;color:var(--sym-e000a5, #e000a5);">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 로 짝지었다. 레퍼런스 없는 선호 최적화 + 현재 모델이 생성한 데이터 + 마진 기반 큐레이션이다. 데이터는 한 번만 만들었으니, 학습 첫 걸음에서만 온폴리시인 오프라인 데이터다.</p>
+<p>또는 반복(Iterative) 접근을 쓴다. 경험적으로 라운드를 몇 번 늘리면 좋아지지만, 많이 늘린다고 계속 좋아지지는 않는다(아래 문제 6). 수학 문장제 모음 GSM8K에서 반복 DPO를 돌린 팡(Richard Yuanzhe Pang)과 동료들(2024, Iterative RPO)의 정확도는 라운드마다 73.1% → 78.0% → 81.1% → 81.6% 였다. 오르는 폭이 4.9, 3.1, 0.5%p로 줄었고, 연구진은 성능이 포화된 넷째 라운드에서 멈췄다.</p>
+<h5 id="문제-6-킬러-라운드를-늘리면-무조건-좋은가">문제 6 — (킬러) 라운드를 늘리면 무조건 좋은가</h5>
 <div class="exercise">
-<p>위젯에서 라운드 수를 늘리면 유효 표본 비율이 계속 좋아지고, 라운드 수가 걸음 수와 같아지면 온라인이 된다. 그렇다면 라운드를 &quot;많이 늘린다고 계속 좋아지지는 않는다&quot;는 본문의 말은 틀린 것인가? 위젯이 <strong>재지 않는 것</strong> 두 가지를 찾으시오. (힌트: 채점하는 쪽은 라운드마다 바뀌는가? 레퍼런스는?)</p>
+<p>데이터가 얼마나 낡는지 재는 정규분포 장난감의 위젯에서 라운드 수를 늘리면 유효 표본 비율이 계속 좋아지고, 라운드 수가 걸음 수와 같아지면 온라인이 된다(위젯의 「문제 6의 값」 단추는 10라운드를 불러온다). 그렇다면 라운드를 &quot;많이 늘린다고 계속 좋아지지는 않는다&quot;는 본문의 말은 틀린 것인가? 위젯이 <strong>재지 않는 것</strong> 두 가지를 찾으시오. (힌트: 채점하는 쪽은 라운드마다 바뀌는가? 레퍼런스는?)</p>
 </div>
 <div class="dlg">
 <div class="dlg-scene">민준이 위젯의 라운드 슬라이더를 10까지 올린다. 톱니가 촘촘해지며 곡선이 거의 100%에 붙는다.</div>
@@ -754,7 +725,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M02.webp" alt="김민준 (생각)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">보상 모델이나 심사 모델이요. 그건… 처음 거 그대로 쓰죠. 아, 정책은 라운드마다 새로 탐색하는데 채점자는 그대로면, 라운드가 많을수록 채점자의 구멍을 찾을 기회도 많아지네요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">맞아요. 데이터가 신선해도 채점이 낡을 수 있어요. 이걸 보상 모델 과최적화라고 불러요.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">기출문제만 계속 풀다 보면 조교님 채점 습관을 외워버리는 거랑 같네요. 점수는 오르는데 실력은 아닌.</div></div>
-<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">나는 다른 게 걸려. 라운드를 늘리면 Δ가 작아지니까, 레퍼런스로 붙잡아 둘 필요도 줄어드는 거 아니야? 가까운 데서만 움직이니까.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">나는 다른 게 걸려. 라운드를 늘리면 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#cc00ff"><mi mathvariant="normal">Δ</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#cc00ff}{\Delta}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord" style="color:var(--sym-cc00ff, #cc00ff);">Δ</span></span></span></span></eq>가 작아지니까, 레퍼런스로 붙잡아 둘 필요도 줄어드는 거 아니야? 가까운 데서만 움직이니까.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">서연 학생, 반복 DPO에서 두 번째 라운드의 레퍼런스는 보통 무엇으로 두죠?</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">앞 라운드가 끝난 모델이요. 그러니까 매 라운드의 목줄은 짧은데…</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S08.webp" alt="이서연 (놀람)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">목줄을 매는 말뚝이 라운드마다 앞으로 옮겨지네요.</div></div>
@@ -762,7 +733,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 서연 학생은 &quot;각 걸음이 작으면 전체도 작다&quot;고 봤고, 민준 학생은 &quot;데이터가 신선하면 라벨도 믿을 만하다&quot;고 봤어요. 둘 다 위젯이 재지 않는 것이었죠.</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">해석학에서 항 하나하나가 0으로 가도 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∑</mo><mn>1</mn><mi mathvariant="normal">/</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">\sum 1/n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1/</span><span class="mord mathnormal">n</span></span></span></span></eq> 은 발산하는 거랑 같네요. 개별 항이 작다고 합이 유한하진 않죠.</div></div>
 </div><blockquote>
-<p><strong>정리</strong> 위젯이 재는 것은 <strong>데이터의 신선도</strong>뿐이다. 재지 않는 것: (1) 채점자(보상 모델·심사 모델)는 고정이라, 라운드가 늘수록 정책이 그 구멍을 찾을 기회도 늘어난다(과최적화). (2) 레퍼런스를 라운드마다 갱신하면 목줄의 말뚝이 옮겨져, 원본에서의 총 이탈은 라운드 수만큼 누적될 수 있다. 그래서 적정 라운드 수가 존재한다.</p>
+<p><strong>정리</strong> 위젯이 재는 것은 <strong>데이터의 신선도</strong>뿐이다. 재지 않는 것: (1) 채점자(보상 모델·심사 모델)는 고정이라, 라운드가 늘수록 정책이 그 구멍을 찾을 기회도 늘어난다(과최적화). 라운드가 많아지면 리워드 해킹 위험이 누적된다. (2) 레퍼런스를 라운드마다 갱신하면 목줄의 말뚝이 옮겨져, 처음 모델에서의 총 이탈은 라운드 수만큼 누적될 수 있다. 그래서 적정 라운드 수가 존재하고, 그 수는 태스크와 보상 모델의 품질에 따라 다르다.</p>
 </blockquote>
 
 </section>

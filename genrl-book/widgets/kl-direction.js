@@ -1,6 +1,6 @@
-// 순KL vs 역KL: 봉우리 두 개인 목표 분포 p 에 봉우리 하나짜리 모델 q = N(μ, s²) 를 맞춘다.
-// 순KL  KL(p‖q) 최소화 = SFT(크로스 엔트로피)  → 평균·분산 맞추기, 골짜기까지 덮는다.
-// 역KL  KL(q‖p) 최소화 = KL 제약 RL          → 한 봉우리를 골라 그 안에 머문다.
+// 순방향 KL vs 역방향 KL: 봉우리 두 개인 목표 분포 p 에 봉우리 하나짜리 모델 q = N(μ, s²) 를 맞춘다.
+// 순방향  KL(p‖q) 최소화 = SFT(크로스 엔트로피)  → 평균·분산 맞추기, 골짜기까지 덮는다.
+// 역방향  KL(q‖p) 최소화 = KL 제약 RL          → 한 봉우리를 골라 그 안에 머문다.
 GW.register("kl-direction", (el) => {
   const f = GW.frame(el, {
     title: "같은 목표, 다른 방향의 KL — SFT는 덮고, RL은 고른다",
@@ -8,9 +8,9 @@ GW.register("kl-direction", (el) => {
       "초록은 목표 분포(SFT의 정답 분포 <span class='sym-tgt'>p<sub>data</sub></span>, RL의 최적 정책 <span class='sym-tgt'>π*</span>), 파랑은 봉우리 하나밖에 못 만드는 모델 <span class='sym-pi'>π<sub>θ</sub></span>. " +
       "회색 띠는 목표가 거의 0인 ‘골짜기’ — 모델이 여기에 두는 확률은 데이터에도, 좋은 답에도 없는 응답, 즉 모델 자신의 실수다.",
   });
-  const st = { sep: 2.2, w: 0.5, mode: "both" };
+  const st = { sep: 1.8, w: 0.65, mode: "both" }; // 간격 2.2·비중 반반은 1장 문제 2의 값이라 처음 화면에 두지 않는다(수치판이 답이 된다)
   GW.segmented(f.controls, {
-    options: [["fwd", "SFT식 (순KL)"], ["rev", "RL식 (역KL)"], ["both", "둘 다"]],
+    options: [["fwd", "SFT식 (순방향 KL)"], ["rev", "RL식 (역방향 KL)"], ["both", "둘 다"]],
     value: st.mode,
     onchange: (v) => { st.mode = v; draw(); },
   });
@@ -19,25 +19,25 @@ GW.register("kl-direction", (el) => {
 
   GW.legend(f.stage, [
     ["cs-tgt", "목표 분포 <span class=\"sym-tgt\">p</span> (<span class=\"sym-tgt\">p<sub>data</sub></span> 또는 <span class=\"sym-tgt\">π*</span>)"],
-    ["cs-pi", "순KL로 맞춘 <span class=\"sym-pi\">π<sub>θ</sub></span> (SFT)"],
-    ["cs-pi dash", "역KL로 맞춘 <span class=\"sym-pi\">π<sub>θ</sub></span> (RL)", "dash"],
+    ["cs-pi", "순방향 KL로 맞춘 <span class=\"sym-pi\">π<sub>θ</sub></span> (SFT)"],
+    ["cs-pi dash", "역방향 KL로 맞춘 <span class=\"sym-pi\">π<sub>θ</sub></span> (RL)", "dash"],
   ]);
   const X0 = -6, X1 = 6, N = 600, dx = (X1 - X0) / N;
   const xs = Array.from({ length: N + 1 }, (_, i) => X0 + i * dx);
-  const c = GW.chart(f.stage, { x: [X0, X1], y: [0, 0.85], xlabel: "응답 공간 (한 줄로 펼친 그림)", ylabel: "확률 밀도", h: 280, label: "순KL과 역KL 맞춤" });
+  const c = GW.chart(f.stage, { x: [X0, X1], y: [0, 0.85], xlabel: "응답 공간 (한 줄로 펼친 그림)", ylabel: "확률 밀도", h: 280, label: "순방향 KL과 역방향 KL 맞춤" });
   c.clip();
 
   const gauss = (x, m, s) => Math.exp(-0.5 * ((x - m) / s) ** 2) / (s * Math.sqrt(2 * Math.PI));
   const sd = 0.55;
   const p = (x) => st.w * gauss(x, -st.sep, sd) + (1 - st.w) * gauss(x, st.sep, sd);
 
-  // 순KL 최적: 모멘트 맞추기 (가우스 모델의 닫힌 해)
+  // 순방향 KL 최적: 모멘트 맞추기 (가우스 모델의 닫힌 해)
   function fitForward() {
     const m = st.w * -st.sep + (1 - st.w) * st.sep;
     const v = st.w * (sd ** 2 + st.sep ** 2) + (1 - st.w) * (sd ** 2 + st.sep ** 2) - m * m;
     return { m, s: Math.sqrt(v) };
   }
-  // 역KL 최적: 격자 탐색으로 KL(q‖p) 의 전역 최소
+  // 역방향 KL 최적: 격자 탐색으로 KL(q‖p) 의 전역 최소
   function klqp(m, s) {
     let k = 0;
     for (const x of xs) { const q = gauss(x, m, s); if (q > 1e-12) k += q * (Math.log(q) - Math.log(p(x) + 1e-300)) * dx; }

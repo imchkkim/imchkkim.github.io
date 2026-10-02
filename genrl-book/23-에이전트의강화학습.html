@@ -485,6 +485,11 @@ pre.mermaid {
 .w-svg .w-dot { stroke: var(--w-surface); stroke-width: 2; fill: var(--w-muted); }
 .w-svg .dash { stroke-dasharray: 5 4; }
 .w-svg .thin { stroke-width: 1.2; }
+/* 휴대폰 폭: 위젯 그래프의 폭 560 좌표가 약 330px 로 줄어 눈금·이름표가 6~7px 로 보인다. 그 글자만 키운다(넓은 화면은 그대로) */
+@media (max-width: 600px) {
+  .w-svg .w-tick { font-size: 16px; }
+  .w-svg .w-axis-label, .w-svg .w-label { font-size: 17px; }
+}
 .w-svg .c1 { stroke: var(--w-1); } .w-svg .f1 { fill: var(--w-1); }
 .w-svg .c2 { stroke: var(--w-2); } .w-svg .f2 { fill: var(--w-2); }
 .w-svg .c3 { stroke: var(--w-3); } .w-svg .f3 { fill: var(--w-3); }
@@ -664,7 +669,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="20-DDPO.html">20. DDPO — 디퓨전의 정책 그래디언트</a></li>
 <li><a href="21-이미지-로보틱스.html">21. 이미지·로보틱스의 강화학습 — GRPO가 시각 생성을 만났을 때</a></li>
 <li><a href="22-영상모델의학습.html">22. 영상 생성 모델의 학습 — 시퀀스와 디퓨전 사이에서 무엇을 "강제"하는가</a></li>
-<li><a href="23-에이전트의강화학습.html" class="active">23. 에이전틱 AI — 행동하는 모델을 정렬하기</a><ul class="sidebar-toc"><li><a href="23-에이전트의강화학습.html" class="current">에이전틱 RL: 다음 상태를 환경이 정한다</a></li><li><a href="23-에이전트의강화학습-2.html">크레딧 할당: 성공 궤적의 어느 스텝이 잘한 것인가</a></li><li><a href="23-에이전트의강화학습-3.html">에이전틱 리워드 해킹: 보상의 빈틈이 실제 행동이 된다</a></li><li><a href="23-에이전트의강화학습-4.html">시그널의 해상도: 스칼라 하나에서 토큰별 방향으로</a></li><li><a href="23-에이전트의강화학습-5.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="23-에이전트의강화학습.html" class="active">23. 에이전틱 AI — 행동하는 모델을 정렬하기</a><ul class="sidebar-toc"><li><a href="23-에이전트의강화학습.html" class="current">에이전틱 RL: 다음 상태를 환경이 정한다</a></li><li><a href="23-에이전트의강화학습-2.html">하네스: 같은 모델, 다른 점수</a></li><li><a href="23-에이전트의강화학습-3.html">하네스도 배운다: 보상으로 고치는 것은 파라미터만이 아니다</a></li><li><a href="23-에이전트의강화학습-4.html">크레딧 할당: 성공 궤적의 어느 스텝이 잘한 것인가</a></li><li><a href="23-에이전트의강화학습-5.html">보상을 어느 토큰에 줄 것인가: 끝의 1비트를 나누는 네 길</a></li><li><a href="23-에이전트의강화학습-6.html">에이전틱 리워드 해킹: 보상의 빈틈이 실제 행동이 된다</a></li><li><a href="23-에이전트의강화학습-7.html">시그널의 해상도: 스칼라 하나에서 토큰별 방향으로</a></li><li><a href="23-에이전트의강화학습-8.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="99-부록.html">부록</a></li></ol>
 </nav>
 
@@ -698,17 +703,19 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 </tbody>
 </table></div>
+<p>이런 도우미를 몇 개 써 본 사람은 하나 더 알아챈다. 같은 회사의 같은 언어모델을 쓴다는 제품들인데도, 일을 끝까지 해내는 정도가 제품마다 다르다. 모델 말고도 결과를 가르는 무언가가 있다는 뜻이다.</p>
 <p>그래서 묻는다:</p>
 <blockquote>
 <p>행동이 수십 번 이어지고 점수는 맨 끝에 한 번만 온다면, 어느 행동을 칭찬해야 하는가?<br>
+같은 모델을 감싼 틀만 바꿔도 점수가 달라진다면, 강화학습이 고칠 대상은 모델뿐인가?<br>
 한 번 생성하는 모델을 위해 만든 도구 — 마진, 그룹(같은 문제에 뽑은 답 묶음) 상대 점수, 검증기 보상 — 는 어디까지 그대로 쓸 수 있는가?</p>
 </blockquote>
 <h4 id="에이전틱-rl-다음-상태를-환경이-정한다">에이전틱 RL: 다음 상태를 환경이 정한다</h4>
 <p>언어모델도 토큰을 하나씩 고르니 이미 &quot;여러 스텝&quot;이다. 그렇다면 에이전트가 수십 스텝을 밟는다는 것은 무엇이 새로운가?</p>
 <h5 id="역사-mdp에서-도구를-쓰는-언어모델까지">역사: MDP에서 도구를 쓰는 언어모델까지</h5>
-<p>상태·행동·전이·보상으로 순차적 의사결정을 적는 틀은 벨먼(Richard Bellman)이 1957년 &quot;마르코프 결정 과정&quot;이라는 이름으로 정리했고, 서튼(Richard Sutton)과 바토(Andrew Barto)의 교과서 『Reinforcement Learning: An Introduction』(1998)이 강화학습을 &quot;에이전트가 환경과 주고받는 루프&quot;로 가르치는 표준이 됐다. 언어모델이 이 루프 안으로 들어온 대표적인 계기는 추론과 도구 호출을 번갈아 쓰게 한 ReAct(Yao et al., 2022)다.</p>
+<p>상태·행동·전이·보상으로 순차적 의사결정을 적는 틀은 벨먼(Richard Bellman)이 1957년 논문 「A Markovian Decision Process」에서 정리했다. 이 틀이 실제 일에 쓰인 이른 예는 장사였다. 로널드 하워드(Ronald Howard)는 백화점 시어스(Sears)의 카탈로그 발송을 이 틀로 다듬다가, 정책을 고치고 다시 평가하기를 되풀이하는 방법(정책 반복)을 내놓아 1960년 책 『Dynamic Programming and Markov Processes』에 실었다. 카탈로그를 보내는 결정의 값은 그 자리에서 정해지지 않고, 손님이 나중에 사느냐로 늦게 드러난다. 서튼(Richard Sutton)과 바토(Andrew Barto)의 교과서 『Reinforcement Learning: An Introduction』(1998)은 강화학습을 &quot;에이전트가 환경과 주고받는 루프&quot;로 가르치는 표준이 됐다.</p>
 <h5 id="토큰-mdp에는-환경이-없다">토큰 MDP에는 환경이 없다</h5>
-<p>언어모델을 토큰 하나가 행동인 다스텝 MDP로 쓰면, 상태는 프롬프트와 지금까지의 토큰이고 행동은 다음 토큰이다. 하지만 그 MDP에는 <strong>환경이 없다</strong> — 다음 상태는 방금 고른 토큰을 이어붙인 것으로 완전히 정해진다. 외부 세계가 끼어들지 않으니 응답 전체를 행동 하나로 봐도 잃는 것이 거의 없고, GRPO가 모든 토큰에 같은 어드밴티지(평균보다 얼마나 나은가)를 주는 것도 그래서 통한다.</p>
+<p>언어모델을 토큰 하나가 행동인 다스텝 MDP(마르코프 결정 과정)로 쓰면, 상태는 프롬프트와 지금까지의 토큰이고 행동은 다음 토큰이다. 하지만 그 MDP에는 <strong>환경이 없다</strong> — 다음 상태는 방금 고른 토큰을 이어붙인 것으로 완전히 정해진다. 외부 세계가 끼어들지 않으니 응답 전체를 행동 하나로 봐도 잃는 것이 거의 없고, GRPO가 모든 토큰에 같은 어드밴티지(평균보다 얼마나 나은가)를 주는 것도 그래서 통한다.</p>
 <p>에이전트에서는 다르다. 상태는 프롬프트와 지금까지의 관찰·행동 이력(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>o</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>o</mi><mn>2</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>2</mn></msub><mo separator="true">,</mo><mo>…</mo></mrow><annotation encoding="application/x-tex">o_1, a_1, o_2, a_2, \dots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span></span></span></span></eq>)이고, 행동은 다음 도구 호출이나 텍스트이며, 다음 관찰은 <strong>환경</strong>이 돌려준다. 보상은 수십–수백 스텝 뒤 최종 성공 여부로만 오는 경우가 많고, 환경의 일부만 보이므로 엄밀히는 부분 관찰 MDP(POMDP)다. 이렇게 환경과 여러 번 주고받는 궤적 전체를 최적화하는 것을 <strong>에이전틱 RL</strong>(agentic RL)이라 부른다.</p>
 <div class="table-scroll"><table>
 <thead>
@@ -763,8 +770,8 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
     <marker id="loop-obs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="f3" d="M0,0 L10,5 L0,10 Z"/></marker>
   </defs>
   <rect class="fa3 s3" x="200" y="18" width="160" height="60" rx="10" stroke-width="2"/>
-  <text class="t-strong" x="280" y="44" text-anchor="middle">환경</text>
-  <text class="t-muted" x="280" y="63" text-anchor="middle" style="font-size:10px">도구 · 파일 · 웹 · 테스트</text>
+  <text class="t-strong" x="280" y="44" text-anchor="middle" style="font-size:16px">환경</text>
+  <text class="t-muted" x="280" y="63" text-anchor="middle" style="font-size:13px">도구 · 파일 · 웹 · 테스트</text>
   <line class="s1" x1="280" y1="122" x2="280" y2="134" stroke-width="2"/>
   <circle class="f1" cx="280" cy="119" r="4"/>
   <rect class="fa1 s1" x="252" y="134" width="56" height="36" rx="9" stroke-width="2"/>
@@ -774,14 +781,14 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   <rect class="fa1 s1" x="260" y="174" width="40" height="30" rx="6" stroke-width="2"/>
   <path class="s1" d="M260 182 L244 172 M300 182 L316 172" stroke-width="2" stroke-linecap="round"/>
   <path class="s1" d="M270 204 L270 214 M290 204 L290 214" stroke-width="2" stroke-linecap="round"/>
-  <text class="t-strong" x="280" y="234" text-anchor="middle">에이전트 (LLM)</text>
+  <text class="t-strong" x="280" y="238" text-anchor="middle" style="font-size:16px">에이전트 (LLM)</text>
   <path class="s2" d="M322 186 C 450 186, 450 48, 366 48" stroke-width="2" marker-end="url(#loop-act)"/>
-  <text class="t2" x="440" y="112" style="font-weight:700">행동 aₜ</text>
-  <text class="t-muted" x="440" y="130" style="font-size:10px">도구 호출 · 텍스트</text>
+  <text class="t2" x="440" y="112" style="font-weight:700;font-size:16px">행동 aₜ</text>
+  <text class="t-muted" x="440" y="130" style="font-size:13px">도구 호출 · 텍스트</text>
   <path class="s3" d="M194 48 C 110 48, 110 186, 238 186" stroke-width="2" marker-end="url(#loop-obs)"/>
-  <text class="t3" x="120" y="104" text-anchor="end" style="font-weight:700">관찰 oₜ₊₁</text>
-  <text class="t3" x="120" y="124" text-anchor="end" style="font-weight:700">보상 rₜ₊₁</text>
-  <text class="t-muted" x="120" y="142" text-anchor="end" style="font-size:10px">도구 출력 · 테스트 결과</text>
+  <text class="t3" x="120" y="104" text-anchor="end" style="font-weight:700;font-size:16px">관찰 oₜ₊₁</text>
+  <text class="t3" x="120" y="124" text-anchor="end" style="font-weight:700;font-size:16px">보상 rₜ₊₁</text>
+  <text class="t-muted" x="120" y="142" text-anchor="end" style="font-size:13px">도구 출력 · 테스트 결과</text>
 </svg>
 <blockquote>
 <p><em>RL의 기본 구조: 에이전트가 환경에서 행동(action)하고, 보상(reward)과 관찰(observation)을 돌려받는다. LLM RL은 이 루프가 1회로 퇴화한 것이고, 에이전틱 RL은 원래의 다회 루프로 돌아간다.</em></p>
@@ -804,9 +811,30 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
     class llm m-blue
     class agent m-orange
     class RA m-red
-</pre><h5 id="ml에서-길어지는-컨텍스트와-도구-선택">ML에서: 길어지는 컨텍스트와 도구 선택</h5>
-<p><strong>긴 컨텍스트의 비용.</strong> 관찰 이력이 쌓여 64K–128K 토큰이 필요할 수 있고, 스텝마다 처리할 컨텍스트가 길어진다. 궤적 하나가 이미 비싼데 GRPO는 같은 태스크에 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span></span></span></span></eq>개를 굴려야 한다.</p>
-<p><strong>도구 선택의 분기.</strong> 행동 공간에 &quot;어떤 도구를 부를 것인가&quot;가 들어간다. 초반의 잘못된 도구 선택 하나가 이후 모든 스텝을 무효로 만들 수 있고, 탐색 공간이 조합적으로 커진다. 토큰 확률을 조금씩 조정하는 것과는 결이 다른 문제다.</p>
+</pre><h5 id="ml에서-길어지는-궤적의-값">ML에서: 길어지는 궤적의 값</h5>
+<p><strong>긴 컨텍스트의 비용.</strong> 관찰 이력이 쌓이면서 스텝마다 처리할 컨텍스트가 길어진다. 궤적 하나가 이미 비싼데 GRPO는 같은 태스크에 그룹 크기 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span></span></span></span></eq>개만큼 굴려야 한다.</p>
+<p>비싼 궤적과 늦게 오는 보상을 실제 시스템은 이렇게 다뤘다.</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>시스템</th>
+<th>무엇을</th>
+<th>어떻게</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>KARL (Databricks, arXiv:2603.05218, 2026년 3월)</td>
+<td>기업 문서 검색 에이전트</td>
+<td>궤적을 매번 새로 굴리는 대신 반복적인 대규모 배치 <strong>오프폴리시</strong>(예전 정책이 모은 궤적으로 배우는) RL. 수치 추론, 보고서 합성, 사실 집계 등 여섯 종류의 검색 과제를 함께 학습했더니 단일 과제 최적화보다 일반화가 좋았다. 생성 엔진과 학습 엔진의 확률 불일치에 강하게 설계</td>
+</tr>
+<tr>
+<td>AutoResearch-RL (arXiv:2603.07300, 2026년 3월)</td>
+<td>신경망 구조·하이퍼파라미터를 스스로 실험하는 연구 에이전트</td>
+<td>보상이 실험 하나를 끝까지 돌려야 나온다. 학습 스크립트를 고치고 정해진 시간 동안 돌려 학습에 쓰지 않은 평가용 데이터의 bits-per-byte(데이터 1바이트를 적는 데 드는 평균 비트 수, 낮을수록 좋다)로 보상, PPO로 정책 갱신. 약 8 GPU 시간 뒤 2.681로 사람 전문가 기준(2.847)보다 낮은 값을 보고</td>
+</tr>
+</tbody>
+</table></div>
 <h5 id="문제-1-토큰-mdp와-턴-mdp">문제 1 — 토큰 MDP와 턴 MDP</h5>
 <div class="exercise">
 <p>언어모델의 토큰 단위 MDP와 에이전트의 턴 단위 MDP는 둘 다 &quot;여러 스텝&quot;이다. 가장 크게 다른 점 하나를 상태 전이의 관점에서 쓰시오.</p>
@@ -816,12 +844,13 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 토큰 MDP에서 행동을 고른 다음 상태는 누가 정하죠?</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">제가 고른 토큰을 붙인 게 다음 상태니까… 제가 정해요. 에이전트는 도구를 부르면 결과를 환경이 돌려주고요. 파일 내용이나 테스트 결과는 제가 못 정해요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T13.webp" alt="선생님 (미소)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 전이가 결정론적이냐 확률적이냐, 그게 핵심이에요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">혼자 보고서를 쓸 때는 제가 쓴 문장이 다음 문장을 정하는데, 조교님께 한 문단씩 보내고 답을 받아 가며 쓰면 다음에 뭘 쓸지가 조교님 답장에 달려 있는 거랑 같네요.</div></div>
 </div><blockquote>
 <p><strong>정리</strong> 토큰 MDP의 다음 상태는 &quot;이어붙이기&quot;로 완전히 결정된다. 에이전트의 다음 상태는 외부 환경(도구 출력, 사용자)이 정한다 — 확률적이고 부분적으로만 관찰된다.</p>
 </blockquote>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="22-영상모델의학습-7.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="23-에이전트의강화학습-2.html">크레딧 할당: 성공 궤적의 어느 스텝이 잘한 것인가 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="22-영상모델의학습-8.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 8</span><a class="chapter-nav-next" href="23-에이전트의강화학습-2.html">하네스: 같은 모델, 다른 점수 &rarr;</a></nav>
 </main>
 
 <script type="module">

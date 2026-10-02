@@ -485,6 +485,11 @@ pre.mermaid {
 .w-svg .w-dot { stroke: var(--w-surface); stroke-width: 2; fill: var(--w-muted); }
 .w-svg .dash { stroke-dasharray: 5 4; }
 .w-svg .thin { stroke-width: 1.2; }
+/* 휴대폰 폭: 위젯 그래프의 폭 560 좌표가 약 330px 로 줄어 눈금·이름표가 6~7px 로 보인다. 그 글자만 키운다(넓은 화면은 그대로) */
+@media (max-width: 600px) {
+  .w-svg .w-tick { font-size: 16px; }
+  .w-svg .w-axis-label, .w-svg .w-label { font-size: 17px; }
+}
 .w-svg .c1 { stroke: var(--w-1); } .w-svg .f1 { fill: var(--w-1); }
 .w-svg .c2 { stroke: var(--w-2); } .w-svg .f2 { fill: var(--w-2); }
 .w-svg .c3 { stroke: var(--w-3); } .w-svg .f3 { fill: var(--w-3); }
@@ -682,7 +687,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </blockquote>
 <p>이 질문의 답이 레퍼런스의 역할을 명확히 해준다.</p>
 <h4 id="레퍼런스의-자리-방향은-데이터가-크기는-레퍼런스가">레퍼런스의 자리: 방향은 데이터가, 크기는 레퍼런스가</h4>
-<p>레퍼런스가 오답을 더 좋아하면, DPO로 학습한 모델도 오답 쪽으로 끌려갈까? 레퍼런스는 손실 식의 어디에 들어가 무엇을 바꾸는가?</p>
+<p>선호 라벨은 사람이나 심사 모델이 두 응답을 읽고 매길 뿐, 레퍼런스가 어느 쪽에 확률을 더 주는지는 보지 않는다. 그러니 수만 쌍을 모은 데이터에는 레퍼런스가 비선호 응답을 더 좋아하는 쌍이 섞이기 마련이다. 레퍼런스가 오답을 더 좋아하면, DPO로 학습한 모델도 오답 쪽으로 끌려갈까? 레퍼런스는 손실 식의 어디에 들어가 무엇을 바꾸는가?</p>
 <h5 id="역사-원래-모델에-목줄을-매다">역사: 원래 모델에 목줄을 매다</h5>
 <p>학습 중인 모델을 원래 모델에 KL 벌점으로 묶어 두는 방법은 DPO보다 먼저, 실패를 겪으며 나왔다. 2017년 재키스(Natasha Jaques)와 동료들은 음악 선율을 만드는 순환 신경망을 다듬고 있었다. 악보 데이터로만 학습한 모델은 같은 음을 지나치게 되풀이해서, 만든 선율의 음 가운데 63%가 그런 되풀이 구간에 들어 있었다. 그래서 「같은 음을 너무 오래 끌지 말 것」 같은 음악 이론 규칙을 보상으로 걸고 강화학습으로 고쳤다. 그런데 규칙 보상만으로 학습한 모델은 규칙은 지켰지만 데이터에서 배운 것을 잃었다. 데이터로 학습한 원래 모델이 보기에 이 모델이 고르는 음의 평균 확률은 약 0.026 — 38가지 선택지에서 아무렇게나 고르는 것과 다름없었다. 분자 구조를 글자로 적은 문자열을 만드는 실험에서는 모델이 보상 함수의 빈틈을 찔러, 원자 하나짜리 분자 'N’을 되풀이하거나 탄소를 'CCCCC…'처럼 늘어놓았다. 그들의 해법이 미리 학습한 모델에서 너무 멀어지지 않게 거는 KL 벌점이었다(Sequence Tutor, ICML 2017). 2019년 OpenAI의 지글러(Daniel Ziegler)와 동료들은 「Fine-Tuning Language Models from Human Preferences」에서 같은 벌점을 7억 7,400만 파라미터 GPT-2에 걸어 사람의 선호로 언어모델을 학습시켰다. 벌점 없이 긍정적인 이어 쓰기만 보상했더니 감정 판별 모델의 점수로는 99.97% 긍정인데 문장은 알아볼 수 없는 말이 되었다고 부록에 적었다. 「보상 − KL 벌점」은 이후 RLHF가 이어 쓰는 틀이 되었다. 2023년 DPO는 이 벌점을 따로 계산하는 대신 손실 속 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Δ</mi><mtext>ref</mtext></msub></mrow><annotation encoding="application/x-tex">\Delta_\text{ref}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord">Δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">ref</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 로 흡수했다.</p>
 <h5 id="그래디언트를-두-조각으로-읽기">그래디언트를 두 조각으로 읽기</h5>
@@ -879,6 +884,6 @@ addEventListener('keydown', e => {
 });
 </script>
 <script src="widgets/common.js?v=6a3d503c" defer></script>
-<script src="widgets/dpo-loss.js?v=938652d6" defer></script>
+<script src="widgets/dpo-loss.js?v=85b18fb4" defer></script>
 </body>
 </html>

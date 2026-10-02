@@ -485,6 +485,11 @@ pre.mermaid {
 .w-svg .w-dot { stroke: var(--w-surface); stroke-width: 2; fill: var(--w-muted); }
 .w-svg .dash { stroke-dasharray: 5 4; }
 .w-svg .thin { stroke-width: 1.2; }
+/* 휴대폰 폭: 위젯 그래프의 폭 560 좌표가 약 330px 로 줄어 눈금·이름표가 6~7px 로 보인다. 그 글자만 키운다(넓은 화면은 그대로) */
+@media (max-width: 600px) {
+  .w-svg .w-tick { font-size: 16px; }
+  .w-svg .w-axis-label, .w-svg .w-label { font-size: 17px; }
+}
 .w-svg .c1 { stroke: var(--w-1); } .w-svg .f1 { fill: var(--w-1); }
 .w-svg .c2 { stroke: var(--w-2); } .w-svg .f2 { fill: var(--w-2); }
 .w-svg .c3 { stroke: var(--w-3); } .w-svg .f3 { fill: var(--w-3); }
@@ -662,7 +667,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="18-GRPO의변종들.html">18. GRPO의 변종들 — 부품을 하나씩 의심하다</a></li>
 <li><a href="19-디퓨전의DPO.html">19. 디퓨전에서 DPO를 쓰려면 — 로그확률의 벽</a></li>
 <li><a href="20-DDPO.html">20. DDPO — 디퓨전의 정책 그래디언트</a></li>
-<li><a href="21-이미지-로보틱스.html" class="active">21. 이미지·로보틱스의 강화학습 — GRPO가 시각 생성을 만났을 때</a><ul class="sidebar-toc"><li><a href="21-이미지-로보틱스.html" class="current">세 갈래 지도: 무엇으로 배우는가</a></li><li><a href="21-이미지-로보틱스-2.html">노이즈 재주입(ODE → SDE): 결정론적 샘플러에 탐색을 되돌린다</a></li><li><a href="21-이미지-로보틱스-3.html">시각 생성 GRPO: 흐름 모델 위의 그룹 비교</a></li><li><a href="21-이미지-로보틱스-4.html">그룹 통제: 무엇과 무엇을 비교할 것인가</a></li><li><a href="21-이미지-로보틱스-5.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="21-이미지-로보틱스.html" class="active">21. 이미지·로보틱스의 강화학습 — GRPO가 시각 생성을 만났을 때</a><ul class="sidebar-toc"><li><a href="21-이미지-로보틱스.html" class="current">세 갈래 지도: 무엇으로 배우는가</a></li><li><a href="21-이미지-로보틱스-2.html">노이즈 재주입(ODE → SDE): 결정론적 샘플러에 탐색을 되돌린다</a></li><li><a href="21-이미지-로보틱스-3.html">시각 생성 GRPO: 흐름 모델 위의 그룹 비교</a></li><li><a href="21-이미지-로보틱스-4.html">그룹 통제: 무엇을 같게 두고 비교할 것인가</a></li><li><a href="21-이미지-로보틱스-5.html">분기 샘플링: 중간에서 갈라 같은 갈래끼리 비교한다</a></li><li><a href="21-이미지-로보틱스-6.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="22-영상모델의학습.html">22. 영상 생성 모델의 학습 — 시퀀스와 디퓨전 사이에서 무엇을 "강제"하는가</a></li>
 <li><a href="23-에이전트의강화학습.html">23. 에이전틱 AI — 행동하는 모델을 정렬하기</a></li>
 <li><a href="99-부록.html">부록</a></li></ol>
@@ -674,25 +679,18 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <h3>Chapter 21: 이미지·로보틱스의 강화학습 — GRPO가 시각 생성을 만났을 때</h3>
 <h4 id="의문">의문</h4>
-<p>DDPO와 Diffusion-DPO는 시작에 불과했다. DeepSeek-R1(2025년 1월) 이후 LLM의 GRPO 붐이 시각 생성으로 번지면서, 디퓨전·흐름 모델의 RL은 2025년에 폭발적으로 늘었다. 뼈대 — 정책 그래디언트(답을 내는 모델, 곧 정책의 확률을 보상 쪽으로 미는 방법), DPO, GRPO와 그 변종 — 는 LLM에서 이미 갖춰져 있다. 그렇다면 이미지·로봇으로 옮길 때 새로 풀어야 하는 것은 무엇일까? 연속 출력에서 로그확률과 탐색은 어디서 얻고, 그룹(같은 프롬프트에서 뽑은 샘플 묶음) 안에서는 무엇과 무엇을 비교해야 할까?</p>
+<p>DeepSeek-R1(2025년 1월)이 GRPO로 수학 정답률을 끌어올린 뒤, 여러 팀이 같은 코드를 이미지 모델에 붙여 보려 했다. 하는 일은 LLM과 같아 보인다. 프롬프트 하나에 그림 여덟 장을 뽑고, 보상 모델로 점수를 매기고, 그룹(같은 프롬프트에서 뽑은 샘플 묶음) 평균보다 나은 그림의 확률을 올린다. 뼈대 — 정책 그래디언트(답을 내는 모델, 곧 정책의 확률을 보상 쪽으로 미는 방법), DPO, GRPO와 그 변종 — 는 LLM에서 이미 갖춰져 있다. 그런데 요즘 이미지 모델에 그대로 붙이면 첫 단계부터 막힌다. 같은 시작 노이즈에서 여덟 번 뽑으면 여덟 장이 똑같이 나오는 모델이 많고, 그림 한 장의 로그확률을 바로 꺼낼 수도 없다. 그렇다면 이미지·로봇으로 옮길 때 새로 풀어야 하는 것은 무엇일까? 연속 출력에서 로그확률과 탐색은 어디서 얻고, 그룹 안에서는 무엇과 무엇을 비교해야 할까?</p>
 <h4 id="세-갈래-지도-무엇으로-배우는가">세 갈래 지도: 무엇으로 배우는가</h4>
-<p>2025년에 쏟아진 방법들을 하나씩 외우기 전에, 무엇으로 배우는지 — 어떤 데이터와 어떤 보상을 쓰는지 — 에 따라 나눠 보면 세 갈래가 된다.</p>
-<pre class="mermaid">graph TB
-    subgraph map[&quot;이미지·영상 생성 RL 지도&quot;]
-        direction TB
-        subgraph pref[&quot;1. 선호 기반 (오프라인 DPO 변형)&quot;]
-            direction LR
-            P1[&quot;Diffusion-DPO&quot;] --&gt; P2[&quot;Diffusion-SDPO&quot;] --&gt; P3[&quot;DenseDPO&quot;]
-            P1 --&gt; P4[&quot;DiffusionKTO&quot;] --&gt; P5[&quot;Pick-a-Pic 학습&quot;]
-        end
-        subgraph pg[&quot;2. 정책 그래디언트 (온라인 RL)&quot;]
-            direction LR
-            G1[&quot;DDPO&quot;] --&gt; G2[&quot;DPOK&quot;] --&gt; G3[&quot;ReFL&quot;] --&gt; G4[&quot;AlignProp&quot;] --&gt; G5[&quot;B²-DiffuRL&quot;]
-        end
-        subgraph grpo[&quot;3. GRPO 기반 (2025년 — 통합 프레임워크)&quot;]
-            direction LR
-            R1[&quot;DanceGRPO&quot;] --&gt; R2[&quot;FlowGRPO&quot;] --&gt; R3[&quot;T2I-R1&quot;] --&gt; R4[&quot;Identity-GRPO&quot;]
-        end
+<p>2025년에 쏟아진 방법들을 하나씩 외우기 전에, 무엇으로 배우는지 — 어떤 데이터와 어떤 보상을 쓰는지 — 에 따라 나눠 보면 세 갈래가 된다. 아래 그림은 갈래마다 이 책이 다루는 대표 방법만 두었고, 화살표에는 앞 방법의 무엇이 모자라서 뒤 방법이 나왔는지를 적었다.</p>
+<pre class="mermaid">graph LR
+    subgraph grpo[&quot;3. GRPO 기반 (2025년)&quot;]
+        R1[&quot;Flow-GRPO · DanceGRPO&quot;] --&gt;|&quot;의도가 다른 궤적끼리 비교됨&quot;| R2[&quot;DiffusionDriveV2&quot;]
+    end
+    subgraph pg[&quot;2. 정책 그래디언트 (온라인 RL)&quot;]
+        G1[&quot;DDPO&quot;] --&gt;|&quot;보상이 끝에만 있어 어느 스텝 덕인지 모름&quot;| G2[&quot;B²-DiffuRL&quot;]
+    end
+    subgraph pref[&quot;1. 선호 기반 (오프라인 DPO 변형)&quot;]
+        P1[&quot;Diffusion-DPO&quot;] --&gt;|&quot;나쁜 쪽을 밀면 좋은 쪽도 밀림&quot;| P2[&quot;Diffusion-SDPO&quot;]
     end
 
     class pref m-blue
@@ -704,32 +702,36 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <th>갈래</th>
 <th>데이터</th>
 <th>특징</th>
+<th>다음 갈래가 메운 것</th>
 <th>LLM 쪽 대응</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>1. 선호 기반</td>
-<td>쌍비교, 오프라인</td>
+<td>쌍비교, 오프라인(미리 모아 둔 데이터)</td>
 <td>안정적이지만 탐색 제한</td>
+<td>모아 둔 쌍 밖의 그림은 배울 수 없다 → 모델이 직접 그려 채점받는 온라인 학습</td>
 <td>DPO 가계도</td>
 </tr>
 <tr>
 <td>2. 정책 그래디언트</td>
 <td>보상 모델, 온라인 생성</td>
 <td>미분 불가 보상도 처리</td>
+<td>작은 프롬프트 모음(100개 미만)을 넘어 키우면 불안정하다는 보고 → 그룹 안에서 비교하는 GRPO</td>
 <td>REINFORCE·PPO</td>
 </tr>
 <tr>
 <td>3. GRPO 기반</td>
 <td>보상 모델/검증기, 온라인 그룹 생성</td>
 <td>비평가(상태마다 앞으로 받을 보상을 예측하는 가치 모델) 없이 그룹 정규화</td>
+<td>—</td>
 <td>GRPO와 변종</td>
 </tr>
 </tbody>
 </table></div>
 <h5 id="ml에서-보상-모델의-네-세대">ML에서: 보상 모델의 네 세대</h5>
-<p>둘째·셋째 갈래는 &quot;좋은 이미지&quot;를 점수로 매겨 줄 무언가가 있어야 돌아간다. 그 점수를 주는 보상 모델은 네 세대를 거쳐 왔다.</p>
+<p>둘째·셋째 갈래는 &quot;좋은 이미지&quot;를 점수로 매겨 줄 무언가가 있어야 돌아간다. 그 점수를 주는 보상 모델을 이 책은 네 세대로 나눠 본다.</p>
 <div class="table-scroll"><table>
 <thead>
 <tr>
@@ -784,7 +786,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </blockquote>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="20-DDPO-5.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="21-이미지-로보틱스-2.html">노이즈 재주입(ODE → SDE): 결정론적 샘플러에 탐색을 되돌린다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="20-DDPO-5.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="21-이미지-로보틱스-2.html">노이즈 재주입(ODE → SDE): 결정론적 샘플러에 탐색을 되돌린다 &rarr;</a></nav>
 </main>
 
 <script type="module">

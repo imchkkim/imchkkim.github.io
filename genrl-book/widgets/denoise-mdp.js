@@ -3,21 +3,38 @@
 // ∂ log p / ∂ b_t = z_t / σ,  ∂ log p / ∂ a_t = −x_t · z_t / σ.  그래디언트 = mean_i (r_i − r̄) · (위 값).
 // 보상: 진짜 보상 = x0 ≈ 2.5 근처.  "보상 모델" = 진짜 보상 + x0 가 클수록 조금씩 더 주는 편향(포화형).
 // 학습률 0.05 에서 보상 모델로 학습하면 진짜 보상은 약 25회에서 최고점 후 하락 (node 시뮬레이션으로 확인).
+// 처음 화면은 원고의 위젯 줄에 붙은 data-set 으로 고른다(빈 그래프로 시작하지 않게 미리 학습해 둔다).
+//   없음            : 20장 「DDPO 추정기」 절 — 진짜 보상으로 20번 학습한 상태
+//   data-set="hack" : 20장 「리워드 해킹」 절 — 보상 모델로 60번 학습한 상태(두 곡선이 갈라진 뒤)
+// 「처음으로」와 슬라이더는 학습 전(0회)으로 돌린다.
 GW.register("denoise-mdp", (el) => {
+  const sets = {
+    default: {
+      useProxy: false, pre: 20,
+      caption:
+        "선 하나가 이미지 하나의 디노이징 경로다(왼쪽 순수 노이즈 x<sub>T</sub> → 오른쪽 결과 x<sub>0</sub>). 진할수록 보상이 높다. " +
+        "초록 띠는 ‘진짜로 좋은 이미지’다. 학습할수록 경로들이 초록 띠로 모이는지 보라. 스텝 노이즈 σ를 바꾸면 탐색의 폭이 달라진다. " +
+        "보상 모델은 진짜 보상에 더해 ‘x가 클수록 조금 더’ 점수를 주는 편향을 갖고 있다(예: 채도가 높을수록 좋아하는 미학 점수). ‘보상 모델로 학습’으로 바꿔 비교해 볼 수 있다.",
+    },
+    hack: {
+      useProxy: true, pre: 60,
+      caption:
+        "보상 모델은 진짜 보상에 더해 ‘x가 클수록 조금 더’ 점수를 주는 편향을 갖고 있다(예: 채도가 높을수록 좋아하는 미학 점수). " +
+        "오른쪽 그래프의 두 곡선(보상 모델 점수, 진짜 보상)이 학습 횟수에 따라 어떻게 움직이는지, ‘처음으로’에서 다시 학습시키며 보라. ‘진짜 보상으로 학습’과 견줘 보라.",
+    },
+  };
+  const S = sets[el.dataset.set] || sets.default;
   const f = GW.frame(el, {
     title: "노이즈는 탐색이고 μθ는 학습이다 — 1차원 디노이징을 정책 그래디언트로",
-    caption:
-      "선 하나가 이미지 하나의 디노이징 경로다(왼쪽 순수 노이즈 x<sub>T</sub> → 오른쪽 결과 x<sub>0</sub>). 진할수록 보상이 높다. " +
-      "초록 띠는 ‘진짜로 좋은 이미지’다. 보상 모델은 진짜 보상에 더해 ‘x가 클수록 조금 더’ 점수를 주는 편향을 갖고 있다(예: 채도가 높을수록 좋아하는 미학 점수). " +
-      "‘보상 모델로 학습’으로 50번 이상 학습시키면, 보상 모델 점수는 계속 오르는데 진짜 보상은 25회 근처에서 꺾인다. ‘진짜 보상으로 학습’과 비교해 보라.",
+    caption: S.caption,
   });
   const T = 10, N = 32;
-  const st = { sigma: 0.3, lr: 0.05, useProxy: true };
+  const st = { sigma: 0.3, lr: 0.05, useProxy: S.useProxy };
   let a = new Array(T).fill(0), b = new Array(T).fill(0), it = 0, hist = [], seed = 3;
   const trueR = (x) => Math.exp(-Math.pow(x - 2.5, 2) / 0.5);
   const proxyR = (x) => trueR(x) + 0.8 / (1 + Math.exp(-1.2 * (x - 3.5)));
 
-  GW.segmented(f.controls, { options: [[true, "보상 모델로 학습"], [false, "진짜 보상으로 학습"]], value: true, onchange: (v) => { st.useProxy = v; reset(); } });
+  GW.segmented(f.controls, { options: [[true, "보상 모델로 학습"], [false, "진짜 보상으로 학습"]], value: st.useProxy, onchange: (v) => { st.useProxy = v; reset(); } });
   GW.button(f.controls, "1번 학습", () => { train(1); draw(); });
   GW.button(f.controls, "10번 학습", () => { train(10); draw(); });
   GW.button(f.controls, "50번 학습", () => { train(50); draw(); });
@@ -88,4 +105,5 @@ GW.register("denoise-mdp", (el) => {
     f.readout.innerHTML = `학습 <b>${it}</b>회 · 보상 모델 <span class="sym-R">r<sub>ψ</sub></span> 평균 <b>${last[1].toFixed(3)}</b> · 진짜 보상 평균 <b>${last[2].toFixed(3)}</b>`;
   }
   reset();
+  if (S.pre) { train(S.pre); draw(); }
 });

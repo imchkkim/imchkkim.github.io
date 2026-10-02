@@ -39,7 +39,7 @@ GW.register("passk", (el) => {
     f.readout.innerHTML =
       `pass@1: 베이스 <b>${base(0).toFixed(2)}</b> vs RLVR <b>${rlv(0).toFixed(2)}</b> · ` +
       `pass@256: 베이스 <b>${base(8).toFixed(2)}</b> vs RLVR <b>${rlv(8).toFixed(2)}</b>` +
-      (cross === null ? " · 이 설정에서는 역전이 없다 (τ = 0 이면 RL이 잃는 문제가 없다)" : "");
+      (cross === null ? " · 이 설정에서는 역전이 없다" : "");
   }
   c.hover((lk) => (lk < 0 || lk > 8 ? "" : `k = ${Math.round(2 ** lk)}<br>베이스 ${pass(2 ** lk, (q) => q).toFixed(3)}<br>RLVR ${pass(2 ** lk, rl).toFixed(3)}`));
   draw();

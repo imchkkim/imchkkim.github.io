@@ -5,10 +5,10 @@ GW.register("dpo-link-fns", (el) => {
     title: "링크 함수를 바꾸면 — ‘언제 그만 벌릴 것인가’가 달라진다",
     caption:
       "DPO 곡선은 오른쪽으로 갈수록 0에 다가가기만 할 뿐 닿지 않는다 — 마진을 끝없이 벌리려는 힘이 남는다. " +
-      "IPO는 <span class='sym-R'>z*</span> = 1/(2<span class='sym-beta'>β</span>)에서 바닥을 치고 그 너머로 가면 다시 손실이 커진다. 힌지는 <span class='sym-R'>z</span> = 1/<span class='sym-beta'>β</span> 에서 손실과 그래디언트가 정확히 0이 된다. " +
+      "IPO는 <span class='sym-R'>z*</span> = 1/(2<span class='sym-beta'>β</span>)에서 바닥을 친다. 힌지는 <span class='sym-R'>z</span> = 1/<span class='sym-beta'>β</span> 에서 손실과 그래디언트가 정확히 0이 된다. " +
       "목표 마진 γ(SimPO)는 DPO 곡선을 γ/<span class='sym-beta'>β</span> 만큼 오른쪽으로 민다 — ‘최소 이만큼은 벌려라’.",
   });
-  const st = { beta: 0.5, gamma: 1.0 };
+  const st = { beta: 0.25, gamma: 1.0 }; // 처음 β 는 본문 표의 0.25. 0.5 는 13장 문제 2의 값이라 처음 화면에 두지 않는다(수치판의 z* 가 답이 된다)
   GW.slider(f.controls, { label: "<span class=\"sym-beta\">β</span>", min: 0.2, max: 2, step: 0.05, value: st.beta, fmt: (v) => v.toFixed(2), oninput: (v) => { st.beta = v; draw(); } });
   GW.slider(f.controls, { label: "γ (목표 마진)", min: 0, max: 3, step: 0.1, value: st.gamma, fmt: (v) => v.toFixed(1), oninput: (v) => { st.gamma = v; draw(); } });
   GW.legend(f.stage, [
@@ -17,7 +17,7 @@ GW.register("dpo-link-fns", (el) => {
     ["c3", "힌지: max(0, 1 − <span class='sym-beta'>β</span><span class='sym-R'>z</span>)"],
     ["c4 dash", "목표 마진: −log σ(<span class='sym-beta'>β</span><span class='sym-R'>z</span> − γ)", "dash"],
   ]);
-  const c = GW.chart(f.stage, { x: [-4, 8], y: [0, 4], xlabel: "원본 대비 마진 z = Δθ − Δref", ylabel: "손실", h: 290, label: "링크 함수 비교" });
+  const c = GW.chart(f.stage, { x: [-4, 8], y: [0, 4], xlabel: "레퍼런스 대비 마진 z = Δθ − Δref", ylabel: "손실", h: 290, label: "링크 함수 비교" });
   c.clip();
   const F = {
     dpo: (z) => -Math.log(GW.sigmoid(st.beta * z)),

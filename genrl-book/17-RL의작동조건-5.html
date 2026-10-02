@@ -485,6 +485,11 @@ pre.mermaid {
 .w-svg .w-dot { stroke: var(--w-surface); stroke-width: 2; fill: var(--w-muted); }
 .w-svg .dash { stroke-dasharray: 5 4; }
 .w-svg .thin { stroke-width: 1.2; }
+/* 휴대폰 폭: 위젯 그래프의 폭 560 좌표가 약 330px 로 줄어 눈금·이름표가 6~7px 로 보인다. 그 글자만 키운다(넓은 화면은 그대로) */
+@media (max-width: 600px) {
+  .w-svg .w-tick { font-size: 16px; }
+  .w-svg .w-axis-label, .w-svg .w-label { font-size: 17px; }
+}
 .w-svg .c1 { stroke: var(--w-1); } .w-svg .f1 { fill: var(--w-1); }
 .w-svg .c2 { stroke: var(--w-2); } .w-svg .f2 { fill: var(--w-2); }
 .w-svg .c3 { stroke: var(--w-3); } .w-svg .f3 { fill: var(--w-3); }
@@ -676,46 +681,34 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <h4 id="가짜-보상-무작위-보상으로도-점수가-오르는-이유">가짜 보상: 무작위 보상으로도 점수가 오르는 이유</h4>
 <p>RLVR의 효과가 원래 있던 능력을 더 자주 꺼내게 하는 것이라면, 극단적인 실험을 해 볼 수 있다. 보상이 정답과 아무 상관이 없어도 점수가 오를까? 오른다면, 무엇이 올린 것일까?</p>
 <h5 id="사례-틀린-라벨과-무작위-보상">사례: 틀린 라벨과 무작위 보상</h5>
-<p><strong>“가짜 보상”</strong> (Shao et al., “Spurious Rewards: Rethinking Training Signals in RLVR”, arXiv:2506.10947, 2025년 6월, 2026년 2월 개정)은 더 기묘한 결과를 냈다. Qwen2.5-Math-7B를 GRPO로 학습시키되 보상을 바꿔 가며 MATH-500 정확도 향상폭을 쟀다.</p>
-<div class="table-scroll"><table>
-<thead>
-<tr>
-<th>보상</th>
-<th>MATH-500 향상 (%p)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>정답 보상</td>
-<td>+29.1</td>
-</tr>
-<tr>
-<td>다수결 답을 정답으로</td>
-<td>+27.1</td>
-</tr>
-<tr>
-<td>문제 하나로만 RL</td>
-<td>+26.0</td>
-</tr>
-<tr>
-<td><strong>틀린 라벨</strong></td>
-<td>+24.1</td>
-</tr>
-<tr>
-<td><strong>무작위 보상</strong></td>
-<td>+21.4</td>
-</tr>
-<tr>
-<td>형식만 맞으면 보상</td>
-<td>+13.8</td>
-</tr>
-</tbody>
-</table></div>
-<p>틀린 답에 상을 줘도, 동전을 던져 상을 줘도 정답 보상 효과의 대부분이 나왔다. 하지만 같은 실험을 Llama3나 OLMo2 계열에 하면 이 효과가 나타나지 않았다. 논문이 찾은 메커니즘은 <strong>GRPO의 클리핑 편향</strong>이다. 클리핑이 비대칭적으로 작동하면서, 보상 내용과 상관없이 모델이 원래 자주 하던 행동을 증폭한다. Qwen2.5-Math의 경우 그것이 &quot;코드로 추론하기&quot;였고(학습 중 비율이 65%에서 90% 이상으로), 이 행동 자체가 정확도를 올렸다. 클리핑을 없애면 무작위 보상의 이득도 사라진다.</p>
+<p><strong>“가짜 보상”</strong> (Shao et al., “Spurious Rewards: Rethinking Training Signals in RLVR”, arXiv:2506.10947, 2025년 6월, 2026년 2월 개정)은 더 기묘한 결과를 냈다. Qwen2.5-Math-7B를 GRPO로 학습시키되 보상을 바꿔 가며 MATH-500(수학 벤치마크 MATH에서 고른 500문제) 정확도 향상폭을 쟀다.</p>
+<svg class="fig" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="보상 종류별 MATH-500 향상폭: 정답 보상 29.1, 무작위 보상 21.4 (Shao 외 2025)">
+  <text class="t-strong" x="280" y="20" text-anchor="middle" style="font-size:16px">Qwen2.5-Math-7B 의 MATH-500 향상폭 (%p)</text>
+  <text x="190" y="61" text-anchor="end" style="font-size:16px">정답 보상</text>
+  <rect class="f1" x="200" y="44" width="276.4" height="24"/>
+  <text x="484.4" y="62" style="font-size:15px">+29.1</text>
+  <text x="190" y="101" text-anchor="end" style="font-size:16px">다수결 답을 정답으로</text>
+  <rect class="f1" x="200" y="84" width="257.4" height="24"/>
+  <text x="465.4" y="102" style="font-size:15px">+27.1</text>
+  <text x="190" y="141" text-anchor="end" style="font-size:16px">문제 하나로만 RL</text>
+  <rect class="f1" x="200" y="124" width="247.0" height="24"/>
+  <text x="455.0" y="142" style="font-size:15px">+26.0</text>
+  <text x="190" y="181" text-anchor="end" style="font-size:16px">틀린 라벨</text>
+  <rect class="f2" x="200" y="164" width="229.0" height="24"/>
+  <text x="437.0" y="182" style="font-size:15px">+24.1</text>
+  <text x="190" y="221" text-anchor="end" style="font-size:16px">무작위 보상</text>
+  <rect class="f2" x="200" y="204" width="203.3" height="24"/>
+  <text x="411.3" y="222" style="font-size:15px">+21.4</text>
+  <text x="190" y="261" text-anchor="end" style="font-size:16px">형식만 맞으면 보상</text>
+  <rect class="fneutral" x="200" y="244" width="131.1" height="24"/>
+  <text x="339.1" y="262" style="font-size:15px">+13.8</text>
+  <line class="saxis" x1="200" y1="40" x2="200" y2="282"/>
+</svg>
+<p>틀린 답에 상을 줘도, 동전을 던져 상을 줘도 정답 보상 효과의 대부분이 나왔다. 하지만 같은 실험을 Llama3나 OLMo2 계열에 하면 이 효과가 나타나지 않았다. Qwen2.5-Math는 원래 실행하지도 않을 파이썬 코드를 써 가며 추론하는 버릇이 있었고(학습 전 응답의 65%), 이 버릇이 든 답의 정확도가 더 높았다. 무작위 보상으로 학습하는 동안 이 비율이 90% 이상으로 올랐다. 논문은 보상이 아무 정보도 주지 않는데 이 버릇이 커진 원인을 GRPO 목적함수의 한 부품에서 찾았고, 그 부품을 빼자 무작위 보상의 이득도 사라졌다. 어느 부품이고 왜 그런지는 아래 문제에서 직접 따져 본다.</p>
 <h5 id="ml에서-이미-있던-모드를-끌어올린다">ML에서: 이미 있던 모드를 끌어올린다</h5>
 <p>앞의 pass@k 결과와 합치면 이 장의 결론과 맞아떨어진다. RLVR의 효과 상당 부분은 <strong>프리트레인이 깔아둔 스펙트럼에서 이미 있던 모드를 표면으로 끌어올리는 것</strong>이다. 보상이 정확하면 올바른 모드가, 보상이 무의미하면 원래 우세하던 모드가 올라온다. 그리고 어느 모드가 우세한지는 프리트레인이 정한다.</p>
-<p>이것이 RL을 폄하하는 결론은 아니다. “여덟 번에 한 번 맞히던 것을 한 번에 맞히게” 하는 것은 실제 사용에서 엄청난 차이다. 다만 <strong>RL로 모델의 천장을 뚫으려면</strong> 다른 무엇 — 더 긴 학습과 탐색 유지(ProRL 같은 시도), 더 나은 프리트레인, 증류 — 이 필요하다는 뜻이다.</p>
-<h5 id="문제-6-킬러-동전-던지기-보상">문제 6 — (킬러) 동전 던지기 보상</h5>
+<p>이것이 RL을 폄하하는 결론은 아니다. “여덟 번에 한 번 맞히던 것을 한 번에 맞히게” 하는 것은 실제 사용에서 엄청난 차이다. 다만 <strong>RL로 모델의 천장을 뚫으려면</strong> 다른 무엇 — 학습을 아주 길게 끌면서 탐색이 꺼지지 않게 붙드는 시도, 더 나은 프리트레인, 증류 — 이 필요하다는 뜻이다.</p>
+<h5 id="문제-9-킬러-동전-던지기-보상">문제 9 — (킬러) 동전 던지기 보상</h5>
 <div class="exercise">
 <p>보상이 응답과 <strong>독립적인 무작위 값</strong>이라면, 정책 그래디언트의 기대값은 0이어야 한다. 그런데 “가짜 보상” 연구에서는 Qwen2.5-Math-7B의 MATH-500 점수가 21.4%p 올랐다. (가) 기대값이 0이라는 논증을 쓰시오. (나) 이 논증은 GRPO의 어느 부분에서 깨지는가? (다) 같은 실험이 Llama 계열에서 재현되지 않은 것은 무엇을 말해주는가?</p>
 </div>
@@ -728,14 +721,14 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그럼 제 논증이 맞으니까, 결국 데이터 오염(평가 문제가 학습 데이터에 섞여 들어간 것)이나 평가 오차일 수밖에 없어요. 기대값이 0인 업데이트로는 체계적인 변화가 안 생기니까요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">서연 학생 논증은 &quot;그래디언트가 R · ∇log π 꼴이다&quot;를 전제로 했어요. GRPO 목적함수에서 그래디언트가 정말 그 꼴인가요?</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S02.webp" alt="이서연 (생각)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">아니요. min(r·Â, clip(r)·Â)가 있어요. 비율 r이 범위를 벗어나면 그 토큰의 그래디언트가 0이 되고요. 그러면 그래디언트가 ∇log π에 선형이 아니에요.</div></div>
-<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S07.webp" alt="이서연 (깨달음)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">잘리는 조건이 토큰의 확률에 따라 달라서, 원래 확률이 낮은 토큰은 조금만 올라가도 잘리고 높은 토큰은 덜 잘리면… 보상이 무작위여도 평균적으로 원래 자주 하던 행동 쪽으로 기울어지겠네요. 독립이라는 가정은 맞는데 선형이라는 가정이 틀렸어요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S07.webp" alt="이서연 (깨달음)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">클립 폭이 0.2면, 확률 0.02이던 토큰은 0.024만 넘어도 잘리는데 0.85이던 토큰은 1.02를 넘어야 잘려요. 확률은 1을 못 넘으니 이 토큰은 위로는 아예 안 잘리고요. 원래 확률이 낮은 토큰은 조금만 올라가도 잘리고 높은 토큰은 안 잘리면… 보상이 무작위여도 평균적으로 원래 자주 하던 행동 쪽으로 기울어지겠네요. 독립이라는 가정은 맞는데 선형이라는 가정이 틀렸어요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">바로 그게 논문이 찾은 &quot;클리핑 편향&quot;이에요. 클리핑을 빼면 무작위 보상의 효과도 사라졌어요.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">그럼 (다)는… Qwen2.5-Math는 원래 코드로 푸는 습관이 있었고 그게 증폭돼서 점수가 오른 거고, Llama는 증폭할 좋은 습관이 없었던 거네요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 무엇이 증폭될지는 보상이 아니라 프리트레인이 정해요. 곱의 길이죠.</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">증명에서 &quot;선형이면&quot;이라는 가정을 조용히 쓴 거였네요. 선형대수 시험에서 선형성 확인 안 하고 중첩 원리 쓴 거랑 같아요.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">채점 기준이 엉망이어도 원래 잘하던 과제 스타일로 쓰면 점수가 오르는 거랑 비슷하네요. 조교님 말로는 그게 제일 위험하댔어요. 잘하는 게 아니라 익숙한 걸 하는 거라서.</div></div>
 </div><blockquote>
-<p><strong>정리</strong> (가) <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mo>⊥</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">R \perp y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">⊥</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span></eq>이면 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mi>R</mi><mtext> </mtext><mi mathvariant="normal">∇</mi><mi>log</mi><mo>⁡</mo><mi>π</mi><mo stretchy="false">]</mo><mo>=</mo><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mi>R</mi><mo stretchy="false">]</mo><mtext> </mtext><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mi mathvariant="normal">∇</mi><mi>log</mi><mo>⁡</mo><mi>π</mi><mo stretchy="false">]</mo><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\mathbb{E}[R\,\nabla\log\pi] = \mathbb{E}[R]\,\mathbb{E}[\nabla\log\pi] = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbb">E</span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">∇</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbb">E</span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathbb">E</span><span class="mopen">[</span><span class="mord">∇</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span></eq>. (나) GRPO의 그래디언트는 클리핑 때문에 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mtext> </mtext><mi mathvariant="normal">∇</mi><mi>log</mi><mo>⁡</mo><mi>π</mi></mrow><annotation encoding="application/x-tex">R\,\nabla\log\pi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">∇</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">π</span></span></span></span></eq> 꼴(선형)이 아니다. 잘리는 조건이 토큰 확률에 의존해 무작위 보상에서도 원래 우세한 행동이 증폭된다(클리핑 편향). (다) 무엇이 증폭될지는 프리트레인이 정한다. Qwen2.5-Math에는 &quot;코드로 추론하기&quot;라는 유용한 모드가 있었고, Llama3·OLMo2에는 없었다.</p>
+<p><strong>정리</strong> (가) <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mo>⊥</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">R \perp y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">⊥</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span></eq>이면 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mi>R</mi><mtext> </mtext><mi mathvariant="normal">∇</mi><mi>log</mi><mo>⁡</mo><mi>π</mi><mo stretchy="false">]</mo><mo>=</mo><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mi>R</mi><mo stretchy="false">]</mo><mtext> </mtext><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mi mathvariant="normal">∇</mi><mi>log</mi><mo>⁡</mo><mi>π</mi><mo stretchy="false">]</mo><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\mathbb{E}[R\,\nabla\log\pi] = \mathbb{E}[R]\,\mathbb{E}[\nabla\log\pi] = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbb">E</span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">∇</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbb">E</span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathbb">E</span><span class="mopen">[</span><span class="mord">∇</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">π</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span></eq>. (나) GRPO의 그래디언트는 클리핑 때문에 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mtext> </mtext><mi mathvariant="normal">∇</mi><mi>log</mi><mo>⁡</mo><mi>π</mi></mrow><annotation encoding="application/x-tex">R\,\nabla\log\pi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">∇</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">π</span></span></span></span></eq> 꼴(선형)이 아니다. 잘리는 조건이 토큰 확률에 의존해(클립 폭 0.2에서 확률 0.02인 토큰은 0.024에서 잘리지만 0.85인 토큰은 위로 잘리지 않는다) 무작위 보상에서도 원래 우세한 행동이 증폭된다(클리핑 편향). (다) 무엇이 증폭될지는 프리트레인이 정한다. Qwen2.5-Math에는 &quot;코드로 추론하기&quot;라는 유용한 모드가 있었고, Llama3·OLMo2에는 없었다.</p>
 </blockquote>
 
 </section>

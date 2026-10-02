@@ -485,6 +485,11 @@ pre.mermaid {
 .w-svg .w-dot { stroke: var(--w-surface); stroke-width: 2; fill: var(--w-muted); }
 .w-svg .dash { stroke-dasharray: 5 4; }
 .w-svg .thin { stroke-width: 1.2; }
+/* 휴대폰 폭: 위젯 그래프의 폭 560 좌표가 약 330px 로 줄어 눈금·이름표가 6~7px 로 보인다. 그 글자만 키운다(넓은 화면은 그대로) */
+@media (max-width: 600px) {
+  .w-svg .w-tick { font-size: 16px; }
+  .w-svg .w-axis-label, .w-svg .w-label { font-size: 17px; }
+}
 .w-svg .c1 { stroke: var(--w-1); } .w-svg .f1 { fill: var(--w-1); }
 .w-svg .c2 { stroke: var(--w-2); } .w-svg .f2 { fill: var(--w-2); }
 .w-svg .c3 { stroke: var(--w-3); } .w-svg .f3 { fill: var(--w-3); }
@@ -673,19 +678,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <main>
 <section class="chapter chapter-paged">
 <h3>Chapter 15: 실전사례 — 현장의 목소리, JoyCaption의 DPO 실전기</h3>
+<h4 id="의문">의문</h4>
 <blockquote>
 <p><strong>원문</strong>: fpgaminer, <em>“How OpenAI Misled You on RLHF”</em>
 <a href="https://aerial-toothpaste-34a.notion.site/How-OpenAI-Misled-You-on-RLHF-1f83f742d9dd80a68129d06503464aff">https://aerial-toothpaste-34a.notion.site/How-OpenAI-Misled-You-on-RLHF-1f83f742d9dd80a68129d06503464aff</a></p>
 </blockquote>
-<p>이론을 벗어나 잠시 현장으로 가보자. 레딧에서 활동하는 비전 모델 제작자 fpgaminer가 공개한 JoyCaption Beta One의 DPO 훈련 기록은 이 교재에서 다룬 개념들이 실전에서 어떻게 부딪히는지를 생생하게 보여준다.</p>
+<p>JoyCaption은 이미지를 보고 캡션(그림을 설명하는 글)을 쓰는 오픈소스 모델이다. 이미지 생성 모델을 학습시키려면 이미지마다 설명글이 있어야 해서, 이런 모델로 수만 장에 캡션을 한꺼번에 붙인다. 그런데 정답 캡션을 그대로 따라 쓰게 하는 지도 학습, 곧 SFT(supervised fine-tuning)만 마친 JoyCaption은 응답 100개 가운데 9.6개꼴로 헛발질을 했다. 같은 구절을 끝없이 되풀이하는 반복 루프에 빠지거나 쓸모없는 출력을 냈다. 이미지 1만 장에 캡션을 붙이면 960장이 망가진다는 뜻이다.</p>
+<p>제작자 fpgaminer가 이 경험을 적은 글의 제목은 「OpenAI는 RLHF를 어떻게 잘못 알렸나」다. RLHF(사람의 선호로 모델을 강화학습하는 과정)는 InstructGPT 소개글 이후 안전과 정렬(사람이 바라는 방식으로 답하게 맞추기)을 위한 기술로 알려졌다. 그는 이것이 오해라고 본다. 강화학습이 하는 일은 모델이 지시를 <strong>믿을 만하게</strong> 따르게 만드는 것이고, SFT만 거친 모델은 과제에 따라 많아야 90% 남짓 믿을 만해서 열 번에서 스무 번에 한 번은 헛발질한다는 것이 그의 경험이다. JoyCaption 저장소의 설명서는 GPT-4o 같은 상용 모델의 헛발질 비율을 0.01%로 적는다.</p>
+<p>그렇다면 열 번에 한 번 헛발질하는 모델은 어떻게 고칠까? 정답 캡션을 더 많이 보여 주면 될까, 모델이 실제로 저지른 실수를 직접 눌러야 할까? 실수를 누르기로 했다면 그 실수는 어디서 가져오고 무엇과 짝지어야 할까? 이 장은 개인 개발자 한 사람이 오프라인 DPO(미리 모아 둔 선호 쌍으로 학습하는 DPO)를 두 라운드 돌린 기록을 따라가며, 선호 쌍·마진·레퍼런스 같은 개념이 현장에서 어떻게 부딪히는지 본다.</p>
 <h4 id="좋은-선호쌍-모델이-실제로-저지르는-실수를-담는다">좋은 선호쌍: 모델이 실제로 저지르는 실수를 담는다</h4>
 <p>DPO 데이터셋을 만들 때 가장 먼저 부딪히는 물음은 이것이다. 어떤 두 응답을 짝지어야 모델이 무언가를 배울까? 점수 차이가 크면 될까, 아니면 다른 조건이 더 있을까? JoyCaption의 기록은 이 물음에 대한 현장의 답을 보여 준다.</p>
 <h5 id="역사-joycaption이-dpo를-고른-이유">역사: JoyCaption이 DPO를 고른 이유</h5>
-<p>JoyCaption은 오픈소스 이미지 캡셔닝 VLM(Visual Language Model, 이미지를 보고 글을 쓰는 언어모델)이다. Llama 3.1 기반으로, 이미지를 입력받아 디퓨전 모델 학습용 캡션을 생성한다.
-검열에서 자유로운 이미지 캡셔닝 기능을 오픈소스로 제공하기 위해 만들어졌고 성인용(NSFW) 이미지를 학습하고자 하는 로컬 이미지 생성 모델 제작자들이 많이 사용한다.</p>
-<p>SFT(정답 캡션을 그대로 따라 쓰게 하는 지도 학습)만으로 학습된 이전 버전(Alpha Two)은 대체로 잘 작동했지만, 10번 중 1번꼴로 반복 루프에 빠지거나 엉뚱한 출력을 내놓았다. 개발자는 이 &quot;헛발질 확률&quot;을 줄이기 위해 오프라인 DPO를 선택했다.</p>
+<p>JoyCaption은 메타가 공개한 언어모델 Llama 3.1 8B(파라미터 80억 개)에 구글의 이미지 인코더 SigLIP2를 붙인 VLM(Visual Language Model, 이미지를 보고 글을 쓰는 언어모델)이다. 이미지 생성 모델(디퓨전 모델)을 학습시킬 캡션을 쓰려고 만들었고, 상용 모델이 거절하는 성인용(NSFW) 이미지까지 고르게 다루도록 검열 없이 학습했다. 누구나 생성 모델 학습에 쓰라고 학습된 파라미터를 무료로 공개했고, fpgaminer는 이것을 취미로 만든다.</p>
+<p>앞 공개판(Alpha Two)까지는 SFT만 썼고, Beta One이 강화학습을 쓴 첫 공개판이다. 강화학습이 처음이었던 그는 가장 단순한 길을 골랐다. 오프라인 DPO(선호 응답과 비선호 응답의 쌍으로, 보상 모델 없이 정책 — 응답을 뽑는 모델 — 을 직접 학습하는 방법)를 여러 라운드 돌리는 것이다. 학습 코드에서 바꿀 것은 두 가지뿐이었다. 한 예제가 「프롬프트 + 응답 하나」에서 「프롬프트 + 응답 둘」이 되고, 학습 전 모델을 얼려 둔 레퍼런스의 로그확률을 함께 계산한다. 남은 일은 데이터셋이었다.</p>
 <h5 id="데이터셋은-어떻게-만들었는가">데이터셋은 어떻게 만들었는가</h5>
-<p>JoyCaption의 DPO 데이터셋 구축 과정은 &quot;좋은 쌍의 조건&quot;과 &quot;오프라인 데이터 파이프라인&quot;을 실전에서 보여준다.</p>
+<p>사람에게 응답의 순위를 매기게 하는 것이 가장 좋지만, 혼자 만드는 사람에게는 돈이 문제였다. DPO 데이터셋은 1만 쌍 단위로 필요하다. 그래서 심사는 다른 모델에게 맡겼다. 그는 모델이 답을 쓰는 것보다 답을 판정하는 것을 훨씬 잘한다고 보았다. 캡션을 쓰려면 이미지를 이해하고, 지시를 지키고, 글을 짜야 해서 사람도 서너 번 고쳐 쓰지만, 캡션이 맞는지 보는 일은 한 번 읽으면 된다.</p>
 <div class="table-scroll"><table>
 <thead>
 <tr>
@@ -696,35 +703,51 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </thead>
 <tbody>
 <tr>
-<td>1. 태스크 균형</td>
-<td>서술형 캡션(격식/비격식, 짧게/길게), Stable Diffusion 프롬프트(태그+구문), VQA(이미지 질의응답), 태그 증강 — 모든 유형을 고르게 섞음</td>
-<td>특정 유형만 좋아지고 나머지가 퇴화하는 것을 막기 위해</td>
+<td>1. 프롬프트를 고르게</td>
+<td>서술형 캡션(격식/비격식, 길이), 단어 수·피할 낱말·형식 같은 조건, SD 프롬프트, 태그 목록, 이미지에 붙은 태그를 녹여 쓰는 캡션, 이미지에 대한 질문까지 유형마다 고르게 넣었다. 시스템 프롬프트 앞뒤에 빈칸과 줄바꿈도 섞었다</td>
+<td>유형마다 프롬프트를 만드는 법과 심사 기준이 다르다. 학습 입력이 늘 똑같은 꼴이면 줄바꿈 하나에도 모델이 흔들린다</td>
 </tr>
 <tr>
 <td>2. 후보 생성</td>
-<td>(이미지, 프롬프트)마다 <strong>현재 모델로</strong> 응답 10개를 샘플링 온도를 높여 뽑음</td>
-<td>비선호 응답이 &quot;모델이 실제로 저지르는 실수&quot;가 되도록 (비선호가 모델의 분포 안에 있어야 한다는 조건)</td>
+<td>(이미지, 프롬프트)마다 <strong>현재 모델로</strong> 응답을 뽑았다. 샘플링 온도를 무작위로 높게(데이터셋 노트북에서는 0.4~1.0) 두고, 라운드가 지날수록 더 높였다</td>
+<td>모델이 넓게 탐색할수록 강해진다(제작자의 말). 비선호 응답이 「모델이 실제로 저지르는 실수」가 되도록 (비선호가 모델의 분포 안에 있어야 한다는 조건)</td>
 </tr>
 <tr>
 <td>3. 심사</td>
-<td>GPT-4o급 VLM이 응답마다 1–10점. “10점 = 프롬프트를 완벽히 따르고, 유용하고, 100% 정확”</td>
-<td>사람이 하기엔 양이 너무 많아서</td>
+<td>그때 가장 성능 좋던 상용 모델 여럿(노트북에는 Gemini 2.5 Pro, o4-mini, o3, GPT-4.1 등) 가운데 예제마다 하나를 무작위로 골라 판정시켰다. 판정 지시문은 작은 표본을 돌려 판정 근거를 직접 읽고 고치기를 여러 번 되풀이해 다듬었다</td>
+<td>사람이 하기엔 양이 너무 많아서. 한 심사 모델의 버릇을 다른 모델이 상쇄하도록. 지시문의 작은 결함은 모든 예제에 곱해진다</td>
 </tr>
 <tr>
 <td>4. 라운드</td>
-<td>1라운드 1만 쌍 → 모델 갱신 → 2라운드 2만 쌍을 <strong>새로</strong> 생성</td>
+<td>1라운드 1만 1천 쌍 → 모델 갱신 → 2라운드 2만 5천 쌍을 1라운드 데이터를 빼고 <strong>새로</strong> 생성</td>
 <td>모델이 바뀌면 옛 데이터는 낡는다</td>
 </tr>
 </tbody>
 </table></div>
 <h5 id="서핑-사진-한-장으로-본-네-가지-쌍">서핑 사진 한 장으로 본 네 가지 쌍</h5>
-<p>실제 쌍은 어떻게 생겼는가? 해질녘 바닷가에서 서핑하는 사람 사진 한 장으로 네 종류의 쌍을 보자. 프롬프트는 예제 3만 <em>“Write a Stable Diffusion prompt for this image.”</em> 이고, 나머지 셋은 <em>“Write a long descriptive caption in a formal tone.”</em> 이다.</p>
+<p>실제 쌍은 어떻게 생겼을까? 원문은 쌍의 실제 예를 싣지 않았다. 아래 그림과 표는 이 장이 <strong>설명을 위해 지은 예</strong>다. 해질녘 바다에서 서핑하는 사람의 사진 한 장을 두고 네 종류의 쌍을 짓는다. 그림을 보며 캡션이 맞는지 직접 따져 보라.</p>
+<svg class="fig" viewBox="0 0 560 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="해질녘 바다에서 흰 숏보드를 탄 서퍼 한 명이 몸을 낮추고 두 팔을 벌린 채 파도를 탄다">
+  <rect class="fa2" x="0" y="0" width="560" height="170"/>
+  <circle class="f2" cx="420" cy="150" r="42"/>
+  <rect class="fa1" x="0" y="150" width="560" height="130"/>
+  <rect class="f1" x="0" y="150" width="560" height="6" opacity="0.5"/>
+  <path class="s1" d="M0,205 C60,185 110,185 160,200 S260,225 330,200 S450,180 560,200" stroke-width="3"/>
+  <path class="s1" d="M0,245 C80,228 140,232 210,245 S350,262 420,245 S520,232 560,240" stroke-width="2" opacity="0.7"/>
+  <path class="f1" d="M120,214 C170,150 250,140 300,170 C270,170 240,182 222,212 Z" opacity="0.55"/>
+  <ellipse class="fsurface" cx="245" cy="205" rx="58" ry="8" transform="rotate(-8 245 205)" stroke="var(--w-ink-2)" stroke-width="2"/>
+  <circle cx="250" cy="128" r="10" style="fill:var(--w-ink)"/>
+  <path class="sink" d="M250,138 L244,168" stroke-width="7" stroke-linecap="round"/>
+  <path class="sink" d="M247,146 L210,140 M247,146 L292,136" stroke-width="5" stroke-linecap="round"/>
+  <path class="sink" d="M244,168 L224,180 L228,200 M244,168 L262,184 L262,199" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="10" y="270" style="font-size:16px">설명을 위해 그린 장면 (실제 사진이 아니다)</text>
+</svg>
+<p>프롬프트는 예제 3만 <em>“Write a Stable Diffusion prompt for this image.”</em> 이고, 나머지 셋은 <em>“Write a long descriptive caption in a formal tone.”</em> 이다. SD 프롬프트는 그림 생성 모델 Stable Diffusion에 넣는 프롬프트로, 태그와 짧은 구문을 쉼표로 이은 꼴이다. 점수는 심사 모델이 매긴 1–10점이다(1점은 전혀 쓸모없음, 10점은 완벽).</p>
 <div class="table-scroll"><table>
 <thead>
 <tr>
 <th></th>
-<th><eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>w</mi></msub></mrow><annotation encoding="application/x-tex">y_w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0269em;">w</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> (점수)</th>
-<th><eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> (점수)</th>
+<th><eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>w</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_w}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0269em;color:var(--sym-e000a5, #e000a5);">w</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> (점수)</th>
+<th><eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>l</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_l}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0197em;color:var(--sym-e000a5, #e000a5);">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> (점수)</th>
 <th>마진</th>
 <th>이 쌍이 가르치는 것</th>
 </tr>
@@ -742,39 +765,57 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <td>같은 상세 캡션 + <em>“…on a white shortboard, arms extended for balance”</em> (9)</td>
 <td><em>“The image shows a person surfing. The image shows a person surfing. The sky is orange…”</em> (3)</td>
 <td>6</td>
-<td><strong>“반복하지 마라.”</strong> <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>은 JoyCaption의 대표적 헛발질인 반복 루프에 빠졌다. 그럴듯하게 시작해서 무너지는, 모델이 실제로 저지르는 실수다</td>
+<td><strong>“반복하지 마라.”</strong> <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>l</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_l}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0197em;color:var(--sym-e000a5, #e000a5);">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>은 JoyCaption의 대표적 헛발질인 반복 루프에 빠졌다. 그럴듯하게 시작해서 무너지는, 모델이 실제로 저지르는 실수다</td>
 </tr>
 <tr>
 <td><strong>예제 3</strong> SD 프롬프트 유형</td>
 <td><em>“1girl, surfer, ocean, sunset, orange sky, waves, dynamic pose, crouching, …”</em> (7)</td>
 <td><em>“A beautiful sunset scene with a surfer riding waves in the golden hour light, …”</em> (2)</td>
 <td>5</td>
-<td><strong>“형식을 따르라.”</strong> <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>은 캡션으로는 좋지만 SD 프롬프트 형식(태그 + 짧은 구문)을 무시했다</td>
+<td><strong>“형식을 따르라.”</strong> <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>l</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_l}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0197em;color:var(--sym-e000a5, #e000a5);">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>은 캡션으로는 좋지만 SD 프롬프트 형식(태그 + 짧은 구문)을 무시했다</td>
 </tr>
 <tr>
 <td><strong>예제 4</strong> 엉터리 vs 정상</td>
 <td>상세 캡션 (9)</td>
 <td><em>“surfing surfing surfing surfing …”</em> (500토큰 반복) (0)</td>
 <td>9</td>
-<td>마진은 최대인데 쓸모는 작다. 정답 대 엉터리의 쌍 — 왜 그런지는 아래 문제 1에서 따져본다</td>
+<td>마진은 최대인데 쓸모는 작다. 정답 대 엉터리의 쌍 — 왜 그런지는 아래 문제 2에서 따져본다</td>
 </tr>
 </tbody>
 </table></div>
-<p>예제 3의 SD 프롬프트 유형은 끝까지 개선이 가장 느렸다. 심사 모델도 &quot;좋은 SD 프롬프트&quot;를 판정하기 어려웠고, 베이스 모델(프리트레인만 마친 모델)도 이 형식의 답을 낼 확률이 거의 없었다.</p>
-<h5 id="문제-1-마진이-넓을수록-좋은-쌍인가">문제 1 — 마진이 넓을수록 좋은 쌍인가</h5>
+<p>예제 3의 SD 프롬프트 유형은 강화학습 전에 JoyCaption이 가장 힘들어한 유형이다. 제작자는 자기가 바라는 SD 프롬프트를 써 주는 상용 모델을 하나도 찾지 못했다고 적었다. 심사하는 쪽도, 따라 할 본보기도 마땅치 않은 유형이었다.</p>
+<h5 id="문제-1-오답노트에-무엇을-적을까">문제 1 — 오답노트에 무엇을 적을까</h5>
+<div class="exercise">
+<p>다음 주 영어 단어 시험은 20문제이고, 그 가운데 10문제가 '-tion’으로 끝나는 단어다. 민준은 지금까지 ‘-tion’ 단어를 열 번에 세 번꼴로 '-sion’으로 잘못 썼다. 오답노트에 한 칸만 더 적을 수 있고, 적은 칸은 그 종류의 실수를 다음 시험에서 완전히 없애 준다고 하자. (가) 아무도 틀리지 않는 쉬운 단어 'apple’과 민준이 쓴 정답 (나) 'information’과 민준이 실제로 쓴 틀린 철자 ‘informasion’ (다) 'information’과 한 번도 써 본 적 없는 엉터리 철자 ‘aaaaaa’. 각 칸은 다음 시험의 오답을 평균 몇 개 줄이는가?</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 세 칸 가운데 어느 것을 적겠어요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M11.webp" alt="김민준 (자신만만)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">(다)요. 정답이랑 제일 많이 다르니까 대비가 확실하잖아요. 한 글자 차이인 (나)는 눈에 잘 안 띄고요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">다음 시험에서 민준 학생이 'aaaaaa’라고 쓸 일이 몇 번이나 있을까요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.webp" alt="김민준 (난처함)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">…한 번도 없죠. 그럼 (다)가 줄이는 오답은 0개예요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">같은 물음을 나머지 두 칸에도 해 볼까요? 그 실수가 다음 시험에서 몇 번 나올지요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">(가)는 원래 안 틀리니까 0개. (나)는 ‘-tion’ 10문제에서 열에 세 번 틀리니까 평균 10 × 0.3 = 3개요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S07.webp" alt="이서연 (아하)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">줄어드는 오답은 &quot;얼마나 심하게 틀렸나&quot;가 아니라 &quot;그 실수가 얼마나 자주 나오나&quot;로 정해지네.</div></div>
+</div><blockquote>
+<p><strong>정리</strong> (가) 0개, (나) 3개, (다) 0개. 오답노트 한 칸의 값은 그 실수가 다음 시험에 얼마나 자주 나오느냐로 정해진다. 정답과 크게 다른 엉터리라도 내가 내지 않는 실수면 줄일 것이 없고, 원래 맞히는 문제의 정답을 적어도 줄일 것이 없다.</p>
+</blockquote>
+<h5 id="문제-2-마진이-넓을수록-좋은-쌍인가">문제 2 — 마진이 넓을수록 좋은 쌍인가</h5>
 <div class="exercise">
 <p>표의 예제 1, 2, 4를 마진 크기 순으로 세우면 4 &gt; 2 &gt; 1 이다. 마진 순서가 곧 “좋은 쌍” 순서인가? 예제 2가 가장 좋은 쌍인 이유를 쓰시오.</p>
 </div>
 <div class="dlg">
-<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 세 쌍 중 가장 좋은 쌍은 어느 거예요?</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M11.webp" alt="김민준 (자신만만)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">예제 4요. 마진이 9점으로 제일 넓잖아요. 마진이 좁으면 배울 게 없다고 했으니까, 넓을수록 좋죠.</div></div>
-<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">예제 4의 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 은 &quot;surfing&quot;을 500번 반복한 거예요. 지금 모델이 그런 답을 얼마나 자주 내놓을까요?</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M02.webp" alt="김민준 (생각)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">거의 안 내놓겠죠… 반복 루프에 빠져도 보통은 예제 2처럼 그럴듯하게 시작했다가 무너지니까요.</div></div>
-<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그러니까 예제 4는 마진은 넓은데 고칠 실수가 없는 쌍이야. 예제 2는 마진도 넓고, <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 이 모델이 실제로 10번에 1번 저지르던 바로 그 실수고.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">서연 학생, 세 쌍 중 가장 좋은 쌍은 어느 거예요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S02.webp" alt="이서연 (생각)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">예제 1이요. 두 응답 모두 모델이 실제로 낼 법한 그럴듯한 캡션이잖아요. 비선호 응답이 모델의 분포 안에 있어야 한다는 조건을 가장 잘 지켜요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">예제 1의 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>l</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_l}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0197em;color:var(--sym-e000a5, #e000a5);">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 에서 고칠 실수는 뭐죠? 그리고 8점과 7점의 순서는 다른 심사 모델이 봤어도 같았을까요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S04.webp" alt="이서연 (난처함)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">둘 다 정확하고 형식도 맞아요… 고칠 실수가 없고, 1점 차이면 심사 모델을 바꿨을 때 순서가 뒤집혀도 이상하지 않겠네요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">아까 오답노트 (가)랑 같네. 원래 안 틀리는 단어의 정답을 적은 칸.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그럼 마진이 9점으로 가장 넓은 예제 4는요? 예제 4의 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>l</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_l}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0197em;color:var(--sym-e000a5, #e000a5);">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 은 &quot;surfing&quot;을 500번 반복한 거예요. 지금 모델이 그런 답을 얼마나 자주 내놓을까요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M02.webp" alt="김민준 (생각)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">거의 안 내놓겠죠… 반복 루프에 빠져도 보통은 예제 2처럼 그럴듯하게 시작했다가 무너지니까요. 이건 오답노트 (다)예요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그러니까 예제 4는 마진은 넓은데 고칠 실수가 없는 쌍이야. 예제 2는 마진도 넓고, <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>l</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_l}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0197em;color:var(--sym-e000a5, #e000a5);">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 이 모델이 실제로 10번에 1번 저지르던 바로 그 실수고.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M07.webp" alt="김민준 (깨달음)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">마진은 필요조건이었네요. 넓은 마진이 <em>실제 실수</em>를 가리켜야 좋은 쌍이고요.</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">조교님이 오답노트 검사할 때 &quot;아무도 안 틀리는 문제 적어 오지 말고 네가 틀린 문제 적어 와&quot;라고 한 거랑 같네요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">분포 안에 있다는 것도 필요조건일 뿐이었어. 둘 다 갖춰야 오답노트 (나) 같은 칸이 되는구나.</div></div>
 </div><blockquote>
-<p><strong>정리</strong> 마진 크기 순서는 좋은 쌍의 순서가 아니다. 예제 1은 마진이 좁아(1점) 차이가 취향 수준이고, 예제 4는 마진이 넓지만(9점) <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 이 모델이 거의 내놓지 않는 답이다. 예제 2는 넓은 마진(6점)이 모델의 <strong>실제 약점</strong>(반복 루프)을 가리킨다.</p>
+<p><strong>정리</strong> 마진 크기 순서는 좋은 쌍의 순서가 아니다. 예제 1은 마진이 좁아(1점) 차이가 취향 수준이고 심사 순서도 흔들린다. 예제 4는 마진이 넓지만(9점) <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>l</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_l}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0197em;color:var(--sym-e000a5, #e000a5);">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 이 모델이 거의 내놓지 않는 답이다. 예제 2는 넓은 마진(6점)이 모델의 <strong>실제 약점</strong>(반복 루프)을 가리킨다. 넓은 마진과 「모델이 실제로 저지르는 실수」는 둘 다 필요조건이다.</p>
 </blockquote>
 
 </section>

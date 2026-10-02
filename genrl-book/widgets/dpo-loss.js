@@ -9,7 +9,7 @@ GW.register("dpo-loss", (el) => {
     default: {
       title: "DPO 손실 — 레퍼런스 대비 마진을 얼마나 더 벌렸나",
       caption:
-        "가로축은 학습 모델의 선호마진 <span class='sym-pi'>Δ<sub>θ</sub></span>. 곡선은 <span class='sym-pi'>Δ<sub>θ</sub></span> = <span class='sym-ref'>Δ<sub>ref</sub></span> 인 지점(점선)에서 항상 손실 0.693 을 지난다 — " +
+        "가로축은 학습 모델의 선호 마진 <span class='sym-pi'>Δ<sub>θ</sub></span>. 곡선은 <span class='sym-pi'>Δ<sub>θ</sub></span> = <span class='sym-ref'>Δ<sub>ref</sub></span> 인 지점(점선)에서 항상 손실 0.693 을 지난다 — " +
         "레퍼런스와 똑같이 구분하면 아직 할 일이 남아 있다는 뜻이다. 그래디언트 크기 <span class='sym-A'>σ(−βz)</span>는 마진을 충분히 벌리면 0 으로 사라진다.",
       ref: "레퍼런스",
       refWa: "레퍼런스와",
@@ -23,12 +23,13 @@ GW.register("dpo-loss", (el) => {
     ref: {
       title: "DPO 손실 — 레퍼런스 대비 마진을 얼마나 더 벌렸나",
       caption:
-        "가로축은 학습 모델의 선호마진 <span class='sym-pi'>Δ<sub>θ</sub></span>, 세로 점선은 레퍼런스 마진 <span class='sym-ref'>Δ<sub>ref</sub></span>. " +
+        "가로축은 학습 모델의 선호 마진 <span class='sym-pi'>Δ<sub>θ</sub></span>, 세로 점선은 레퍼런스 마진 <span class='sym-ref'>Δ<sub>ref</sub></span>. " +
         "<span class='sym-ref'>Δ<sub>ref</sub></span> 를 움직이면 곡선이 어떻게 바뀌는지 보라. 단추는 아래 문제 1·2 의 값을 불러온다. 풀이를 마친 뒤 수치판과 견주어 보라.",
       ref: "레퍼런스",
       refWa: "레퍼런스와",
       hideLogLabel: true,
       start: "p1",
+      ymax: 2, // 문제 1의 β = 0.1 곡선이 바닥에 붙지 않게(손실이 2 를 넘는 곳은 이 절에서 쓰지 않는다)
       presets: {
         p1: { beta: 0.1, dref: 4, dth: 0, label: "문제 1" },
         p2a: { beta: 0.5, dref: 3, dth: 1, label: "문제 2 · 쌍 A" },
@@ -77,7 +78,7 @@ GW.register("dpo-loss", (el) => {
     ["cs-J", "손실 <span class=\"sym-J\">L</span>"],
     ["cs-A dash", "그래디언트 크기 <span class=\"sym-A\">σ(−βz)</span>", "dash"],
   ]);
-  const c = GW.chart(f.stage, { x: [-6, XMAX], y: [0, YMAX], xlabel: "학습 모델의 선호마진 Δθ", ylabel: "값", h: 290, label: "DPO 손실 곡선" });
+  const c = GW.chart(f.stage, { x: [-6, XMAX], y: [0, YMAX], xlabel: "학습 모델의 선호 마진 Δθ", ylabel: "값", h: 290, label: "DPO 손실 곡선" });
   c.clip();
 
   const L = (d) => -Math.log(GW.sigmoid(st.beta * (d - st.dref)));

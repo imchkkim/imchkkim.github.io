@@ -9,7 +9,7 @@ GW.register("sampling-temp", (el) => {
     title: "샘플링 온도 — 모델의 분포와 실제로 뽑히는 분포",
     caption:
       "진한 막대는 모델이 내놓은 확률 <span class='sym-pi'>π<sub>θ</sub></span>, 옅은 막대는 로짓을 샘플링 온도 T 로 나눈 뒤 실제로 뽑히는 확률이다. " +
-      "T 를 1에서 멀리 옮기며 두 막대가 어떻게 벌어지는지, 가장 큰 토큰이 바뀌는지 보라. 수치판의 <span class='sym-ratio'>w</span> 는 두 확률의 비 " +
+      "처음 화면은 본문의 T = 0.5 다. T 를 1에 가까이, 또 1 너머로 옮기며 두 막대가 어떻게 벌어지는지, 가장 큰 토큰이 바뀌는지 보라. 수치판의 <span class='sym-ratio'>w</span> 는 두 확률의 비 " +
       "<span class='sym-pi'>π<sub>θ</sub></span> ÷ (뽑히는 확률)이다. 단추로 분포를 고른 뒤 T 를 문제의 값에 맞추고 풀이와 견주어 보라.",
   });
   const sets = {
@@ -17,7 +17,7 @@ GW.register("sampling-temp", (el) => {
     p7: { p: [0.6, 0.3, 0.1], label: "문제 7" },
   };
   let cur = "body";
-  const st = { T: 1 };
+  const st = { T: 0.5 }; // 처음 화면은 본문의 T = 0.5 (T = 1 이면 두 막대가 같아 차이가 안 보인다)
   const bar = GW.h("div", { class: "w-controls" }, f.controls);
   GW.segmented(bar, {
     options: Object.entries(sets).map(([k, s]) => [k, s.label]),

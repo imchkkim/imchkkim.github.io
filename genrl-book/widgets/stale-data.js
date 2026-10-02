@@ -11,8 +11,12 @@ GW.register("stale-data", (el) => {
   });
   const T = 100, tau = 30;
   const st = { D: 2.5, rounds: 3 };
-  GW.slider(f.controls, { label: "학습이 가는 거리 D", min: 0.5, max: 4, step: 0.1, value: st.D, fmt: (v) => v.toFixed(1), oninput: (v) => { st.D = v; draw(); } });
-  GW.slider(f.controls, { label: "반복 라운드 수", min: 1, max: 10, step: 1, value: st.rounds, fmt: (v) => v + "회", oninput: (v) => { st.rounds = v; draw(); } });
+  const sD = GW.slider(f.controls, { label: "학습이 가는 거리 D", min: 0.5, max: 4, step: 0.1, value: st.D, fmt: (v) => v.toFixed(1), oninput: (v) => { st.D = v; draw(); } });
+  const sR = GW.slider(f.controls, { label: "반복 라운드 수", min: 1, max: 10, step: 1, value: st.rounds, fmt: (v) => v + "회", oninput: (v) => { st.rounds = v; draw(); } });
+  // 문제 값 불러오기 (14장 「분포 이동」 절의 문제 5, 「반복 DPO」 절의 문제 6). 답은 수치판이 보여 주고 설명글에는 적지 않는다.
+  const load = (D, rounds) => { st.D = D; st.rounds = rounds; sD.value = D; sR.value = rounds; draw(); };
+  GW.button(f.controls, "문제 5의 값 (D = 2, 3라운드)", () => load(2, 3));
+  GW.button(f.controls, "문제 6의 값 (D = 2, 10라운드)", () => load(2, 10));
   GW.legend(f.stage, [
     ["c1", "오프라인 (갱신 없음)"],
     ["c2", "반복 (라운드마다 갱신)"],

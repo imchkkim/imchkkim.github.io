@@ -7,7 +7,7 @@ GW.register("difficulty-signal", (el) => {
     caption:
       "곡선은 정답률 <span style='color:var(--sym-993600, #993600)'>p</span> 인 문제 하나에서 <span style='color:var(--sym-5f970c, #5f970c)'>G</span> 개 롤아웃을 뽑았을 때의 기댓값(이항분포로 정확히 계산). " +
       "<span style='color:var(--sym-993600, #993600)'>p</span> 가 0 이나 1 에 가까우면 그룹 전체가 같은 보상을 받을 확률이 커져 시그널이 사라진다. " +
-      "<span style='color:var(--sym-008deb, #008deb)'>σ</span>로 나눈 곡선이 양 끝에서 덜 가라앉는 것에 주목 — 아주 쉽거나 어려운 문제의 가중치를 키우는 효과다(<span style='color:var(--sym-008deb, #008deb)'>σ</span>로 나누기를 뺀 변종이 Dr. GRPO).",
+      "<span style='color:var(--sym-008deb, #008deb)'>σ</span>로 나눈 곡선이 양 끝에서 덜 가라앉는 것에 주목 — 아주 쉽거나 어려운 문제의 몫을 상대적으로 키우는 효과다(그래서 <span style='color:var(--sym-008deb, #008deb)'>σ</span>로 나누기를 빼자는 변형도 나왔다).",
   });
   let G = 8, p = 0.3;
   GW.slider(f.controls, { label: "그룹 크기 <span style='color:var(--sym-5f970c, #5f970c)'>G</span>", min: 2, max: 32, step: 1, value: G, oninput: (v) => { G = v; draw(); } });

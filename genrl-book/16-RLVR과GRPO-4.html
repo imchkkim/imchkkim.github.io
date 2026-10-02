@@ -485,6 +485,11 @@ pre.mermaid {
 .w-svg .w-dot { stroke: var(--w-surface); stroke-width: 2; fill: var(--w-muted); }
 .w-svg .dash { stroke-dasharray: 5 4; }
 .w-svg .thin { stroke-width: 1.2; }
+/* 휴대폰 폭: 위젯 그래프의 폭 560 좌표가 약 330px 로 줄어 눈금·이름표가 6~7px 로 보인다. 그 글자만 키운다(넓은 화면은 그대로) */
+@media (max-width: 600px) {
+  .w-svg .w-tick { font-size: 16px; }
+  .w-svg .w-axis-label, .w-svg .w-label { font-size: 17px; }
+}
 .w-svg .c1 { stroke: var(--w-1); } .w-svg .f1 { fill: var(--w-1); }
 .w-svg .c2 { stroke: var(--w-2); } .w-svg .f2 { fill: var(--w-2); }
 .w-svg .c3 { stroke: var(--w-3); } .w-svg .f3 { fill: var(--w-3); }
@@ -674,7 +679,25 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="16-RLVR과GRPO.html">16. RLVR과 GRPO — 비평가를 내려놓다</a></p>
 <h4 id="deepseek-r1-정답-보상이-추론-습관을-키웠다">DeepSeek-R1: 정답 보상이 추론 습관을 키웠다</h4>
-<p>비평가는 그룹 평균으로, 보상 모델은 검증기로 바뀌었다. 학습 중에 필요한 모델만 세면 정책과 레퍼런스, DPO와 똑같이 둘이다. 그렇다면 무엇이 달라서 이 조합이 추론 모델의 판도를 바꿨을까?</p>
+<p>비평가는 그룹 평균으로, 보상 모델은 검증기로 바뀌었다. 학습하는 동안 올려 두는 모델만 세면 정책과 레퍼런스, DPO와 똑같이 둘이다.</p>
+<pre class="mermaid">graph LR
+    subgraph ppo[&quot;PPO (RLHF)&quot;]
+        direction LR
+        P1[&quot;π_θ&lt;br/&gt;정책&quot;] ~~~ P2[&quot;π_ref&lt;br/&gt;레퍼런스&quot;]
+        P3[&quot;r_ψ&lt;br/&gt;보상 모델&quot;] ~~~ P4[&quot;V_φ&lt;br/&gt;비평가&quot;]
+    end
+    subgraph grpo[&quot;GRPO + RLVR&quot;]
+        direction LR
+        G1[&quot;π_θ&lt;br/&gt;정책&quot;] ~~~ G2[&quot;π_ref&lt;br/&gt;레퍼런스&quot;]
+        G3[&quot;검증기&lt;br/&gt;(규칙)&quot;] ~~~ G4[&quot;그룹 통계&lt;br/&gt;(샘플 평균)&quot;]
+    end
+    ppo --&gt;|&quot;학습 중 올려 두는 모델 4개 → 2개&quot;| grpo
+
+    class P3 m-red
+    class P4 m-red
+    class G3 m-green
+    class G4 m-green
+</pre><p>그렇다면 무엇이 달라서 이 조합이 추론 모델의 판도를 바꿨을까? DPO와 나란히 놓아 보자.</p>
 <div class="table-scroll"><table>
 <thead>
 <tr>
@@ -692,7 +715,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <tr>
 <td>비교 구조</td>
 <td>쌍 (<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>w</mi></msub></mrow><annotation encoding="application/x-tex">y_w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0269em;">w</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> vs <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">y_l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0197em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>)</td>
-<td>그룹 (<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span></span></span></span></eq>개 중 상대 위치)</td>
+<td>그룹 (<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#5f970c"><mi>G</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#5f970c}{G}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="color:var(--sym-5f970c, #5f970c);">G</span></span></span></span></eq>개 중 상대 위치)</td>
 </tr>
 <tr>
 <td>보상 출처</td>
@@ -702,7 +725,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <tr>
 <td>베이스라인</td>
 <td>레퍼런스 마진 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Δ</mi><mtext>ref</mtext></msub></mrow><annotation encoding="application/x-tex">\Delta_\text{ref}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord">Δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">ref</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq></td>
-<td>그룹 평균 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mi>G</mi></msub></mrow><annotation encoding="application/x-tex">\mu_G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">μ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">G</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq></td>
+<td>그룹 평균 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#00897b"><msub><mi>μ</mi><mi>G</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#00897b}{\mu_G}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-00897b, #00897b);"><span class="mord mathnormal" style="color:var(--sym-00897b, #00897b);">μ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-00897b, #00897b);"><span class="mord mathnormal mtight" style="color:var(--sym-00897b, #00897b);">G</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq></td>
 </tr>
 <tr>
 <td>분포 이동</td>
@@ -731,33 +754,69 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 </tbody>
 </table></div>
-<p>모델 수는 같다. 차이는 <strong>데이터가 어디서 오는가</strong>다. GRPO는 고정 데이터·탐색 부재라는 DPO의 구조적 한계를 대부분 넘어선다. 대가는 &quot;정답이 있는 도메인&quot;이라는 전제와, 매 스텝 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span></span></span></span></eq>개씩 생성하는 비용이다.</p>
+<p>모델 수는 같다. 차이는 <strong>데이터가 어디서 오는가</strong>다. GRPO는 고정 데이터·탐색 부재라는 DPO의 구조적 한계를 대부분 넘어선다. 대가는 &quot;정답이 있는 도메인&quot;이라는 전제와, 매 스텝 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#5f970c"><mi>G</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#5f970c}{G}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="color:var(--sym-5f970c, #5f970c);">G</span></span></span></span></eq>개씩 생성하는 비용이다.</p>
 <h5 id="역사-resnet-모먼트">역사: “ResNet 모먼트”</h5>
 <p>DPO의 변형들을 CNN의 역사에 비유해 보자. IPO, KTO, ORPO, SimPO는 AlexNet에서 GoogLeNet까지처럼 각자 의미 있는 개선이지만, &quot;오프라인 고정 데이터&quot;라는 틀은 같았다. ResNet은 달랐다. 잔차 연결이라는 단순한 아이디어 하나가 CNN만의 문제가 아니라 깊은 신경망 전체의 문제(그래디언트 소실)를 풀었고, 이후 거의 모든 아키텍처에 들어갔다.</p>
-<p>GRPO + RLVR의 알고리즘 자체는 새롭지 않다 — 같은 프롬프트의 다른 답들로 베이스라인을 잡는 발상은 REINFORCE의 베이스라인에서 이어지는 것이고 같은 시기의 RLOO(REINFORCE Leave-One-Out — 자기를 뺀 나머지 답의 평균을 베이스라인으로 쓰는 방법, 2024년 2월)도 같은 발상이며, 정답 보상도 오래된 아이디어다. 이것을 ResNet에 비유할 만한 이유는 <strong>DeepSeek-R1(2025년 1월)이 보여준 파급력</strong>이다. R1의 전신인 R1-Zero는 SFT(정답 예시를 그대로 따라 쓰게 하는 지도 미세조정) 없이 베이스 모델(프리트레인만 마치고 지시 따르기를 배우지 않은 모델)에 곧바로 이 조합을 돌렸고, 학습이 진행되면서 응답이 길어지고 스스로 검산하고 &quot;잠깐, 다시 보자&quot;라며 되돌아가는 행동이 나타났다. 그리고 수학·코드 같은 검증 가능한 문제 위주로 학습했는데, 과학 문제처럼 학습에 직접 쓰지 않은 추론 벤치마크 점수도 함께 올랐다.</p>
-<p>그 다리가 <strong>CoT</strong>(Chain of Thought, 단계별 사고)다. 검증기는 최종 답만 보지만, 정답에 도달한 응답을 강화하면 그 안에 담긴 사고 과정 전체가 함께 강화된다 — 문제를 쪼개는 습관, 중간 결과를 검산하는 습관, 막히면 다른 방법을 시도하는 습관. 이 습관들은 수학에만 쓰이지 않는다. 수학 RLVR은 수학 지식보다 <strong>단계적으로 생각하는 방법</strong>을 강화했던 것이다.</p>
+<p>GRPO + RLVR의 알고리즘 자체는 새롭지 않다 — 같은 프롬프트의 다른 답들로 베이스라인을 잡는 발상은 REINFORCE의 베이스라인에서 이어지는 것이고 같은 시기의 RLOO(자기를 뺀 나머지 답의 평균을 베이스라인으로 쓰는 방법, 2024년 2월)도 같은 발상이며, 정답 보상도 오래된 아이디어다. 이것을 ResNet에 비유할 만한 이유는 <strong>DeepSeek-R1(2025년 1월)이 보여준 파급력</strong>이다.</p>
+<h5 id="역사-sft-없이-정답-보상만으로">역사: SFT 없이 정답 보상만으로</h5>
+<p>GRPO + RLVR의 부품은 하나하나 새롭지 않았다. 같은 입력에 대한 다른 답으로 베이스라인을 잡는 발상은 캡션 모델의 SCST와 RLOO에, 정답 검사를 보상으로 쓰는 일은 툴루 3에 이미 있었다. 이 조합을 널리 알린 것은 2025년 1월 DeepSeek-R1 논문의 한 실험이다.</p>
+<p>DeepSeek 팀은 프리트레인만 마친 베이스 모델 DeepSeek-V3-Base에 SFT(정답 예시를 그대로 따라 쓰게 하는 지도 미세조정)를 전혀 하지 않고 곧바로 GRPO를 돌렸다. 이 모델을 R1-Zero라 불렀다. 주문은 「생각을 <code>&lt;think&gt;</code> 태그 안에 먼저 쓰고 답을 써라」는 틀 하나뿐이었다. 반성하라거나 특정한 풀이법을 쓰라는 말은 일부러 넣지 않았다고 논문은 적었다. 보상도 규칙 둘뿐이었다. 수학은 정해진 상자 안에 쓴 최종 답이 맞는지, 코드는 테스트를 통과하는지를 보는 정확도 보상, 그리고 생각을 태그 안에 썼는지 보는 형식 보상이다.</p>
+<p>학습이 진행되자 미국 고교 수학 경시대회 AIME 2024 문제의 정답률(문제마다 16번 답하게 해 맞힌 비율의 평균)이 15.6%에서 71.0%로 올랐다. 한 번에 맞히는 71.0%는 같은 표에 실린 OpenAI o1-0912의 74.4%에 가깝고, 64번 답하게 해 가장 많이 나온 답을 고르면 86.7%로 그보다 높았다. 응답은 수백 토큰에서 수천 토큰으로 길어졌고, 자기 풀이를 되돌아보며 다시 따지는 행동과 다른 풀이를 시도하는 행동이 저절로 나타났다. 논문에 실린 중간 모델의 풀이에는 「Wait, wait. Wait. That’s an aha moment I can flag here.(잠깐, 잠깐. 여기가 깨달음의 순간이라고 표시해 둘 만하다)」라는 문장이 있다. 연구진은 이 장면을 자기들에게도 깨달음의 순간이었다고 적었다. 학습 보상은 수학 답 비교와 코드 테스트 같은 규칙 채점이었는데, 대학원 수준 과학 객관식 모음 GPQA Diamond에서도 73.3%를 냈다.</p>
+<svg class="fig" viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AIME 2024 정답률: R1-Zero 학습 전 15.6%, 학습 후 71.0%, 학습 후 64번 다수결 86.7%, OpenAI o1-0912 74.4%">
+  <text class="t-strong" x="20" y="22" style="font-size:16px">AIME 2024 정답률 (%)</text>
+  <line class="sgrid" x1="40" y1="40" x2="545" y2="40"/>
+  <line class="sgrid" x1="40" y1="95" x2="545" y2="95"/>
+  <line class="sgrid" x1="40" y1="150" x2="545" y2="150"/>
+  <line class="sgrid" x1="40" y1="205" x2="545" y2="205"/>
+  <text x="34" y="45" text-anchor="end" style="font-size:14px">100</text>
+  <text x="34" y="100" text-anchor="end" style="font-size:14px">75</text>
+  <text x="34" y="155" text-anchor="end" style="font-size:14px">50</text>
+  <text x="34" y="210" text-anchor="end" style="font-size:14px">25</text>
+  <rect class="f1" x="60" y="225.7" width="80" height="34.3"/>
+  <text class="t-strong" x="100" y="217" text-anchor="middle" style="font-size:17px">15.6</text>
+  <rect class="f1" x="180" y="103.8" width="80" height="156.2"/>
+  <text class="t-strong" x="220" y="95" text-anchor="middle" style="font-size:17px">71.0</text>
+  <rect class="f1" x="300" y="69.3" width="80" height="190.7"/>
+  <text class="t-strong" x="340" y="61" text-anchor="middle" style="font-size:17px">86.7</text>
+  <rect class="fneutral" x="430" y="96.3" width="80" height="163.7"/>
+  <text class="t-strong" x="470" y="88" text-anchor="middle" style="font-size:17px">74.4</text>
+  <line class="saxis" x1="40" y1="260" x2="545" y2="260" stroke-width="1.5"/>
+  <text x="100" y="284" text-anchor="middle" style="font-size:16px">R1-Zero</text>
+  <text x="100" y="306" text-anchor="middle" style="font-size:16px">학습 전</text>
+  <text x="220" y="284" text-anchor="middle" style="font-size:16px">R1-Zero</text>
+  <text x="220" y="306" text-anchor="middle" style="font-size:16px">학습 후</text>
+  <text x="340" y="284" text-anchor="middle" style="font-size:16px">학습 후</text>
+  <text x="340" y="306" text-anchor="middle" style="font-size:16px">64번 다수결</text>
+  <text x="470" y="284" text-anchor="middle" style="font-size:16px">OpenAI</text>
+  <text x="470" y="306" text-anchor="middle" style="font-size:16px">o1-0912</text>
+</svg>
+<p>(DeepSeek-R1 논문 arXiv 첫 판(2025년 1월)의 본문과 표 2의 수치로 다시 그렸다. 학습 중의 곡선은 수치가 공개되지 않아 그리지 않았다.)</p>
+<p>검증기는 최종 답만 본다. 그런데 정답에 이른 응답을 강화하면 그 안에 담긴 풀이 전체가 함께 강화된다 — 문제를 쪼개는 습관, 중간 결과를 검산하는 습관, 막히면 다른 방법을 시도하는 습관. 그 다리가 <strong>CoT</strong>(Chain of Thought, 단계별 사고)다. 이 습관들은 수학에만 쓰이지 않는다. 그래서 수학 RLVR이 수학 지식보다 <strong>단계적으로 생각하는 방법</strong>을 강화했다고 풀이할 수 있다. 논문도 같은 뜻으로, 푸는 법을 가르치지 않고 알맞은 보상만 주었더니 모델이 스스로 풀이 전략을 키웠다고 적었다.</p>
 <h5 id="ml에서-r1-이후-몇-달">ML에서: R1 이후 몇 달</h5>
 <p>R1 이후 몇 달 사이에 벌어진 일:</p>
 <ul>
-<li><strong>오픈소스 재현</strong>: 7B–14B의 작은 모델에서도 GRPO + RLVR로 추론 능력이 오른다는 재현이 잇따랐다.</li>
-<li><strong>도메인 확장</strong>: 의학 객관식, Text-to-SQL, 법률 추론 등 &quot;검증기를 설계할 수 있는 곳&quot;으로.</li>
-<li><strong>모달리티 확장</strong>: 이미지·영상 생성(DanceGRPO, Flow-GRPO), 자율주행(DiffusionDriveV2).</li>
+<li><strong>오픈소스 재현</strong>: 홍콩과기대 등의 연구진이 낸 SimpleRL-Zoo(2025)는 0.5B부터 32B까지 열 개의 베이스 모델(Llama3-8B, Mistral-7B, Qwen2.5 등)에 같은 조합을 돌려 추론 능력이 오르는 것을 확인했고, Qwen 계열이 아닌 작은 모델에서도 되돌아보는 행동이 나타났다고 보고했다.</li>
+<li><strong>도메인 확장</strong>: 객관식 시험, SQL 실행 결과 비교처럼 &quot;검증기를 설계할 수 있는 곳&quot;으로.</li>
+<li><strong>모달리티 확장</strong>: 이미지 생성의 Flow-GRPO(2025)는 그림 속 물체의 개수와 위치를 물체 검출기로 세어 채점하는 규칙 보상을 썼고, Stable Diffusion 3.5 Medium의 GenEval(물체 개수·색·위치를 지시대로 그렸는지 보는 시험) 점수를 63%에서 95%로 올렸다.</li>
 <li><strong>에이전트</strong>: &quot;환경의 피드백 = 검증기&quot;라는 일반화.</li>
 <li><strong>알고리즘 자체의 수정</strong>: 대규모로 돌려 보니 GRPO의 부품들이 삐걱거렸다. 표준편차 나누기, 길이 나누기, 클리핑 범위, KL 항… 부품마다 고친 변종이 나왔다.</li>
 </ul>
-<h5 id="문제-4-무엇을-무엇으로">문제 4 — 무엇을 무엇으로</h5>
+<h5 id="문제-7-정답이-없는-곳의-grpo">문제 7 — 정답이 없는 곳의 GRPO</h5>
 <div class="exercise">
-<p>RLHF-PPO의 네 모델 중 GRPO + RLVR은 무엇을 무엇으로 대체했는가? DeepSeekMath의 GRPO는 레퍼런스 모델을 쓰는가?</p>
+<p>고객 상담 챗봇의 말투를 다듬고 싶다. 좋은 말투에는 정답이 없어 검증기를 만들 수 없다. (가) 그래도 GRPO를 쓰려면 RLHF-PPO의 네 모델(정책, 레퍼런스, 보상 모델, 비평가) 가운데 무엇을 다시 들여와야 하는가? (나) 그때 강화학습 동안 메모리에 올려 두는 모델은 몇 개이고, 그 가운데 파라미터가 업데이트되는 것은 몇 개인가? RLHF-PPO와 견주시오.</p>
 </div>
 <div class="dlg">
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">보상 모델은 검증기로, 비평가는 그룹 평균으로 바뀌었어요. 그리고 레퍼런스도 뺐죠. KL을 안 쓰잖아요.</div></div>
-<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 목적함수 끝에 있는 β 항은 뭘까요?</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.webp" alt="김민준 (당황)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">아… −β·KL(π_θ‖π_ref). 레퍼런스가 있어야 계산되는 거네요.</div></div>
-<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">DeepSeekMath에선 β = 0.04였지. KL을 뺀 건 나중 이야기 아니야?</div></div>
-<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">맞아요. 원래 GRPO는 레퍼런스를 쓰고, KL을 보상이 아니라 손실에 직접 넣었어요. KL을 빼버린 건 DAPO 같은 후속 연구예요.</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">새 버전 과제 명세서만 보고 옛날 버전 채점 기준을 착각한 셈이네요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">(가)는 보상 모델이요. 그런데 보상 모델이 돌아오면 그냥 PPO로 돌아가는 거 아니에요? 비평가도 같이 들여와야 할 것 같은데요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 그룹 평균 <span class="sym" style="color:var(--sym-00897b, #00897b)">μ<sub>G</sub></span>를 계산할 때 보상이 어디서 왔는지가 쓰이나요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M02.webp" alt="김민준 (생각)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">아뇨. 여덟 개 점수만 있으면 돼요. 검증기가 줬든 보상 모델이 줬든 평균 내고 빼는 건 똑같네요. 비평가는 안 돌아와도 돼요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 실제로 GRPO를 처음 낸 DeepSeekMath도 학습한 보상 모델의 점수로 GRPO를 돌렸고, DeepSeek-R1도 수학·코드 밖의 일반 질문에는 보상 모델을 썼어요. 반대쪽도 있어요. RLVR이라는 이름을 붙인 툴루 3는 검증기 보상을 비평가가 있는 PPO로 학습했죠. (나)는요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">올려 두는 건 정책, 레퍼런스, 보상 모델, 셋. 업데이트되는 건… 보상 모델도 학습한 모델이니까 정책이랑 둘?</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">서연 학생, 보상 모델은 언제 학습했어요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S07.webp" alt="이서연 (아하)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">강화학습 전에요. 강화학습 동안엔 점수만 매기고 그대로예요. 그럼 업데이트되는 건 정책 하나예요. RLHF-PPO는 넷을 올리고 정책이랑 비평가 둘을 업데이트했고요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">그 차이가 꽤 크겠네요. 학습하는 모델은 파라미터 말고도 그래디언트랑 옵티마이저 상태까지 들고 있어야 하잖아요. Adam이면 파라미터마다 숫자 두 개를 더 들고 있고요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">채점 기준표는 학기 전에 만들어 두고 그대로 쓰고, 한 학기 동안 바뀌는 건 공부하는 학생뿐인 거랑 같네요.</div></div>
 </div><blockquote>
-<p><strong>정리</strong> 보상 모델 → 검증기, 비평가 → 그룹 평균. 원래 GRPO는 레퍼런스를 유지하며 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mtext> </mtext><msub><mi mathvariant="double-struck">D</mi><mtext>KL</mtext></msub></mrow><annotation encoding="application/x-tex">\beta\,\mathbb{D}_\text{KL}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathbb">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">KL</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>을 손실에 넣는다(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mo>=</mo><mn>0.04</mn></mrow><annotation encoding="application/x-tex">\beta = 0.04</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.04</span></span></span></span></eq>). KL 제거는 DAPO 같은 후속 변종의 선택이다.</p>
+<p><strong>정리</strong> (가) 보상 모델. 비평가는 돌아오지 않는다: 그룹 평균은 점수가 어디서 왔든 계산된다. 두 대체(검증기, 그룹 평균)는 서로 독립이다 — DeepSeekMath의 GRPO는 보상 모델과, 툴루 3의 RLVR은 비평가가 있는 PPO와 짝지어졌다. (나) 정책·레퍼런스·보상 모델 셋을 올리고 정책 하나만 업데이트한다. RLHF-PPO는 넷을 올리고 둘(정책, 비평가)을 업데이트한다.</p>
 </blockquote>
 
 </section>

@@ -88,6 +88,11 @@ GW.register("pg-bandit", (el) => {
     line.layer.innerHTML = "";
     line.path(hist.map((v, i) => [i, v]), "cs-J");
     line.dot(hist.length - 1, hist[hist.length - 1], "fs-J", 4);
+    // 처음 화면에서 곡선 칸이 빈 그래프로 보이지 않게, 아직 걷지 않았다는 안내를 둔다.
+    if (hist.length === 1) {
+      GW.s("text", { class: "w-tick", x: line.X(22), y: line.Y(0.62), "text-anchor": "middle", text: "걸음 단추를 누르면" }, line.layer);
+      GW.s("text", { class: "w-tick", x: line.X(22), y: line.Y(0.62) + 16, "text-anchor": "middle", text: "J 의 변화가 그려진다" }, line.layer);
+    }
     const ls = f.lastSample && mode === "sample" ? ` · 방금 뽑은 답 <b>${ACT[f.lastSample.a]}</b>, 가중치 <span class='sym-R'>r</span>+c = <b>${GW.fmt(f.lastSample.w, 1)}</b>` : "";
     const gs = lastG ? ` · 방금 쓴 그래디언트 (∂/∂z₁, ∂/∂z₂, ∂/∂z₃) = (<b>${lastG.map((g) => GW.fmt(g, 2)).join(", ")}</b>)` : "";
     f.readout.innerHTML = `걸음 <b>${stepN}</b> · 기대 보상 <span class="sym-J">J</span> = <b>${Jv.toFixed(3)}</b>${ls}${gs}`;

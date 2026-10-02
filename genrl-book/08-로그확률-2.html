@@ -485,6 +485,11 @@ pre.mermaid {
 .w-svg .w-dot { stroke: var(--w-surface); stroke-width: 2; fill: var(--w-muted); }
 .w-svg .dash { stroke-dasharray: 5 4; }
 .w-svg .thin { stroke-width: 1.2; }
+/* 휴대폰 폭: 위젯 그래프의 폭 560 좌표가 약 330px 로 줄어 눈금·이름표가 6~7px 로 보인다. 그 글자만 키운다(넓은 화면은 그대로) */
+@media (max-width: 600px) {
+  .w-svg .w-tick { font-size: 16px; }
+  .w-svg .w-axis-label, .w-svg .w-label { font-size: 17px; }
+}
 .w-svg .c1 { stroke: var(--w-1); } .w-svg .f1 { fill: var(--w-1); }
 .w-svg .c2 { stroke: var(--w-2); } .w-svg .f2 { fill: var(--w-2); }
 .w-svg .c3 { stroke: var(--w-3); } .w-svg .f3 { fill: var(--w-3); }
@@ -674,7 +679,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="08-로그확률.html">8. 로그확률 — 문장의 확률은 어떻게 매기나</a></p>
 <h4 id="조회-이미-있는-응답의-확률은-한-번에-읽는다">조회: 이미 있는 응답의 확률은 한 번에 읽는다</h4>
-<p>로그확률을 구하려면 토큰마다 확률표가 필요하다. 그렇다면 100토큰짜리 응답의 로그확률을 구하는 일은 그 응답을 생성하는 일만큼 비쌀까? 생성과 학습에서 모델이 하는 일을 나란히 놓아 보자.</p>
+<p>로그확률을 구하려면 토큰마다 확률표가 필요하다. 그런데 DPO는 이 값을 한 번 구하고 끝내지 않는다. 쌍 하나마다 학습 모델과 레퍼런스로, 선호 응답과 비선호 응답에 대해 네 번 구하고, 쌍이 만 개면 학습 한 바퀴에 4만 번이다. 그렇다면 100토큰짜리 응답의 로그확률을 구하는 일은 그 응답을 생성하는 일만큼 비쌀까? 생성과 학습에서 모델이 하는 일을 나란히 놓아 보자.</p>
 <h5 id="생성은-뽑고-학습은-읽는다">생성은 뽑고, 학습은 읽는다</h5>
 <p>생성할 때는 확률표에서 토큰 하나를 실제로 <strong>뽑는다</strong>. 뽑은 토큰을 입력 끝에 붙여 다시 모델을 돌리고, 새 확률표에서 또 뽑는다. 앞 토큰이 뽑혀야 다음 입력이 생기므로 이 고리는 토큰 수만큼 차례로 돈다.</p>
 <p>DPO 학습에서는 응답이 이미 주어져 있다. 데이터셋에 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>w</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_w}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0269em;color:var(--sym-e000a5, #e000a5);">w</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> = “서울입니다”, <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>l</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_l}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0197em;color:var(--sym-e000a5, #e000a5);">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> = &quot;부산입니다&quot;가 적혀 있다. 필요한 것은 뽑기가 아니라 <strong>조회</strong>다 — 확률표를 얻은 뒤, 데이터셋의 토큰이 그 표에서 받은 확률을 읽어 온다.</p>
