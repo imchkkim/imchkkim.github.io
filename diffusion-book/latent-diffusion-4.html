@@ -649,7 +649,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="teaching-generation.html">생성을 가르치는 법: 분류기를 뒤집으면</a></li>
 <li><a href="autoencoder-vae.html">오토인코더에서 VAE 로</a></li>
 <li class="toc-part">조건을 붙여가기</li>
-<li><a href="denoising.html">디노이징과 조건부 디노이징</a></li>
+<li><a href="denoising.html">디노이징과 조건부 디노이징: 고치다 보면 만들게 된다</a></li>
 <li><a href="condition-elbo.html">조건과 ELBO</a></li>
 <li class="toc-part">신호와 스펙트럼</li>
 <li><a href="spectrum.html">그림을 나누는 축: 스펙트럼</a></li>
@@ -718,7 +718,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <figure class="fig "><img src="images/latent-diffusion/flops_bar.png" alt="한 번 계산에 드는 FLOP(로그 눈금). 같은 Stable Diffusion 1.x U-Net 을 잠재 64 × 64 × 4와 픽셀 128², 256², 512²에 걸었을 때, 그리고 VAE 디코더가 잠재 64 × 64를 512 × 512 그림으로 한 번 되살릴 때. 픽셀에 건 U-Net 은 계산량만 견주려고 무작위 가중치로 만든 가상 설정이다. 스크립트 sources/latent-diffusion/flops.py, figs.py" loading="lazy"><figcaption>한 번 계산에 드는 FLOP(로그 눈금). 같은 Stable Diffusion 1.x U-Net 을 잠재 64 × 64 × 4와 픽셀 128², 256², 512²에 걸었을 때, 그리고 VAE 디코더가 잠재 64 × 64를 512 × 512 그림으로 한 번 되살릴 때. 픽셀에 건 U-Net 은 계산량만 견주려고 무작위 가중치로 만든 가상 설정이다. 스크립트 sources/latent-diffusion/flops.py, figs.py</figcaption></figure>
 <p>대신 디코더가 새로 들어왔다. 디코더 한 번은 2.51 TFLOP 로 U-Net 을 세 번 부르는 것과 비슷하다. 높은 해상도에서 일하는 합성곱 층이 많아서다. 그래도 디코더는 그림 한 장에 한 번만 돌고, U-Net 은 걸음마다 돈다.</p>
 <h3 id="ml에서-인코더가-다시-필요한-순간">ML에서: 인코더가 다시 필요한 순간</h3>
-<p>글로 그림을 만들 때는 디코더만 쓰지만, 이미 있는 그림에서 출발하는 일에는 인코더가 다시 나온다. 사진을 조금 고쳐 그리는 일(ComfyUI 의 <code>VAEEncode</code> 뒤 <code>KSampler</code> 의 <code>denoise</code> 를 1보다 작게)은 사진을 잠재로 줄이고, 잡음을 중간 수준까지만 섞은 뒤 거기서부터 걷어 낸다. 그림의 일부만 다시 그리는 일도 사진의 잠재에서 가려 둔 칸만 새로 만든다. 영상 모델은 압축기가 시간 축도 줄인다. Wan 2.1 의 압축기는 가로세로 8배에 시간 4배를 줄이고, Wan 2.2 의 것은 가로세로 16배, 채널 48이다(ComfyUI <code>latent_formats.py</code>). 반대 방향의 시도도 있다. ComfyUI 에는 압축 배율이 1인, 곧 압축기 없이 픽셀에서 직접 퍼뜨리는 모델(Chroma Radiance, HiDream-O1 등)도 들어 있다. 이런 모델의 신경망은 픽셀 조각을 받아, 섞인 잡음이 아니라 깨끗한 그림을 맞히는 꼴(Chroma Radiance 의 한 판, HiDream-O1)을 쓰고 그 답을 샘플러가 쓰는 속도로 바꿔 내놓는다. 잡음 맞히기를 압축기 없이 픽셀로 옮기면 무엇이 무너지기에 그렇게 하는지는, 그림을 큰 조각으로 잘라 트랜스포머에 넣을 때 드러난다.</p>
+<p>글로 그림을 만들 때는 디코더만 쓰지만, 이미 있는 그림에서 출발하는 일에는 인코더가 다시 나온다. 사진을 조금 고쳐 그리는 일(ComfyUI 의 <code>VAEEncode</code> 뒤 <code>KSampler</code> 의 <code>denoise</code> 를 1보다 작게)은 사진을 잠재로 줄이고, 잡음을 중간 수준까지만 섞은 뒤 거기서부터 걷어 낸다. 그림의 일부만 다시 그리는 일도 사진의 잠재에서 가려 둔 칸만 새로 만든다. 영상 모델은 압축기가 시간 축도 줄인다. Wan 2.1 의 압축기는 가로세로 8배에 시간 4배를 줄이고, Wan 2.2 의 것은 가로세로 16배, 채널 48이다(ComfyUI <code>latent_formats.py</code>). 반대 방향의 시도도 있다. ComfyUI 에는 압축 배율이 1인, 곧 압축기 없이 픽셀에서 직접 퍼뜨리는 모델(Chroma Radiance, HiDream-O1 등)도 들어 있다. 이런 모델의 신경망은 픽셀 조각을 받아, 섞인 잡음이 아니라 깨끗한 그림을 맞히는 꼴(Chroma Radiance 의 한 판, HiDream-O1)을 쓰고 그 답을 샘플러가 쓰는 속도로 바꿔 내놓는다. 까닭은 매니폴드 가설에 있다. 깨끗한 그림은 좁은 면 근처에 모이고 잡음은 모든 방향에 퍼지므로, 픽셀 조각 하나에 든 수가 신경망의 폭에 닿으면 잡음이나 속도를 내놓는 출력은 폭의 벽에 막히고 원래 그림을 내놓는 출력만 그 벽을 넘는다.</p>
 <div class="dialogue"><h3 id="문제-10-영상-편집의-프록시">문제 10. 영상 편집의 프록시</h3>
 <blockquote>
 <p>4K(3840 × 2160) 영상을 편집하는 프로그램이 원본 대신 960 × 540짜리 사본(프록시)을 만들어 편집 화면에 쓴다. 편집하는 동안 효과를 200번 고쳐 보고, 다 고친 뒤에 원본에 한 번 적용해 내보낸다. 효과 한 번의 계산은 픽셀 수에 비례한다고 하자. (가) 프록시는 픽셀 수가 몇 분의 1인가? (나) 원본에서 200번 고쳐 보는 계산을 1로 칠 때(곧 원본 한 번은 1/200), 프록시로 고쳐 보고 원본에 한 번 내보내는 계산은 얼마인가? (다) 프록시 화면에서 「잘됐다」고 본 것이 원본에서도 잘되었다고 믿어도 되는 경우와 안 되는 경우는?</p>

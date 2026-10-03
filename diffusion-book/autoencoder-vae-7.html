@@ -649,7 +649,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="teaching-generation.html">생성을 가르치는 법: 분류기를 뒤집으면</a></li>
 <li><a href="autoencoder-vae.html" class="active">오토인코더에서 VAE 로</a><ul class="sidebar-toc"><li><a href="autoencoder-vae.html">오토인코더: 그림 자신을 정답으로 삼기</a></li><li><a href="autoencoder-vae-2.html">점만 모으면: 오토인코더의 이웃은 비어 있다</a></li><li><a href="autoencoder-vae-3.html">구름: 점 하나를 분포로 넓히기</a></li><li><a href="autoencoder-vae-4.html">VAE: 구름을 사전분포 안으로 모으기</a></li><li><a href="autoencoder-vae-5.html">재매개변수화: 뽑기를 거쳐 미분하기</a></li><li><a href="autoencoder-vae-6.html">ELBO: 잴 수 없는 로그우도 아래에 받친 바닥</a></li><li><a href="autoencoder-vae-7.html" class="current">자주 하는 실수와 요약</a></li></ul></li>
 <li class="toc-part">조건을 붙여가기</li>
-<li><a href="denoising.html">디노이징과 조건부 디노이징</a></li>
+<li><a href="denoising.html">디노이징과 조건부 디노이징: 고치다 보면 만들게 된다</a></li>
 <li><a href="condition-elbo.html">조건과 ELBO</a></li>
 <li class="toc-part">신호와 스펙트럼</li>
 <li><a href="spectrum.html">그림을 나누는 축: 스펙트럼</a></li>
@@ -772,24 +772,25 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </tbody>
 </table></div>
 <h3 id="요약">요약</h3>
-<p>그림 자신을 정답으로 삼아 좁은 가운데 칸(잠재 변수)을 거쳐 되살리게 하면(오토인코더) 학습은 되지만, 잠재 변수가 어디에 놓일지 정하지 않아 새 그림을 뽑을 곳을 모른다. 잠재 변수를 N(0, I) 안으로 모으기만 해도 뽑을 곳은 생기지만, 디코더는 학습 그림이 놓인 점 바로 그 자리만 배워서 조금만 옮겨도 그림이 빨리 무너진다. 그래서 점을 점 둘레의 작은 구름 N(μ, σ²)으로 넓힌다. σ = 0 인 구름이 점(디랙 델타)이고, 인코더가 내놓는 μ 와 σ 한 쌍이 그 그림의 잠재 표현이다. 학습 때 구름에서 뽑아 넣으면 디코더가 구름 전체를 그 그림으로 배워 조각면들이 지도를 덮는다. VAE는 그 구름들을 사전분포 N(0, I) 쪽으로 KL 발산만큼 당겨, 구름이 점으로 줄거나 흩어지지 않고 한데 모이게 한다. 그러면 N(0, I)에서 아무 점이나 뽑아도 숫자가 나온다. 구름에서 뽑는 단계는 z = μ + σε 로 바꿔 써서(재매개변수화) 역전파가 지나가게 한다. VAE의 손실은 로그우도 log p<sub>θ</sub>(x)의 바닥인 ELBO = 재구성 항 − KL(q ‖ p(z))에 마이너스를 붙인 것이고, 바닥과 천장의 틈은 인코더 구름과 참 사후분포 사이의 KL이다(변분 추론).</p>
+<p>라벨이 정하지 못한 생김새의 값을 사람 대신 그림 자신에게서 얻으려고, 그림 자신을 정답으로 삼아 좁은 가운데 칸(잠재 변수)을 거쳐 되살리게 했다(오토인코더). 값은 얻었지만, 그 값으로 새 그림을 뽑기에는 한계가 둘 있었다. ① 학습한 잠재 변수들 사이(데이터의 중간 영역)에서 무엇을 그릴지 학습이 정하지 않았고, ② 잠재 변수가 어디에 놓일지 정하지 않아 무작위로 뽑을 곳을 몰랐다. 잠재 변수를 N(0, I) 안으로 모으는 벌점은 ②만 풀었다. 디코더는 학습 그림이 놓인 점 바로 그 자리만 배워서 조금만 옮겨도 그림이 빨리 무너졌다. ①은 점을 점 둘레의 작은 구름 N(μ, σ²)으로 넓혀 푼다. σ = 0 인 구름이 점(디랙 델타)이고, 인코더가 내놓는 μ 와 σ 한 쌍이 그 그림의 잠재 표현이다. 학습 때 구름에서 뽑아 넣으면 디코더가 구름 전체를 그 그림으로 배워 조각면들이 지도를 덮는다. VAE는 그 구름들을 사전분포 N(0, I) 쪽으로 KL 발산만큼 당겨, 구름이 점으로 줄거나 흩어지지 않고 한데 모이게 해 ①과 ②를 함께 붙든다. 그러면 N(0, I)에서 아무 점이나 뽑아도 숫자가 나온다. 학습 안의 뽑기는 z = μ + σε 로 바꿔 써서(재매개변수화) 무작위를 ε 하나에 몰면 역전파가 지나간다. VAE의 손실은 로그우도 log p<sub>θ</sub>(x)의 바닥인 ELBO = 재구성 항 − KL(q ‖ p(z))에 마이너스를 붙인 것이고, 바닥과 천장의 틈은 인코더 구름과 참 사후분포 사이의 KL이다(변분 추론).</p>
 <pre class="mermaid">flowchart LR
-  A[&quot;MLP&lt;br/&gt;정답이 하나면 잘 맞힌다&quot;] --&gt; B[&quot;정답이 여럿이면&lt;br/&gt;제곱 오차는 평균을 낸다&quot;]
-  B --&gt; C[&quot;오토인코더&lt;br/&gt;그림 자신을 정답으로&quot;]
-  C --&gt; D[&quot;잠재 변수가 놓일 자리를&lt;br/&gt;아무도 정하지 않았다&quot;]
-  D --&gt; D2[&quot;점만 모으면&lt;br/&gt;이웃이 비어 있다&quot;]
-  D2 --&gt; D3[&quot;점을 구름으로&lt;br/&gt;μ 와 σ 한 쌍&quot;]
-  D3 --&gt; E[&quot;VAE&lt;br/&gt;구름을 N(0, I) 안으로 모은다&quot;]
+  A[&quot;라벨이 정하지 못한 몫&lt;br/&gt;그 값을 어디서 얻나&quot;] --&gt; C[&quot;오토인코더&lt;br/&gt;그림 자신을 정답으로&quot;]
+  C --&gt; L1[&quot;한계 ①&lt;br/&gt;학습한 점들 사이가 비어 있다&quot;]
+  C --&gt; L2[&quot;한계 ②&lt;br/&gt;뽑을 곳이 정해지지 않았다&quot;]
+  L2 --&gt; D2[&quot;점만 모으기&lt;br/&gt;②만 풀린다&quot;]
+  L1 --&gt; D3[&quot;점을 구름으로&lt;br/&gt;μ 와 σ 한 쌍&quot;]
+  D2 --&gt; E[&quot;VAE&lt;br/&gt;구름을 N(0, I) 안으로 모은다&lt;br/&gt;①②를 함께&quot;]
+  D3 --&gt; E
   E --&gt; F[&quot;재매개변수화&lt;br/&gt;z = μ + σε&quot;]
   E --&gt; G[&quot;ELBO&lt;br/&gt;로그우도 아래의 바닥&quot;]
 </pre>
 <h3 id="막힌-곳">막힌 곳</h3>
-<blockquote>
-<p>〔재편 R2 집필 예정〕</p>
-</blockquote>
+<p>이제 데이터를 보지 않고 새 손글씨 숫자를 뽑는 모델이 생겼다. 잠재 변수를 N(0, I)에서 뽑아 디코더에 넣으면 되고, 그 모델을 학습시키는 손실은 로그우도의 바닥인 ELBO다.</p>
+<p>그런데 여기까지 오며 붙인 장치를 세어 보자. 새 그림에는 맞힐 정답이 없어서 오토인코더는 그림 자신을 정답으로 삼았다. 그것만으로는 사이가 비고 뽑을 곳이 없어서 구름을 들이고, 구름을 사전분포 안으로 모으는 벌점을 달았다. 구름에서 뽑는 단계를 지나 미분하려고 잡음을 바깥으로 빼냈다. 인코더 구름은 참 사후분포를 흉내 낼 뿐이라 바닥은 천장보다 평균 5.9 nat 아래에 남았다. 그러고도 디코더는 잠재 변수 두 칸을 받아 784칸을 한 번에 그려야 하고, 두 칸이 다 정하지 못한 것은 칸마다 잉크 확률로 번져 획 가장자리가 회색으로 남는다.</p>
+<p>장치가 이렇게 늘어난 까닭은 처음부터 하나였다. 「3을 하나 그려 봐」에는 정답이 하나로 정해져 있지 않다. 그렇다면 정답이 하나로 분명한 일만 가르쳐서, 그 솜씨로 새 그림을 만들게 할 수는 없을까? 정답이 분명하면서도 그림을 만드는 일과 가장 가까운 일은 무엇일까?</p>
 
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="autoencoder-vae-6.html">&larr; ELBO: 잴 수 없는 로그우도 아래에 받친 바닥</a><span class="page-count">7 / 7</span><a class="chapter-nav-next" href="denoising.html">디노이징과 조건부 디노이징 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="autoencoder-vae-6.html">&larr; ELBO: 잴 수 없는 로그우도 아래에 받친 바닥</a><span class="page-count">7 / 7</span><a class="chapter-nav-next" href="denoising.html">디노이징과 조건부 디노이징: 고치다 보면 만들게 된다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

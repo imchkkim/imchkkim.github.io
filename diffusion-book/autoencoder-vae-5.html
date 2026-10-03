@@ -649,7 +649,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="teaching-generation.html">생성을 가르치는 법: 분류기를 뒤집으면</a></li>
 <li><a href="autoencoder-vae.html" class="active">오토인코더에서 VAE 로</a><ul class="sidebar-toc"><li><a href="autoencoder-vae.html">오토인코더: 그림 자신을 정답으로 삼기</a></li><li><a href="autoencoder-vae-2.html">점만 모으면: 오토인코더의 이웃은 비어 있다</a></li><li><a href="autoencoder-vae-3.html">구름: 점 하나를 분포로 넓히기</a></li><li><a href="autoencoder-vae-4.html">VAE: 구름을 사전분포 안으로 모으기</a></li><li><a href="autoencoder-vae-5.html" class="current">재매개변수화: 뽑기를 거쳐 미분하기</a></li><li><a href="autoencoder-vae-6.html">ELBO: 잴 수 없는 로그우도 아래에 받친 바닥</a></li><li><a href="autoencoder-vae-7.html">자주 하는 실수와 요약</a></li></ul></li>
 <li class="toc-part">조건을 붙여가기</li>
-<li><a href="denoising.html">디노이징과 조건부 디노이징</a></li>
+<li><a href="denoising.html">디노이징과 조건부 디노이징: 고치다 보면 만들게 된다</a></li>
 <li><a href="condition-elbo.html">조건과 ELBO</a></li>
 <li class="toc-part">신호와 스펙트럼</li>
 <li><a href="spectrum.html">그림을 나누는 축: 스펙트럼</a></li>
@@ -680,6 +680,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p class="chapter-crumb"><a href="autoencoder-vae.html">오토인코더에서 VAE 로</a></p>
 <h2 id="재매개변수화-뽑기를-거쳐-미분하기">재매개변수화: 뽑기를 거쳐 미분하기</h2>
 <p>VAE의 손실에는 「인코더 구름에서 잠재 변수를 하나 뽑는다」는 단계가 들어 있다. 손실을 줄이려면 인코더의 매개변수 <span class="sym" style="color:#665522">φ</span>로 손실을 미분해야 하는데, 역전파가 뽑기 단계를 어떻게 지나갈까? 실제로 코드에서 <code>z = torch.normal(mu, sd)</code> 처럼 그 분포에서 바로 뽑으면 mu 와 sd 에는 기울기가 흐르지 않는다. 주사위를 던진 결과를 주사위의 무게중심으로 미분할 수는 없는 것처럼 보인다.</p>
+<p>한계 ②에서 바란 것은 무작위 요소를 쉽게 정의하는 것이었다. 새 그림을 뽑을 때의 무작위는 N(0, I) 하나로 정했다. 그런데 학습 안의 무작위는 그림마다 다른 구름, 곧 인코더의 매개변수에 따라 모양이 바뀌는 분포에서 뽑는다. 이 무작위도 N(0, I)처럼 쉽게 정의된 꼴로 다시 적을 수는 없을까? 그러면 뽑기를 거쳐서도 미분이 지나갈지 모른다.</p>
 <h3 id="장난감-평균을-옮기면-결과가-어떻게-바뀌나">장난감: 평균을 옮기면 결과가 어떻게 바뀌나</h3>
 <p>계산이 손으로 되는 가장 작은 경우로 보자. 잠재 변수 하나가 정규분포 N(<span class="sym" style="color:#87965a">μ</span>, <span class="sym" style="color:#874b0f">σ</span>²)에서 뽑히고, 손실은 f(<span class="sym" style="color:#8c564b">z</span>) = (<span class="sym" style="color:#8c564b">z</span> − 3)²이라 하자. 평균 손실은 E[(<span class="sym" style="color:#8c564b">z</span> − 3)²] = (<span class="sym" style="color:#87965a">μ</span> − 3)² + <span class="sym" style="color:#874b0f">σ</span>²이라 <span class="sym" style="color:#87965a">μ</span>로 미분하면 2(<span class="sym" style="color:#87965a">μ</span> − 3)이고, <span class="sym" style="color:#87965a">μ</span> = 1, <span class="sym" style="color:#874b0f">σ</span> = 1이면 −4다. 이 −4를 표본만으로 어림하고 싶다.</p>
 <p>뽑기를 둘로 나눠 적어 보자. 먼저 매개변수와 상관없는 표준정규 잡음 <span class="sym" style="color:#1f6066">ε</span>(엡실론)을 뽑고, 그다음 그것을 늘이고 옮긴다.</p>

@@ -649,7 +649,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="teaching-generation.html">생성을 가르치는 법: 분류기를 뒤집으면</a></li>
 <li><a href="autoencoder-vae.html">오토인코더에서 VAE 로</a></li>
 <li class="toc-part">조건을 붙여가기</li>
-<li><a href="denoising.html">디노이징과 조건부 디노이징</a></li>
+<li><a href="denoising.html">디노이징과 조건부 디노이징: 고치다 보면 만들게 된다</a></li>
 <li><a href="condition-elbo.html" class="active">조건과 ELBO</a><ul class="sidebar-toc"><li><a href="condition-elbo.html">흐림: 조건을 세밀하게 주면 선명해질까</a></li><li><a href="condition-elbo-2.html" class="current">속성 벡터: 다 배운 잠재 공간에서 방향 찾기</a></li><li><a href="condition-elbo-3.html">자주 하는 실수와 요약</a></li></ul></li>
 <li class="toc-part">신호와 스펙트럼</li>
 <li><a href="spectrum.html">그림을 나누는 축: 스펙트럼</a></li>
@@ -687,7 +687,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>그해 말 라르센(Anders Boesen Lindbo Larsen)과 동료들은 셈에 쓸 벡터를 라벨로 뽑았다. 얼굴 사진에 붙은 「안경」 같은 라벨로 그림을 둘로 나누고, 인코더가 내놓은 잠재 변수의 평균끼리 뺀 것이다. 그들도 이 방법이 「짙은 화장」과 「립스틱」처럼 함께 붙는 라벨에는 문제가 있다고 적었고, 남자 쪽으로 가는 벡터에 콧수염이 따라 나온다는 것을 그림으로 보였다. 이듬해 화이트(Tom White)는 사진 속 사람의 미소를 더하고 빼 주는 온라인 서비스를 열었다가 같은 문제를 겪었다. 미소를 빼면 얼굴이 남자처럼 바뀌었다. 데이터에서 여자가 남자보다 더 자주 웃고 있었기 때문이다.</p>
 <h3 id="얼굴-사진으로-vae-학습하기">얼굴 사진으로 VAE 학습하기</h3>
 <p>데이터는 2015년 홍콩중문대의 류(Ziwei Liu)와 동료들이 모은 <strong>CelebA</strong> 다. 유명인 10,177명의 얼굴 사진 202,599장에, 사진마다 「안경」「남성」「수염 없음」「웃음」 같은 예/아니오 라벨 40개가 붙어 있다. 얼굴은 두 눈이 같은 자리에 오도록 맞춰 잘라 두었다. 이 데이터는 비상업 연구 목적으로만 쓸 수 있다. 이 절의 사진과 그림은 그 조건 안에서 싣는다. 사진을 가운데 148 × 148 칸으로 잘라 64 × 64 로 줄였고, 학습에는 162,770장, 확인에는 따로 떼어 둔 시험 사진 19,962장을 썼다.</p>
-<p>모델은 이 장의 VAE 와 같은 구조다. 인코더가 사진 한 장을 받아 구름의 중심 <span class="sym" style="color:#87965a">μ<sub>φ</sub></span>와 크기를 내놓고, 디코더가 잠재 변수 <span class="sym" style="color:#8c564b">z</span>에서 사진을 되살린다. 잠재 변수는 64칸이다. 다른 점은 둘이다. 하나는 디코더가 칸마다 잉크 동전 대신 밝기의 평균을 내놓는 가우시안 디코더라 재구성 항이 제곱 오차가 된다는 것이다(표준편차 0.1). 다른 하나는 64 × 64 × 3 = 12,288칸을 MLP 처럼 한 줄로 늘어놓지 않고, 그림을 다루려고 만든 부품을 쌓았다는 것이다. 이웃한 칸들을 묶어 읽는 부품인데, 그 속은 아직 열지 않고 빌려 쓴다. 매개변수는 217만 개이고, 학습 사진을 30번 돌리는 데 GPU 하나로 5분쯤 걸렸다.</p>
+<p>모델은 손글씨에서 쓴 VAE 와 같은 구조다. 인코더가 사진 한 장을 받아 구름의 중심 <span class="sym" style="color:#87965a">μ<sub>φ</sub></span>와 크기를 내놓고, 디코더가 잠재 변수 <span class="sym" style="color:#8c564b">z</span>에서 사진을 되살린다. 잠재 변수는 64칸이다. 다른 점은 둘이다. 하나는 디코더가 칸마다 잉크 동전 대신 밝기의 평균을 내놓는 가우시안 디코더라 재구성 항이 제곱 오차가 된다는 것이다(표준편차 0.1). 다른 하나는 64 × 64 × 3 = 12,288칸을 MLP 처럼 한 줄로 늘어놓지 않고, 그림을 다루려고 만든 부품을 쌓았다는 것이다. 이웃한 칸들을 묶어 읽는 부품인데, 그 속은 아직 열지 않고 빌려 쓴다. 매개변수는 217만 개이고, 학습 사진을 30번 돌리는 데 GPU 하나로 5분쯤 걸렸다.</p>
 <figure class="fig "><img src="images/condition-elbo/celeba_real_recon.png" alt="위: CelebA 시험 사진 8장(가운데를 잘라 64 × 64 로 줄인 것). 아래: 잠재 변수 64칸짜리 VAE 가 사진을 인코더에 넣었다가 구름의 중심 μ 를 디코더로 되살린 그림. 첫째·둘째 사진의 안경테처럼 가는 무늬가 흐려지거나 사라진다. 사진 자료: CelebA(Liu, Luo, Wang, Tang, ICCV 2015, 홍콩중문대 MMLAB, 비상업 연구 목적으로만 이용 가능)." loading="lazy"><figcaption>위: CelebA 시험 사진 8장(가운데를 잘라 64 × 64 로 줄인 것). 아래: 잠재 변수 64칸짜리 VAE 가 사진을 인코더에 넣었다가 구름의 중심 μ 를 디코더로 되살린 그림. 첫째·둘째 사진의 안경테처럼 가는 무늬가 흐려지거나 사라진다. 사진 자료: CelebA(Liu, Luo, Wang, Tang, ICCV 2015, 홍콩중문대 MMLAB, 비상업 연구 목적으로만 이용 가능).</figcaption></figure>
 <p>되살린 얼굴은 누구인지 알아볼 만하지만 흐리다. 시험 사진 2,000장에서 가는 무늬의 세기(칸마다 이웃 네 칸과의 밝기 차를 모은 값의 분산)는 원래 사진의 14.5%만 남았다. 손글씨에서 본 흐림이 얼굴에서도 그대로다.</p>
 <h3 id="라벨의-차이로-방향을-뽑는다">라벨의 차이로 방향을 뽑는다</h3>

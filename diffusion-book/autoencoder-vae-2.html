@@ -649,7 +649,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="teaching-generation.html">생성을 가르치는 법: 분류기를 뒤집으면</a></li>
 <li><a href="autoencoder-vae.html" class="active">오토인코더에서 VAE 로</a><ul class="sidebar-toc"><li><a href="autoencoder-vae.html">오토인코더: 그림 자신을 정답으로 삼기</a></li><li><a href="autoencoder-vae-2.html" class="current">점만 모으면: 오토인코더의 이웃은 비어 있다</a></li><li><a href="autoencoder-vae-3.html">구름: 점 하나를 분포로 넓히기</a></li><li><a href="autoencoder-vae-4.html">VAE: 구름을 사전분포 안으로 모으기</a></li><li><a href="autoencoder-vae-5.html">재매개변수화: 뽑기를 거쳐 미분하기</a></li><li><a href="autoencoder-vae-6.html">ELBO: 잴 수 없는 로그우도 아래에 받친 바닥</a></li><li><a href="autoencoder-vae-7.html">자주 하는 실수와 요약</a></li></ul></li>
 <li class="toc-part">조건을 붙여가기</li>
-<li><a href="denoising.html">디노이징과 조건부 디노이징</a></li>
+<li><a href="denoising.html">디노이징과 조건부 디노이징: 고치다 보면 만들게 된다</a></li>
 <li><a href="condition-elbo.html">조건과 ELBO</a></li>
 <li class="toc-part">신호와 스펙트럼</li>
 <li><a href="spectrum.html">그림을 나누는 축: 스펙트럼</a></li>
@@ -679,7 +679,12 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="autoencoder-vae.html">오토인코더에서 VAE 로</a></p>
 <h2 id="점만-모으면-오토인코더의-이웃은-비어-있다">점만 모으면: 오토인코더의 이웃은 비어 있다</h2>
-<p>오토인코더에서 새 그림을 뽑지 못한 까닭은 둘이었다. 잠재 변수를 열 배로 늘리거나 돌려도 손실이 그대로라서 잠재 변수가 어디에 놓일지 아무도 정하지 않았고, 학습한 잠재 변수들 사이의 빈 곳이나 바깥 들판을 넣으면 무엇이 나올지도 정해지지 않았다. 가장 먼저 떠오르는 고침은 첫째 까닭만 손보는 것이다. 잠재 변수를 표준정규분포 N(0, I) 안쪽으로 끌어당기는 벌점을 손실에 더하면, 새 그림을 뽑을 때도 N(0, I)에서 뽑으면 되지 않을까?</p>
+<p>오토인코더는 그림마다 생김새를 적은 값, 곧 잠재 변수를 사람 손 없이 찾아 주었다. 그런데 그 값으로 새 그림을 뽑으려 하자 두 군데가 모자랐다. 이것이 오토인코더의 한계 두 가지이고, 이 장의 나머지는 이 둘을 한 단계씩 푼다.</p>
+<ul>
+<li>한계 ① 사이가 비어 있다. 학습 그림들의 잠재 변수 사이, 곧 데이터의 중간 영역에서 잠재 변수를 골라 넣어도 제대로 된 숫자가 나왔으면 한다. 그런데 디코더는 학습 그림이 놓인 자리에서만 배웠고, 그 사이에서 무엇을 그릴지는 학습이 정해 주지 않았다. 티셔츠 가게가 표에 없는 2.5번을 받았을 때 무엇을 줄지 모르는 것과 같다.</li>
+<li>한계 ② 뽑을 곳이 정해지지 않았다. 무작위 요소, 곧 잠재 변수를 어디서 어떻게 뽑을지를 쉽게 정의하고 싶다. 그런데 잠재 변수를 열 배로 늘리거나 돌려도 손실이 그대로라서, 잠재 변수가 어디에 놓일지 아무도 정하지 않았다. 정규분포에서 뽑으면 무리가 겹친 가운데의 얼룩이, 상자에서 뽑으면 0과 1로 쏠린 그림이 나왔다.</li>
+</ul>
+<p>둘 가운데 손보기 쉬워 보이는 것은 ②다. 잠재 변수를 표준정규분포 N(0, I) 안쪽으로 끌어당기는 벌점을 손실에 더하면, 새 그림을 뽑을 때도 N(0, I)에서 뽑으면 되지 않을까? 이 절은 그 벌점만 더해 보고, ①이 함께 풀리는지 본다.</p>
 <h3 id="흑백-그림과-칸마다-던지는-동전">흑백 그림과 칸마다 던지는 동전</h3>
 <p>이 절부터는 그림을 밝기 0.5에서 잘라 칸마다 잉크(1)와 바탕(0)만 있는 흑백으로 쓴다. 디코더는 784칸 각각이 잉크일 확률을 내놓고, 그 확률로 칸마다 따로 동전을 던진다고 본다. 그러면 디코더가 내놓는 것은 그림 한 장이 아니라 그림들의 분포다. 분류기의 소프트맥스가 라벨 하나가 아니라 라벨들의 분포를 내놓던 것과 같은 자리에 섰다. 손실은 제곱 오차 대신, 이 분포가 실제 그림에 주는 확률의 로그에 마이너스를 붙인 값이다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#ff5a78"><msub><mi>p</mi><mi>θ</mi></msub></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#1b9e77"><mi>x</mi></mstyle><mo>∣</mo><mstyle mathcolor="#8c564b"><mi>z</mi></mstyle><mo stretchy="false">)</mo><mo>=</mo><munderover><mo>∏</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mn>784</mn></munderover><msup><mstyle mathcolor="#ff5a78"><msub><mi>π</mi><mi>i</mi></msub></mstyle><mrow><mtext> </mtext><mstyle mathcolor="#1b9e77"><msub><mi>x</mi><mi>i</mi></msub></mstyle></mrow></msup><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mstyle mathcolor="#ff5a78"><msub><mi>π</mi><mi>i</mi></msub></mstyle><msup><mo stretchy="false">)</mo><mrow><mn>1</mn><mo>−</mo><mstyle mathcolor="#1b9e77"><msub><mi>x</mi><mi>i</mi></msub></mstyle></mrow></msup><mo separator="true">,</mo><mspace width="2em"/><mstyle mathcolor="#d62728"><mi mathvariant="script">L</mi></mstyle><mo>=</mo><mo>−</mo><mi>log</mi><mo>⁡</mo><mstyle mathcolor="#ff5a78"><msub><mi>p</mi><mi>θ</mi></msub></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#1b9e77"><mi>x</mi></mstyle><mo>∣</mo><mstyle mathcolor="#8c564b"><mi>z</mi></mstyle><mo stretchy="false">)</mo><mo>+</mo><mtext>(잠재 변수를 모으는 벌점)</mtext></mrow><annotation encoding="application/x-tex">\textcolor{#ff5a78}{p_\theta}(\textcolor{#1b9e77}{x} \mid \textcolor{#8c564b}{z}) = \prod_{i=1}^{784} \textcolor{#ff5a78}{\pi_i}^{\,\textcolor{#1b9e77}{x_i}}(1-\textcolor{#ff5a78}{\pi_i})^{1-\textcolor{#1b9e77}{x_i}}, \qquad \textcolor{#d62728}{\mathcal{L}} = -\log \textcolor{#ff5a78}{p_\theta}(\textcolor{#1b9e77}{x} \mid \textcolor{#8c564b}{z}) + \text{(잠재 변수를 모으는 벌점)}
@@ -694,7 +699,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>벌점은 두 가지를 해 봤다. 먼저 잠재 변수 하나하나를 원점 쪽으로 당기는 ½‖<span class="sym" style="color:#8c564b">z</span>‖²를 더했다. 잠재 변수가 원 안으로 들어오기는 했지만, 생각보다 더 작게 오그라들었다(칸마다 표준편차 0.65, 0.64). 인코더 출력에 c(0 &lt; c &lt; 1)를 곱하고 디코더 첫 층 가중치를 1/c 배로 키우면 재구성은 그대로인데 벌점은 c² 배로 줄기 때문이다. 잠재 변수를 열 배로 늘려도 손실이 같던 것과 같은 구조라, 이 벌점은 「모여라」는 정해도 「얼마나 크게 모여라」는 정하지 못한다. 그래서 N(0, I)에서 뽑으면 지도 바깥 들판을 자주 밟아 숫자 0(21.0%), 1(18.6%), 7(20.8%)로 쏠렸다. 둘째로, 한 묶음(128장)의 잠재 변수들이 칸마다 평균 0, 분산 1이 되도록 당기는 벌점을 썼다. 점 하나하나가 아니라 점들 전체의 모양을 N(0, I)에 맞추는 것이다. 몸통(784-128-64-2)과 데이터, 학습 횟수(50번 돌기)는 앞으로 견줄 모델과 모두 같다.</p>
 <p>이 오토인코더의 잠재 변수는 칸마다 표준편차 1.03, 1.05로 N(0, I)과 크기가 맞게 모였다. N(0, I)에서 잠재 변수를 1만 개 뽑아 디코더에 넣으면 분류기가 90% 넘게 확신하는 그림이 78.9%이고, 숫자는 0부터 9까지 5.1% ~ 15.4%로 나온다. 회색조로 학습한 벌점 없는 오토인코더의 39.4%와 견주면 뽑을 곳은 정해진 셈이다.</p>
 <h3 id="학습한-자리에서-조금만-옮기면">학습한 자리에서 조금만 옮기면</h3>
-<p>그렇다면 남은 것은 둘째 까닭, 점들 사이와 둘레다. 디코더는 학습하는 동안 학습 그림이 놓인 바로 그 자리만 보았다. 시험 그림 1,000장을 인코더에 넣은 자리에서 되살리면, 분류기가 원래 숫자로 읽는 비율이 74.4%다. 그 자리에서 여덟 방향으로 조금씩 옮겨 디코더에 넣고, 옮기기 전 그림과의 제곱 거리(784칸 합)를 재 보았다. 옆에는 같은 몸통·같은 데이터로 다르게 학습한 모델 B를 함께 두었다. 모델 B 의 정체는 다음 절에서 밝힌다. 이 모델도 잠재 변수가 N(0, I) 크기로 모여 있고(칸마다 표준편차 1.08, 1.05), 학습한 자리에서는 원래 숫자로 73.8%를 읽어 오토인코더와 거의 같다.</p>
+<p>한계 ②는 벌점 하나로 풀렸다. 그렇다면 ①, 학습한 점들 사이와 둘레는 어떨까? 디코더는 학습하는 동안 학습 그림이 놓인 바로 그 자리만 보았다. 시험 그림 1,000장을 인코더에 넣은 자리에서 되살리면, 분류기가 원래 숫자로 읽는 비율이 74.4%다. 그 자리에서 여덟 방향으로 조금씩 옮겨 디코더에 넣고, 옮기기 전 그림과의 제곱 거리(784칸 합)를 재 보았다. 옆에는 같은 몸통·같은 데이터로 다르게 학습한 모델 B를 함께 두었다. 모델 B 의 정체는 다음 절에서 밝힌다. 이 모델도 잠재 변수가 N(0, I) 크기로 모여 있고(칸마다 표준편차 1.08, 1.05), 학습한 자리에서는 원래 숫자로 73.8%를 읽어 오토인코더와 거의 같다.</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -741,7 +746,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </tr>
 </tbody>
 </table></div>
-<p>같은 자리에서 시작해 같은 만큼 옮겼는데, 오토인코더의 그림이 두 배쯤 빨리 바뀌고 원래 숫자에서 먼저 벗어난다. 이웃한 시험 그림의 잠재 변수끼리는 0.01 남짓 떨어져 있으니, 0.1만 옮겨도 이웃 여러 장을 지나는 거리다. 그 사이를 오토인코더의 디코더는 한 번도 배운 적이 없다.</p>
+<p>같은 자리에서 시작해 같은 만큼 옮겼는데, 오토인코더의 그림이 두 배쯤 빨리 바뀌고 원래 숫자에서 먼저 벗어난다. 이웃한 시험 그림의 잠재 변수끼리는 0.01 남짓 떨어져 있으니, 0.1만 옮겨도 이웃 여러 장을 지나는 거리다. 그 사이를 오토인코더의 디코더는 한 번도 배운 적이 없다. 뽑을 곳을 N(0, I) 하나로 정해도, 뽑힌 자리가 학습한 점에서 조금만 비켜 나면 그림이 무너진다. 벌점은 ②를 풀었을 뿐 ①은 그대로 남겼다.</p>
 <figure class="widget-embed" id="widget-autoencoder-vae-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">같은 자리, 두 디코더</span><a class="widget-open" href="widgets/autoencoder-vae.html?v=e94cd464#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/autoencoder-vae.html?w=w2&embed=1&v=e94cd464" title="같은 자리, 두 디코더" loading="lazy"></iframe></figure>
 <h3 id="ml에서-점을-모으는-길도-다시-나왔다">ML에서: 점을 모으는 길도 다시 나왔다</h3>
 <p>점만 모으는 오토인코더가 이 절의 숫자처럼 꽤 쓸 만한 그림을 뽑는다는 것은 뒤의 연구에서도 다시 확인되었다. 2017년 톨스티힌(Ilya Tolstikhin)과 동료들의 바서슈타인 오토인코더는 이 절의 둘째 벌점처럼 「인코딩한 학습 데이터 전체의 분포」를 사전분포에 맞추는 벌점을 쓴다. 2019년 고시(Partha Ghosh)와 동료들은 구름에서 뽑는 단계를 다른 규제로 바꿔도 똑같이 매끄럽고 뜻 있는 잠재 공간을 얻을 수 있다고 보고했다. 그러니 다음 절의 방법은 그림을 뽑는 유일한 길이 아니다. 다만 이 장은 그 방법을 따라간다. 이웃을 채우는 방식이 가장 단순하고, 그 손실이 뒤의 ELBO 절에서 로그우도의 바닥이라는 뜻을 얻기 때문이다.</p>

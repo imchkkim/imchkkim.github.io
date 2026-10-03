@@ -649,7 +649,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="teaching-generation.html">생성을 가르치는 법: 분류기를 뒤집으면</a></li>
 <li><a href="autoencoder-vae.html" class="active">오토인코더에서 VAE 로</a><ul class="sidebar-toc"><li><a href="autoencoder-vae.html" class="current">오토인코더: 그림 자신을 정답으로 삼기</a></li><li><a href="autoencoder-vae-2.html">점만 모으면: 오토인코더의 이웃은 비어 있다</a></li><li><a href="autoencoder-vae-3.html">구름: 점 하나를 분포로 넓히기</a></li><li><a href="autoencoder-vae-4.html">VAE: 구름을 사전분포 안으로 모으기</a></li><li><a href="autoencoder-vae-5.html">재매개변수화: 뽑기를 거쳐 미분하기</a></li><li><a href="autoencoder-vae-6.html">ELBO: 잴 수 없는 로그우도 아래에 받친 바닥</a></li><li><a href="autoencoder-vae-7.html">자주 하는 실수와 요약</a></li></ul></li>
 <li class="toc-part">조건을 붙여가기</li>
-<li><a href="denoising.html">디노이징과 조건부 디노이징</a></li>
+<li><a href="denoising.html">디노이징과 조건부 디노이징: 고치다 보면 만들게 된다</a></li>
 <li><a href="condition-elbo.html">조건과 ELBO</a></li>
 <li class="toc-part">신호와 스펙트럼</li>
 <li><a href="spectrum.html">그림을 나누는 축: 스펙트럼</a></li>
@@ -679,13 +679,15 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <h1>오토인코더에서 VAE 로</h1>
 <h2 id="이-장의-물음">이 장의 물음</h2>
+<p>라벨 「3」은 그림의 흩어짐 가운데 21%만 정했다. 획이 어디를 지나는지, 얼마나 기울었는지, 얼마나 굵은지 같은 나머지 몫은 라벨 곁에 다른 값이 함께 들어가야 고를 수 있다. 그런데 그 값을 학습 그림마다 붙여 준 사람은 없다. 라벨은 사람이 하나하나 붙였지만, 6만 장의 획 생김새를 숫자로 적어 줄 사람은 없다. 사람이 적어 주지 못한다면, 그 값은 그림 자신에게서 얻을 수밖에 없다.</p>
+<p>값을 얻었다고 끝나지도 않는다. 새 그림을 만들려면 그 값을 학습 그림에서 베껴 오지 않고 새로 골라 넣어야 한다. 학습 그림이 쓴 값만 넣으면 다시 찾아보기 표가 된다. 이 장은 다음 물음을 차례로 따라간다.</p>
 <ul>
-<li>새 그림을 꺼낼 수 있으려면 학습 과정에서 무엇을 정해 두어야 할까? 그림 한 장의 잠재 변수가 점이 아니라 분포라는 것은 무슨 뜻일까?</li>
-<li>그 학습이 실제로 올리는 값은 무엇이고, 그 값은 우리가 바라던 값과 얼마나 떨어져 있을까?</li>
-<li>그렇게 뽑은 그림은 왜 흐릿하고, 조건을 더 세밀하게 주면 선명해질까?</li>
+<li>획의 생김새를 적은 값을, 사람 손을 빌리지 않고 그림 자신에게서 얻을 수 있을까?</li>
+<li>그 값을 학습 그림들이 쓴 값 사이에서 골라 넣어도 제대로 된 숫자가 나올까? 새로 고를 값은 어디서, 어떻게 뽑아야 할까?</li>
+<li>그림 한 장이 값 하나가 아니라 값들의 분포를 갖는다는 것은 무슨 뜻일까? 그렇게 배운 모델이 실제로 올리는 값은 무엇이고, 우리가 바라던 값과 얼마나 떨어져 있을까?</li>
 </ul>
 <h2 id="오토인코더-그림-자신을-정답으로-삼기">오토인코더: 그림 자신을 정답으로 삼기</h2>
-<p>라벨을 넣은 MLP가 평균을 그린 것은 라벨 「3」이 그림을 정하기에 너무 적은 정보라서였다. 같은 라벨 아래 6,131가지 3이 있었다. 그렇다면 입력에 정보를 더 주면 어떨까? 획의 기울기, 굵기, 고리의 크기까지 알려 주면 정답은 점점 하나로 좁아진다. 끝까지 가면 입력이 그림 자체다. 그림을 넣고 같은 그림을 맞히라면 정답은 정확히 하나다. 그대로 두면 받은 것을 그대로 내보내는 지루한 함수가 되지만, 가운데를 좁은 목으로 조이면 이야기가 달라진다.</p>
+<p>라벨을 넣은 MLP가 평균을 그린 것은 라벨 「3」이 그림을 정하기에 너무 적은 정보라서였다. 같은 라벨 아래 6,131가지 3이 있었다. 그렇다면 입력에 정보를 더 주면 어떨까? 획의 기울기, 굵기, 고리의 크기까지 알려 주면 정답은 점점 하나로 좁아진다. 끝까지 가면 입력이 그림 자체다. 그림을 넣고 같은 그림을 맞히라면 정답은 정확히 하나다. 그대로 두면 받은 것을 그대로 내보내는 지루한 함수가 되지만, 가운데를 좁은 목으로 조이면 이야기가 달라진다. 그림이 좁은 목을 지나려면 숫자 몇 개로 줄어야 한다. 그 숫자 몇 개가, 아무도 붙여 주지 않은 생김새의 값 노릇을 할 수 있을까?</p>
 <h3 id="역사-주성분-분석의-손을-떠나">역사: 주성분 분석의 손을 떠나</h3>
 <p>그림처럼 칸이 많은 데이터를 몇 개의 숫자로 줄이는 일은 오래전부터 주성분 분석(PCA)이 맡았다. 데이터가 가장 크게 퍼진 방향 몇 개를 찾아, 그 방향의 좌표만 남기는 방법이다. 줄이는 법이 직선(선형)이라 계산은 깔끔하지만, 손글씨처럼 굽은 모양의 차이는 잘 담지 못한다.</p>
 <p>신경망으로 줄였다 되살리는 생각은 그 전에도 있었지만, 층이 많은 신경망은 잘 학습되지 않았다. 힌턴(Geoffrey Hinton)과 살라후트디노프(Ruslan Salakhutdinov)는 2006년 《사이언스》 논문에서 그 어려움을 이렇게 적었다. 처음 가중치가 크면 나쁜 자리에 빠지고, 작으면 앞쪽 층의 기울기가 너무 작아 학습이 되지 않는다. 무작위로 그린 곡선 그림을 784-400-200-100-50-25-6 신경망으로 줄였다 되살리게 했더니, 미리 학습 없이 바로 학습시킨 신경망은 오래 다듬어도 「언제나 학습 데이터의 평균을 되살렸다」고 한다. 두 사람은 층을 하나씩 미리 학습시켜 좋은 출발점을 만든 뒤 전체를 역전파로 다듬었고, 784-1000-500-250-30 신경망이 MNIST 그림을 30개의 숫자로 줄였다가 PCA보다 훨씬 잘 되살렸다. 가운데를 2칸으로 줄인 신경망의 숫자 두 개를 평면에 찍자 숫자마다 무리가 갈라져, PCA의 첫 두 성분보다 뚜렷한 지도가 나왔다.</p>
@@ -747,7 +749,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>확률론 시간에 표본 공간을 정하지 않고 「무작위로 고른다」고 하면 답이 여러 개 나오던 베르트랑의 역설 같아요. 어떤 분포에서 뽑는지부터 정해야 하네요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="teaching-generation-2.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 7</span><a class="chapter-nav-next" href="autoencoder-vae-2.html">점만 모으면: 오토인코더의 이웃은 비어 있다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="teaching-generation-4.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 7</span><a class="chapter-nav-next" href="autoencoder-vae-2.html">점만 모으면: 오토인코더의 이웃은 비어 있다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');
