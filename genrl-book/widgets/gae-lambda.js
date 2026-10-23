@@ -3,8 +3,8 @@
 // V* = 실제 가치(이 앞부분에서 결국 맞힐 확률), V̂ = 비평가의 예측 (품질 슬라이더로 오차를 섞는다).
 // δ_t = r_t + V̂(s_{t+1}) − V̂(s_t),  Â_t = Σ_l λ^l δ_{t+l}   (γ = 1)
 // 원고의 위젯 줄에 붙은 data-set 으로 절마다 다르게 연다. 설명글에는 문제의 답을 적지 않는다.
-//   (없음)          : 4장 「GAE」 절 — 「문제 5 값」 단추(정답 응답, λ = 1, 비평가 완벽)
-//   data-set="bias" : 4장 「비평가의 청구서」 절 — 문제 8. 비평가 단추에 「‘24’ 뒤 +0.3」(‘24’ 를 쓴 뒤의 앞부분을 0.3 높게 보는 비평가)을 더한다
+//   (없음)          : 9장 「GAE」 절 — 「문제 4 값」 단추(정답 응답, λ = 1, 비평가 완벽)
+//   data-set="bias" : 9장 「비평가의 청구서」 절 — 문제 7. 비평가 단추에 「‘24’ 뒤 +0.3」(‘24’ 를 쓴 뒤의 앞부분을 0.3 높게 보는 비평가)을 더한다
 GW.register("gae-lambda", (el) => {
   const LAM = "<span style='color:var(--sym-993600, #993600)'>λ</span>";
   const sets = {
@@ -13,18 +13,18 @@ GW.register("gae-lambda", (el) => {
         "마름모는 완벽한 비평가가 알려주는 ‘진짜 기여도’(그 토큰이 결국 맞힐 확률을 얼마나 바꿨나). " +
         LAM + " = 1 이면 <span class='sym-A'>Â<sub>t</sub></span> = <span class='sym-R'>R</span> − <span class='sym-V'>V̂</span>(<span style='color:var(--sym-0093b8, #0093b8)'>s<sub>t</sub></span>) — 비평가를 베이스라인으로만 쓰고, 좋은 수든 나쁜 수든 결과를 뒤집어쓴다. " +
         LAM + " = 0 이면 <span class='sym-A'>Â<sub>t</sub></span> = <span class='sym-A'>δ<sub>t</sub></span> — 비평가를 전적으로 믿어 정확히 짚어내지만, 비평가가 틀리면 그 오류가 그대로 어드밴티지가 된다. " +
-        "「문제 5 값」 단추는 아래 문제 5 의 설정을 불러온다.",
+        "「문제 4 값」 단추는 아래 문제 4 의 설정을 불러온다.",
       start: { sc: "wrong", lam: 0.95, q: 0, mode: "noise" },
-      presets: [["문제 5 값", { sc: "right", lam: 1, q: 0, mode: "noise" }]],
+      presets: [["문제 4 값", { sc: "right", lam: 1, q: 0, mode: "noise" }]],
       modes: false,
       ymax: 1,
     },
     bias: {
       caption:
         "마름모는 완벽한 비평가가 알려주는 ‘진짜 기여도’다. 「‘24’ 뒤 +0.3」 비평가는 ‘24’ 를 쓴 뒤의 모든 앞부분을 실제보다 0.3 높게 보고, 다른 앞부분은 정확히 본다. " +
-        LAM + " 를 0 과 1 로 바꿔 가며 어느 토큰의 막대가 마름모에서 벗어나는지 보라. 「문제 8 값」 단추는 아래 문제 8 의 설정을 불러온다.",
+        LAM + " 를 0 과 1 로 바꿔 가며 어느 토큰의 막대가 마름모에서 벗어나는지 보라. 「문제 7 값」 단추는 아래 문제 7 의 설정을 불러온다.",
       start: { sc: "wrong", lam: 0.95, q: 0, mode: "noise" },
-      presets: [["문제 8 값", { sc: "wrong", lam: 0, q: 0, mode: "bias" }]],
+      presets: [["문제 7 값", { sc: "wrong", lam: 0, q: 0, mode: "bias" }]],
       modes: true,
       ymax: 1.3,
     },

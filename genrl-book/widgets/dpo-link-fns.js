@@ -8,7 +8,7 @@ GW.register("dpo-link-fns", (el) => {
       "IPO는 <span class='sym-R'>z*</span> = 1/(2<span class='sym-beta'>β</span>)에서 바닥을 친다. 힌지는 <span class='sym-R'>z</span> = 1/<span class='sym-beta'>β</span> 에서 손실과 그래디언트가 정확히 0이 된다. " +
       "목표 마진 γ(SimPO)는 DPO 곡선을 γ/<span class='sym-beta'>β</span> 만큼 오른쪽으로 민다 — ‘최소 이만큼은 벌려라’.",
   });
-  const st = { beta: 0.25, gamma: 1.0 }; // 처음 β 는 본문 표의 0.25. 0.5 는 13장 문제 2의 값이라 처음 화면에 두지 않는다(수치판의 z* 가 답이 된다)
+  const st = { beta: 0.25, gamma: 1.0 }; // 처음 β 는 본문 표의 0.25. 0.5 는 18장 문제 2의 값이라 처음 화면에 두지 않는다(수치판의 z* 가 답이 된다)
   GW.slider(f.controls, { label: "<span class=\"sym-beta\">β</span>", min: 0.2, max: 2, step: 0.05, value: st.beta, fmt: (v) => v.toFixed(2), oninput: (v) => { st.beta = v; draw(); } });
   GW.slider(f.controls, { label: "γ (목표 마진)", min: 0, max: 3, step: 0.1, value: st.gamma, fmt: (v) => v.toFixed(1), oninput: (v) => { st.gamma = v; draw(); } });
   GW.legend(f.stage, [
