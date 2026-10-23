@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>보간 문턱: 가장 작은 특잇값이 잡음을 키운다 — 이중 하강: 외우고 나서도 나아진다 — 최적화: 경사하강에서 Muon 까지</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>@font-face{font-display:block;font-family:KaTeX_AMS;font-style:normal;font-weight:400;src:url(fonts/KaTeX_AMS-Regular.woff2) format("woff2"),url(fonts/KaTeX_AMS-Regular.woff) format("woff"),url(fonts/KaTeX_AMS-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Bold.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Regular.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Fraktur-Bold.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Bold.woff) format("woff"),url(fonts/KaTeX_Fraktur-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Fraktur-Regular.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Regular.woff) format("woff"),url(fonts/KaTeX_Fraktur-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Main-Bold.woff2) format("woff2"),url(fonts/KaTeX_Main-Bold.woff) format("woff"),url(fonts/KaTeX_Main-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Main-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Main-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Main-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Main-Italic.woff2) format("woff2"),url(fonts/KaTeX_Main-Italic.woff) format("woff"),url(fonts/KaTeX_Main-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Main-Regular.woff2) format("woff2"),url(fonts/KaTeX_Main-Regular.woff) format("woff"),url(fonts/KaTeX_Main-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Math-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Math-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Math-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Math-Italic.woff2) format("woff2"),url(fonts/KaTeX_Math-Italic.woff) format("woff"),url(fonts/KaTeX_Math-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:700;src:url(fonts/KaTeX_SansSerif-Bold.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Bold.woff) format("woff"),url(fonts/KaTeX_SansSerif-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:italic;font-weight:400;src:url(fonts/KaTeX_SansSerif-Italic.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Italic.woff) format("woff"),url(fonts/KaTeX_SansSerif-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:400;src:url(fonts/KaTeX_SansSerif-Regular.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Regular.woff) format("woff"),url(fonts/KaTeX_SansSerif-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Script;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Script-Regular.woff2) format("woff2"),url(fonts/KaTeX_Script-Regular.woff) format("woff"),url(fonts/KaTeX_Script-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size1;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size1-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size1-Regular.woff) format("woff"),url(fonts/KaTeX_Size1-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size2;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size2-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size2-Regular.woff) format("woff"),url(fonts/KaTeX_Size2-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size3;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size3-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size3-Regular.woff) format("woff"),url(fonts/KaTeX_Size3-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size4;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size4-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size4-Regular.woff) format("woff"),url(fonts/KaTeX_Size4-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Typewriter;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Typewriter-Regular.woff2) format("woff2"),url(fonts/KaTeX_Typewriter-Regular.woff) format("woff"),url(fonts/KaTeX_Typewriter-Regular.ttf) format("truetype")}.katex{font:normal 1.21em KaTeX_Main,Times New Roman,serif;line-height:1.2;position:relative;text-indent:0;text-rendering:auto}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.16.47"}.katex .katex-mathml{border:0;-webkit-clip-path:inset(50%);clip-path:inset(50%);height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.newline{display:block}.katex .base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .base,.katex .strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathboldfrak,.katex .textboldfrak{font-family:KaTeX_Fraktur;font-weight:700}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .mathsfit,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .hbox{width:100%}.katex .hbox,.katex .thinbox{display:inline-flex;flex-direction:row}.katex .thinbox{max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline,.katex .hline,.katex .mfrac .frac-line,.katex .overline .overline-line,.katex .rule,.katex .underline .underline-line{min-height:1px}.katex .mspace{display:inline-block}.katex .smash{display:inline;line-height:0}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.inner,.katex .llap>.inner,.katex .rlap>.inner{position:absolute}.katex .clap>.fix,.katex .llap>.fix,.katex .rlap>.fix{display:inline-block}.katex .llap>.inner{right:0}.katex .clap>.inner,.katex .rlap>.inner{left:0}.katex .clap>.inner>span{margin-left:-50%;margin-right:50%}.katex .rule{border:0 solid;display:inline-block;position:relative}.katex .hline,.katex .overline .overline-line,.katex .underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.root{margin-left:.2777777778em;margin-right:-.5555555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .sizing.reset-size2.size1{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .sizing.reset-size2.size3{font-size:1.1666666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .sizing.reset-size2.size4{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .sizing.reset-size2.size6{font-size:1.6666666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .sizing.reset-size2.size10{font-size:3.4566666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .sizing.reset-size2.size11{font-size:4.1466666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .sizing.reset-size3.size1{font-size:.7142857143em}.katex .fontsize-ensurer.reset-size3.size2,.katex .sizing.reset-size3.size2{font-size:.8571428571em}.katex .fontsize-ensurer.reset-size3.size3,.katex .sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .sizing.reset-size3.size4{font-size:1.1428571429em}.katex .fontsize-ensurer.reset-size3.size5,.katex .sizing.reset-size3.size5{font-size:1.2857142857em}.katex .fontsize-ensurer.reset-size3.size6,.katex .sizing.reset-size3.size6{font-size:1.4285714286em}.katex .fontsize-ensurer.reset-size3.size7,.katex .sizing.reset-size3.size7{font-size:1.7142857143em}.katex .fontsize-ensurer.reset-size3.size8,.katex .sizing.reset-size3.size8{font-size:2.0571428571em}.katex .fontsize-ensurer.reset-size3.size9,.katex .sizing.reset-size3.size9{font-size:2.4685714286em}.katex .fontsize-ensurer.reset-size3.size10,.katex .sizing.reset-size3.size10{font-size:2.9628571429em}.katex .fontsize-ensurer.reset-size3.size11,.katex .sizing.reset-size3.size11{font-size:3.5542857143em}.katex .fontsize-ensurer.reset-size4.size1,.katex .sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .sizing.reset-size5.size1{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .sizing.reset-size5.size2{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .sizing.reset-size5.size3{font-size:.7777777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .sizing.reset-size5.size4{font-size:.8888888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .sizing.reset-size5.size6{font-size:1.1111111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .sizing.reset-size5.size7{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .sizing.reset-size5.size10{font-size:2.3044444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .sizing.reset-size5.size11{font-size:2.7644444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .sizing.reset-size7.size1{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .sizing.reset-size7.size3{font-size:.5833333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .sizing.reset-size7.size4{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .sizing.reset-size7.size6{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .sizing.reset-size7.size10{font-size:1.7283333333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .sizing.reset-size7.size11{font-size:2.0733333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .sizing.reset-size8.size1{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .sizing.reset-size8.size2{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .sizing.reset-size8.size3{font-size:.4861111111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .sizing.reset-size8.size4{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .sizing.reset-size8.size6{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .sizing.reset-size8.size7{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .sizing.reset-size8.size10{font-size:1.4402777778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .sizing.reset-size8.size11{font-size:1.7277777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .sizing.reset-size9.size1{font-size:.2893518519em}.katex .fontsize-ensurer.reset-size9.size2,.katex .sizing.reset-size9.size2{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .sizing.reset-size9.size3{font-size:.4050925926em}.katex .fontsize-ensurer.reset-size9.size4,.katex .sizing.reset-size9.size4{font-size:.462962963em}.katex .fontsize-ensurer.reset-size9.size5,.katex .sizing.reset-size9.size5{font-size:.5208333333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .sizing.reset-size9.size6{font-size:.5787037037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .sizing.reset-size9.size7{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .sizing.reset-size9.size8{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .sizing.reset-size9.size10{font-size:1.2002314815em}.katex .fontsize-ensurer.reset-size9.size11,.katex .sizing.reset-size9.size11{font-size:1.4398148148em}.katex .fontsize-ensurer.reset-size10.size1,.katex .sizing.reset-size10.size1{font-size:.2410800386em}.katex .fontsize-ensurer.reset-size10.size2,.katex .sizing.reset-size10.size2{font-size:.2892960463em}.katex .fontsize-ensurer.reset-size10.size3,.katex .sizing.reset-size10.size3{font-size:.337512054em}.katex .fontsize-ensurer.reset-size10.size4,.katex .sizing.reset-size10.size4{font-size:.3857280617em}.katex .fontsize-ensurer.reset-size10.size5,.katex .sizing.reset-size10.size5{font-size:.4339440694em}.katex .fontsize-ensurer.reset-size10.size6,.katex .sizing.reset-size10.size6{font-size:.4821600771em}.katex .fontsize-ensurer.reset-size10.size7,.katex .sizing.reset-size10.size7{font-size:.5785920926em}.katex .fontsize-ensurer.reset-size10.size8,.katex .sizing.reset-size10.size8{font-size:.6943105111em}.katex .fontsize-ensurer.reset-size10.size9,.katex .sizing.reset-size10.size9{font-size:.8331726133em}.katex .fontsize-ensurer.reset-size10.size10,.katex .sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .sizing.reset-size10.size11{font-size:1.1996142719em}.katex .fontsize-ensurer.reset-size11.size1,.katex .sizing.reset-size11.size1{font-size:.2009646302em}.katex .fontsize-ensurer.reset-size11.size2,.katex .sizing.reset-size11.size2{font-size:.2411575563em}.katex .fontsize-ensurer.reset-size11.size3,.katex .sizing.reset-size11.size3{font-size:.2813504823em}.katex .fontsize-ensurer.reset-size11.size4,.katex .sizing.reset-size11.size4{font-size:.3215434084em}.katex .fontsize-ensurer.reset-size11.size5,.katex .sizing.reset-size11.size5{font-size:.3617363344em}.katex .fontsize-ensurer.reset-size11.size6,.katex .sizing.reset-size11.size6{font-size:.4019292605em}.katex .fontsize-ensurer.reset-size11.size7,.katex .sizing.reset-size11.size7{font-size:.4823151125em}.katex .fontsize-ensurer.reset-size11.size8,.katex .sizing.reset-size11.size8{font-size:.578778135em}.katex .fontsize-ensurer.reset-size11.size9,.katex .sizing.reset-size11.size9{font-size:.6945337621em}.katex .fontsize-ensurer.reset-size11.size10,.katex .sizing.reset-size11.size10{font-size:.8336012862em}.katex .fontsize-ensurer.reset-size11.size11,.katex .sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .accent .accent-body{position:relative}.katex .accent .accent-body:not(.accent-full){width:0}.katex .overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex svg{fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .stretchy:after,.katex .stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+</style>
+<style>/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-code: #f5f5f5;
+  --fg: #1a1a1a;
+  --fg-muted: #555;
+  --accent: #1565C0;
+  --border: #ddd;
+  --sidebar-bg: #fafafa;
+  --sidebar-width: 280px;
+  --chapter-gap: 3rem;
+  --max-width: 52rem;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1a2e;
+  --bg-code: #16213e;
+  --fg: #e0e0e0;
+  --fg-muted: #aaa;
+  --accent: #64b5f6;
+  --border: #333;
+  --sidebar-bg: #16213e;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.8;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ===== Main Content ===== */
+main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.chapter { margin-bottom: var(--chapter-gap); }
+
+hr.chapter-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: var(--chapter-gap) 0;
+}
+
+/* ===== Typography ===== */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+  font-weight: 700;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.3em; }
+h2 { font-size: 1.6rem; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+h3 { font-size: 1.3rem; }
+h4 { font-size: 1.1rem; }
+
+.chapter > h1:first-child,
+.chapter > h2:first-child,
+.chapter > h3:first-child { margin-top: 0; }
+
+p { margin: 0.8em 0; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+strong { font-weight: 700; }
+
+blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 0.5em 1em;
+  margin: 1em 0;
+  background: var(--bg-code);
+  color: var(--fg-muted);
+}
+
+/* 보법 노트: 본문 흐름 밖의 곁글 */
+aside.sidenote {
+  margin: 1.5em 0;
+  padding: 0.9em 1.2em;
+  border: 1px solid var(--border);
+  border-top: 3px solid #b8860b;
+  border-radius: 6px;
+  background: var(--bg-code);
+  font-size: 0.93em;
+}
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+[data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
+[data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
+
+/* 길잡이: 다른 권(이론 책 ↔ 응용 책)으로 잇는 안내. 곁글과 다르게 왼쪽 선 + 작은 글씨 */
+aside.guide {
+  margin: 1.2em 0;
+  padding: 0.6em 1em;
+  border-left: 3px solid #0093b8;
+  background: var(--bg-code);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.9em;
+}
+aside.guide p { margin: 0.2em 0; }
+aside.guide .guide-title { font-weight: 700; color: #0078a0; }
+[data-theme="dark"] aside.guide { border-left-color: #37a9be; }
+[data-theme="dark"] aside.guide .guide-title { color: #5cc4d8; }
+
+/* ===== Code ===== */
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9em;
+  background: var(--bg-code);
+  padding: 0.15em 0.3em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--bg-code);
+  padding: 1em 1.2em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1em 0;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85em;
+}
+
+/* ===== Tables ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: 0.95em;
+}
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.8em;
+  text-align: left;
+}
+th { background: var(--bg-code); font-weight: 600; }
+
+/* ===== Lists ===== */
+ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
+li { margin: 0.3em 0; }
+
+/* ===== SVG ===== */
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+}
+
+[data-theme="dark"] svg text { fill: var(--fg); }
+[data-theme="dark"] svg line,
+[data-theme="dark"] svg path { stroke: var(--fg-muted); }
+
+/* KaTeX 는 근호·긴 화살표를 SVG 로 그린다. 위 전역 규칙에서 빼낸다. */
+.katex svg {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: inherit;
+  max-width: none;
+  margin: 0;
+}
+[data-theme="dark"] .katex svg path { stroke: inherit; }
+
+/* ===== Images ===== */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+  border-radius: 6px;
+}
+
+/* ===== 따라 계산해 보기 / 연습문제 ===== */
+.worked, .exercises {
+  margin: 1.8em 0;
+  padding: 1em 1.3em;
+  border-left: 4px solid var(--accent);
+  background: var(--bg-code);
+  border-radius: 0 8px 8px 0;
+}
+.worked > :first-child, .exercises > :first-child { margin-top: 0; }
+.exercises ol { padding-left: 1.4em; }
+.exercises li { margin: 0.6em 0; }
+.exercises .level {
+  display: inline-block;
+  font-size: 0.75em;
+  padding: 0 0.5em;
+  margin-right: 0.4em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--fg-muted);
+  vertical-align: 0.1em;
+}
+details.answer { margin: 0.4em 0 0.2em; font-size: 0.95em; }
+details.answer summary { cursor: pointer; color: var(--accent); }
+
+/* ===== 같이 풀기 세션 (대화) ===== */
+.exercises + h4 {
+  margin-top: 1.2em;
+  font-size: 0.95em;
+  color: var(--fg-muted);
+  letter-spacing: 0.02em;
+}
+.exercises + h4::before { content: "💬 "; }
+/* 인물 색은 .turn 에도 둔다: 문제 밖 대화(16장 맺음 등)에서도 이름·선 색이 나오게 */
+.dialogue, .turn { --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; }
+.dialogue {
+  margin: 1.5em 0 2em;
+}
+[data-theme="dark"] :is(.dialogue, .turn) { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
+.turn {
+  display: flex;
+  gap: 0.9em;
+  align-items: flex-start;
+  margin: 0.7em 0;
+}
+.turn-body {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55em 0.95em;
+  border-radius: 10px;
+  background: var(--bg-code);
+}
+.turn-body p { margin: 0; font-weight: 350; }
+.turn-body strong { font-weight: 600; }
+
+/* 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨 */
+.dialogue blockquote {
+  background: #fff;
+  color: #111;
+  border: 1.5px solid #222;
+  border-radius: 4px;
+  padding: 0.9em 1.2em;
+  margin: 0.8em 0 1.4em;
+  font-size: 1.12em;
+  font-weight: 600;
+  line-height: 1.75;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.dialogue blockquote p { margin: 0; }
+.dialogue blockquote code { background: #eee; color: #111; }
+[data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+.turn-T { --who: var(--who-T); }
+.turn-M { --who: var(--who-M); }
+.turn-S { --who: var(--who-S); }
+.cast {
+  flex: 0 0 88px;
+  width: 88px;
+  margin: 0;
+}
+.cast img {
+  width: 88px; height: 88px;
+  object-fit: cover;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  float: none; box-shadow: none; max-width: none;
+}
+.cast figcaption {
+  margin-top: 0.25em;
+  text-align: center;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--who);
+}
+.cast-slot {
+  width: 88px; height: 88px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border: 1.5px dashed var(--who, var(--border));
+  border-radius: 12px;
+  color: var(--who);
+  font-size: 0.85em;
+  font-weight: 600;
+  opacity: 0.75;
+  line-height: 1.3;
+}
+.cast-slot small { font-weight: 400; font-size: 0.8em; color: var(--fg-muted); }
+/* 대화 사이의 수식·그림은 말풍선 폭에 맞춘다 */
+.dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: calc(88px + 0.9em); }
+@media (max-width: 600px) {
+  .cast, .cast img, .cast-slot { flex-basis: 56px; width: 56px; height: 56px; }
+  .cast-slot { font-size: 0.7em; }
+  .dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: 0; }
+}
+
+
+/* ===== KaTeX ===== */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}
+
+/* ===== Mermaid ===== */
+pre.mermaid {
+  background: transparent;
+  border: none;
+  text-align: center;
+  padding: 1em 0;
+}
+
+/* ===== Theme Toggle (목차 머리 안) ===== */
+#theme-toggle {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+#theme-toggle:hover { background: var(--border); }
+
+/* ===== Sidebar ===== */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 999;
+  transition: left 0.3s ease;
+  padding: 1rem;
+}
+#sidebar.open { left: 0; }
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-header h2 { font-size: 1.1rem; margin: 0; border: none; padding: 0; }
+.sidebar-actions { display: flex; align-items: center; gap: 0.4rem; }
+
+#sidebar-close {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: var(--fg);
+  padding: 0 0.3em;
+}
+
+#sidebar ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: chapter;
+}
+#sidebar li {
+  margin: 0.3em 0;
+}
+#sidebar a {
+  display: block;
+  padding: 0.4em 0.5em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--fg);
+}
+#sidebar a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+
+#sidebar-open {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 998;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#sidebar-open:hover { background: var(--border); }
+
+/* ===== Responsive ===== */
+@media (min-width: 1200px) {
+  #sidebar {
+    left: 0;
+    padding-top: 2rem;
+  }
+  #sidebar-open { display: none; }
+  #sidebar-close { display: none; }
+  main {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+@media (max-width: 600px) {
+  main { padding: 1rem 0.8rem 3rem; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  pre { font-size: 0.8em; padding: 0.8em; }
+}
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
+
+/* ===== Chapter Navigation ===== */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border);
+  gap: 1rem;
+}
+.chapter-nav a {
+  display: inline-block;
+  padding: 0.6em 1em;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9em;
+  color: var(--fg);
+  transition: background 0.2s;
+  max-width: 45%;
+}
+.chapter-nav a:hover {
+  background: var(--border);
+  text-decoration: none;
+}
+.chapter-nav-next { text-align: right; margin-left: auto; }
+.page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
+
+/* ===== 절 단위 페이지 ===== */
+.chapter-crumb { margin: 0 0 0.4em; font-size: 0.85em; }
+.chapter-crumb a { color: var(--fg-muted); }
+.chapter-paged > h2:first-of-type { margin-top: 0.4em; }
+#sidebar .sidebar-toc a.current { color: var(--accent); font-weight: 600; }
+
+/* ===== TOC Page ===== */
+.toc-page { padding-top: 1rem; }
+.toc-page h1 {
+  margin-bottom: 1.5rem;
+}
+/* 대문(교재 목록)으로 돌아가는 링크 */
+.site-nav { font-size: 0.9rem; }
+.site-nav a { color: var(--fg-muted); text-decoration: none; }
+.site-nav a:hover { color: var(--accent); }
+.site-nav + h1 { margin-top: 1rem; }
+@media print { .site-nav { display: none; } }
+.toc-list {
+  list-style: none;
+  padding: 0;
+  counter-reset: toc-ch;
+}
+.toc-list li {
+  margin: 0;
+}
+.toc-list a {
+  display: block;
+  padding: 0.7em 1em;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg);
+  font-size: 1.05em;
+  transition: background 0.2s;
+}
+.toc-list a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+/* 부 이름 줄(book.json 의 parts). 번호 없이 이름만 */
+.toc-list .toc-part {
+  margin-top: 1.6em;
+  padding: 0 1em 0.4em;
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+  border-bottom: 2px solid var(--border);
+}
+#sidebar .toc-part {
+  margin: 1.1em 0 0.2em;
+  padding: 0 0.5em;
+  font-size: 0.75em;
+  font-weight: 700;
+  color: var(--fg-muted);
+}
+
+/* ===== Sidebar Active ===== */
+#sidebar a.active {
+  background: var(--accent);
+  color: #fff;
+}
+#sidebar a.active:hover {
+  background: var(--accent);
+}
+
+/* ===== Print ===== */
+@media print {
+  #sidebar, #sidebar-open, #theme-toggle { display: none; }
+  main { margin: 0; max-width: none; }
+}
+
+/* ===== 그림과 캡션 ===== */
+figure.fig { margin: 1.8em auto; text-align: center; }
+figure.fig img { margin: 0 auto; }
+figure.fig figcaption {
+  margin-top: 0.5em;
+  font-size: 0.86em;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: center;
+}
+/* 초상화: 오른쪽에 작게 띄운다 */
+figure.fig-portrait {
+  float: right;
+  clear: right; /* 초상화가 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
+  width: 200px;
+  margin: 0.3em 0 1em 1.5em;
+  text-align: left;
+}
+figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
+/* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
+.portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
+.portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
+@media (max-width: 600px) {
+  figure.fig-portrait { float: none; width: 170px; margin: 1em auto; }
+  .portrait-row { gap: 1em; }
+  .portrait-row figure.fig-portrait { width: 140px; }
+}
+/* 다크모드에서 흰 바탕 그림이 눈부시지 않게 */
+[data-theme="dark"] figure.fig img { filter: brightness(0.92); }
+
+/* ===== 수식 ===== */
+.math-block { margin: 1.2em 0; }
+.math-block .katex-display { margin: 0; }
+.math-legend {
+  margin: -0.4em auto 1.6em;
+  padding: 0.2em 1em;
+  width: fit-content;
+  max-width: 100%;
+  border-left: 3px solid var(--border);
+  background: var(--bg-code);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.86em;
+}
+.math-legend .katex-display > .katex { text-align: left; }
+/* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
+[data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
+
+/* ===== 인터랙티브 위젯 ===== */
+.widget-embed {
+  margin: 1.8em 0 2.2em;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-code);
+}
+.widget-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3em 0.8em;
+  padding: 0.55em 1em;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9em;
+}
+.widget-tag {
+  font-size: 0.78em;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.03em;
+}
+.widget-label { font-weight: 600; flex: 1; min-width: 12em; }
+.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-embed iframe {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border: 0;
+  background: transparent;
+  color-scheme: normal;
+}
+.widget-embed noscript img { margin: 0; border-radius: 0; }
+
+/* ===== 장 안의 목차 (사이드바) ===== */
+.sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
+#sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
+.toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+</style>
+<script>
+(function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
+</script>
+</head>
+<body>
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="index.html" style="color:inherit;text-decoration:none">최적화: 경사하강에서 Muon 까지</a></h2>
+    <div class="sidebar-actions">
+      <button id="theme-toggle" aria-label="다크모드 전환">&#x1F319;</button>
+      <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
+    </div>
+  </div>
+  <ol><li><a href="preface.html">머리말: 경사하강에서 Muon 까지</a></li>
+<li class="toc-part">미분과 근사</li>
+<li><a href="loss-landscape.html">손실 지형: 공을 굴려 바닥을 찾는 첫 실험</a></li>
+<li><a href="gradient-jacobian.html">기울기와 자코비안: 미분 가능성에서 연쇄법칙까지</a></li>
+<li><a href="taylor.html">테일러 전개: 0·1·2차 근사의 사다리</a></li>
+<li><a href="lipschitz.html">립시츠 연속: 함수가 얼마나 빨리 변할 수 있나</a></li>
+<li><a href="convexity.html">볼록이면 왜 쉬운가: 극소가 곧 최소</a></li>
+<li class="toc-part">0차 최적화</li>
+<li><a href="zeroth-order.html">미분 없이: 0차 최적화</a></li>
+<li><a href="evolution.html">진화 알고리즘: 무리로 찾는 길</a></li>
+<li class="toc-part">1차 최적화</li>
+<li><a href="backprop.html">역전파: 자코비안 곱을 거꾸로</a></li>
+<li><a href="initialization.html">가중치 초기화: 신호가 커지지도 사라지지도 않게</a></li>
+<li><a href="gradient-descent.html">경사하강: 학습률은 어디까지 키울 수 있나</a></li>
+<li><a href="sgd.html">확률적 경사하강: 잡음 섞인 기울기로 걷기</a></li>
+<li class="toc-part">2차 최적화</li>
+<li><a href="newton.html">뉴턴법과 헤시안: 곡률을 알면 한 번에</a></li>
+<li><a href="sharpness.html">날카로움: 안정성의 가장자리</a></li>
+<li class="toc-part">2차의 근사와 큰 모델의 걸음</li>
+<li><a href="momentum.html">모멘텀: 무거운 공과 네스테로프 가속</a></li>
+<li><a href="adaptive.html">적응 학습률: AdaGrad 에서 AdamW 까지</a></li>
+<li><a href="curvature-approx.html">곡률 근사: 준뉴턴에서 K-FAC·Shampoo 까지</a></li>
+<li><a href="muon.html">Muon: 노름을 바꾸면 가장 가파른 방향이 바뀐다</a></li>
+<li><a href="mup.html">μP: 폭이 달라져도 같은 학습률로</a></li>
+<li class="toc-part">분포를 옮기는 최적화</li>
+<li><a href="optimal-transport.html">최적 수송: 흙을 가장 적게 나르는 짝</a></li>
+<li><a href="wgan.html">WGAN: 최소최대와 1-립시츠 판별기</a></li>
+<li class="toc-part">최적화가 일반화를 만든다</li>
+<li><a href="implicit-bias.html">암묵적 편향: 옵티마이저가 고르는 해</a></li>
+<li><a href="double-descent.html" class="active">이중 하강: 외우고 나서도 나아진다</a><ul class="sidebar-toc"><li><a href="double-descent.html">편향–분산: 너무 단순해도, 너무 흔들려도 틀린다</a></li><li><a href="double-descent-2.html">이중 하강: 문턱을 넘으면 시험 오차가 다시 내려간다</a></li><li><a href="double-descent-3.html" class="current">보간 문턱: 가장 작은 특잇값이 잡음을 키운다</a></li><li><a href="double-descent-4.html">그로킹: 다 외운 뒤 한참 지나 규칙을 찾는다</a></li><li><a href="double-descent-5.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="epilogue.html">맺음: 남은 물음</a></li></ol>
+</nav>
+<button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
+<main>
+<article class="chapter chapter-paged">
+<p class="chapter-crumb"><a href="double-descent.html">이중 하강: 외우고 나서도 나아진다</a></p>
+<h2 id="보간-문턱-가장-작은-특잇값이-잡음을-키운다">보간 문턱: 가장 작은 특잇값이 잡음을 키운다</h2>
+<p>이중 하강의 봉우리는 언덕 수가 기록 수 40에 닿는 언저리에 섰고, 잡음이 클수록 높았다. 언덕을 40개 쓸 때 계수 노름은 309,671이었고, 400개 쓸 때는 79였다. 둘 다 기록을 다 지나는데 왜 문턱에서만 계수가 이렇게 커질까? 그리고 「점을 다 지나는 방법이 하나뿐이면 사납다」는 말은 정말 문턱에서만 성립할까?</p>
+<h3 id="비슷한-영수증-두-장">비슷한 영수증 두 장</h3>
+<p>먼저 미지수 둘, 방정식 둘인 가장 작은 경우에서 문제가 어디서 오는지 보자. 과일 가게에서 사과 20개와 배 20개를 사고 60천 원, 사과 20개와 배 21개를 사고 62천 원을 냈다. 두 영수증을 연립하면 사과 한 개 1.0천 원, 배 한 개 2.0천 원이다. 그런데 영수증의 금액이 반올림 등으로 조금씩 틀려 있다고 해 보자. 두 금액이 같은 쪽으로 0.25씩 많으면(60.25, 62.25) 답은 사과 1.0125, 배 2.0으로 거의 그대로다. 한 장은 0.25 많고 다른 한 장은 0.25 적으면(60.25, 61.75) 답은 사과 1.5125, 배 1.5로 크게 바뀐다. 금액 오차의 길이는 두 경우 모두 0.354인데 값 오차의 길이는 0.0125와 0.716으로 57배 차이가 난다.</p>
+<p>까닭은 두 영수증이 거의 같은 내용이라는 데 있다. 「두 금액이 함께 늘었다」는 오차는 사과와 배 모두 조금씩 비싸다고 보면 설명된다. 그러나 「두 금액이 엇갈렸다」는 오차를 설명하려면 배 한 개 차이만으로 0.5천 원 차이를 만들어야 하므로 값을 크게 비틀어야 한다. 행렬로 쓰면 [[20, 20], [20, 21]]의 특잇값이 40.51과 0.494로, 한 방향은 크게 늘이고 다른 방향은 거의 납작하게 누른다.</p>
+<h3 id="특잇값-분해로-본-최소-노름-해">특잇값 분해로 본 최소 노름 해</h3>
+<p>이 구조를 특잇값 분해로 적어 보자. 특잇값 분해는 행렬을 「돌리기, 축마다 σ배로 늘이기, 다시 돌리기」로 쪼개는 것이었다. 언덕 맞추기에서 특징 행렬 Φ는 40행 p열이고(Φ의 (i, j) 칸은 i번째 기록 시각에서 j번째 언덕의 높이 φⱼ(tᵢ)), 기록에 맞춘다는 것은 Φw ≈ y를 푸는 일이다. Φ를 특잇값 분해하면 최소 노름 최소제곱 해는 방향마다 따로 풀린다.</p>
+<div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#008787"><mi mathvariant="normal">Φ</mi></mstyle><mo>=</mo><munder><mo>∑</mo><mi>i</mi></munder><msub><mstyle mathcolor="#0093b8"><mi>σ</mi></mstyle><mi>i</mi></msub><mtext> </mtext><msub><mstyle mathcolor="#962d1e"><mi>u</mi></mstyle><mi>i</mi></msub><msubsup><mstyle mathcolor="#87965a"><mi>v</mi></mstyle><mi>i</mi><mi mathvariant="normal">⊤</mi></msubsup><mo separator="true">,</mo><mspace width="2em"/><mstyle mathcolor="#665522"><mi>w</mi></mstyle><mo>=</mo><munder><mo>∑</mo><mi>i</mi></munder><mfrac><mrow><msub><mstyle mathcolor="#962d1e"><mi>u</mi></mstyle><mi>i</mi></msub><mo>⋅</mo><mstyle mathcolor="#1b9e77"><mi>y</mi></mstyle></mrow><msub><mstyle mathcolor="#0093b8"><mi>σ</mi></mstyle><mi>i</mi></msub></mfrac><mtext> </mtext><msub><mstyle mathcolor="#87965a"><mi>v</mi></mstyle><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\textcolor{#008787}{\Phi} = \sum_{i} \textcolor{#0093b8}{\sigma}_i\, \textcolor{#962d1e}{u}_i \textcolor{#87965a}{v}_i^{\top}, \qquad
+\textcolor{#665522}{w} = \sum_{i} \frac{\textcolor{#962d1e}{u}_i \cdot \textcolor{#1b9e77}{y}}{\textcolor{#0093b8}{\sigma}_i}\, \textcolor{#87965a}{v}_i
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord" style="color:#008787;">Φ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3277em;vertical-align:-1.2777em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2777em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#0093b8;">σ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="color:#962d1e;">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#87965a;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8991em;"><span style="top:-2.453em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">⊤</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;color:#665522;">w</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3991em;vertical-align:-1.2777em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2777em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.1214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#0093b8;">σ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="color:#962d1e;">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;color:#1b9e77;">y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.836em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#87965a;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></div>
+<div class="math-block math-legend"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#008787"><mi mathvariant="normal">Φ</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>특징 행렬: 기록 40개 × 언덕 </mtext><mstyle mathcolor="#3c4bff"><mi>p</mi></mstyle><mtext>개</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mstyle mathcolor="#0093b8"><mi>σ</mi></mstyle><mi>i</mi></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>i</mi><mtext>번째 특잇값 (그 방향을 늘이는 배율)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mstyle mathcolor="#962d1e"><mi>u</mi></mstyle><mi>i</mi></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>기록 쪽의 방향 (길이 40, 서로 수직)</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mstyle mathcolor="#87965a"><mi>v</mi></mstyle><mi>i</mi></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>계수 쪽의 방향 (길이 </mtext><mstyle mathcolor="#3c4bff"><mi>p</mi></mstyle><mtext>, 서로 수직)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#1b9e77"><mi>y</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>기록 40개</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#665522"><mi>w</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>최소 노름 최소제곱 해 (언덕 높이)</mtext></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{ll}
+\textcolor{#008787}{\Phi} &amp; \text{특징 행렬: 기록 40개 × 언덕 } \textcolor{#3c4bff}{p} \text{개} \\
+\textcolor{#0093b8}{\sigma}_i &amp; i\text{번째 특잇값 (그 방향을 늘이는 배율)} \\
+\textcolor{#962d1e}{u}_i &amp; \text{기록 쪽의 방향 (길이 40, 서로 수직)} \\
+\textcolor{#87965a}{v}_i &amp; \text{계수 쪽의 방향 (길이 } \textcolor{#3c4bff}{p}\text{, 서로 수직)} \\
+\textcolor{#1b9e77}{y} &amp; \text{기록 40개} \\
+\textcolor{#665522}{w} &amp; \text{최소 노름 최소제곱 해 (언덕 높이)}
+\end{array}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:7.2em;vertical-align:-3.35em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.85em;"><span style="top:-6.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#008787;">Φ</span></span></span><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#0093b8;">σ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="color:#962d1e;">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#87965a;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#1b9e77;">y</span></span></span><span style="top:-0.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0269em;color:#665522;">w</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.35em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.85em;"><span style="top:-6.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">특징</span><span class="mord"> </span><span class="mord hangul_fallback">행렬</span><span class="mord">: </span><span class="mord hangul_fallback">기록</span><span class="mord"> 40</span><span class="mord hangul_fallback">개</span><span class="mord"> × </span><span class="mord hangul_fallback">언덕</span><span class="mord"> </span></span><span class="mord mathnormal" style="color:#3c4bff;">p</span><span class="mord text"><span class="mord hangul_fallback">개</span></span></span></span><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">i</span><span class="mord text"><span class="mord hangul_fallback">번째</span><span class="mord"> </span><span class="mord hangul_fallback">특잇값</span><span class="mord"> (</span><span class="mord hangul_fallback">그</span><span class="mord"> </span><span class="mord hangul_fallback">방향을</span><span class="mord"> </span><span class="mord hangul_fallback">늘이는</span><span class="mord"> </span><span class="mord hangul_fallback">배율</span><span class="mord">)</span></span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">기록</span><span class="mord"> </span><span class="mord hangul_fallback">쪽의</span><span class="mord"> </span><span class="mord hangul_fallback">방향</span><span class="mord"> (</span><span class="mord hangul_fallback">길이</span><span class="mord"> 40, </span><span class="mord hangul_fallback">서로</span><span class="mord"> </span><span class="mord hangul_fallback">수직</span><span class="mord">)</span></span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">계수</span><span class="mord"> </span><span class="mord hangul_fallback">쪽의</span><span class="mord"> </span><span class="mord hangul_fallback">방향</span><span class="mord"> (</span><span class="mord hangul_fallback">길이</span><span class="mord"> </span></span><span class="mord mathnormal" style="color:#3c4bff;">p</span><span class="mord text"><span class="mord">, </span><span class="mord hangul_fallback">서로</span><span class="mord"> </span><span class="mord hangul_fallback">수직</span><span class="mord">)</span></span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">기록</span><span class="mord"> 40</span><span class="mord hangul_fallback">개</span></span></span></span><span style="top:-0.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">최소</span><span class="mord"> </span><span class="mord hangul_fallback">노름</span><span class="mord"> </span><span class="mord hangul_fallback">최소제곱</span><span class="mord"> </span><span class="mord hangul_fallback">해</span><span class="mord"> (</span><span class="mord hangul_fallback">언덕</span><span class="mord"> </span><span class="mord hangul_fallback">높이</span><span class="mord">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.35em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
+<p>둘째 식이 이 절의 핵심이다. 기록 <span class="sym" style="color:#1b9e77">y</span>를 방향 <span class="sym" style="color:#962d1e">u</span>ᵢ로 잰 성분을 그 방향의 특잇값 <span class="sym" style="color:#0093b8">σ</span>ᵢ로 나눈 만큼 계수가 그 방향 <span class="sym" style="color:#87965a">v</span>ᵢ로 움직인다. 기록에 섞인 잡음도 이 나눗셈을 똑같이 거친다. 그래서 잡음이 계수로 옮겨 갈 때 가장 크게 부풀려지는 배율은 1/<span class="sym" style="color:#0093b8">σ</span><sub>min</sub>이다. 기록에서 계수로 가는 이 사상의 립시츠 상수가 1/<span class="sym" style="color:#0093b8">σ</span><sub>min</sub>이라고 해도 같은 말이다. 영수증 행렬에서 1/0.494 = 2.03이 엇갈린 금액 오차를 키운 배율이었다. <span class="sym" style="color:#0093b8">σ</span><sub>min</sub>이 0에 가까우면 이 배율은 끝없이 커진다. <span class="sym" style="color:#3c4bff">p</span>가 40보다 작을 때도 같은 식으로 풀리는데, 그때 <span class="sym" style="color:#962d1e">u</span>ᵢ는 <span class="sym" style="color:#3c4bff">p</span>개뿐이라 <span class="sym" style="color:#1b9e77">y</span>에서 그 <span class="sym" style="color:#3c4bff">p</span>개 방향 밖에 있는 성분은 맞추지 않고 잔차로 남겨 둔다.</p>
+<h3 id="가장-작은-특잇값은-문턱에서-가장-작다">가장 작은 특잇값은 문턱에서 가장 작다</h3>
+<p>그러면 <span class="sym" style="color:#0093b8">σ</span><sub>min</sub>이 언덕 수에 따라 어떻게 바뀌는지가 관건이다. 계산해 보면 <span class="sym" style="color:#3c4bff">p</span> = 30에서 1.26 × 10⁻⁵, 38에서 3.18 × 10⁻⁷, 40에서 1.73 × 10⁻⁷로 가장 작고, 41에서 2.52 × 10⁻⁷, 45에서 8.21 × 10⁻⁵, 400에서 1.82 × 10⁻³으로 다시 커진다. 1부터 400까지 모두 재 보면 <span class="sym" style="color:#3c4bff">p</span> ≤ 40에서는 언덕을 하나 더할 때마다 줄기만 하고, <span class="sym" style="color:#3c4bff">p</span> ≥ 40에서는 늘기만 한다.</p>
+<p>이 계산은 이 장난감만의 우연이 아니다. 두 가지 사실만으로 따라 나온다. 하나, 세로가 긴 행렬(<span class="sym" style="color:#3c4bff">p</span> &lt; 40)의 <span class="sym" style="color:#0093b8">σ</span><sub>min</sub>은 길이 1인 계수 <span class="sym" style="color:#665522">w</span> 가운데 |<span class="sym" style="color:#008787">Φ</span><span class="sym" style="color:#665522">w</span>|가 가장 작은 값이다. 언덕을 하나 더하면 새 언덕의 높이를 0으로 둔 옛 계수도 여전히 후보이므로, 가장 작은 값은 더 작아질 수는 있어도 커질 수는 없다. 둘, 가로가 긴 행렬(<span class="sym" style="color:#3c4bff">p</span> &gt; 40)의 <span class="sym" style="color:#0093b8">σ</span><sub>min</sub>은 길이 1인 기록 쪽 벡터 z 가운데 |<span class="sym" style="color:#008787">Φ</span>ᵀz|가 가장 작은 값이다. 언덕을 하나 더하면 <span class="sym" style="color:#008787">Φ</span>ᵀz에 칸이 하나 붙을 뿐이라 길이는 줄 수 없다. 그래서 <span class="sym" style="color:#0093b8">σ</span><sub>min</sub>은 정사각형이 되는 <span class="sym" style="color:#3c4bff">p</span> = 40에서 가장 작다. <span class="sym" style="color:#0093b8">σ</span><sub>min</sub>이 정사각형에서 가장 작다는 이 사실이 봉우리가 기록 수 언저리에 서는 구조적인 까닭이다.</p>
+<p>문턱에서 실제로 무슨 일이 생기는지 방향별로 보자. <span class="sym" style="color:#3c4bff">p</span> = 40의 가장 약한 방향은 <span class="sym" style="color:#0093b8">σ</span> = 1.73 × 10⁻⁷이고, 기록을 그 방향으로 잰 성분은 −0.0500이고, 그 가운데 정답 곡선에서 온 부분이 −0.0084, 잡음에서 온 부분이 −0.0416이다. 나누면 계수 성분이 −2.88 × 10⁵이다. 잡음에서 온 부분이 절반을 훌쩍 넘는 작은 수를 아주 작은 수로 나눈 것이다. <span class="sym" style="color:#3c4bff">p</span> = 400의 가장 약한 방향은 <span class="sym" style="color:#0093b8">σ</span> = 1.82 × 10⁻³이라 같은 나눗셈을 해도 −78이다.</p>
+<p>그런데 <span class="sym" style="color:#3c4bff">p</span> = 30에서도 <span class="sym" style="color:#0093b8">σ</span><sub>min</sub>은 10⁻⁵로 작았는데 시험 오차는 0.0108로 괜찮았다. 무엇이 다를까? 가장 약한 방향 <span class="sym" style="color:#87965a">v</span><sub>min</sub>으로 계수를 바꿀 때 곡선이 얼마나 움직이는지를 기록 시각과 그 사이에서 따로 재 보면 답이 보인다. <span class="sym" style="color:#3c4bff">p</span> = 30에서는 기록 시각에서 2.0 × 10⁻⁶, 시험 시각 801개에서 1.4 × 10⁻⁵로 비가 6.9이고, <span class="sym" style="color:#3c4bff">p</span> = 400에서는 비가 2.0이다. <span class="sym" style="color:#3c4bff">p</span> = 40에서는 2.7 × 10⁻⁸과 2.6 × 10⁻⁶으로 비가 94다. 문턱의 가장 약한 방향은 기록 시각에서만 조용하고 그 사이에서는 크게 움직이는 방향이다. 이 방향에 부풀린 잡음이 실리니, 기록은 다 지나면서 점 사이에서 곡선이 튄다.</p>
+<figure class="fig "><img src="images/double-descent/a3_threshold.png" alt="왼쪽: 언덕 수 p에 따른 가장 작은 특잇값 σₘᵢₙ(실선, 왼쪽 축)과 계수 노름 |w|(점선, 오른쪽 축). p = 40에서 σₘᵢₙ은 가장 작고 |w|는 가장 크다. 오른쪽: 최소 노름 맞춤의 시험 오차(빨강)와 능형 회귀 λ = 10⁻³의 시험 오차(적갈색 점선). 작은 λ 하나로 봉우리가 사라진다(sources/double-descent/s3_threshold.py)" loading="lazy"><figcaption>왼쪽: 언덕 수 p에 따른 가장 작은 특잇값 σₘᵢₙ(실선, 왼쪽 축)과 계수 노름 |w|(점선, 오른쪽 축). p = 40에서 σₘᵢₙ은 가장 작고 |w|는 가장 크다. 오른쪽: 최소 노름 맞춤의 시험 오차(빨강)와 능형 회귀 λ = 10⁻³의 시험 오차(적갈색 점선). 작은 λ 하나로 봉우리가 사라진다(sources/double-descent/s3_threshold.py)</figcaption></figure>
+<p>언덕 수가 기록 수와 같아져 모든 점을 지나는 해가 처음으로 생기는 자리를 <strong>보간 문턱</strong> (점을 다 지나는 해가 처음 생기는 크기 / interpolation threshold)이라 한다. 그 자리에서 특징 행렬의 가장 작은 특잇값이 가장 작아지고, 잡음이 그 역수만큼 부풀려져 계수와 시험 오차를 키운다.</p>
+<h3 id="능형-회귀는-나눗셈의-상한을-둔다">능형 회귀는 나눗셈의 상한을 둔다</h3>
+<p>봉우리를 없애는 방법도 최소 노름 해의 식 <span class="sym" style="color:#665522">w</span> = Σ (<span class="sym" style="color:#962d1e">u</span>ᵢ·<span class="sym" style="color:#1b9e77">y</span>/<span class="sym" style="color:#0093b8">σ</span>ᵢ)<span class="sym" style="color:#87965a">v</span>ᵢ에서 나온다. 계수 노름의 제곱에 벌점 <span class="sym" style="color:#874b0f">λ</span>|<span class="sym" style="color:#665522">w</span>|²을 더해 맞추는 능형 회귀는 방향마다 1/<span class="sym" style="color:#0093b8">σ</span>ᵢ 대신 <span class="sym" style="color:#0093b8">σ</span>ᵢ/(<span class="sym" style="color:#0093b8">σ</span>ᵢ² + <span class="sym" style="color:#874b0f">λ</span>)를 곱한다. 이 배율은 <span class="sym" style="color:#0093b8">σ</span>ᵢ가 크면 1/<span class="sym" style="color:#0093b8">σ</span>ᵢ와 거의 같지만, <span class="sym" style="color:#0093b8">σ</span>ᵢ가 0에 가까워지면 끝없이 커지는 대신 <span class="sym" style="color:#0093b8">σ</span>ᵢ/<span class="sym" style="color:#874b0f">λ</span>로 작아진다. <span class="sym" style="color:#874b0f">λ</span> = 10⁻³으로만 잡아도 <span class="sym" style="color:#3c4bff">p</span> = 40의 시험 오차는 1.7932에서 0.0051로 떨어지고, 언덕 수 20 이상에서 곡선의 가장 큰 값이 0.0230으로 봉우리가 사라진다. <span class="sym" style="color:#3c4bff">p</span> = 400에서도 0.0070이 0.0050이 된다.</p>
+<figure class="widget-embed" id="widget-double-descent-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 가장 약한 방향</span><a class="widget-open" href="widgets/double-descent.html?v=6092b2af#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/double-descent.html?w=w2&embed=1&v=6092b2af" title="위젯 2: 가장 약한 방향" loading="lazy"></iframe></figure>
+<h3 id="ml에서-학습-시간이-모형의-크기를-정한다">ML에서: 학습 시간이 모형의 크기를 정한다</h3>
+<p>신경망은 최소 노름 해를 식으로 풀지 않고 경사하강으로 다가간다. 언덕 맞추기를 0에서 출발한 경사하강(학습률 1/<span class="sym" style="color:#0093b8">σ</span><sub>max</sub>²)으로 풀면, 걸음마다 방향 <span class="sym" style="color:#87965a">v</span>ᵢ의 성분이 최소 노름 해 쪽으로 (1 − <span class="sym" style="color:#0093b8">σ</span>ᵢ²/<span class="sym" style="color:#0093b8">σ</span><sub>max</sub>²)배씩 남은 거리를 줄인다. 특잇값이 큰 방향은 몇 걸음에 끝나고, 작은 방향은 대략 (<span class="sym" style="color:#0093b8">σ</span><sub>max</sub>/<span class="sym" style="color:#0093b8">σ</span>ᵢ)² 걸음이 걸린다. <span class="sym" style="color:#3c4bff">p</span> = 40이면 이 값이 5.3 × 10¹⁴이다. 그래서 1만 걸음 학습한 <span class="sym" style="color:#3c4bff">p</span> = 40의 시험 오차는 0.0051로 능형 회귀와 같고, 10¹²걸음에서도 0.0067이다. 10¹³걸음에서 0.0125, 10¹⁴걸음에서 0.2183으로 오르기 시작해 10¹⁶걸음에서야 최소 노름 해의 1.7932에 닿는다. 걸음 수가 모자란 경사하강은 약한 방향을 아직 맞추지 못한 맞춤이고, 그 모습이 작은 <span class="sym" style="color:#874b0f">λ</span>의 능형 회귀와 닮았다.</p>
+<figure class="fig "><img src="images/double-descent/m1_gd_steps.png" alt="언덕 수 p = 29, 40, 400을 경사하강으로 맞출 때 걸음 수 k에 따른 시험 오차(두 축 모두 로그 눈금). p = 40의 봉우리는 10¹³걸음을 넘어서야 나타나고, 그 전까지는 세 곡선이 모두 낮다(sources/double-descent/s3_threshold.py)" loading="lazy"><figcaption>언덕 수 p = 29, 40, 400을 경사하강으로 맞출 때 걸음 수 k에 따른 시험 오차(두 축 모두 로그 눈금). p = 40의 봉우리는 10¹³걸음을 넘어서야 나타나고, 그 전까지는 세 곡선이 모두 낮다(sources/double-descent/s3_threshold.py)</figcaption></figure>
+<p>나키란 팀이 학습 에포크를 따라서도 이중 하강을 본 것은 이 때문이다. 학습을 오래 할수록 모형이 실제로 맞출 수 있는 방향이 늘어나므로, 학습 시간이 모형의 「쓰는 크기」를 키운다. 그들은 이것을 「실질 모형 복잡도」라 부르고, 그 값이 학습 데이터 수에 닿는 곳에서 봉우리가 선다고 추측했다. 조기 종료가 정규화처럼 듣는 까닭도, 나키란과 동료들이 2020년 논문 「최적의 정규화는 이중 하강을 누그러뜨릴 수 있다(Optimal Regularization Can Mitigate Double Descent)」에서 입력이 모든 방향으로 고르게 퍼진 몇몇 선형 회귀에서 세기를 잘 고른 능형 회귀 벌점이 봉우리를 없앤다고 증명하고 신경망에서도 봉우리를 누그러뜨리는 것을 실험으로 보인 것도 같은 식에서 나온다.</p>
+<aside class="guide"><p class="guide-title">길잡이 · 『ML 입문자를 위한 동역학』 「가드너 부피: 퍼셉트론의 경계는 왜 2인가」</p><p>회귀에서는 계수 수가 데이터 수에 닿을 때 점을 다 지나는 해가 처음 생겼다. 무작위 라벨을 다 맞히는 분류기는 데이터 수가 입력 수의 몇 배까지 있을 수 있을까? 맞히는 가중치들의 부피를 재어 퍼셉트론의 경계가 입력 수의 2배임을 보인다. <a href="https://lameproof.com/dynamics-book/17-%EC%8A%A4%ED%95%80-%EA%B8%80%EB%9E%98%EC%8A%A4%EC%99%80-%EB%A0%88%ED%94%8C%EB%A6%AC%EC%B9%B4-%EB%B0%A9%EB%B2%95-9.html">이어 읽기</a></p>
+</aside>
+<div class="dialogue"><h3 id="문제-6-영수증의-약한-방향">문제 6. 영수증의 약한 방향</h3>
+<blockquote>
+<p>비슷한 영수증 두 장(사과 20 + 배 20 = 60, 사과 20 + 배 21 = 62)의 행렬 [[20, 20], [20, 21]]은 특잇값이 40.51과 0.494이고, 약한 방향은 금액 쪽 <span class="sym" style="color:#962d1e">u</span> = (−0.716, 0.698), 값 쪽 <span class="sym" style="color:#87965a">v</span> = (−0.716, 0.698)이다. (가) 금액 오차 (0.25, −0.25)는 어느 방향에 가까운가? 그 오차가 값 오차를 몇 배로 키울지 어림하라. (나) 사과 30 + 배 10 = 50인 셋째 영수증(금액은 정확)을 더해 최소제곱으로 풀면 답과 가장 작은 특잇값은 어떻게 되는가? (다) 미지수보다 영수증이 많아지면 왜 나아지는가?</p>
+</blockquote>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 오차 길이 0.354가 0.716으로 커졌으니까 두 배쯤이에요. 그런데 왜 두 배인지는 모르겠어요. 첫째 영수증이 틀린 건 0.25뿐인데요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>오차 (0.25, −0.25)를 약한 방향 <span class="sym" style="color:#962d1e">u</span>와 견주어 보세요. 길이를 1로 맞추면요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(0.707, −0.707)이니까 <span class="sym" style="color:#962d1e">u</span>와 부호만 반대고 거의 같아요. 오차가 통째로 약한 방향에 실린 거네요. 그 방향은 1/0.494 = 2.03배로 커지니까 0.354 × 2.03 = 0.716. 맞아요. 두 금액이 함께 0.25씩 틀린 건 강한 방향이라 1/40.51배로 줄어서 0.0125였고요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(나)는 셋째 영수증을 넣고 최소제곱으로 풀면 사과 1.0008, 배 1.9988이야. 가장 작은 특잇값이 0.494에서 11.75로 커졌어. 사과와 배의 비율이 전혀 다른 영수증이라서 약한 방향을 받쳐 주는 거야.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 미지수 둘에 영수증 둘이 가장 위험한 자리일까요? 영수증이 하나뿐이면요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>영수증이 하나면 값을 정할 수 없어요. 사과와 배 값이 무수히 많아져요. 둘이면 하나로 정해지지만 그 하나가 약한 방향에 휘둘리고, 셋이면 남는 영수증으로 오차를 나눠 받아요. 언덕 맞추기에서 기록 40개에 언덕 40개가 봉우리였던 것과 같은 꼴이에요. 미지수와 식의 수가 같을 때 해가 처음으로 딱 하나 생기는데, 그 해가 가장 약해요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>비슷한 실험을 두 번만 해서 기울기를 정하면 안 되는 이유네요. 물리 실험 보고서에서 거의 같은 조건의 측정 두 개로 직선을 그었다가 기울기가 엉터리로 나온 적이 있어요.</p></div></div>
+</div><div class="dialogue"><h3 id="문제-7-방정식-하나에-미지수-둘">문제 7. 방정식 하나에 미지수 둘</h3>
+<blockquote>
+<p>(가) 방정식 <span class="sym" style="color:#665522">w</span>₁ + 2<span class="sym" style="color:#665522">w</span>₂ = 5의 해 가운데 노름 √(<span class="sym" style="color:#665522">w</span>₁² + <span class="sym" style="color:#665522">w</span>₂²)이 가장 작은 것을 구하라. (5, 0), (3, 1)의 노름과 견주어 보라. (나) 미지수를 하나 더해 <span class="sym" style="color:#665522">w</span>₁ + 2<span class="sym" style="color:#665522">w</span>₂ + 2<span class="sym" style="color:#665522">w</span>₃ = 5로 만들면 최소 노름은 어떻게 되는가? (다) 언덕 맞추기에서 문턱을 넘어 언덕을 늘릴수록 계수 노름이 줄어든 것과 무슨 관계인가?</p>
+</blockquote>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(가)는 직선 <span class="sym" style="color:#665522">w</span>₁ + 2<span class="sym" style="color:#665522">w</span>₂ = 5 위에서 원점에 가장 가까운 점이니까 원점에서 직선에 내린 수선의 발이야. 계수 벡터 (1, 2) 방향이어야 하니까 (1, 2)에 5/5를 곱한 (1, 2), 노름은 √5 = 2.236. (5, 0)은 5, (3, 1)은 3.162라 다 더 커.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>특잇값 식으로 해도 같아요. 행렬이 1행이니까 <span class="sym" style="color:#962d1e">u</span> = 1, <span class="sym" style="color:#0093b8">σ</span> = |(1, 2)| = √5, <span class="sym" style="color:#87965a">v</span> = (1, 2)/√5. <span class="sym" style="color:#665522">w</span> = (5/√5)<span class="sym" style="color:#87965a">v</span> = (1, 2).</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(나)는요? 미지수를 하나 더하면 노름이 늘까요, 줄까요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>미지수가 늘면 복잡해지니까 노름도 클 것 같았는데, 계산하니 (0.556, 1.111, 1.111)이고 노름이 1.667이에요. √5 = 2.236보다 작아요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>옛 해 (1, 2)에 0을 붙인 (1, 2, 0)도 새 방정식의 해인가요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>네, 1 + 4 + 0 = 5니까요. 옛 해가 모두 새 해 후보에 들어가니까 최소 노름은 늘 수가 없어요. 오히려 새 미지수가 짐을 나눠 지니까 줄어요. 그래서 문턱을 넘어 언덕을 늘릴수록 최소 노름 해의 노름이 309,671에서 79까지 내려간 거예요. 가장 작은 특잇값이 언덕을 더할수록 커진 것과 같은 이야기를 계수 쪽에서 한 거고요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>일을 여러 사람이 나눠서 하면 한 사람이 맡는 분량이 줄어드는 거랑 같네요. 조별 과제에서 혼자 다 떠맡은 사람이 제일 지쳐 보이는 것처럼요.</p></div></div>
+</div><div class="dialogue"><h3 id="문제-8-능형-회귀의-상한과-걸음-수">문제 8. 능형 회귀의 상한과 걸음 수</h3>
+<blockquote>
+<p>언덕 수 <span class="sym" style="color:#3c4bff">p</span> = 40의 특징 행렬은 <span class="sym" style="color:#0093b8">σ</span><sub>max</sub> = 3.984, <span class="sym" style="color:#0093b8">σ</span><sub>min</sub> = 1.734 × 10⁻⁷이다. (가) 최소 노름 맞춤에서 가장 약한 방향의 배율 1/<span class="sym" style="color:#0093b8">σ</span><sub>min</sub>은 얼마인가? (나) 능형 회귀 <span class="sym" style="color:#874b0f">λ</span> = 10⁻³의 배율 <span class="sym" style="color:#0093b8">σ</span>/(<span class="sym" style="color:#0093b8">σ</span>² + <span class="sym" style="color:#874b0f">λ</span>)는 가장 커도 얼마이고, <span class="sym" style="color:#0093b8">σ</span><sub>min</sub>에서는 얼마인가? (다) 학습률 1/<span class="sym" style="color:#0093b8">σ</span><sub>max</sub>²인 경사하강으로 가장 약한 방향을 반쯤 맞추려면 대략 몇 걸음이 필요한가? (풀어 본 뒤 위젯 2의 「문제 8 불러오기」로 확인해 보자.)</p>
+</blockquote>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 1/(1.734 × 10⁻⁷) = 5.77 × 10⁶이요. (나)는 <span class="sym" style="color:#0093b8">σ</span>/(<span class="sym" style="color:#0093b8">σ</span>² + <span class="sym" style="color:#874b0f">λ</span>)에서 <span class="sym" style="color:#0093b8">σ</span>가 작으면 분모가 <span class="sym" style="color:#874b0f">λ</span>만 남으니까 <span class="sym" style="color:#0093b8">σ</span>/<span class="sym" style="color:#874b0f">λ</span> = 1.73 × 10⁻⁴이요. 그런데 가장 큰 값은 <span class="sym" style="color:#0093b8">σ</span>가 클 때 아닌가요? <span class="sym" style="color:#0093b8">σ</span>가 크면 분자가 크니까요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p><span class="sym" style="color:#0093b8">σ</span>가 아주 크면 분모는 어떻게 되죠?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>분모가 <span class="sym" style="color:#0093b8">σ</span>²으로 커지니까 1/<span class="sym" style="color:#0093b8">σ</span>로 다시 작아져요. 작은 <span class="sym" style="color:#0093b8">σ</span>에서는 <span class="sym" style="color:#0093b8">σ</span>/<span class="sym" style="color:#874b0f">λ</span>로 작고, 큰 <span class="sym" style="color:#0093b8">σ</span>에서는 1/<span class="sym" style="color:#0093b8">σ</span>로 작고, 가운데 어딘가가 꼭대기네요. 미분하면 <span class="sym" style="color:#0093b8">σ</span> = √<span class="sym" style="color:#874b0f">λ</span>에서 1/(2√<span class="sym" style="color:#874b0f">λ</span>) = 15.81이에요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그러니까 능형 회귀는 어느 방향도 15.81배 넘게 키우지 못해. 최소 노름은 577만 배까지 키웠는데. 위젯에서 <span class="sym" style="color:#874b0f">λ</span>를 10⁻³으로 놓으면 갈색 막대의 오른쪽 끝, 약한 방향들이 다 주저앉아.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(다)는요? 경사하강의 한 걸음은 그 방향의 남은 거리를 몇 배로 만들죠?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(1 − <span class="sym" style="color:#0093b8">σ</span>²/<span class="sym" style="color:#0093b8">σ</span><sub>max</sub>²)배예요. 반이 되려면 (1 − r)ᵏ = 1/2에서 r이 아주 작으니까 k ≈ ln 2 / r = ln 2 × (<span class="sym" style="color:#0093b8">σ</span><sub>max</sub>/<span class="sym" style="color:#0093b8">σ</span><sub>min</sub>)² = 3.66 × 10¹⁴걸음이에요. 본문의 표에서 10¹⁴걸음 언저리부터 시험 오차가 오르기 시작한 것과 맞아요. 경사하강이 실제로 그만큼 돌 일은 없으니, 경사하강으로 학습한 모형은 저절로 능형 회귀처럼 굴어요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>실전에서 이중 하강이 생각보다 덜 보이는 것도 이 때문이겠네요. 학습을 일찍 멈추거나 가중치 감쇠를 거는 순간 봉우리가 깎이니까요. 시험 전날 밤을 새워도 책 끝까지 못 가면 마지막 장에서 헷갈릴 일도 없는 거랑 비슷해요.</p></div></div>
+</div>
+</article>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="double-descent-2.html">&larr; 이중 하강: 문턱을 넘으면 시험 오차가 다시 내려간다</a><span class="page-count">3 / 5</span><a class="chapter-nav-next" href="double-descent-4.html">그로킹: 다 외운 뒤 한참 지나 규칙을 찾는다 &rarr;</a></nav>
+</main>
+<script type="module">
+const toggle = document.getElementById('theme-toggle');
+const frames = () => document.querySelectorAll('.widget-embed iframe');
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  toggle.textContent = t === 'dark' ? '\u2600\uFE0F' : '\u{1F319}';
+  frames().forEach(f => f.contentWindow && f.contentWindow.postMessage({ type: 'dyn-theme', theme: t }, '*'));
+}
+const curTheme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+setTheme(curTheme());
+toggle.addEventListener('click', () => {
+  const t = curTheme() === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('theme', t);
+  setTheme(t);
+  renderMermaid();
+});
+
+// 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  io.unobserve(e.target);
+  e.target.src = e.target.dataset.src + '&theme=' + curTheme();
+}), { rootMargin: '600px' });
+frames().forEach(f => io.observe(f));
+addEventListener('message', e => {
+  if (!e.data || e.data.type !== 'dyn-widget-height') return;
+  frames().forEach(f => { if (f.contentWindow === e.source) { f.style.height = e.data.h + 'px'; f.classList.add('ready'); } });
+});
+
+// 사이드바
+const sidebar = document.getElementById('sidebar');
+document.getElementById('sidebar-open').addEventListener('click', () => sidebar.classList.add('open'));
+document.getElementById('sidebar-close').addEventListener('click', () => sidebar.classList.remove('open'));
+sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', () => sidebar.classList.remove('open')));
+
+// 키보드 ←/→ 로 이전·다음 페이지
+addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  const a = document.querySelector(e.key === 'ArrowLeft' ? '.chapter-nav-prev' : e.key === 'ArrowRight' ? '.chapter-nav-next' : null);
+  if (a) location.href = a.href;
+});
+
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+</script>
+</body>
+</html>

@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Muon: 노름을 바꾸면 가장 가파른 방향이 바뀐다 — 최적화: 경사하강에서 Muon 까지</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>@font-face{font-display:block;font-family:KaTeX_AMS;font-style:normal;font-weight:400;src:url(fonts/KaTeX_AMS-Regular.woff2) format("woff2"),url(fonts/KaTeX_AMS-Regular.woff) format("woff"),url(fonts/KaTeX_AMS-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Bold.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Regular.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Fraktur-Bold.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Bold.woff) format("woff"),url(fonts/KaTeX_Fraktur-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Fraktur-Regular.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Regular.woff) format("woff"),url(fonts/KaTeX_Fraktur-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Main-Bold.woff2) format("woff2"),url(fonts/KaTeX_Main-Bold.woff) format("woff"),url(fonts/KaTeX_Main-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Main-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Main-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Main-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Main-Italic.woff2) format("woff2"),url(fonts/KaTeX_Main-Italic.woff) format("woff"),url(fonts/KaTeX_Main-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Main-Regular.woff2) format("woff2"),url(fonts/KaTeX_Main-Regular.woff) format("woff"),url(fonts/KaTeX_Main-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Math-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Math-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Math-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Math-Italic.woff2) format("woff2"),url(fonts/KaTeX_Math-Italic.woff) format("woff"),url(fonts/KaTeX_Math-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:700;src:url(fonts/KaTeX_SansSerif-Bold.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Bold.woff) format("woff"),url(fonts/KaTeX_SansSerif-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:italic;font-weight:400;src:url(fonts/KaTeX_SansSerif-Italic.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Italic.woff) format("woff"),url(fonts/KaTeX_SansSerif-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:400;src:url(fonts/KaTeX_SansSerif-Regular.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Regular.woff) format("woff"),url(fonts/KaTeX_SansSerif-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Script;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Script-Regular.woff2) format("woff2"),url(fonts/KaTeX_Script-Regular.woff) format("woff"),url(fonts/KaTeX_Script-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size1;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size1-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size1-Regular.woff) format("woff"),url(fonts/KaTeX_Size1-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size2;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size2-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size2-Regular.woff) format("woff"),url(fonts/KaTeX_Size2-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size3;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size3-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size3-Regular.woff) format("woff"),url(fonts/KaTeX_Size3-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size4;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size4-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size4-Regular.woff) format("woff"),url(fonts/KaTeX_Size4-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Typewriter;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Typewriter-Regular.woff2) format("woff2"),url(fonts/KaTeX_Typewriter-Regular.woff) format("woff"),url(fonts/KaTeX_Typewriter-Regular.ttf) format("truetype")}.katex{font:normal 1.21em KaTeX_Main,Times New Roman,serif;line-height:1.2;position:relative;text-indent:0;text-rendering:auto}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.16.47"}.katex .katex-mathml{border:0;-webkit-clip-path:inset(50%);clip-path:inset(50%);height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.newline{display:block}.katex .base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .base,.katex .strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathboldfrak,.katex .textboldfrak{font-family:KaTeX_Fraktur;font-weight:700}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .mathsfit,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .hbox{width:100%}.katex .hbox,.katex .thinbox{display:inline-flex;flex-direction:row}.katex .thinbox{max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline,.katex .hline,.katex .mfrac .frac-line,.katex .overline .overline-line,.katex .rule,.katex .underline .underline-line{min-height:1px}.katex .mspace{display:inline-block}.katex .smash{display:inline;line-height:0}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.inner,.katex .llap>.inner,.katex .rlap>.inner{position:absolute}.katex .clap>.fix,.katex .llap>.fix,.katex .rlap>.fix{display:inline-block}.katex .llap>.inner{right:0}.katex .clap>.inner,.katex .rlap>.inner{left:0}.katex .clap>.inner>span{margin-left:-50%;margin-right:50%}.katex .rule{border:0 solid;display:inline-block;position:relative}.katex .hline,.katex .overline .overline-line,.katex .underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.root{margin-left:.2777777778em;margin-right:-.5555555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .sizing.reset-size2.size1{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .sizing.reset-size2.size3{font-size:1.1666666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .sizing.reset-size2.size4{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .sizing.reset-size2.size6{font-size:1.6666666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .sizing.reset-size2.size10{font-size:3.4566666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .sizing.reset-size2.size11{font-size:4.1466666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .sizing.reset-size3.size1{font-size:.7142857143em}.katex .fontsize-ensurer.reset-size3.size2,.katex .sizing.reset-size3.size2{font-size:.8571428571em}.katex .fontsize-ensurer.reset-size3.size3,.katex .sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .sizing.reset-size3.size4{font-size:1.1428571429em}.katex .fontsize-ensurer.reset-size3.size5,.katex .sizing.reset-size3.size5{font-size:1.2857142857em}.katex .fontsize-ensurer.reset-size3.size6,.katex .sizing.reset-size3.size6{font-size:1.4285714286em}.katex .fontsize-ensurer.reset-size3.size7,.katex .sizing.reset-size3.size7{font-size:1.7142857143em}.katex .fontsize-ensurer.reset-size3.size8,.katex .sizing.reset-size3.size8{font-size:2.0571428571em}.katex .fontsize-ensurer.reset-size3.size9,.katex .sizing.reset-size3.size9{font-size:2.4685714286em}.katex .fontsize-ensurer.reset-size3.size10,.katex .sizing.reset-size3.size10{font-size:2.9628571429em}.katex .fontsize-ensurer.reset-size3.size11,.katex .sizing.reset-size3.size11{font-size:3.5542857143em}.katex .fontsize-ensurer.reset-size4.size1,.katex .sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .sizing.reset-size5.size1{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .sizing.reset-size5.size2{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .sizing.reset-size5.size3{font-size:.7777777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .sizing.reset-size5.size4{font-size:.8888888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .sizing.reset-size5.size6{font-size:1.1111111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .sizing.reset-size5.size7{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .sizing.reset-size5.size10{font-size:2.3044444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .sizing.reset-size5.size11{font-size:2.7644444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .sizing.reset-size7.size1{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .sizing.reset-size7.size3{font-size:.5833333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .sizing.reset-size7.size4{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .sizing.reset-size7.size6{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .sizing.reset-size7.size10{font-size:1.7283333333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .sizing.reset-size7.size11{font-size:2.0733333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .sizing.reset-size8.size1{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .sizing.reset-size8.size2{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .sizing.reset-size8.size3{font-size:.4861111111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .sizing.reset-size8.size4{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .sizing.reset-size8.size6{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .sizing.reset-size8.size7{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .sizing.reset-size8.size10{font-size:1.4402777778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .sizing.reset-size8.size11{font-size:1.7277777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .sizing.reset-size9.size1{font-size:.2893518519em}.katex .fontsize-ensurer.reset-size9.size2,.katex .sizing.reset-size9.size2{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .sizing.reset-size9.size3{font-size:.4050925926em}.katex .fontsize-ensurer.reset-size9.size4,.katex .sizing.reset-size9.size4{font-size:.462962963em}.katex .fontsize-ensurer.reset-size9.size5,.katex .sizing.reset-size9.size5{font-size:.5208333333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .sizing.reset-size9.size6{font-size:.5787037037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .sizing.reset-size9.size7{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .sizing.reset-size9.size8{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .sizing.reset-size9.size10{font-size:1.2002314815em}.katex .fontsize-ensurer.reset-size9.size11,.katex .sizing.reset-size9.size11{font-size:1.4398148148em}.katex .fontsize-ensurer.reset-size10.size1,.katex .sizing.reset-size10.size1{font-size:.2410800386em}.katex .fontsize-ensurer.reset-size10.size2,.katex .sizing.reset-size10.size2{font-size:.2892960463em}.katex .fontsize-ensurer.reset-size10.size3,.katex .sizing.reset-size10.size3{font-size:.337512054em}.katex .fontsize-ensurer.reset-size10.size4,.katex .sizing.reset-size10.size4{font-size:.3857280617em}.katex .fontsize-ensurer.reset-size10.size5,.katex .sizing.reset-size10.size5{font-size:.4339440694em}.katex .fontsize-ensurer.reset-size10.size6,.katex .sizing.reset-size10.size6{font-size:.4821600771em}.katex .fontsize-ensurer.reset-size10.size7,.katex .sizing.reset-size10.size7{font-size:.5785920926em}.katex .fontsize-ensurer.reset-size10.size8,.katex .sizing.reset-size10.size8{font-size:.6943105111em}.katex .fontsize-ensurer.reset-size10.size9,.katex .sizing.reset-size10.size9{font-size:.8331726133em}.katex .fontsize-ensurer.reset-size10.size10,.katex .sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .sizing.reset-size10.size11{font-size:1.1996142719em}.katex .fontsize-ensurer.reset-size11.size1,.katex .sizing.reset-size11.size1{font-size:.2009646302em}.katex .fontsize-ensurer.reset-size11.size2,.katex .sizing.reset-size11.size2{font-size:.2411575563em}.katex .fontsize-ensurer.reset-size11.size3,.katex .sizing.reset-size11.size3{font-size:.2813504823em}.katex .fontsize-ensurer.reset-size11.size4,.katex .sizing.reset-size11.size4{font-size:.3215434084em}.katex .fontsize-ensurer.reset-size11.size5,.katex .sizing.reset-size11.size5{font-size:.3617363344em}.katex .fontsize-ensurer.reset-size11.size6,.katex .sizing.reset-size11.size6{font-size:.4019292605em}.katex .fontsize-ensurer.reset-size11.size7,.katex .sizing.reset-size11.size7{font-size:.4823151125em}.katex .fontsize-ensurer.reset-size11.size8,.katex .sizing.reset-size11.size8{font-size:.578778135em}.katex .fontsize-ensurer.reset-size11.size9,.katex .sizing.reset-size11.size9{font-size:.6945337621em}.katex .fontsize-ensurer.reset-size11.size10,.katex .sizing.reset-size11.size10{font-size:.8336012862em}.katex .fontsize-ensurer.reset-size11.size11,.katex .sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .accent .accent-body{position:relative}.katex .accent .accent-body:not(.accent-full){width:0}.katex .overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex svg{fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .stretchy:after,.katex .stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+</style>
+<style>/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-code: #f5f5f5;
+  --fg: #1a1a1a;
+  --fg-muted: #555;
+  --accent: #1565C0;
+  --border: #ddd;
+  --sidebar-bg: #fafafa;
+  --sidebar-width: 280px;
+  --chapter-gap: 3rem;
+  --max-width: 52rem;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1a2e;
+  --bg-code: #16213e;
+  --fg: #e0e0e0;
+  --fg-muted: #aaa;
+  --accent: #64b5f6;
+  --border: #333;
+  --sidebar-bg: #16213e;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.8;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ===== Main Content ===== */
+main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.chapter { margin-bottom: var(--chapter-gap); }
+
+hr.chapter-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: var(--chapter-gap) 0;
+}
+
+/* ===== Typography ===== */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+  font-weight: 700;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.3em; }
+h2 { font-size: 1.6rem; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+h3 { font-size: 1.3rem; }
+h4 { font-size: 1.1rem; }
+
+.chapter > h1:first-child,
+.chapter > h2:first-child,
+.chapter > h3:first-child { margin-top: 0; }
+
+p { margin: 0.8em 0; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+strong { font-weight: 700; }
+
+blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 0.5em 1em;
+  margin: 1em 0;
+  background: var(--bg-code);
+  color: var(--fg-muted);
+}
+
+/* 보법 노트: 본문 흐름 밖의 곁글 */
+aside.sidenote {
+  margin: 1.5em 0;
+  padding: 0.9em 1.2em;
+  border: 1px solid var(--border);
+  border-top: 3px solid #b8860b;
+  border-radius: 6px;
+  background: var(--bg-code);
+  font-size: 0.93em;
+}
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+[data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
+[data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
+
+/* 길잡이: 다른 권(이론 책 ↔ 응용 책)으로 잇는 안내. 곁글과 다르게 왼쪽 선 + 작은 글씨 */
+aside.guide {
+  margin: 1.2em 0;
+  padding: 0.6em 1em;
+  border-left: 3px solid #0093b8;
+  background: var(--bg-code);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.9em;
+}
+aside.guide p { margin: 0.2em 0; }
+aside.guide .guide-title { font-weight: 700; color: #0078a0; }
+[data-theme="dark"] aside.guide { border-left-color: #37a9be; }
+[data-theme="dark"] aside.guide .guide-title { color: #5cc4d8; }
+
+/* ===== Code ===== */
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9em;
+  background: var(--bg-code);
+  padding: 0.15em 0.3em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--bg-code);
+  padding: 1em 1.2em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1em 0;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85em;
+}
+
+/* ===== Tables ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: 0.95em;
+}
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.8em;
+  text-align: left;
+}
+th { background: var(--bg-code); font-weight: 600; }
+
+/* ===== Lists ===== */
+ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
+li { margin: 0.3em 0; }
+
+/* ===== SVG ===== */
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+}
+
+[data-theme="dark"] svg text { fill: var(--fg); }
+[data-theme="dark"] svg line,
+[data-theme="dark"] svg path { stroke: var(--fg-muted); }
+
+/* KaTeX 는 근호·긴 화살표를 SVG 로 그린다. 위 전역 규칙에서 빼낸다. */
+.katex svg {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: inherit;
+  max-width: none;
+  margin: 0;
+}
+[data-theme="dark"] .katex svg path { stroke: inherit; }
+
+/* ===== Images ===== */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+  border-radius: 6px;
+}
+
+/* ===== 따라 계산해 보기 / 연습문제 ===== */
+.worked, .exercises {
+  margin: 1.8em 0;
+  padding: 1em 1.3em;
+  border-left: 4px solid var(--accent);
+  background: var(--bg-code);
+  border-radius: 0 8px 8px 0;
+}
+.worked > :first-child, .exercises > :first-child { margin-top: 0; }
+.exercises ol { padding-left: 1.4em; }
+.exercises li { margin: 0.6em 0; }
+.exercises .level {
+  display: inline-block;
+  font-size: 0.75em;
+  padding: 0 0.5em;
+  margin-right: 0.4em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--fg-muted);
+  vertical-align: 0.1em;
+}
+details.answer { margin: 0.4em 0 0.2em; font-size: 0.95em; }
+details.answer summary { cursor: pointer; color: var(--accent); }
+
+/* ===== 같이 풀기 세션 (대화) ===== */
+.exercises + h4 {
+  margin-top: 1.2em;
+  font-size: 0.95em;
+  color: var(--fg-muted);
+  letter-spacing: 0.02em;
+}
+.exercises + h4::before { content: "💬 "; }
+/* 인물 색은 .turn 에도 둔다: 문제 밖 대화(16장 맺음 등)에서도 이름·선 색이 나오게 */
+.dialogue, .turn { --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; }
+.dialogue {
+  margin: 1.5em 0 2em;
+}
+[data-theme="dark"] :is(.dialogue, .turn) { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
+.turn {
+  display: flex;
+  gap: 0.9em;
+  align-items: flex-start;
+  margin: 0.7em 0;
+}
+.turn-body {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55em 0.95em;
+  border-radius: 10px;
+  background: var(--bg-code);
+}
+.turn-body p { margin: 0; font-weight: 350; }
+.turn-body strong { font-weight: 600; }
+
+/* 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨 */
+.dialogue blockquote {
+  background: #fff;
+  color: #111;
+  border: 1.5px solid #222;
+  border-radius: 4px;
+  padding: 0.9em 1.2em;
+  margin: 0.8em 0 1.4em;
+  font-size: 1.12em;
+  font-weight: 600;
+  line-height: 1.75;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.dialogue blockquote p { margin: 0; }
+.dialogue blockquote code { background: #eee; color: #111; }
+[data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+.turn-T { --who: var(--who-T); }
+.turn-M { --who: var(--who-M); }
+.turn-S { --who: var(--who-S); }
+.cast {
+  flex: 0 0 88px;
+  width: 88px;
+  margin: 0;
+}
+.cast img {
+  width: 88px; height: 88px;
+  object-fit: cover;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  float: none; box-shadow: none; max-width: none;
+}
+.cast figcaption {
+  margin-top: 0.25em;
+  text-align: center;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--who);
+}
+.cast-slot {
+  width: 88px; height: 88px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border: 1.5px dashed var(--who, var(--border));
+  border-radius: 12px;
+  color: var(--who);
+  font-size: 0.85em;
+  font-weight: 600;
+  opacity: 0.75;
+  line-height: 1.3;
+}
+.cast-slot small { font-weight: 400; font-size: 0.8em; color: var(--fg-muted); }
+/* 대화 사이의 수식·그림은 말풍선 폭에 맞춘다 */
+.dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: calc(88px + 0.9em); }
+@media (max-width: 600px) {
+  .cast, .cast img, .cast-slot { flex-basis: 56px; width: 56px; height: 56px; }
+  .cast-slot { font-size: 0.7em; }
+  .dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: 0; }
+}
+
+
+/* ===== KaTeX ===== */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}
+
+/* ===== Mermaid ===== */
+pre.mermaid {
+  background: transparent;
+  border: none;
+  text-align: center;
+  padding: 1em 0;
+}
+
+/* ===== Theme Toggle (목차 머리 안) ===== */
+#theme-toggle {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+#theme-toggle:hover { background: var(--border); }
+
+/* ===== Sidebar ===== */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 999;
+  transition: left 0.3s ease;
+  padding: 1rem;
+}
+#sidebar.open { left: 0; }
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-header h2 { font-size: 1.1rem; margin: 0; border: none; padding: 0; }
+.sidebar-actions { display: flex; align-items: center; gap: 0.4rem; }
+
+#sidebar-close {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: var(--fg);
+  padding: 0 0.3em;
+}
+
+#sidebar ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: chapter;
+}
+#sidebar li {
+  margin: 0.3em 0;
+}
+#sidebar a {
+  display: block;
+  padding: 0.4em 0.5em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--fg);
+}
+#sidebar a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+
+#sidebar-open {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 998;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#sidebar-open:hover { background: var(--border); }
+
+/* ===== Responsive ===== */
+@media (min-width: 1200px) {
+  #sidebar {
+    left: 0;
+    padding-top: 2rem;
+  }
+  #sidebar-open { display: none; }
+  #sidebar-close { display: none; }
+  main {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+@media (max-width: 600px) {
+  main { padding: 1rem 0.8rem 3rem; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  pre { font-size: 0.8em; padding: 0.8em; }
+}
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
+
+/* ===== Chapter Navigation ===== */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border);
+  gap: 1rem;
+}
+.chapter-nav a {
+  display: inline-block;
+  padding: 0.6em 1em;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9em;
+  color: var(--fg);
+  transition: background 0.2s;
+  max-width: 45%;
+}
+.chapter-nav a:hover {
+  background: var(--border);
+  text-decoration: none;
+}
+.chapter-nav-next { text-align: right; margin-left: auto; }
+.page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
+
+/* ===== 절 단위 페이지 ===== */
+.chapter-crumb { margin: 0 0 0.4em; font-size: 0.85em; }
+.chapter-crumb a { color: var(--fg-muted); }
+.chapter-paged > h2:first-of-type { margin-top: 0.4em; }
+#sidebar .sidebar-toc a.current { color: var(--accent); font-weight: 600; }
+
+/* ===== TOC Page ===== */
+.toc-page { padding-top: 1rem; }
+.toc-page h1 {
+  margin-bottom: 1.5rem;
+}
+/* 대문(교재 목록)으로 돌아가는 링크 */
+.site-nav { font-size: 0.9rem; }
+.site-nav a { color: var(--fg-muted); text-decoration: none; }
+.site-nav a:hover { color: var(--accent); }
+.site-nav + h1 { margin-top: 1rem; }
+@media print { .site-nav { display: none; } }
+.toc-list {
+  list-style: none;
+  padding: 0;
+  counter-reset: toc-ch;
+}
+.toc-list li {
+  margin: 0;
+}
+.toc-list a {
+  display: block;
+  padding: 0.7em 1em;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg);
+  font-size: 1.05em;
+  transition: background 0.2s;
+}
+.toc-list a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+/* 부 이름 줄(book.json 의 parts). 번호 없이 이름만 */
+.toc-list .toc-part {
+  margin-top: 1.6em;
+  padding: 0 1em 0.4em;
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+  border-bottom: 2px solid var(--border);
+}
+#sidebar .toc-part {
+  margin: 1.1em 0 0.2em;
+  padding: 0 0.5em;
+  font-size: 0.75em;
+  font-weight: 700;
+  color: var(--fg-muted);
+}
+
+/* ===== Sidebar Active ===== */
+#sidebar a.active {
+  background: var(--accent);
+  color: #fff;
+}
+#sidebar a.active:hover {
+  background: var(--accent);
+}
+
+/* ===== Print ===== */
+@media print {
+  #sidebar, #sidebar-open, #theme-toggle { display: none; }
+  main { margin: 0; max-width: none; }
+}
+
+/* ===== 그림과 캡션 ===== */
+figure.fig { margin: 1.8em auto; text-align: center; }
+figure.fig img { margin: 0 auto; }
+figure.fig figcaption {
+  margin-top: 0.5em;
+  font-size: 0.86em;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: center;
+}
+/* 초상화: 오른쪽에 작게 띄운다 */
+figure.fig-portrait {
+  float: right;
+  clear: right; /* 초상화가 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
+  width: 200px;
+  margin: 0.3em 0 1em 1.5em;
+  text-align: left;
+}
+figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
+/* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
+.portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
+.portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
+@media (max-width: 600px) {
+  figure.fig-portrait { float: none; width: 170px; margin: 1em auto; }
+  .portrait-row { gap: 1em; }
+  .portrait-row figure.fig-portrait { width: 140px; }
+}
+/* 다크모드에서 흰 바탕 그림이 눈부시지 않게 */
+[data-theme="dark"] figure.fig img { filter: brightness(0.92); }
+
+/* ===== 수식 ===== */
+.math-block { margin: 1.2em 0; }
+.math-block .katex-display { margin: 0; }
+.math-legend {
+  margin: -0.4em auto 1.6em;
+  padding: 0.2em 1em;
+  width: fit-content;
+  max-width: 100%;
+  border-left: 3px solid var(--border);
+  background: var(--bg-code);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.86em;
+}
+.math-legend .katex-display > .katex { text-align: left; }
+/* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
+[data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
+
+/* ===== 인터랙티브 위젯 ===== */
+.widget-embed {
+  margin: 1.8em 0 2.2em;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-code);
+}
+.widget-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3em 0.8em;
+  padding: 0.55em 1em;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9em;
+}
+.widget-tag {
+  font-size: 0.78em;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.03em;
+}
+.widget-label { font-weight: 600; flex: 1; min-width: 12em; }
+.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-embed iframe {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border: 0;
+  background: transparent;
+  color-scheme: normal;
+}
+.widget-embed noscript img { margin: 0; border-radius: 0; }
+
+/* ===== 장 안의 목차 (사이드바) ===== */
+.sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
+#sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
+.toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+</style>
+<script>
+(function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
+</script>
+</head>
+<body>
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="index.html" style="color:inherit;text-decoration:none">최적화: 경사하강에서 Muon 까지</a></h2>
+    <div class="sidebar-actions">
+      <button id="theme-toggle" aria-label="다크모드 전환">&#x1F319;</button>
+      <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
+    </div>
+  </div>
+  <ol><li><a href="preface.html">머리말: 경사하강에서 Muon 까지</a></li>
+<li class="toc-part">미분과 근사</li>
+<li><a href="loss-landscape.html">손실 지형: 공을 굴려 바닥을 찾는 첫 실험</a></li>
+<li><a href="gradient-jacobian.html">기울기와 자코비안: 미분 가능성에서 연쇄법칙까지</a></li>
+<li><a href="taylor.html">테일러 전개: 0·1·2차 근사의 사다리</a></li>
+<li><a href="lipschitz.html">립시츠 연속: 함수가 얼마나 빨리 변할 수 있나</a></li>
+<li><a href="convexity.html">볼록이면 왜 쉬운가: 극소가 곧 최소</a></li>
+<li class="toc-part">0차 최적화</li>
+<li><a href="zeroth-order.html">미분 없이: 0차 최적화</a></li>
+<li><a href="evolution.html">진화 알고리즘: 무리로 찾는 길</a></li>
+<li class="toc-part">1차 최적화</li>
+<li><a href="backprop.html">역전파: 자코비안 곱을 거꾸로</a></li>
+<li><a href="initialization.html">가중치 초기화: 신호가 커지지도 사라지지도 않게</a></li>
+<li><a href="gradient-descent.html">경사하강: 학습률은 어디까지 키울 수 있나</a></li>
+<li><a href="sgd.html">확률적 경사하강: 잡음 섞인 기울기로 걷기</a></li>
+<li class="toc-part">2차 최적화</li>
+<li><a href="newton.html">뉴턴법과 헤시안: 곡률을 알면 한 번에</a></li>
+<li><a href="sharpness.html">날카로움: 안정성의 가장자리</a></li>
+<li class="toc-part">2차의 근사와 큰 모델의 걸음</li>
+<li><a href="momentum.html">모멘텀: 무거운 공과 네스테로프 가속</a></li>
+<li><a href="adaptive.html">적응 학습률: AdaGrad 에서 AdamW 까지</a></li>
+<li><a href="curvature-approx.html">곡률 근사: 준뉴턴에서 K-FAC·Shampoo 까지</a></li>
+<li><a href="muon.html" class="active">Muon: 노름을 바꾸면 가장 가파른 방향이 바뀐다</a><ul class="sidebar-toc"><li><a href="muon.html" class="current">가장 가파른 방향: 노름이 「같은 크기」를 정한다</a></li><li><a href="muon-2.html">직교화: 스펙트럼 노름 아래 가장 가파른 걸음</a></li><li><a href="muon-3.html">뉴턴–슐츠 반복: 행렬 곱만으로 직교화한다</a></li><li><a href="muon-4.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="mup.html">μP: 폭이 달라져도 같은 학습률로</a></li>
+<li class="toc-part">분포를 옮기는 최적화</li>
+<li><a href="optimal-transport.html">최적 수송: 흙을 가장 적게 나르는 짝</a></li>
+<li><a href="wgan.html">WGAN: 최소최대와 1-립시츠 판별기</a></li>
+<li class="toc-part">최적화가 일반화를 만든다</li>
+<li><a href="implicit-bias.html">암묵적 편향: 옵티마이저가 고르는 해</a></li>
+<li><a href="double-descent.html">이중 하강: 외우고 나서도 나아진다</a></li>
+<li><a href="epilogue.html">맺음: 남은 물음</a></li></ol>
+</nav>
+<button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
+<main>
+<article class="chapter chapter-paged">
+<h1>Muon: 노름을 바꾸면 가장 가파른 방향이 바뀐다</h1>
+<h2 id="이-장의-물음">이 장의 물음</h2>
+<p>Adam 으로 큰 언어 모델을 학습시키는 설정 파일을 열면, 학습률과 가중치 감쇠 몇 줄 말고는 옵티마이저에 대해 고칠 것이 별로 없다. 기울기 제곱의 평균으로 매개변수 한 칸 한 칸의 걸음을 나눠 주는 Adam 은 「기울기가 큰 칸은 덜, 작은 칸은 더」 움직여서, 칸마다 크기가 수천 배씩 다른 기울기를 고르게 다듬어 준다. 그래서 오랫동안 「옵티마이저는 AdamW 로 두면 된다」가 상식이었다.</p>
+<p>그런데 신경망의 가중치는 숫자를 한 줄로 늘어놓은 것이 아니다. 한 층의 가중치는 행렬이고, 행렬은 입력 벡터를 받아 출력 벡터를 내놓는 일을 한다. 그 층의 기울기도 같은 모양의 행렬이다. 그런데 기울기 행렬이 입력을 늘이는 배율은 입력의 방향에 따라 수십, 수백 배씩 차이 날 수 있다. 어떤 입력 방향으로는 기울기가 거대하고, 어떤 방향으로는 거의 없다. 칸 하나하나를 고르게 다듬는 Adam 은 이 「방향마다의 불균형」을 볼 수 있을까?</p>
+<p>2024년 가을, 작은 언어 모델을 정해진 성능까지 누가 가장 빨리 학습시키나를 겨루는 공개 경주에서, 옵티마이저 하나를 AdamW 에서 다른 것으로 바꾼 기록이 학습 속도를 35% 끌어올렸다. 바뀐 것은 기울기 행렬을 어떻게 다듬어 걸음으로 바꾸느냐 하나였다. 이듬해에는 매개변수 1조 개짜리 모델이 같은 계열의 옵티마이저로 학습되었다.</p>
+<p>이 장은 다음 물음에 차례로 답한다.</p>
+<ul>
+<li>경사하강이 「가장 가파른 내리막」이라는 말에는 어떤 약속이 숨어 있었을까? 그 약속을 바꾸면 가장 가파른 방향도 바뀔까?</li>
+<li>걸음의 크기를 칸마다의 최댓값으로 재면 어떤 옵티마이저가 나올까? Adam 과는 무슨 사이일까?</li>
+<li>행렬인 걸음의 크기를 행렬답게 재면, 가장 가파른 걸음은 어떤 모양일까?</li>
+<li>그 걸음을 걸음마다, 층마다 구하는 데 드는 계산을 감당할 수 있을까?</li>
+</ul>
+<h2 id="가장-가파른-방향-노름이-같은-크기-를-정한다">가장 가파른 방향: 노름이 「같은 크기」를 정한다</h2>
+<p>경사하강의 한 걸음은 기울기의 반대쪽이었고, 그 까닭은 「짧은 거리 안에서 손실이 가장 빨리 줄어드는 방향이 기울기의 반대쪽」이라는 데 있었다. 그런데 「짧은 거리」의 거리는 무엇으로 쟀던가? 걸음 벡터의 칸을 제곱해 더한 뒤 제곱근을 씌운 유클리드 길이였다. 지도 위에서 자로 재는 길이가 그렇다. 그렇다면 다른 자로 거리를 재면 어떨까? 예를 들어 「한 칸이라도 0.1 넘게 움직이면 안 된다」는 규칙은 어떤가. 매개변수마다 따로 움직일 수 있는 폭이 정해져 있는 셈이라, 실제 하드웨어나 학습 안정성을 생각하면 그리 이상한 규칙도 아니다. 이 규칙 아래에서도 가장 가파른 걸음은 여전히 기울기의 반대쪽일까?</p>
+<h3 id="역사-기울기의-크기를-버리고-부호만-쓴-사람들">역사: 기울기의 크기를 버리고 부호만 쓴 사람들</h3>
+<p>기울기의 크기를 아예 버리고 부호만 쓰자는 생각은 신경망 학습에서 여러 번 나왔다. 독일 카를스루에 대학의 마르틴 리트밀러(Martin Riedmiller)와 하인리히 브라운(Heinrich Braun)은 1992년 무렵 RPROP(탄력적 역전파, resilient backpropagation)이라는 방법을 만들어, 1993년 신경망 학회(IEEE ICNN) 논문으로 널리 알렸다. RPROP 이 겨눈 문제는 층마다, 가중치마다 기울기의 크기가 너무 달라서 학습률 하나로는 어떤 가중치는 너무 크게, 어떤 가중치는 너무 작게 움직인다는 것이었다. RPROP 은 기울기의 크기는 보지 않고 부호만 보아 가중치를 움직이고, 움직이는 폭은 가중치마다 따로 두어, 부호가 연달아 같으면 키우고 뒤집히면 줄였다.</p>
+<p>25년쯤 뒤에는 전혀 다른 까닭으로 부호가 다시 나왔다. 여러 대의 컴퓨터가 나눠 학습할 때는 걸음마다 기울기를 주고받아야 하는데, 매개변수가 수억 개면 이 통신이 계산보다 느려진다. 제러미 번스타인(Jeremy Bernstein)과 동료들은 2018년 국제 기계학습 학회(ICML)에 낸 「signSGD: 비볼록 문제를 위한 압축 최적화」에서 기울기의 부호, 곧 칸마다 1비트만 보내자고 했다. 부호만 써도 확률적 경사하강과 같은 빠르기로 수렴한다는 것을 보였고, 부호에 모멘텀을 더한 판(Signum)은 이미지넷 학습에서 Adam 과 비슷한 정확도와 빠르기를 냈다고 보고했다. 왜 크기를 버려도 되는지, 버리면 무엇을 얻는지는 숫자로 보는 것이 빠르다.</p>
+<h3 id="기울기-2-1-에서-크기-0-1-의-걸음-고르기">기울기 (2, 1) 에서 크기 0.1 의 걸음 고르기</h3>
+<p>매개변수가 둘이고, 지금 자리의 기울기가 <span class="sym" style="color:#b0892a">g</span> = (2, 1)이라고 하자. 첫 칸 쪽으로 손실이 두 배 가파르다. 걸음 <span class="sym" style="color:#0078e1">Δθ</span>를 디디면 손실은 1차 어림으로 ⟨<span class="sym" style="color:#b0892a">g</span>, <span class="sym" style="color:#0078e1">Δθ</span>⟩ = 2<span class="sym" style="color:#0078e1">Δθ</span>₁ + <span class="sym" style="color:#0078e1">Δθ</span>₂만큼 바뀐다. 걸음의 크기를 0.1로 묶고, 후보 셋을 견주어 보자. 기울기의 반대쪽, 두 칸을 똑같이 줄이는 부호의 반대쪽 (−1, −1), 큰 칸만 줄이는 (−1, 0)이다. 크기를 재는 자를 둘 쓴다. 하나는 유클리드 길이(칸의 제곱합의 제곱근)이고, 다른 하나는 칸의 절댓값 가운데 가장 큰 것이다. 후보마다 그 자로 크기가 정확히 0.1이 되게 늘이거나 줄였다(sources/muon/s1_norms.py).</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>후보 방향</th>
+<th>유클리드 길이 0.1 로 맞춘 걸음</th>
+<th>줄어드는 손실</th>
+<th>가장 큰 칸 0.1 로 맞춘 걸음</th>
+<th>줄어드는 손실</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>기울기 반대쪽</td>
+<td>(−0.0894, −0.0447)</td>
+<td><strong>0.2236</strong></td>
+<td>(−0.1, −0.05)</td>
+<td>0.2500</td>
+</tr>
+<tr>
+<td>부호 반대쪽 (−1, −1)</td>
+<td>(−0.0707, −0.0707)</td>
+<td>0.2121</td>
+<td>(−0.1, −0.1)</td>
+<td><strong>0.3000</strong></td>
+</tr>
+<tr>
+<td>큰 칸만 (−1, 0)</td>
+<td>(−0.1, 0)</td>
+<td>0.2000</td>
+<td>(−0.1, 0)</td>
+<td>0.2000</td>
+</tr>
+</tbody>
+</table></div>
+<p>유클리드 자로 재면 기울기의 반대쪽이 1등이다. 경사하강의 「가장 가파른 내리막」이 바로 이 말이었다. 그런데 칸의 최댓값으로 재면 1등이 부호 쪽으로 바뀐다. 기울기 반대쪽 걸음은 첫 칸이 0.1에 닿는 순간 멈춰야 해서 둘째 칸을 0.05밖에 쓰지 못한다. 규칙은 둘째 칸도 0.1까지 움직이도록 허락하는데, 둘째 칸에 허락된 폭의 절반을 쓰지 않고 남긴 것이다. 부호 걸음은 두 칸을 모두 끝까지 쓴다. 유클리드 자로 재면 이 걸음의 길이는 0.1414로 「규칙 위반」이지만, 최댓값 자로는 정확히 0.1이다. 같은 기울기, 같은 「크기 0.1」인데 무엇을 크기라 부르느냐에 따라 가장 가파른 걸음이 달라진다.</p>
+<p>크기를 재는 규칙 ‖·‖을 노름이라 했다. 노름 하나를 정하면, 그 노름으로 잰 크기가 <span class="sym" style="color:#006600">η</span> 이하인 걸음 가운데 1차 어림의 손실을 가장 많이 줄이는 걸음이 그 노름 아래의 가장 가파른 걸음이다.</p>
+<div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msup><mstyle mathcolor="#0078e1"><mi mathvariant="normal">Δ</mi><mi>θ</mi></mstyle><mo lspace="0em" rspace="0em">⋆</mo></msup><mo>=</mo><mi><munder><mo><mi>arg</mi><mo>⁡</mo><mi>min</mi><mo>⁡</mo></mo><mrow><mo stretchy="false">∥</mo><mstyle mathcolor="#0078e1"><mi mathvariant="normal">Δ</mi><mi>θ</mi></mstyle><mo stretchy="false">∥</mo><mo>≤</mo><mstyle mathcolor="#006600"><mi>η</mi></mstyle></mrow></munder></mi><mtext> </mtext><mo stretchy="false">⟨</mo><mstyle mathcolor="#b0892a"><mi>g</mi></mstyle><mo separator="true">,</mo><mtext> </mtext><mstyle mathcolor="#0078e1"><mi mathvariant="normal">Δ</mi><mi>θ</mi></mstyle><mo stretchy="false">⟩</mo><mspace width="2em"/><mrow><mo fence="true">{</mo><mtable rowspacing="0.36em" columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo stretchy="false">∥</mo><mo>⋅</mo><msub><mo stretchy="false">∥</mo><mn>2</mn></msub><mtext> </mtext><mo stretchy="false">(</mo><mtext>유클리드</mtext><mo stretchy="false">)</mo><mo>:</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msup><mstyle mathcolor="#0078e1"><mi mathvariant="normal">Δ</mi><mi>θ</mi></mstyle><mo lspace="0em" rspace="0em">⋆</mo></msup><mo>=</mo><mo>−</mo><mstyle mathcolor="#006600"><mi>η</mi></mstyle><mtext> </mtext><mstyle mathcolor="#b0892a"><mi>g</mi></mstyle><mi mathvariant="normal">/</mi><mo stretchy="false">∥</mo><mstyle mathcolor="#b0892a"><mi>g</mi></mstyle><msub><mo stretchy="false">∥</mo><mn>2</mn></msub></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo stretchy="false">∥</mo><mo>⋅</mo><msub><mo stretchy="false">∥</mo><mi mathvariant="normal">∞</mi></msub><mtext> </mtext><mo stretchy="false">(</mo><mtext>최대</mtext><mo stretchy="false">)</mo><mo>:</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msup><mstyle mathcolor="#0078e1"><mi mathvariant="normal">Δ</mi><mi>θ</mi></mstyle><mo lspace="0em" rspace="0em">⋆</mo></msup><mo>=</mo><mo>−</mo><mstyle mathcolor="#006600"><mi>η</mi></mstyle><mtext> </mtext><mi mathvariant="normal">sign</mi><mo>⁡</mo><mo stretchy="false">(</mo><mstyle mathcolor="#b0892a"><mi>g</mi></mstyle><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">\textcolor{#0078e1}{\Delta\theta}^{\star} = \underset{\lVert \textcolor{#0078e1}{\Delta\theta} \rVert \le \textcolor{#006600}{\eta}}{\arg\min}\ \langle \textcolor{#b0892a}{g},\, \textcolor{#0078e1}{\Delta\theta} \rangle
+\qquad
+\begin{cases}
+\lVert\cdot\rVert_2 \ (\text{유클리드}): &amp; \textcolor{#0078e1}{\Delta\theta}^{\star} = -\textcolor{#006600}{\eta}\,\textcolor{#b0892a}{g}/\lVert \textcolor{#b0892a}{g} \rVert_2 \\[2pt]
+\lVert\cdot\rVert_\infty \ (\text{최대}): &amp; \textcolor{#0078e1}{\Delta\theta}^{\star} = -\textcolor{#006600}{\eta}\,\operatorname{sign}(\textcolor{#b0892a}{g})
+\end{cases}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.773em;"></span><span class="mord"><span class="mord" style="color:#0078e1;">Δ</span><span class="mord mathnormal" style="margin-right:0.0278em;color:#0078e1;">θ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.773em;"><span style="top:-3.1473em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">⋆</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.08em;vertical-align:-1.29em;"></span><span class="mord"><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6679em;"><span style="top:-2.1146em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">∥</span><span class="mord mtight" style="color:#0078e1;">Δ</span><span class="mord mathnormal mtight" style="margin-right:0.0278em;color:#0078e1;">θ</span><span class="mclose mtight">∥</span><span class="mrel mtight">≤</span><span class="mord mathnormal mtight" style="margin-right:0.0359em;color:#006600;">η</span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop"><span class="mop">ar<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">min</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.1604em;"><span></span></span></span></span></span></span><span class="mspace"> </span><span class="mopen">⟨</span><span class="mord mathnormal" style="margin-right:0.0359em;color:#b0892a;">g</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord" style="color:#0078e1;">Δ</span><span class="mord mathnormal" style="margin-right:0.0278em;color:#0078e1;">θ</span><span class="mclose">⟩</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size4">{</span></span><span class="mord"><span class="mtable"><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.79em;"><span style="top:-3.79em;"><span class="pstrut" style="height:3.008em;"></span><span class="mord"><span class="mopen">∥</span><span class="mord">⋅</span><span class="mclose"><span class="mclose">∥</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace"> </span><span class="mopen">(</span><span class="mord text"><span class="mord hangul_fallback">유클리드</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">:</span></span></span><span style="top:-2.15em;"><span class="pstrut" style="height:3.008em;"></span><span class="mord"><span class="mopen">∥</span><span class="mord">⋅</span><span class="mclose"><span class="mclose">∥</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">∞</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace"> </span><span class="mopen">(</span><span class="mord text"><span class="mord hangul_fallback">최대</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">:</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.29em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:1em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.79em;"><span style="top:-3.79em;"><span class="pstrut" style="height:3.008em;"></span><span class="mord"><span class="mord"><span class="mord" style="color:#0078e1;">Δ</span><span class="mord mathnormal" style="margin-right:0.0278em;color:#0078e1;">θ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.773em;"><span style="top:-3.1473em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">⋆</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord">−</span><span class="mord mathnormal" style="margin-right:0.0359em;color:#006600;">η</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;color:#b0892a;">g</span><span class="mord">/</span><span class="mopen">∥</span><span class="mord mathnormal" style="margin-right:0.0359em;color:#b0892a;">g</span><span class="mclose"><span class="mclose">∥</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-2.15em;"><span class="pstrut" style="height:3.008em;"></span><span class="mord"><span class="mord"><span class="mord" style="color:#0078e1;">Δ</span><span class="mord mathnormal" style="margin-right:0.0278em;color:#0078e1;">θ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.773em;"><span style="top:-3.1473em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">⋆</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord">−</span><span class="mord mathnormal" style="margin-right:0.0359em;color:#006600;">η</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop"><span class="mord mathrm">sign</span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;color:#b0892a;">g</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.29em;"><span></span></span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></div>
+<div class="math-block math-legend"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#0078e1"><mi mathvariant="normal">Δ</mi><mi>θ</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>한 걸음 (매개변수가 바뀌는 양)</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#b0892a"><mi>g</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>지금 자리의 기울기</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#006600"><mi>η</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>걸음 크기의 상한 (학습률)</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo stretchy="false">⟨</mo><mstyle mathcolor="#b0892a"><mi>g</mi></mstyle><mo separator="true">,</mo><mstyle mathcolor="#0078e1"><mi mathvariant="normal">Δ</mi><mi>θ</mi></mstyle><mo stretchy="false">⟩</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>1차 어림으로 바뀌는 손실: 칸끼리 곱해 더한 값</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo stretchy="false">∥</mo><mstyle mathcolor="#0078e1"><mi mathvariant="normal">Δ</mi><mi>θ</mi></mstyle><msub><mo stretchy="false">∥</mo><mn>2</mn></msub></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>유클리드 노름: 칸 제곱합의 제곱근</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo stretchy="false">∥</mo><mstyle mathcolor="#0078e1"><mi mathvariant="normal">Δ</mi><mi>θ</mi></mstyle><msub><mo stretchy="false">∥</mo><mi mathvariant="normal">∞</mi></msub></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>최대 노름: 칸 절댓값의 최댓값</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi mathvariant="normal">sign</mi><mo>⁡</mo></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>칸마다 부호만 남기기 (양수 1, 음수 −1)</mtext></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{ll}
+\textcolor{#0078e1}{\Delta\theta} &amp; \text{한 걸음 (매개변수가 바뀌는 양)} \\
+\textcolor{#b0892a}{g} &amp; \text{지금 자리의 기울기} \\
+\textcolor{#006600}{\eta} &amp; \text{걸음 크기의 상한 (학습률)} \\
+\langle \textcolor{#b0892a}{g}, \textcolor{#0078e1}{\Delta\theta} \rangle &amp; \text{1차 어림으로 바뀌는 손실: 칸끼리 곱해 더한 값} \\
+\lVert \textcolor{#0078e1}{\Delta\theta} \rVert_2 &amp; \text{유클리드 노름: 칸 제곱합의 제곱근} \\
+\lVert \textcolor{#0078e1}{\Delta\theta} \rVert_\infty &amp; \text{최대 노름: 칸 절댓값의 최댓값} \\
+\operatorname{sign} &amp; \text{칸마다 부호만 남기기 (양수 1, 음수 −1)}
+\end{array}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:8.4em;vertical-align:-3.95em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4.45em;"><span style="top:-6.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#0078e1;">Δ</span><span class="mord mathnormal" style="margin-right:0.0278em;color:#0078e1;">θ</span></span></span><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#b0892a;">g</span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#006600;">η</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">⟨</span><span class="mord mathnormal" style="margin-right:0.0359em;color:#b0892a;">g</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord" style="color:#0078e1;">Δ</span><span class="mord mathnormal" style="margin-right:0.0278em;color:#0078e1;">θ</span><span class="mclose">⟩</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">∥</span><span class="mord" style="color:#0078e1;">Δ</span><span class="mord mathnormal" style="margin-right:0.0278em;color:#0078e1;">θ</span><span class="mclose"><span class="mclose">∥</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">∥</span><span class="mord" style="color:#0078e1;">Δ</span><span class="mord mathnormal" style="margin-right:0.0278em;color:#0078e1;">θ</span><span class="mclose"><span class="mclose">∥</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">∞</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:0.59em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop"><span class="mord mathrm">sign</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4.45em;"><span style="top:-6.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">한</span><span class="mord"> </span><span class="mord hangul_fallback">걸음</span><span class="mord"> (</span><span class="mord hangul_fallback">매개변수가</span><span class="mord"> </span><span class="mord hangul_fallback">바뀌는</span><span class="mord"> </span><span class="mord hangul_fallback">양</span><span class="mord">)</span></span></span></span><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">지금</span><span class="mord"> </span><span class="mord hangul_fallback">자리의</span><span class="mord"> </span><span class="mord hangul_fallback">기울기</span></span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">걸음</span><span class="mord"> </span><span class="mord hangul_fallback">크기의</span><span class="mord"> </span><span class="mord hangul_fallback">상한</span><span class="mord"> (</span><span class="mord hangul_fallback">학습률</span><span class="mord">)</span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">1</span><span class="mord hangul_fallback">차</span><span class="mord"> </span><span class="mord hangul_fallback">어림으로</span><span class="mord"> </span><span class="mord hangul_fallback">바뀌는</span><span class="mord"> </span><span class="mord hangul_fallback">손실</span><span class="mord">: </span><span class="mord hangul_fallback">칸끼리</span><span class="mord"> </span><span class="mord hangul_fallback">곱해</span><span class="mord"> </span><span class="mord hangul_fallback">더한</span><span class="mord"> </span><span class="mord hangul_fallback">값</span></span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">유클리드</span><span class="mord"> </span><span class="mord hangul_fallback">노름</span><span class="mord">: </span><span class="mord hangul_fallback">칸</span><span class="mord"> </span><span class="mord hangul_fallback">제곱합의</span><span class="mord"> </span><span class="mord hangul_fallback">제곱근</span></span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">최대</span><span class="mord"> </span><span class="mord hangul_fallback">노름</span><span class="mord">: </span><span class="mord hangul_fallback">칸</span><span class="mord"> </span><span class="mord hangul_fallback">절댓값의</span><span class="mord"> </span><span class="mord hangul_fallback">최댓값</span></span></span></span><span style="top:0.59em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">칸마다</span><span class="mord"> </span><span class="mord hangul_fallback">부호만</span><span class="mord"> </span><span class="mord hangul_fallback">남기기</span><span class="mord"> (</span><span class="mord hangul_fallback">양수</span><span class="mord"> 1, </span><span class="mord hangul_fallback">음수</span><span class="mord"> −1)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
+<p>유클리드 노름 아래에서는 기울기의 방향을 그대로 두고 길이만 맞춘다. 최대 노름 아래에서는 크기를 모두 버리고 부호만 남긴다. 칸마다 부호를 따라 똑같은 폭으로 움직이는 이 걸음을 <strong>부호 하강</strong> (기울기의 부호만 따라 칸마다 같은 폭으로 걷기 / sign descent)이라 한다. 줄어드는 손실도 노름마다 다른 꼴로 나온다. 유클리드 노름이면 <span class="sym" style="color:#006600">η</span>‖<span class="sym" style="color:#b0892a">g</span>‖₂ = 0.1 × 2.2361이고, 최대 노름이면 칸 절댓값의 합 <span class="sym" style="color:#006600">η</span>(|<span class="sym" style="color:#b0892a">g</span>₁| + |<span class="sym" style="color:#b0892a">g</span>₂|) = 0.1 × 3이다. 걸음을 재는 노름과 기울기를 재는 노름이 짝을 이룬다. 이 짝을 쌍대 노름이라 부르는데, 이 장에서는 이름만 알아 두면 된다.</p>
+<p>그림으로 보면 까닭이 한눈에 보인다. 크기가 0.1 이하인 걸음 전체는 유클리드 자로는 원, 최대 자로는 정사각형이다. 손실이 같은 만큼 바뀌는 걸음들은 기울기에 수직인 직선이고, 그 직선을 기울기 반대쪽으로 밀어 가다가 도형에서 마지막으로 닿는 점이 가장 가파른 걸음이다. 원에서는 그 점이 기울기 반대쪽 끝이고, 정사각형에서는 모서리다. 모서리는 칸마다 ±0.1, 곧 부호다.</p>
+<figure class="fig "><img src="images/muon/a1_norm_balls.png" alt="기울기 g = (2, 1)일 때 크기 0.1 안의 걸음(파란 도형)과, 1차 어림으로 손실이 같은 만큼 바뀌는 걸음들(황토색 직선). 유클리드 자(원)에서는 기울기 반대쪽 끝, 최대 자(정사각형)에서는 모서리 (−0.1, −0.1), 합 자(마름모)에서는 꼭짓점 (−0.1, 0)이 손실을 가장 많이 줄인다(sources/muon/figs.py)" loading="lazy"><figcaption>기울기 g = (2, 1)일 때 크기 0.1 안의 걸음(파란 도형)과, 1차 어림으로 손실이 같은 만큼 바뀌는 걸음들(황토색 직선). 유클리드 자(원)에서는 기울기 반대쪽 끝, 최대 자(정사각형)에서는 모서리 (−0.1, −0.1), 합 자(마름모)에서는 꼭짓점 (−0.1, 0)이 손실을 가장 많이 줄인다(sources/muon/figs.py)</figcaption></figure>
+<figure class="widget-embed" id="widget-muon-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 1: 자마다 다른 가장 가파른 걸음</span><a class="widget-open" href="widgets/muon.html?v=6b2c4116#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/muon.html?w=w1&embed=1&v=6b2c4116" title="위젯 1: 자마다 다른 가장 가파른 걸음" loading="lazy"></iframe></figure>
+<p>그런데 표의 비교는 걸음 한 번, 그것도 1차 어림에 대한 것이었다. 부호 하강을 여러 걸음 되풀이하면 손실의 최솟값에 닿을까? 아래 문제 2에서 먼저 손으로 따라가 본 뒤 위젯 2로 확인해 보자.</p>
+<figure class="widget-embed" id="widget-muon-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 부호 하강은 바닥에 닿는가</span><a class="widget-open" href="widgets/muon.html?v=6b2c4116#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/muon.html?w=w2&embed=1&v=6b2c4116" title="위젯 2: 부호 하강은 바닥에 닿는가" loading="lazy"></iframe></figure>
+<h3 id="ml에서-이동-평균을-끈-adam-은-부호-하강이다">ML에서: 이동 평균을 끈 Adam 은 부호 하강이다</h3>
+<p>Adam 의 한 걸음은 기울기의 이동 평균 <span class="sym" style="color:#ff1eff">m̂</span>을 기울기 제곱의 이동 평균의 제곱근 √<span class="sym" style="color:#8787ff">v̂</span>로 칸마다 나눈 것이었다. 두 이동 평균의 계수 <span class="sym" style="color:#f0694b">β</span>₁, <span class="sym" style="color:#f0694b">β</span>₂를 0으로 두어 평균을 끄면, <span class="sym" style="color:#ff1eff">m̂</span>은 지금 기울기 <span class="sym" style="color:#b0892a">g</span>이고 √<span class="sym" style="color:#8787ff">v̂</span>는 |<span class="sym" style="color:#b0892a">g</span>|다.</p>
+<div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#0078e1"><mi mathvariant="normal">Δ</mi><mi>θ</mi></mstyle><mo>=</mo><mo>−</mo><mstyle mathcolor="#006600"><mi>η</mi></mstyle><mtext> </mtext><mfrac><mstyle mathcolor="#ff1eff"><mover accent="true"><mi>m</mi><mo>^</mo></mover></mstyle><mrow><msqrt><mstyle mathcolor="#8787ff"><mover accent="true"><mi>v</mi><mo>^</mo></mover></mstyle></msqrt><mo>+</mo><mstyle mathcolor="#008787"><mi>ϵ</mi></mstyle></mrow></mfrac><mtext>  </mtext><mtext>  </mtext><mover><mo stretchy="true" minsize="3.0em">→</mo><mpadded width="+0.6em" lspace="0.3em"><mrow><mtext> </mtext><msub><mstyle mathcolor="#f0694b"><mi>β</mi></mstyle><mn>1</mn></msub><mo>=</mo><msub><mstyle mathcolor="#f0694b"><mi>β</mi></mstyle><mn>2</mn></msub><mo>=</mo><mn>0</mn><mtext> </mtext></mrow></mpadded></mover><mtext>  </mtext><mtext>  </mtext><mo>−</mo><mstyle mathcolor="#006600"><mi>η</mi></mstyle><mtext> </mtext><mfrac><mstyle mathcolor="#b0892a"><mi>g</mi></mstyle><mrow><mo stretchy="false">∣</mo><mstyle mathcolor="#b0892a"><mi>g</mi></mstyle><mo stretchy="false">∣</mo><mo>+</mo><mstyle mathcolor="#008787"><mi>ϵ</mi></mstyle></mrow></mfrac><mtext>  </mtext><mo>≈</mo><mtext>  </mtext><mo>−</mo><mstyle mathcolor="#006600"><mi>η</mi></mstyle><mtext> </mtext><mi mathvariant="normal">sign</mi><mo>⁡</mo><mo stretchy="false">(</mo><mstyle mathcolor="#b0892a"><mi>g</mi></mstyle><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\textcolor{#0078e1}{\Delta\theta} = -\textcolor{#006600}{\eta}\,\frac{\textcolor{#ff1eff}{\hat m}}{\sqrt{\textcolor{#8787ff}{\hat v}} + \textcolor{#008787}{\epsilon}}
+\;\;\xrightarrow{\ \textcolor{#f0694b}{\beta}_1 = \textcolor{#f0694b}{\beta}_2 = 0\ }\;\;
+-\textcolor{#006600}{\eta}\,\frac{\textcolor{#b0892a}{g}}{\lvert \textcolor{#b0892a}{g} \rvert + \textcolor{#008787}{\epsilon}} \;\approx\; -\textcolor{#006600}{\eta}\,\operatorname{sign}(\textcolor{#b0892a}{g})
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord" style="color:#0078e1;">Δ</span><span class="mord mathnormal" style="margin-right:0.0278em;color:#0078e1;">θ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3014em;vertical-align:-0.93em;"></span><span class="mord">−</span><span class="mord mathnormal" style="margin-right:0.0359em;color:#006600;">η</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.1778em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9322em;"><span class="svg-align" style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord" style="padding-left:0.833em;"><span class="mord accent" style="color:#8787ff;"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;color:#8787ff;">v</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.2222em;"><span class="mord" style="color:#8787ff;">^</span></span></span></span></span></span></span></span></span><span style="top:-2.8922em;"><span class="pstrut" style="height:3em;"></span><span class="hide-tail" style="min-width:0.853em;height:1.08em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="1.08em" viewBox="0 0 400000 1080" preserveAspectRatio="xMinYMin slice"><path d="M95,702
+c-2.7,0,-7.17,-2.7,-13.5,-8c-5.8,-5.3,-9.5,-10,-9.5,-14
+c0,-2,0.3,-3.3,1,-4c1.3,-2.7,23.83,-20.7,67.5,-54
+c44.2,-33.3,65.8,-50.3,66.5,-51c1.3,-1.3,3,-2,5,-2c4.7,0,8.7,3.3,12,10
+s173,378,173,378c0.7,0,35.3,-71,104,-213c68.7,-142,137.5,-285,206.5,-429
+c69,-144,104.5,-217.7,106.5,-221
+l0 -0
+c5.3,-9.3,12,-14,20,-14
+H400000v40H845.2724
+s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
+c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
+M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1078em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="color:#008787;">ϵ</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord accent" style="color:#ff1eff;"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="color:#ff1eff;">m</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord" style="color:#ff1eff;">^</span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.93em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel x-arrow"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.1081em;"><span style="top:-3.322em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight x-arrow-pad"><span class="mord mtight"><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0528em;color:#f0694b;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3173em;"><span style="top:-2.357em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span><span class="mrel mtight">=</span><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0528em;color:#f0694b;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3173em;"><span style="top:-2.357em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span><span class="mrel mtight">=</span><span class="mord mtight">0</span><span class="mspace mtight"><span class="mtight"> </span></span></span></span></span><span class="svg-align" style="top:-2.689em;"><span class="pstrut" style="height:2.7em;"></span><span class="hide-tail" style="height:0.522em;min-width:1.469em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.522em" viewBox="0 0 400000 522" preserveAspectRatio="xMaxYMin slice"><path d="M0 241v40h399891c-47.3 35.3-84 78-110 128
+-16.7 32-27.7 63.7-33 95 0 1.3-.2 2.7-.5 4-.3 1.3-.5 2.3-.5 3 0 7.3 6.7 11 20
+ 11 8 0 13.2-.8 15.5-2.5 2.3-1.7 4.2-5.5 5.5-11.5 2-13.3 5.7-27 11-41 14.7-44.7
+ 39-84.5 73-119.5s73.7-60.2 119-75.5c6-2 9-5.7 9-11s-3-9-9-11c-45.3-15.3-85
+-40.5-119-75.5s-58.3-74.8-73-119.5c-4.7-14-8.3-27.3-11-40-1.3-6.7-3.2-10.8-5.5
+-12.5-2.3-1.7-7.5-2.5-15.5-2.5-14 0-21 3.7-21 11 0 2 2 10.3 6 25 20.7 83.3 67
+ 151.7 139 205zm0 0v40h399900v-40z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.011em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.0436em;vertical-align:-0.936em;"></span><span class="mord">−</span><span class="mord mathnormal" style="margin-right:0.0359em;color:#006600;">η</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.1076em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">∣</span><span class="mord mathnormal" style="margin-right:0.0359em;color:#b0892a;">g</span><span class="mclose">∣</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="color:#008787;">ϵ</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#b0892a;">g</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">−</span><span class="mord mathnormal" style="margin-right:0.0359em;color:#006600;">η</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop"><span class="mord mathrm">sign</span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;color:#b0892a;">g</span><span class="mclose">)</span></span></span></span></span></div>
+<div class="math-block math-legend"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#ff1eff"><mover accent="true"><mi>m</mi><mo>^</mo></mover></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>기울기의 이동 평균 (치우침 보정 뒤)</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#8787ff"><mover accent="true"><mi>v</mi><mo>^</mo></mover></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>기울기 제곱의 이동 평균 (치우침 보정 뒤)</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mstyle mathcolor="#f0694b"><mi>β</mi></mstyle><mn>1</mn></msub><mo separator="true">,</mo><msub><mstyle mathcolor="#f0694b"><mi>β</mi></mstyle><mn>2</mn></msub></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>두 이동 평균의 계수 (기본값 0.9, 0.999)</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#008787"><mi>ϵ</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>0으로 나누지 않게 더하는 작은 수 (기본값 </mtext><msup><mn>10</mn><mrow><mo>−</mo><mn>8</mn></mrow></msup><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#b0892a"><mi>g</mi></mstyle><mo separator="true">,</mo><mtext> </mtext><mstyle mathcolor="#006600"><mi>η</mi></mstyle><mo separator="true">,</mo><mtext> </mtext><mstyle mathcolor="#0078e1"><mi mathvariant="normal">Δ</mi><mi>θ</mi></mstyle></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>지금 기울기, 학습률, 한 걸음</mtext></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{ll}
+\textcolor{#ff1eff}{\hat m} &amp; \text{기울기의 이동 평균 (치우침 보정 뒤)} \\
+\textcolor{#8787ff}{\hat v} &amp; \text{기울기 제곱의 이동 평균 (치우침 보정 뒤)} \\
+\textcolor{#f0694b}{\beta}_1, \textcolor{#f0694b}{\beta}_2 &amp; \text{두 이동 평균의 계수 (기본값 0.9, 0.999)} \\
+\textcolor{#008787}{\epsilon} &amp; \text{0으로 나누지 않게 더하는 작은 수 (기본값 } 10^{-8}) \\
+\textcolor{#b0892a}{g},\ \textcolor{#006600}{\eta},\ \textcolor{#0078e1}{\Delta\theta} &amp; \text{지금 기울기, 학습률, 한 걸음}
+\end{array}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:6em;vertical-align:-2.75em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord accent" style="color:#ff1eff;"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="color:#ff1eff;">m</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord" style="color:#ff1eff;">^</span></span></span></span></span></span></span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord accent" style="color:#8787ff;"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;color:#8787ff;">v</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.2222em;"><span class="mord" style="color:#8787ff;">^</span></span></span></span></span></span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0528em;color:#f0694b;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0528em;color:#f0694b;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#008787;">ϵ</span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#b0892a;">g</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;color:#006600;">η</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord" style="color:#0078e1;">Δ</span><span class="mord mathnormal" style="margin-right:0.0278em;color:#0078e1;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">기울기의</span><span class="mord"> </span><span class="mord hangul_fallback">이동</span><span class="mord"> </span><span class="mord hangul_fallback">평균</span><span class="mord"> (</span><span class="mord hangul_fallback">치우침</span><span class="mord"> </span><span class="mord hangul_fallback">보정</span><span class="mord"> </span><span class="mord hangul_fallback">뒤</span><span class="mord">)</span></span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">기울기</span><span class="mord"> </span><span class="mord hangul_fallback">제곱의</span><span class="mord"> </span><span class="mord hangul_fallback">이동</span><span class="mord"> </span><span class="mord hangul_fallback">평균</span><span class="mord"> (</span><span class="mord hangul_fallback">치우침</span><span class="mord"> </span><span class="mord hangul_fallback">보정</span><span class="mord"> </span><span class="mord hangul_fallback">뒤</span><span class="mord">)</span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">두</span><span class="mord"> </span><span class="mord hangul_fallback">이동</span><span class="mord"> </span><span class="mord hangul_fallback">평균의</span><span class="mord"> </span><span class="mord hangul_fallback">계수</span><span class="mord"> (</span><span class="mord hangul_fallback">기본값</span><span class="mord"> 0.9, 0.999)</span></span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">0</span><span class="mord hangul_fallback">으로</span><span class="mord"> </span><span class="mord hangul_fallback">나누지</span><span class="mord"> </span><span class="mord hangul_fallback">않게</span><span class="mord"> </span><span class="mord hangul_fallback">더하는</span><span class="mord"> </span><span class="mord hangul_fallback">작은</span><span class="mord"> </span><span class="mord hangul_fallback">수</span><span class="mord"> (</span><span class="mord hangul_fallback">기본값</span><span class="mord"> </span></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">8</span></span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">지금</span><span class="mord"> </span><span class="mord hangul_fallback">기울기</span><span class="mord">, </span><span class="mord hangul_fallback">학습률</span><span class="mord">, </span><span class="mord hangul_fallback">한</span><span class="mord"> </span><span class="mord hangul_fallback">걸음</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
+<p>번스타인과 래커 뉴하우스(Laker Newhouse)는 2024년 글 「옛 옵티마이저, 새 노름(Old Optimizer, New Norm: An Anthology)」에서 이 관찰을 출발점으로 삼았다. 이동 평균을 끈 Adam 은 최대 노름 아래의 가장 가파른 걸음이고, 다른 몇몇 옵티마이저도 저마다 어떤 노름 아래의 가장 가파른 걸음으로 읽힌다는 것이다. 이렇게 보면 「어느 옵티마이저가 좋은가」라는 물음은 「매개변수의 걸음을 어떤 노름으로 재는 것이 맞는가」라는 물음으로 바뀐다. Adam 이 칸마다 크기가 다른 기울기를 잘 다루는 까닭도 여기서 읽힌다. 최대 노름은 칸마다 따로 상한을 두니, 기울기가 아주 작은 칸도 큰 칸과 같은 폭으로 움직인다. 이동 평균을 켜면 걸음이 부호에서 조금씩 벗어나는데, 이동 평균이 걸음을 어떻게 바꾸는지는 아래 문제 3에서 계산한다.</p>
+<aside class="guide"><p class="guide-title">길잡이 · 『미분기하학의 언어들』 「자연 경사: 좌표를 바꿔도 같은 방향」</p><p>걸음의 크기를 재는 자를 바꾸면 가장 가파른 방향이 바뀐다는 생각을 끝까지 밀면, 자를 매개변수 공간이 아니라 모형이 내놓는 분포의 차이에서 가져올 수 있다. 그 자가 피셔 행렬이고, 그 아래의 가장 가파른 방향이 자연 경사다. <a href="https://lameproof.com/diffgeo-book/12-%EB%A7%A4%EA%B0%9C%EB%B3%80%EC%88%98%EA%B3%B5%EA%B0%84%EC%9D%98%ED%92%8D%EA%B2%BD%EC%9D%84%EA%B1%B7%EB%8B%A4-2.html">이어 읽기</a></p>
+</aside>
+<div class="dialogue"><h3 id="문제-1-보너스-점수-나누기">문제 1. 보너스 점수 나누기</h3>
+<blockquote>
+<p>조원 셋의 기여도가 3, 1, 0.5다. 조장이 보너스 <span class="sym" style="color:#0078e1">b</span>₁, <span class="sym" style="color:#0078e1">b</span>₂, <span class="sym" style="color:#0078e1">b</span>₃를 나눠 주고, 조의 평가 점수는 기여도와 보너스를 곱해 더한 3<span class="sym" style="color:#0078e1">b</span>₁ + <span class="sym" style="color:#0078e1">b</span>₂ + 0.5<span class="sym" style="color:#0078e1">b</span>₃로 매겨진다. (가) 규칙이 「한 사람에게 최대 1점」이면 어떻게 나눠야 평가 점수가 가장 큰가? (나) 규칙이 「보너스 제곱의 합이 1 이하」면? (다) 규칙이 「보너스를 모두 더해 1 이하」면? 세 규칙 모두에서 「가장 많이 기여한 사람에게 1점 몰아주기」와 견주어라.</p>
+</blockquote>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>제일 잘한 사람한테 몰아주는 게 제일 크죠. 첫째에게 1점 주면 3점이요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(가)의 규칙에서 둘째와 셋째에게 주는 걸 막는 게 있어요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>없네요. 한 사람 상한만 있으니까 다 1점씩 주면 3 + 1 + 0.5 = 4.5. 몰아줄 이유가 하나도 없었어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(나)는 달라. 제곱합이 묶여 있으면 한 사람한테 더 주는 만큼 남에게 줄 수 있는 보너스가 줄어. 이때는 기여도에 비례해서 주는 게 최선이고, 기여도 벡터를 길이 √(9 + 1 + 0.25) = 3.20으로 나눈 (0.94, 0.31, 0.16)이야. 평가 점수는 3.20. 셋에게 똑같이 1/√3씩 주면 2.60이라 그보다 못해.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 (다)는요? 합이 1로 묶였을 때 둘째에게 0.1을 떼어 주면 점수가 어떻게 바뀌죠?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>첫째에게서 0.1을 빼면 3 × 0.1 = 0.3이 줄고, 둘째에게 주면 1 × 0.1 = 0.1이 늘어요. 손해네요. 여기서는 몰아주기 3점이 1등이에요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>같은 기여도인데 규칙에 따라 최선이 「모두에게 상한까지」, 「기여도에 비례」, 「한 사람에게 몰아주기」로 갈려. 기여도가 기울기고 보너스가 걸음이면, 아까 표에서 최대 자는 부호, 유클리드 자는 기울기 방향이었던 거랑 똑같아. 셋째 규칙은 마름모 모양 자고. 함수해석 시간에 ℓ∞의 짝은 ℓ₁, ℓ₂의 짝은 ℓ₂라고 외웠던 게 이거였네. 최선일 때 점수가 4.5 = 3 + 1 + 0.5, 3.20 = 길이, 3 = 가장 큰 기여도로 나오잖아.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조별 과제 발표 시간을 「한 사람 최대 5분」으로 주면 다 5분씩 쓰는데, 「합쳐서 10분」으로 주면 제일 말 잘하는 사람한테 몰아주게 되는 거랑 같네요.</p></div></div>
+</div><div class="dialogue"><h3 id="문제-2-부호-하강은-바닥에-닿는가">문제 2. 부호 하강은 바닥에 닿는가</h3>
+<blockquote>
+<p>손실 <span class="sym" style="color:#d62728">f</span>(<span class="sym" style="color:#665522">θ</span>) = ½<span class="sym" style="color:#665522">θ</span>²를 <span class="sym" style="color:#665522">θ</span>₀ = 1에서 내려간다. (가) 부호 하강 <span class="sym" style="color:#665522">θ</span> ← <span class="sym" style="color:#665522">θ</span> − <span class="sym" style="color:#006600">η</span>·sign(<span class="sym" style="color:#665522">θ</span>)를 <span class="sym" style="color:#006600">η</span> = 0.3으로 열 걸음 계산하라. 같은 학습률의 경사하강과 견주면? (나) <span class="sym" style="color:#006600">η</span> = 0.25로 바꾸면 무슨 일이 생기는가? 바닥에 멈춘 것은 좋은 소식인가? (다) 부호 하강을 바닥으로 데려가려면 학습률을 어떻게 해야 하는가? (풀어 본 뒤 위젯 2의 「문제 2 불러오기」로 확인해 보자.)</p>
+</blockquote>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>표에서 부호가 1등이었잖아요. 걸음마다 손실을 더 많이 줄이니까 경사하강보다 빨리 바닥에 가겠죠. 0.7, 0.4, 0.1… 벌써 0.1이에요. 경사하강은 0.7, 0.49, 0.343이라 한참 뒤처져 있고요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>0.1 다음은요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>0.1 − 0.3 = −0.2, 그다음 −0.2 + 0.3 = 0.1, 다시 −0.2… 0.1과 −0.2 사이를 영영 오가요. 경사하강은 열 걸음째에 0.0282까지 내려갔는데요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>표에서 부호가 이긴 것은 어떤 조건에서였죠?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>「1차 어림으로」, 「크기 0.1인 걸음 가운데」요. 걸음 한 번에 대한 말이었네요. 바닥 근처에서 기울기가 작아져도 걸음은 늘 0.3이니까 바닥을 건너뛰어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(나)는 0.75, 0.5, 0.25, 0. 딱 바닥에 떨어지고 sign(0) = 0이라 거기 멈춰. 그런데 이건 1이 0.25의 정확히 네 배라서 생긴 우연이야. θ₀가 1.01이면 다시 오가겠지. 좋은 소식이라기보다는 운이야.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 (다)는요. 걸음의 크기를 기울기가 줄여 주지 않으면 누가 줄여야 하죠?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>학습률이 줄어야 해요. η를 0.3/√(k+1)로 줄여 가면 10걸음 뒤 −0.0795, 100걸음 뒤 −0.0300, 1000걸음 뒤 −0.0095예요. 그때 걸음 크기가 0.0949, 0.0300, 0.0095니까 바닥에서의 거리가 거의 그 걸음의 크기만큼이에요. 경사하강은 기울기가 걸음을 저절로 줄여 줬는데, 부호 하강에서는 그 일을 학습률 일정이 떠맡는 거네요. 수열이 수렴하려면 항이 0으로 가야 한다는 조건을 학습률이 채워 주는 셈이에요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>Adam 으로 학습할 때 학습률을 끝에서 줄이지 않으면 손실이 어느 높이에서 더 안 내려가던 게 이거였구나. 샤워기 물을 「남은 차이와 상관없이 3도씩」 바꾸면 목표 온도 둘레를 오가기만 하는 것과 같아요.</p></div></div>
+</div><div class="dialogue"><h3 id="문제-3-adam-의-첫-걸음은-부호-하강인가">문제 3. Adam 의 첫 걸음은 부호 하강인가</h3>
+<blockquote>
+<p>Adam(<span class="sym" style="color:#f0694b">β</span>₁ = 0.9, <span class="sym" style="color:#f0694b">β</span>₂ = 0.999, <span class="sym" style="color:#008787">ε</span> = 10⁻⁸, <span class="sym" style="color:#006600">η</span> = 10⁻³, 치우침 보정 켬)으로 매개변수 넷을 학습시킨다. 첫 걸음의 기울기가 <span class="sym" style="color:#b0892a">g</span> = (3, −0.02, 10⁻⁹, 0)이다. (가) 치우침 보정 뒤의 <span class="sym" style="color:#ff1eff">m̂</span>, <span class="sym" style="color:#8787ff">v̂</span>와 첫 걸음 <span class="sym" style="color:#0078e1">Δθ</span>/<span class="sym" style="color:#006600">η</span>를 구하라. 부호 하강과 같은가? (나) 이번에는 첫 칸의 기울기가 첫 걸음에 −3이었다가 둘째 걸음에 +3으로 뒤집혔다고 하자(다른 칸은 그대로). 둘째 걸음의 첫 칸은 얼마인가?</p>
+</blockquote>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>Adam 은 기울기를 √<span class="sym" style="color:#8787ff">v̂</span>로 나누니까 칸마다 크기가 다르게 나오겠죠. 기울기 3인 칸이랑 0.02인 칸이 같을 리가 없어요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>첫 걸음에서 <span class="sym" style="color:#ff1eff">m̂</span>과 <span class="sym" style="color:#8787ff">v̂</span>를 직접 적어 볼까요? 치우침 보정이 무엇을 나누는지 보면서요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p><span class="sym" style="color:#ff1eff">m</span> = 0.1<span class="sym" style="color:#b0892a">g</span>인데 1 − 0.9 = 0.1로 나누니까 <span class="sym" style="color:#ff1eff">m̂</span> = <span class="sym" style="color:#b0892a">g</span>. <span class="sym" style="color:#8787ff">v̂</span>도 같은 식으로 <span class="sym" style="color:#b0892a">g</span>²이에요. 그럼 걸음은 −<span class="sym" style="color:#006600">η</span><span class="sym" style="color:#b0892a">g</span>/(|<span class="sym" style="color:#b0892a">g</span>| + <span class="sym" style="color:#008787">ε</span>)… 계산하니 <span class="sym" style="color:#0078e1">Δθ</span>/<span class="sym" style="color:#006600">η</span> = (−1, 1, −0.0909, 0)이에요. 첫 두 칸은 크기가 150배 다른데 걸음은 똑같이 1이네요. 첫 걸음은 부호 하강이에요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>셋째 칸은 −1이 아니라 −0.0909야. 기울기 10⁻⁹이 <span class="sym" style="color:#008787">ε</span> = 10⁻⁸보다 작으니까 10⁻⁹/(10⁻⁹ + 10⁻⁸) = 1/11이 된 거지. 넷째 칸은 기울기가 0이라 부호도 0이고. 그러니까 정확히는 「<span class="sym" style="color:#008787">ε</span>보다 큰 칸에서만 부호 하강」이야.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 (나)는요? 이동 평균이 켜진 채로 부호가 뒤집히면요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>첫 칸의 <span class="sym" style="color:#ff1eff">m</span>이 0.9 × (−0.3) + 0.1 × 3 = 0.03이고, 보정하면 0.03/0.19 = 0.158이에요. <span class="sym" style="color:#8787ff">v̂</span>는 9 그대로라 걸음이 −0.0526이에요. 부호 하강이면 −1이었을 텐데 스무 분의 일로 줄었어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>이동 평균이 부호가 오락가락하는 칸의 걸음을 줄인 거야. 부호가 계속 같은 칸은 1 근처로 걷고, 들쭉날쭉한 칸은 거의 멈추고. 문제 2에서 부호 하강이 바닥을 건너뛰며 오갔잖아. 그 오가는 칸에서 Adam 은 저절로 걸음을 줄이는 거네. 그래서 「이동 평균을 끈 Adam」이 부호 하강이라는 말에 「끈」이 붙은 거야. 극한을 취한 식이 원래 식과 같다고 하려면 그 조건을 꼭 적어야 하는 것처럼.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>학습 첫 걸음에 모든 매개변수가 똑같이 학습률만큼 움직인다니, 워밍업이 왜 필요한지 하나 더 알겠어요. 첫 주에 모든 과목에 같은 시간을 쏟고 나서야 어느 과목이 급한지 보이는 거랑 비슷하네요.</p></div></div>
+</div>
+</article>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="curvature-approx-6.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="muon-2.html">직교화: 스펙트럼 노름 아래 가장 가파른 걸음 &rarr;</a></nav>
+</main>
+<script type="module">
+const toggle = document.getElementById('theme-toggle');
+const frames = () => document.querySelectorAll('.widget-embed iframe');
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  toggle.textContent = t === 'dark' ? '\u2600\uFE0F' : '\u{1F319}';
+  frames().forEach(f => f.contentWindow && f.contentWindow.postMessage({ type: 'dyn-theme', theme: t }, '*'));
+}
+const curTheme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+setTheme(curTheme());
+toggle.addEventListener('click', () => {
+  const t = curTheme() === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('theme', t);
+  setTheme(t);
+  renderMermaid();
+});
+
+// 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  io.unobserve(e.target);
+  e.target.src = e.target.dataset.src + '&theme=' + curTheme();
+}), { rootMargin: '600px' });
+frames().forEach(f => io.observe(f));
+addEventListener('message', e => {
+  if (!e.data || e.data.type !== 'dyn-widget-height') return;
+  frames().forEach(f => { if (f.contentWindow === e.source) { f.style.height = e.data.h + 'px'; f.classList.add('ready'); } });
+});
+
+// 사이드바
+const sidebar = document.getElementById('sidebar');
+document.getElementById('sidebar-open').addEventListener('click', () => sidebar.classList.add('open'));
+document.getElementById('sidebar-close').addEventListener('click', () => sidebar.classList.remove('open'));
+sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', () => sidebar.classList.remove('open')));
+
+// 키보드 ←/→ 로 이전·다음 페이지
+addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  const a = document.querySelector(e.key === 'ArrowLeft' ? '.chapter-nav-prev' : e.key === 'ArrowRight' ? '.chapter-nav-next' : null);
+  if (a) location.href = a.href;
+});
+
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+</script>
+</body>
+</html>
