@@ -635,17 +635,17 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <h1>2장 — 엔트로피</h1>
 <h2 id="이-장의-물음">이 장의 물음</h2>
-<p>GPT-2 크기의 어휘(50,257개)를 쓰는 언어 모델을 막 초기화하고 학습을 시작하면, 토큰당 loss는 10.8 근처에서 출발해 학습이 끝날 무렵에는 모델과 데이터에 따라 다르지만 이를테면 2.3쯤까지 내려온다. 그런데 학습을 아무리 오래 해도 이 값이 0까지 내려가지는 않는다. 게다가 이 loss에는 cross-entropy라는 이름이 붙어 있는데, 엔트로피라는 말은 원래 19세기에 증기기관의 효율을 따지던 열역학에서 온 것이다. 열기관의 공학과 언어 모델의 loss가 왜 같은 이름을 쓰는지, 이 장은 다음 물음을 차례로 따라가며 답을 찾는다.</p>
+<p>GPT-2 크기의 어휘(50,257개)를 쓰는 언어 모델을 막 초기화하고 학습을 시작하면, 토큰당 loss는 10.8 근처에서 출발해 학습이 끝날 무렵에는 모델과 데이터에 따라 다르지만 이를테면 2.3쯤까지 내려온다. 그런데 학습을 아무리 오래 해도 토큰당 loss가 0까지 내려가지는 않는다. 게다가 이 loss에는 cross-entropy라는 이름이 붙어 있는데, 엔트로피라는 말은 원래 19세기에 증기기관의 효율을 따지던 열역학에서 온 것이다. 열기관의 공학과 언어 모델의 loss가 왜 같은 이름을 쓰는지, 이 장은 다음 물음을 차례로 따라가며 답을 찾는다.</p>
 <ul>
 <li>열이 흐르는 방향을 숫자 하나로 나타낼 수 있을까?</li>
-<li>그 숫자는 도대체 무엇을 세고 있을까?</li>
+<li>열이 흐르는 방향을 나타내는 숫자는 도대체 무엇을 세고 있을까?</li>
 <li>왜 확률이나 경우의 수를 그대로 쓰지 않고 로그를 취할까?</li>
 <li>처음 loss 10.8은 어디서 나온 값이고, 왜 loss는 0까지 내려가지 않을까?</li>
 </ul>
 <h2 id="엔트로피-열을-온도로-나눈-양">엔트로피: 열을 온도로 나눈 양</h2>
 <p>뜨거운 물체와 차가운 물체를 맞닿게 두면 열은 언제나 뜨거운 쪽에서 차가운 쪽으로 흐른다. 그런데 에너지는 어느 쪽으로 흐르든 똑같이 보존되므로, 에너지만 봐서는 왜 한쪽 방향만 일어나는지 설명할 수 없다. 그렇다면 열이 흐르는 방향을 숫자 하나로 나타낼 수는 없을까?</p>
 <h3 id="역사-열기관에서-태어난-엔트로피">역사: 열기관에서 태어난 엔트로피</h3>
-<p>엔트로피는 원자론보다 먼저, 증기기관의 효율을 따지는 공학 문제에서 나왔다. 그래서 이 양을 처음 정의한 사람은 엔트로피가 무엇인지는 몰랐고, 어떻게 재는지만 알았다. 이야기는 두 사람에게서 시작된다.</p>
+<p>엔트로피는 원자론보다 먼저, 증기기관의 효율을 따지는 공학 문제에서 나왔다. 그래서 엔트로피라는 양을 처음 정의한 사람은 그것이 무엇을 세는지는 몰랐고, 어떻게 재는지만 알았다. 이야기는 두 사람에게서 시작된다.</p>
 <p>1824년 프랑스의 공학자 카르노는 증기기관을 아무리 잘 만들어도 효율에는 한계가 있고, 그 한계는 뜨거운 쪽과 차가운 쪽의 온도로만 정해진다는 것을 보였다. 다시 말해 열이 일(work, 힘으로 물체를 밀어 옮기는 데 쓰인 에너지. 증기가 피스톤을 미는 것이 그 예다)로 바뀌려면 뜨거운 곳에서 차가운 곳으로 흘러야 한다는 것이다.</p>
 <figure class="fig fig-portrait"><img src="images/ch02/carnot.jpg" alt="사디 카르노(1796–1832), 1813년 루이레오폴 부아이 그림. 출처: Wikimedia Commons, 퍼블릭 도메인" loading="lazy"><figcaption>사디 카르노(1796–1832), 1813년 루이레오폴 부아이 그림. 출처: Wikimedia Commons, 퍼블릭 도메인</figcaption></figure>
 <p>카르노는 이 생각을 물레방아에 빗대어 설명했다. 물레방아를 돌리는 힘이 떨어지는 물의 양과 떨어지는 높이로 정해지듯, 열기관의 힘도 흐르는 열의 양과 그 열이 「떨어지는」 온도 차로 정해진다는 것이다. 당시에는 열을 칼로릭(caloric)이라는, 새로 생기지도 없어지지도 않는 보이지 않는 유체로 보았다. 그래서 물이 물레방아를 지나도 줄지 않듯, 칼로릭도 기관을 지나며 줄지 않고 차가운 쪽으로 내려갈 뿐이라고 여겼다.</p>
@@ -698,9 +698,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>뜨거운 커피(350 K, 약 77 °C)를 방(300 K, 약 27 °C)에 두었더니 커피에서 방으로 열 1000 J이 흘렀다. 한참 뒤 커피가 310 K(약 37 °C)까지 식었을 때 다시 열 1000 J이 흘렀다. 두 번 가운데 커피와 방의 엔트로피 합이 더 많이 늘어난 것은 어느 쪽인가? (열이 흐르는 동안 커피와 방의 온도는 거의 그대로라고 치자. 풀어 본 뒤 위젯 1의 「문제 1 불러오기」로 확인해 보자.)</p>
 </blockquote>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>흐른 열이 둘 다 1000 J이니까 늘어난 양도 같겠죠.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T12"><img src="images/cast/T12.webp" alt="선생님 T12" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>커피와 방의 몫을 따로 적어 볼까요? 처음 1000 J이 흐를 때 커피의 <span class="sym" style="color:#ff7f0e">Q</span>/<span class="sym" style="color:#8c564b">T</span>는요?</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T12"><img src="images/cast/T12.webp" alt="선생님 T12" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>커피와 방의 엔트로피 변화를 따로 적어 볼까요? 처음 1000 J이 흐를 때 커피의 <span class="sym" style="color:#ff7f0e">Q</span>/<span class="sym" style="color:#8c564b">T</span>는요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>커피는 열을 내줬으니까 −1000/350 ≈ −2.86 J/K, 방은 +1000/300 ≈ +3.33 J/K. 합은 +0.48 J/K예요. 두 번째는 커피가 −1000/310 ≈ −3.23 J/K니까 합이 +0.11 J/K…. 어, 네 배 넘게 작아졌네요. 흐른 열은 똑같은데요.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>커피와 방의 온도가 가까워질수록 커피가 잃는 몫과 방이 얻는 몫이 거의 같아져서 서로 지워지는 거네. 그럼 커피가 방과 같은 300 K가 되면 합은 딱 0이겠다.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>커피와 방의 온도가 가까워질수록 커피가 잃는 엔트로피와 방이 얻는 엔트로피가 거의 같아져서 서로 지워지는 거네. 그럼 커피가 방과 같은 300 K가 되면 합은 딱 0이겠다.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>합이 0이면 열은 어느 쪽으로 흐를까요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S10"><img src="images/cast/S10.webp" alt="이서연 S10" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>어느 쪽으로 흘러도 합이 늘지 않으니까 저절로 흐를 까닭이 없어요. 그래서 커피가 방 온도에 닿으면 더 식지 않는 거네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M09"><img src="images/cast/M09.webp" alt="김민준 M09" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>물통 두 개를 호스로 이으면 물 높이가 같아질 때까지만 흐르는 거랑 같네요. 여기서는 온도가 물 높이 노릇을 하고요.</p></div></div>
