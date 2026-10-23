@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>굳힌 평균: 로그를 먼저, 평균은 나중에 — 17장 — 스핀 글래스와 레플리카 방법 — ML 입문자를 위한 동역학</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>@font-face{font-display:block;font-family:KaTeX_AMS;font-style:normal;font-weight:400;src:url(fonts/KaTeX_AMS-Regular.woff2) format("woff2"),url(fonts/KaTeX_AMS-Regular.woff) format("woff"),url(fonts/KaTeX_AMS-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Bold.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Regular.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Fraktur-Bold.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Bold.woff) format("woff"),url(fonts/KaTeX_Fraktur-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Fraktur-Regular.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Regular.woff) format("woff"),url(fonts/KaTeX_Fraktur-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Main-Bold.woff2) format("woff2"),url(fonts/KaTeX_Main-Bold.woff) format("woff"),url(fonts/KaTeX_Main-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Main-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Main-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Main-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Main-Italic.woff2) format("woff2"),url(fonts/KaTeX_Main-Italic.woff) format("woff"),url(fonts/KaTeX_Main-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Main-Regular.woff2) format("woff2"),url(fonts/KaTeX_Main-Regular.woff) format("woff"),url(fonts/KaTeX_Main-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Math-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Math-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Math-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Math-Italic.woff2) format("woff2"),url(fonts/KaTeX_Math-Italic.woff) format("woff"),url(fonts/KaTeX_Math-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:700;src:url(fonts/KaTeX_SansSerif-Bold.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Bold.woff) format("woff"),url(fonts/KaTeX_SansSerif-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:italic;font-weight:400;src:url(fonts/KaTeX_SansSerif-Italic.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Italic.woff) format("woff"),url(fonts/KaTeX_SansSerif-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:400;src:url(fonts/KaTeX_SansSerif-Regular.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Regular.woff) format("woff"),url(fonts/KaTeX_SansSerif-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Script;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Script-Regular.woff2) format("woff2"),url(fonts/KaTeX_Script-Regular.woff) format("woff"),url(fonts/KaTeX_Script-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size1;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size1-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size1-Regular.woff) format("woff"),url(fonts/KaTeX_Size1-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size2;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size2-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size2-Regular.woff) format("woff"),url(fonts/KaTeX_Size2-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size3;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size3-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size3-Regular.woff) format("woff"),url(fonts/KaTeX_Size3-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size4;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size4-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size4-Regular.woff) format("woff"),url(fonts/KaTeX_Size4-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Typewriter;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Typewriter-Regular.woff2) format("woff2"),url(fonts/KaTeX_Typewriter-Regular.woff) format("woff"),url(fonts/KaTeX_Typewriter-Regular.ttf) format("truetype")}.katex{font:normal 1.21em KaTeX_Main,Times New Roman,serif;line-height:1.2;position:relative;text-indent:0;text-rendering:auto}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.16.47"}.katex .katex-mathml{border:0;-webkit-clip-path:inset(50%);clip-path:inset(50%);height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.newline{display:block}.katex .base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .base,.katex .strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathboldfrak,.katex .textboldfrak{font-family:KaTeX_Fraktur;font-weight:700}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .mathsfit,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .hbox{width:100%}.katex .hbox,.katex .thinbox{display:inline-flex;flex-direction:row}.katex .thinbox{max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline,.katex .hline,.katex .mfrac .frac-line,.katex .overline .overline-line,.katex .rule,.katex .underline .underline-line{min-height:1px}.katex .mspace{display:inline-block}.katex .smash{display:inline;line-height:0}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.inner,.katex .llap>.inner,.katex .rlap>.inner{position:absolute}.katex .clap>.fix,.katex .llap>.fix,.katex .rlap>.fix{display:inline-block}.katex .llap>.inner{right:0}.katex .clap>.inner,.katex .rlap>.inner{left:0}.katex .clap>.inner>span{margin-left:-50%;margin-right:50%}.katex .rule{border:0 solid;display:inline-block;position:relative}.katex .hline,.katex .overline .overline-line,.katex .underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.root{margin-left:.2777777778em;margin-right:-.5555555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .sizing.reset-size2.size1{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .sizing.reset-size2.size3{font-size:1.1666666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .sizing.reset-size2.size4{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .sizing.reset-size2.size6{font-size:1.6666666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .sizing.reset-size2.size10{font-size:3.4566666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .sizing.reset-size2.size11{font-size:4.1466666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .sizing.reset-size3.size1{font-size:.7142857143em}.katex .fontsize-ensurer.reset-size3.size2,.katex .sizing.reset-size3.size2{font-size:.8571428571em}.katex .fontsize-ensurer.reset-size3.size3,.katex .sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .sizing.reset-size3.size4{font-size:1.1428571429em}.katex .fontsize-ensurer.reset-size3.size5,.katex .sizing.reset-size3.size5{font-size:1.2857142857em}.katex .fontsize-ensurer.reset-size3.size6,.katex .sizing.reset-size3.size6{font-size:1.4285714286em}.katex .fontsize-ensurer.reset-size3.size7,.katex .sizing.reset-size3.size7{font-size:1.7142857143em}.katex .fontsize-ensurer.reset-size3.size8,.katex .sizing.reset-size3.size8{font-size:2.0571428571em}.katex .fontsize-ensurer.reset-size3.size9,.katex .sizing.reset-size3.size9{font-size:2.4685714286em}.katex .fontsize-ensurer.reset-size3.size10,.katex .sizing.reset-size3.size10{font-size:2.9628571429em}.katex .fontsize-ensurer.reset-size3.size11,.katex .sizing.reset-size3.size11{font-size:3.5542857143em}.katex .fontsize-ensurer.reset-size4.size1,.katex .sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .sizing.reset-size5.size1{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .sizing.reset-size5.size2{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .sizing.reset-size5.size3{font-size:.7777777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .sizing.reset-size5.size4{font-size:.8888888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .sizing.reset-size5.size6{font-size:1.1111111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .sizing.reset-size5.size7{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .sizing.reset-size5.size10{font-size:2.3044444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .sizing.reset-size5.size11{font-size:2.7644444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .sizing.reset-size7.size1{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .sizing.reset-size7.size3{font-size:.5833333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .sizing.reset-size7.size4{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .sizing.reset-size7.size6{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .sizing.reset-size7.size10{font-size:1.7283333333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .sizing.reset-size7.size11{font-size:2.0733333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .sizing.reset-size8.size1{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .sizing.reset-size8.size2{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .sizing.reset-size8.size3{font-size:.4861111111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .sizing.reset-size8.size4{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .sizing.reset-size8.size6{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .sizing.reset-size8.size7{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .sizing.reset-size8.size10{font-size:1.4402777778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .sizing.reset-size8.size11{font-size:1.7277777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .sizing.reset-size9.size1{font-size:.2893518519em}.katex .fontsize-ensurer.reset-size9.size2,.katex .sizing.reset-size9.size2{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .sizing.reset-size9.size3{font-size:.4050925926em}.katex .fontsize-ensurer.reset-size9.size4,.katex .sizing.reset-size9.size4{font-size:.462962963em}.katex .fontsize-ensurer.reset-size9.size5,.katex .sizing.reset-size9.size5{font-size:.5208333333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .sizing.reset-size9.size6{font-size:.5787037037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .sizing.reset-size9.size7{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .sizing.reset-size9.size8{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .sizing.reset-size9.size10{font-size:1.2002314815em}.katex .fontsize-ensurer.reset-size9.size11,.katex .sizing.reset-size9.size11{font-size:1.4398148148em}.katex .fontsize-ensurer.reset-size10.size1,.katex .sizing.reset-size10.size1{font-size:.2410800386em}.katex .fontsize-ensurer.reset-size10.size2,.katex .sizing.reset-size10.size2{font-size:.2892960463em}.katex .fontsize-ensurer.reset-size10.size3,.katex .sizing.reset-size10.size3{font-size:.337512054em}.katex .fontsize-ensurer.reset-size10.size4,.katex .sizing.reset-size10.size4{font-size:.3857280617em}.katex .fontsize-ensurer.reset-size10.size5,.katex .sizing.reset-size10.size5{font-size:.4339440694em}.katex .fontsize-ensurer.reset-size10.size6,.katex .sizing.reset-size10.size6{font-size:.4821600771em}.katex .fontsize-ensurer.reset-size10.size7,.katex .sizing.reset-size10.size7{font-size:.5785920926em}.katex .fontsize-ensurer.reset-size10.size8,.katex .sizing.reset-size10.size8{font-size:.6943105111em}.katex .fontsize-ensurer.reset-size10.size9,.katex .sizing.reset-size10.size9{font-size:.8331726133em}.katex .fontsize-ensurer.reset-size10.size10,.katex .sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .sizing.reset-size10.size11{font-size:1.1996142719em}.katex .fontsize-ensurer.reset-size11.size1,.katex .sizing.reset-size11.size1{font-size:.2009646302em}.katex .fontsize-ensurer.reset-size11.size2,.katex .sizing.reset-size11.size2{font-size:.2411575563em}.katex .fontsize-ensurer.reset-size11.size3,.katex .sizing.reset-size11.size3{font-size:.2813504823em}.katex .fontsize-ensurer.reset-size11.size4,.katex .sizing.reset-size11.size4{font-size:.3215434084em}.katex .fontsize-ensurer.reset-size11.size5,.katex .sizing.reset-size11.size5{font-size:.3617363344em}.katex .fontsize-ensurer.reset-size11.size6,.katex .sizing.reset-size11.size6{font-size:.4019292605em}.katex .fontsize-ensurer.reset-size11.size7,.katex .sizing.reset-size11.size7{font-size:.4823151125em}.katex .fontsize-ensurer.reset-size11.size8,.katex .sizing.reset-size11.size8{font-size:.578778135em}.katex .fontsize-ensurer.reset-size11.size9,.katex .sizing.reset-size11.size9{font-size:.6945337621em}.katex .fontsize-ensurer.reset-size11.size10,.katex .sizing.reset-size11.size10{font-size:.8336012862em}.katex .fontsize-ensurer.reset-size11.size11,.katex .sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .accent .accent-body{position:relative}.katex .accent .accent-body:not(.accent-full){width:0}.katex .overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex svg{fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .stretchy:after,.katex .stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+</style>
+<style>/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-code: #f5f5f5;
+  --fg: #1a1a1a;
+  --fg-muted: #555;
+  --accent: #1565C0;
+  --border: #ddd;
+  --sidebar-bg: #fafafa;
+  --sidebar-width: 280px;
+  --chapter-gap: 3rem;
+  --max-width: 52rem;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1a2e;
+  --bg-code: #16213e;
+  --fg: #e0e0e0;
+  --fg-muted: #aaa;
+  --accent: #64b5f6;
+  --border: #333;
+  --sidebar-bg: #16213e;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.8;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ===== Main Content ===== */
+main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.chapter { margin-bottom: var(--chapter-gap); }
+
+hr.chapter-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: var(--chapter-gap) 0;
+}
+
+/* ===== Typography ===== */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+  font-weight: 700;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.3em; }
+h2 { font-size: 1.6rem; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+h3 { font-size: 1.3rem; }
+h4 { font-size: 1.1rem; }
+
+.chapter > h1:first-child,
+.chapter > h2:first-child,
+.chapter > h3:first-child { margin-top: 0; }
+
+p { margin: 0.8em 0; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+strong { font-weight: 700; }
+
+blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 0.5em 1em;
+  margin: 1em 0;
+  background: var(--bg-code);
+  color: var(--fg-muted);
+}
+
+/* 보법 노트: 본문 흐름 밖의 곁글 */
+aside.sidenote {
+  margin: 1.5em 0;
+  padding: 0.9em 1.2em;
+  border: 1px solid var(--border);
+  border-top: 3px solid #b8860b;
+  border-radius: 6px;
+  background: var(--bg-code);
+  font-size: 0.93em;
+}
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+[data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
+[data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
+
+/* ===== Code ===== */
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9em;
+  background: var(--bg-code);
+  padding: 0.15em 0.3em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--bg-code);
+  padding: 1em 1.2em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1em 0;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85em;
+}
+
+/* ===== Tables ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: 0.95em;
+}
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.8em;
+  text-align: left;
+}
+th { background: var(--bg-code); font-weight: 600; }
+
+/* ===== Lists ===== */
+ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
+li { margin: 0.3em 0; }
+
+/* ===== SVG ===== */
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+}
+
+[data-theme="dark"] svg text { fill: var(--fg); }
+[data-theme="dark"] svg line,
+[data-theme="dark"] svg path { stroke: var(--fg-muted); }
+
+/* KaTeX 는 근호·긴 화살표를 SVG 로 그린다. 위 전역 규칙에서 빼낸다. */
+.katex svg {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: inherit;
+  max-width: none;
+  margin: 0;
+}
+[data-theme="dark"] .katex svg path { stroke: inherit; }
+
+/* ===== Images ===== */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+  border-radius: 6px;
+}
+
+/* ===== 따라 계산해 보기 / 연습문제 ===== */
+.worked, .exercises {
+  margin: 1.8em 0;
+  padding: 1em 1.3em;
+  border-left: 4px solid var(--accent);
+  background: var(--bg-code);
+  border-radius: 0 8px 8px 0;
+}
+.worked > :first-child, .exercises > :first-child { margin-top: 0; }
+.exercises ol { padding-left: 1.4em; }
+.exercises li { margin: 0.6em 0; }
+.exercises .level {
+  display: inline-block;
+  font-size: 0.75em;
+  padding: 0 0.5em;
+  margin-right: 0.4em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--fg-muted);
+  vertical-align: 0.1em;
+}
+details.answer { margin: 0.4em 0 0.2em; font-size: 0.95em; }
+details.answer summary { cursor: pointer; color: var(--accent); }
+
+/* ===== 같이 풀기 세션 (대화) ===== */
+.exercises + h4 {
+  margin-top: 1.2em;
+  font-size: 0.95em;
+  color: var(--fg-muted);
+  letter-spacing: 0.02em;
+}
+.exercises + h4::before { content: "💬 "; }
+/* 인물 색은 .turn 에도 둔다: 문제 밖 대화(16장 맺음 등)에서도 이름·선 색이 나오게 */
+.dialogue, .turn { --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; }
+.dialogue {
+  margin: 1.5em 0 2em;
+}
+[data-theme="dark"] :is(.dialogue, .turn) { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
+.turn {
+  display: flex;
+  gap: 0.9em;
+  align-items: flex-start;
+  margin: 0.7em 0;
+}
+.turn-body {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55em 0.95em;
+  border-radius: 10px;
+  background: var(--bg-code);
+}
+.turn-body p { margin: 0; font-weight: 350; }
+.turn-body strong { font-weight: 600; }
+
+/* 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨 */
+.dialogue blockquote {
+  background: #fff;
+  color: #111;
+  border: 1.5px solid #222;
+  border-radius: 4px;
+  padding: 0.9em 1.2em;
+  margin: 0.8em 0 1.4em;
+  font-size: 1.12em;
+  font-weight: 600;
+  line-height: 1.75;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.dialogue blockquote p { margin: 0; }
+.dialogue blockquote code { background: #eee; color: #111; }
+[data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+.turn-T { --who: var(--who-T); }
+.turn-M { --who: var(--who-M); }
+.turn-S { --who: var(--who-S); }
+.cast {
+  flex: 0 0 88px;
+  width: 88px;
+  margin: 0;
+}
+.cast img {
+  width: 88px; height: 88px;
+  object-fit: cover;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  float: none; box-shadow: none; max-width: none;
+}
+.cast figcaption {
+  margin-top: 0.25em;
+  text-align: center;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--who);
+}
+.cast-slot {
+  width: 88px; height: 88px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border: 1.5px dashed var(--who, var(--border));
+  border-radius: 12px;
+  color: var(--who);
+  font-size: 0.85em;
+  font-weight: 600;
+  opacity: 0.75;
+  line-height: 1.3;
+}
+.cast-slot small { font-weight: 400; font-size: 0.8em; color: var(--fg-muted); }
+/* 대화 사이의 수식·그림은 말풍선 폭에 맞춘다 */
+.dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: calc(88px + 0.9em); }
+@media (max-width: 600px) {
+  .cast, .cast img, .cast-slot { flex-basis: 56px; width: 56px; height: 56px; }
+  .cast-slot { font-size: 0.7em; }
+  .dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: 0; }
+}
+
+
+/* ===== KaTeX ===== */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}
+
+/* ===== Mermaid ===== */
+pre.mermaid {
+  background: transparent;
+  border: none;
+  text-align: center;
+  padding: 1em 0;
+}
+
+/* ===== Theme Toggle (목차 머리 안) ===== */
+#theme-toggle {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+#theme-toggle:hover { background: var(--border); }
+
+/* ===== Sidebar ===== */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 999;
+  transition: left 0.3s ease;
+  padding: 1rem;
+}
+#sidebar.open { left: 0; }
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-header h2 { font-size: 1.1rem; margin: 0; border: none; padding: 0; }
+.sidebar-actions { display: flex; align-items: center; gap: 0.4rem; }
+
+#sidebar-close {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: var(--fg);
+  padding: 0 0.3em;
+}
+
+#sidebar ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: chapter;
+}
+#sidebar li {
+  margin: 0.3em 0;
+}
+#sidebar a {
+  display: block;
+  padding: 0.4em 0.5em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--fg);
+}
+#sidebar a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+
+#sidebar-open {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 998;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#sidebar-open:hover { background: var(--border); }
+
+/* ===== Responsive ===== */
+@media (min-width: 1200px) {
+  #sidebar {
+    left: 0;
+    padding-top: 2rem;
+  }
+  #sidebar-open { display: none; }
+  #sidebar-close { display: none; }
+  main {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+@media (max-width: 600px) {
+  main { padding: 1rem 0.8rem 3rem; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  pre { font-size: 0.8em; padding: 0.8em; }
+}
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
+
+/* ===== Chapter Navigation ===== */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border);
+  gap: 1rem;
+}
+.chapter-nav a {
+  display: inline-block;
+  padding: 0.6em 1em;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9em;
+  color: var(--fg);
+  transition: background 0.2s;
+  max-width: 45%;
+}
+.chapter-nav a:hover {
+  background: var(--border);
+  text-decoration: none;
+}
+.chapter-nav-next { text-align: right; margin-left: auto; }
+.page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
+
+/* ===== 절 단위 페이지 ===== */
+.chapter-crumb { margin: 0 0 0.4em; font-size: 0.85em; }
+.chapter-crumb a { color: var(--fg-muted); }
+.chapter-paged > h2:first-of-type { margin-top: 0.4em; }
+#sidebar .sidebar-toc a.current { color: var(--accent); font-weight: 600; }
+
+/* ===== TOC Page ===== */
+.toc-page { padding-top: 1rem; }
+.toc-page h1 {
+  margin-bottom: 1.5rem;
+}
+/* 대문(교재 목록)으로 돌아가는 링크 */
+.site-nav { font-size: 0.9rem; }
+.site-nav a { color: var(--fg-muted); text-decoration: none; }
+.site-nav a:hover { color: var(--accent); }
+.site-nav + h1 { margin-top: 1rem; }
+@media print { .site-nav { display: none; } }
+.toc-list {
+  list-style: none;
+  padding: 0;
+  counter-reset: toc-ch;
+}
+.toc-list li {
+  margin: 0;
+}
+.toc-list a {
+  display: block;
+  padding: 0.7em 1em;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg);
+  font-size: 1.05em;
+  transition: background 0.2s;
+}
+.toc-list a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+
+/* ===== Sidebar Active ===== */
+#sidebar a.active {
+  background: var(--accent);
+  color: #fff;
+}
+#sidebar a.active:hover {
+  background: var(--accent);
+}
+
+/* ===== Print ===== */
+@media print {
+  #sidebar, #sidebar-open, #theme-toggle { display: none; }
+  main { margin: 0; max-width: none; }
+}
+
+/* ===== 그림과 캡션 ===== */
+figure.fig { margin: 1.8em auto; text-align: center; }
+figure.fig img { margin: 0 auto; }
+figure.fig figcaption {
+  margin-top: 0.5em;
+  font-size: 0.86em;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: center;
+}
+/* 초상화: 오른쪽에 작게 띄운다 */
+figure.fig-portrait {
+  float: right;
+  clear: right; /* 초상화가 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
+  width: 200px;
+  margin: 0.3em 0 1em 1.5em;
+  text-align: left;
+}
+figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
+/* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
+.portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
+.portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
+@media (max-width: 600px) {
+  figure.fig-portrait { float: none; width: 170px; margin: 1em auto; }
+  .portrait-row { gap: 1em; }
+  .portrait-row figure.fig-portrait { width: 140px; }
+}
+/* 다크모드에서 흰 바탕 그림이 눈부시지 않게 */
+[data-theme="dark"] figure.fig img { filter: brightness(0.92); }
+
+/* ===== 수식 ===== */
+.math-block { margin: 1.2em 0; }
+.math-block .katex-display { margin: 0; }
+.math-legend {
+  margin: -0.4em auto 1.6em;
+  padding: 0.2em 1em;
+  width: fit-content;
+  max-width: 100%;
+  border-left: 3px solid var(--border);
+  background: var(--bg-code);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.86em;
+}
+.math-legend .katex-display > .katex { text-align: left; }
+/* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
+[data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
+
+/* ===== 인터랙티브 위젯 ===== */
+.widget-embed {
+  margin: 1.8em 0 2.2em;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-code);
+}
+.widget-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3em 0.8em;
+  padding: 0.55em 1em;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9em;
+}
+.widget-tag {
+  font-size: 0.78em;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.03em;
+}
+.widget-label { font-weight: 600; flex: 1; min-width: 12em; }
+.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-embed iframe {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border: 0;
+  background: transparent;
+  color-scheme: normal;
+}
+.widget-embed noscript img { margin: 0; border-radius: 0; }
+
+/* ===== 장 안의 목차 (사이드바) ===== */
+.sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
+#sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
+.toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+</style>
+<script>
+(function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
+</script>
+</head>
+<body>
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="index.html" style="color:inherit;text-decoration:none">ML 입문자를 위한 동역학</a></h2>
+    <div class="sidebar-actions">
+      <button id="theme-toggle" aria-label="다크모드 전환">&#x1F319;</button>
+      <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
+    </div>
+  </div>
+  <ol><li><a href="00-머리말.html">머리말</a></li>
+<li><a href="01-미시상태와-거시상태.html">1장 — 미시상태와 거시상태</a></li>
+<li><a href="02-엔트로피.html">2장 — 엔트로피</a></li>
+<li><a href="03-온도.html">3장 — 온도</a></li>
+<li><a href="04-라그랑지안과-최소-작용-원리.html">4장 — 라그랑지안과 최소 작용 원리</a></li>
+<li><a href="05-르장드르-변환.html">5장 — 르장드르 변환</a></li>
+<li><a href="06-해밀토니안과-위상공간.html">6장 — 해밀토니안과 위상공간</a></li>
+<li><a href="07-볼츠만-분포.html">7장 — 볼츠만 분포</a></li>
+<li><a href="08-마르코프-사슬과-에르고드성.html">8장 — 마르코프 사슬과 에르고드성</a></li>
+<li><a href="09-분배함수와-자유에너지.html">9장 — 분배함수와 자유에너지</a></li>
+<li><a href="10-요동과-응답.html">10장 — 요동과 응답</a></li>
+<li><a href="11-최대-엔트로피-원리.html">11장 — 최대 엔트로피 원리</a></li>
+<li><a href="12-이징-모형과-상전이.html">12장 — 이징 모형과 상전이</a></li>
+<li><a href="13-평균장-근사.html">13장 — 평균장 근사</a></li>
+<li><a href="14-열-방정식과-확산.html">14장 — 열 방정식과 확산</a></li>
+<li><a href="15-브라운-운동-랑주뱅-포커–플랑크.html">15장 — 브라운 운동, 랑주뱅, 포커–플랑크</a></li>
+<li><a href="16-비평형-통계역학과-야르진스키-등식.html">16장 — 비평형 통계역학과 야르진스키 등식</a></li>
+<li><a href="17-스핀-글래스와-레플리카-방법.html" class="active">17장 — 스핀 글래스와 레플리카 방법</a><ul class="sidebar-toc"><li><a href="17-스핀-글래스와-레플리카-방법.html">굳은 무질서: 한 번 뽑히면 그대로인 무작위성</a></li><li><a href="17-스핀-글래스와-레플리카-방법-2.html" class="current">굳힌 평균: 로그를 먼저, 평균은 나중에</a></li><li><a href="17-스핀-글래스와-레플리카-방법-3.html">겹침: 두 배치가 얼마나 닮았나</a></li><li><a href="17-스핀-글래스와-레플리카-방법-4.html">레플리카 방법: 복제본의 수를 0으로 보낸다</a></li><li><a href="17-스핀-글래스와-레플리카-방법-5.html">스핀 글래스: 제각각의 방향으로 굳은 스핀</a></li><li><a href="17-스핀-글래스와-레플리카-방법-6.html">레플리카 대칭 깨짐: 복제본 쌍마다 다른 겹침</a></li><li><a href="17-스핀-글래스와-레플리카-방법-7.html">TAP 방정식: 되돌아온 제 영향을 뺀다</a></li><li><a href="17-스핀-글래스와-레플리카-방법-8.html">기억 용량: 홉필드 네트워크는 패턴을 몇 개까지 기억하나</a></li><li><a href="17-스핀-글래스와-레플리카-방법-9.html">가드너 부피: 퍼셉트론의 경계는 왜 2인가</a></li><li><a href="17-스핀-글래스와-레플리카-방법-10.html">자주 하는 실수와 요약</a></li><li><a href="17-스핀-글래스와-레플리카-방법-11.html">맺음: 경우의 수에서 여기까지</a></li></ul></li></ol>
+</nav>
+<button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
+<main>
+<article class="chapter chapter-paged">
+<p class="chapter-crumb"><a href="17-스핀-글래스와-레플리카-방법.html">17장 — 스핀 글래스와 레플리카 방법</a></p>
+<h2 id="굳힌-평균-로그를-먼저-평균은-나중에">굳힌 평균: 로그를 먼저, 평균은 나중에</h2>
+<p>스핀 16개의 무작위 결합에서 두 순서로 낸 평균은 역온도 3에서 2.029와 2.803으로 크게 달랐다. 실험실에서 재는 합금은 결합이 한 번 정해진 시료 하나이고, 우리가 학습에 쓰는 데이터도 한 번 뽑힌 표본 하나다. 그렇다면 둘 가운데 어느 쪽이 결합을 한 번 뽑아 만든 실제 계를 알려 줄까? 스핀 계보다 익숙한 예부터 보자.</p>
+<h3 id="투자-기대-자산과-전형적인-자산">투자: 기대 자산과 전형적인 자산</h3>
+<p>두 평균의 차이는 투자에서 쉽게 볼 수 있다. 해마다 자산이 반반의 확률로 1.5배나 0.6배가 되면 한 해 배율의 평균은 1.05라 기대 자산은 해마다 5%씩 늘지만, 전형적인 투자자의 빠르기는 배율의 로그 평균 (ln 1.5 + ln 0.6)/2 = −0.053이 정하므로 대부분은 해마다 약 5%씩 잃는다. 100년 뒤 기대 자산은 처음의 131배인데 중앙값은 0.005배다. 기대 자산은 운 좋은 극소수가 끌어올린 값이고, 전형적인 투자자를 알려 주는 것은 로그의 평균이다.</p>
+<figure class="fig "><img src="images/ch17/a2_invest.png" alt="해마다 반반의 확률로 자산이 1.5배나 0.6배가 되는 투자자 200명의 100년(로그 눈금). 기대 자산은 1.05¹⁰⁰ ≈ 131배로 늘지만 중앙값은 0.9⁵⁰ ≈ 0.005배이고, 100년 뒤 원금 이상을 가진 사람은 13.6%뿐이다." loading="lazy"><figcaption>해마다 반반의 확률로 자산이 1.5배나 0.6배가 되는 투자자 200명의 100년(로그 눈금). 기대 자산은 1.05¹⁰⁰ ≈ 131배로 늘지만 중앙값은 0.9⁵⁰ ≈ 0.005배이고, 100년 뒤 원금 이상을 가진 사람은 13.6%뿐이다.</figcaption></figure>
+<h3 id="스핀-계의-두-평균">스핀 계의 두 평균</h3>
+<p>스핀 계로 돌아가면, 두 순서로 낸 평균 사이에는 늘 부등식이 선다. 로그가 위로 볼록하므로 로그를 먼저 씌워 평균한 값은 평균에 로그를 씌운 값보다 클 수 없다.</p>
+<div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><munder><munder><mover accent="true"><mrow><mi>ln</mi><mo>⁡</mo><mstyle mathcolor="#667733"><mi>Z</mi></mstyle></mrow><mo stretchy="true">‾</mo></mover><mo stretchy="true">⏟</mo></munder><mtext>굳힌 평균</mtext></munder><mtext>  </mtext><mo>≤</mo><mtext>  </mtext><munder><munder><mrow><mi>ln</mi><mo>⁡</mo><mover accent="true"><mstyle mathcolor="#667733"><mi>Z</mi></mstyle><mo stretchy="true">‾</mo></mover></mrow><mo stretchy="true">⏟</mo></munder><mtext>풀린 평균</mtext></munder><mo separator="true">,</mo><mspace width="2em"/><mo>−</mo><mstyle mathcolor="#8c564b"><mi>β</mi></mstyle><mtext> </mtext><mover accent="true"><mstyle mathcolor="#a000c8"><mi>F</mi></mstyle><mo stretchy="true">‾</mo></mover><mo>=</mo><mover accent="true"><mrow><mi>ln</mi><mo>⁡</mo><mstyle mathcolor="#667733"><mi>Z</mi></mstyle></mrow><mo stretchy="true">‾</mo></mover></mrow><annotation encoding="application/x-tex">\underbrace{\overline{\ln \textcolor{#667733}{Z}}}_{\text{굳힌 평균}} \;\le\; \underbrace{\ln \overline{\textcolor{#667733}{Z}}}_{\text{풀린 평균}}, \qquad -\textcolor{#8c564b}{\beta}\, \overline{\textcolor{#a000c8}{F}} = \overline{\ln \textcolor{#667733}{Z}}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.2208em;vertical-align:-1.3263em;"></span><span class="minner munder"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8944em;"><span style="top:-1.6737em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord hangul_fallback mtight">굳힌</span><span class="mord mtight"> </span><span class="mord hangul_fallback mtight">평균</span></span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="minner munder"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8944em;"><span class="svg-align" style="top:-2.352em;"><span class="pstrut" style="height:3em;"></span><span class="stretchy" style="height:0.548em;min-width:1.6em;"><span class="brace-left" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewBox="0 0 400000 548" preserveAspectRatio="xMinYMin slice"><path d="M0 6l6-6h17c12.688 0 19.313.3 20 1 4 4 7.313 8.3 10 13
+ 35.313 51.3 80.813 93.8 136.5 127.5 55.688 33.7 117.188 55.8 184.5 66.5.688
+ 0 2 .3 4 1 18.688 2.7 76 4.3 172 5h399450v120H429l-6-1c-124.688-8-235-61.7
+-331-161C60.687 138.7 32.312 99.3 7 54L0 41V6z"/></svg></span><span class="brace-center" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewBox="0 0 400000 548" preserveAspectRatio="xMidYMin slice"><path d="M199572 214
+c100.7 8.3 195.3 44 280 108 55.3 42 101.7 93 139 153l9 14c2.7-4 5.7-8.7 9-14
+ 53.3-86.7 123.7-153 211-199 66.7-36 137.3-56.3 212-62h199568v120H200432c-178.3
+ 11.7-311.7 78.3-403 201-6 8-9.7 12-11 12-.7.7-6.7 1-18 1s-17.3-.3-18-1c-1.3 0
+-5-4-11-12-44.7-59.3-101.3-106.3-170-141s-145.3-54.3-229-60H0V214z"/></svg></span><span class="brace-right" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewBox="0 0 400000 548" preserveAspectRatio="xMaxYMin slice"><path d="M399994 0l6 6v35l-6 11c-56 104-135.3 181.3-238 232-57.3
+ 28.7-117 45-179 50H-300V214h399897c43.3-7 81-15 113-26 100.7-33 179.7-91 237
+-174 2.7-5 6-9 10-13 .7-1 7.3-1 20-1h17z"/></svg></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord overline"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop">ln</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;color:#667733;">Z</span></span></span><span style="top:-3.8144em;"><span class="pstrut" style="height:3em;"></span><span class="overline-line" style="border-bottom-width:0.04em;"></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.648em;"><span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.3263em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.2097em;vertical-align:-1.3263em;"></span><span class="minner munder"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8833em;"><span style="top:-1.6737em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord hangul_fallback mtight">풀린</span><span class="mord mtight"> </span><span class="mord hangul_fallback mtight">평균</span></span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="minner munder"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8833em;"><span class="svg-align" style="top:-2.352em;"><span class="pstrut" style="height:3em;"></span><span class="stretchy" style="height:0.548em;min-width:1.6em;"><span class="brace-left" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewBox="0 0 400000 548" preserveAspectRatio="xMinYMin slice"><path d="M0 6l6-6h17c12.688 0 19.313.3 20 1 4 4 7.313 8.3 10 13
+ 35.313 51.3 80.813 93.8 136.5 127.5 55.688 33.7 117.188 55.8 184.5 66.5.688
+ 0 2 .3 4 1 18.688 2.7 76 4.3 172 5h399450v120H429l-6-1c-124.688-8-235-61.7
+-331-161C60.687 138.7 32.312 99.3 7 54L0 41V6z"/></svg></span><span class="brace-center" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewBox="0 0 400000 548" preserveAspectRatio="xMidYMin slice"><path d="M199572 214
+c100.7 8.3 195.3 44 280 108 55.3 42 101.7 93 139 153l9 14c2.7-4 5.7-8.7 9-14
+ 53.3-86.7 123.7-153 211-199 66.7-36 137.3-56.3 212-62h199568v120H200432c-178.3
+ 11.7-311.7 78.3-403 201-6 8-9.7 12-11 12-.7.7-6.7 1-18 1s-17.3-.3-18-1c-1.3 0
+-5-4-11-12-44.7-59.3-101.3-106.3-170-141s-145.3-54.3-229-60H0V214z"/></svg></span><span class="brace-right" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewBox="0 0 400000 548" preserveAspectRatio="xMaxYMin slice"><path d="M399994 0l6 6v35l-6 11c-56 104-135.3 181.3-238 232-57.3
+ 28.7-117 45-179 50H-300V214h399897c43.3-7 81-15 113-26 100.7-33 179.7-91 237
+-174 2.7-5 6-9 10-13 .7-1 7.3-1 20-1h17z"/></svg></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop">ln</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord overline"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8833em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;color:#667733;">Z</span></span></span><span style="top:-3.8033em;"><span class="pstrut" style="height:3em;"></span><span class="overline-line" style="border-bottom-width:0.04em;"></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.648em;"><span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.3263em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord mathnormal" style="margin-right:0.0528em;color:#8c564b;">β</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord overline"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8833em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;color:#a000c8;">F</span></span></span><span style="top:-3.8033em;"><span class="pstrut" style="height:3em;"></span><span class="overline-line" style="border-bottom-width:0.04em;"></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8944em;"></span><span class="mord overline"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop">ln</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;color:#667733;">Z</span></span></span><span style="top:-3.8144em;"><span class="pstrut" style="height:3em;"></span><span class="overline-line" style="border-bottom-width:0.04em;"></span></span></span></span></span></span></span></span></span></span></div>
+<div class="math-block math-legend"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mover accent="true"><mrow><mi>ln</mi><mo>⁡</mo><mstyle mathcolor="#667733"><mi>Z</mi></mstyle></mrow><mo stretchy="true">‾</mo></mover></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>결합을 굳혀 둔 계마다 ln Z를 구한 뒤 평균 (전형적인 계 하나의 값)</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>ln</mi><mo>⁡</mo><mover accent="true"><mstyle mathcolor="#667733"><mi>Z</mi></mstyle><mo stretchy="true">‾</mo></mover></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>Z를 결합에 대해 먼저 평균한 뒤 로그 (결합도 스핀과 함께 요동하는 것처럼 계산한 값)</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mover accent="true"><mstyle mathcolor="#a000c8"><mi>F</mi></mstyle><mo stretchy="true">‾</mo></mover></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>결합에 대해 평균한 자유에너지</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#8c564b"><mi>β</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>역온도</mtext></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{ll}
+\overline{\ln \textcolor{#667733}{Z}} &amp; \text{결합을 굳혀 둔 계마다 ln Z를 구한 뒤 평균 (전형적인 계 하나의 값)} \\
+\ln \overline{\textcolor{#667733}{Z}} &amp; \text{Z를 결합에 대해 먼저 평균한 뒤 로그 (결합도 스핀과 함께 요동하는 것처럼 계산한 값)} \\
+\overline{\textcolor{#a000c8}{F}} &amp; \text{결합에 대해 평균한 자유에너지} \\
+\textcolor{#8c564b}{\beta} &amp; \text{역온도}
+\end{array}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:4.9411em;vertical-align:-2.2205em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.7206em;"><span style="top:-4.8261em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord overline"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop">ln</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;color:#667733;">Z</span></span></span><span style="top:-3.8144em;"><span class="pstrut" style="height:3em;"></span><span class="overline-line" style="border-bottom-width:0.04em;"></span></span></span></span></span></span></span></span><span style="top:-3.5828em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop">ln</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord overline"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8833em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;color:#667733;">Z</span></span></span><span style="top:-3.8033em;"><span class="pstrut" style="height:3em;"></span><span class="overline-line" style="border-bottom-width:0.04em;"></span></span></span></span></span></span></span></span><span style="top:-2.3395em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord overline"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8833em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;color:#a000c8;">F</span></span></span><span style="top:-3.8033em;"><span class="pstrut" style="height:3em;"></span><span class="overline-line" style="border-bottom-width:0.04em;"></span></span></span></span></span></span></span></span><span style="top:-1.1395em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0528em;color:#8c564b;">β</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.2205em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.7206em;"><span style="top:-4.8261em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">결합을</span><span class="mord"> </span><span class="mord hangul_fallback">굳혀</span><span class="mord"> </span><span class="mord hangul_fallback">둔</span><span class="mord"> </span><span class="mord hangul_fallback">계마다</span><span class="mord"> ln Z</span><span class="mord hangul_fallback">를</span><span class="mord"> </span><span class="mord hangul_fallback">구한</span><span class="mord"> </span><span class="mord hangul_fallback">뒤</span><span class="mord"> </span><span class="mord hangul_fallback">평균</span><span class="mord"> (</span><span class="mord hangul_fallback">전형적인</span><span class="mord"> </span><span class="mord hangul_fallback">계</span><span class="mord"> </span><span class="mord hangul_fallback">하나의</span><span class="mord"> </span><span class="mord hangul_fallback">값</span><span class="mord">)</span></span></span></span><span style="top:-3.5828em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">Z</span><span class="mord hangul_fallback">를</span><span class="mord"> </span><span class="mord hangul_fallback">결합에</span><span class="mord"> </span><span class="mord hangul_fallback">대해</span><span class="mord"> </span><span class="mord hangul_fallback">먼저</span><span class="mord"> </span><span class="mord hangul_fallback">평균한</span><span class="mord"> </span><span class="mord hangul_fallback">뒤</span><span class="mord"> </span><span class="mord hangul_fallback">로그</span><span class="mord"> (</span><span class="mord hangul_fallback">결합도</span><span class="mord"> </span><span class="mord hangul_fallback">스핀과</span><span class="mord"> </span><span class="mord hangul_fallback">함께</span><span class="mord"> </span><span class="mord hangul_fallback">요동하는</span><span class="mord"> </span><span class="mord hangul_fallback">것처럼</span><span class="mord"> </span><span class="mord hangul_fallback">계산한</span><span class="mord"> </span><span class="mord hangul_fallback">값</span><span class="mord">)</span></span></span></span><span style="top:-2.3395em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">결합에</span><span class="mord"> </span><span class="mord hangul_fallback">대해</span><span class="mord"> </span><span class="mord hangul_fallback">평균한</span><span class="mord"> </span><span class="mord hangul_fallback">자유에너지</span></span></span></span><span style="top:-1.1395em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">역온도</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.2205em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
+<p>왼쪽을 <strong>굳힌 평균</strong> (결합을 한 번 뽑아 굳힌 계마다 ln <span class="sym" style="color:#667733">Z</span>를 구하고 그 값을 결합에 대해 평균한 것, quenched average)이라 하고, 물리 문헌에서는 담금질 평균이라고도 옮긴다. 오른쪽처럼 결합까지 스핀과 함께 열평형에 드는 변수로 풀어 두고 <span class="sym" style="color:#667733">Z</span>를 먼저 평균한 뒤 로그를 씌운 것은 풀린 평균(annealed average)이라 부른다. 투자에서 기대 자산이 풀린 평균에, 로그의 평균이 정하는 전형적인 자산이 굳힌 평균에 해당한다. 실제로 관찰하는 것은 결합이 고정된 계 하나이므로 물리적인 값은 굳힌 평균이고, 풀린 평균은 계산하기 쉬운 상한이다.</p>
+<h3 id="역사-굳은-불순물은-로그부터">역사: 굳은 불순물은 로그부터</h3>
+<p>로그를 먼저 씌워야 한다는 생각은 스핀 글래스보다 오래되었다. 1950년대 말 브라우트는 고체 속에 무작위로 박힌 불순물을 다루면서 두 경우를 갈랐다. 불순물도 늘 열평형에 드는 경우라면 분배함수를 먼저 평균하면 된다. 그러나 우리가 알고 싶은 것은 불순물이 제자리에 굳은 시료 하나의 자유에너지이므로, 열평형에 있는 스핀에 대한 합으로 분배함수를 먼저 구하고 그 로그를 불순물의 배치에 대해 평균해야 한다고 그는 적었다. 무엇을 계산해야 하는지는 이렇게 일찍 분명해졌지만, 로그의 평균을 실제로 계산하는 방법은 오래 막혀 있었다.</p>
+<h3 id="계-하나가-평균을-대신한다">계 하나가 평균을 대신한다</h3>
+<p>그런데 굳힌 평균도 결국 결합에 대한 평균이고, 우리가 관찰하는 것은 결합을 한 번 뽑아 고정한 계 하나다. 그 계 하나에서 잰 값이 굳힌 평균과 가까우리라고 믿어도 될까?</p>
+<p>스핀이 많아지면 결합을 한 번만 뽑아도 스핀 하나당 ln <span class="sym" style="color:#667733">Z</span>가 거의 늘 그 평균값에 가까워진다. <span class="sym" style="color:#8c564b">β</span> = 2에서 스핀 하나당 ln <span class="sym" style="color:#667733">Z</span>의 표준편차는 스핀 8·12·16·20개일 때 0.178·0.137·0.117·0.103으로 줄지만, <span class="sym" style="color:#667733">Z</span> 자체의 상대 표준편차는 줄지 않는다. 이처럼 계 하나에서 잰 값이 계가 커질수록 무질서에 대한 평균으로 모이는 성질을 자기 평균(self-averaging)이라 한다. 스핀 하나당 ln <span class="sym" style="color:#667733">Z</span>는 자기 평균이고, <span class="sym" style="color:#667733">Z</span>는 자기 평균이 아니다. 까닭은 투자에서 본 것과 같은 구조다. 스핀 하나당 ln <span class="sym" style="color:#667733">Z</span>는 결합의 우연이 스핀들 사이에서 서로 상쇄되어 평균 근처로 모이지만, <span class="sym" style="color:#667733">Z</span>는 그 값에 스핀 수를 곱해 지수로 올린 e^(<span class="sym" style="color:#1f77b4">N</span> × 스핀 하나당 ln <span class="sym" style="color:#667733">Z</span>)라서, 스핀 하나당으로는 작은 흔들림이 <span class="sym" style="color:#1f77b4">N</span>배로 불어나 지수에 들어간다. 로그 자산은 모이고 자산은 모이지 않던 것과 같다.</p>
+<p><span class="sym" style="color:#667733">Z</span>가 자기 평균이 아니라는 것은 스핀 16개의 표에서도 보인다. 결합 300개로 낸 평균 <span class="sym" style="color:#667733">Z</span>의 로그는 <span class="sym" style="color:#8c564b">β</span> = 3에서 2.496으로, 손으로 계산한 2.803에 한참 못 미쳤다. 표본 평균이 참값에 이르지 못하는 것은 평균 <span class="sym" style="color:#667733">Z</span>가 드물게 뽑히는 결합 몇 개에 좌우되기 때문이다. 결합을 2000번 뽑아 보면 <span class="sym" style="color:#8c564b">β</span> = 3에서 <span class="sym" style="color:#667733">Z</span>가 큰 순서로 상위 1%인 결합 20개가 <span class="sym" style="color:#667733">Z</span> 합계의 93%를 차지한다. 투자에서 기대 자산을 운 좋은 극소수가 끌어올린 것과 같은 모습이다. 그렇다면 <span class="sym" style="color:#667733">Z</span>는 결합에 따라 얼마나 흔들릴까?</p>
+<h3 id="ml에서-담금질-이라는-같은-이름">ML에서: 「담금질」이라는 같은 이름</h3>
+<p>1983년 IBM에 있던 커크패트릭은 겔라트, 베키와 함께 무작위 결합 스핀 계의 시뮬레이션 방법을 컴퓨터 칩의 부품 자리 정하기 같은 최적화 문제에 옮겨 모의 담금질(simulated annealing)을 만들었고, 온도를 천천히 내리며 분포를 옮기는 ML의 여러 절차가 이 이름을 물려받았다. 금속 가공에서는 급히 식혀 굳히는 것(quench)을 담금질, 천천히 식혀 푸는 것(anneal)을 풀림이라 부르지만, ML에서는 온도나 잡음 수준을 천천히 바꾸는 절차를 흔히 담금질이라 옮겨 담금질 중요도 샘플링(annealed importance sampling)이나 담금질 랑주뱅이라 부른다. 그 담금질은 분포를 옮기는 절차의 이름이고, 여기의 굳힌 평균과 풀린 평균은 무질서에 대해 평균을 내는 순서의 이름이다. 두 이름이 섞이지 않도록 이 장은 역할이 드러나는 「굳힌」과 「풀린」을 쓴다.</p>
+<h3 id="ml에서-입력이-많을수록-날카로워지는-경계">ML에서: 입력이 많을수록 날카로워지는 경계</h3>
+<p>장 첫머리에서 입력이 100개일 때는 P/<span class="sym" style="color:#1f77b4">N</span> = 1.8에서 외워질 확률이 0.933, 2.2에서 0.088이었지만, 입력이 400개이면 0.999와 0.003이었다. 외울 수 있는지는 데이터를 뽑을 때마다 달라지는 운의 문제인데, 입력이 많아질수록 무작위 데이터 하나로 얻은 답이 평균적인 답과 같아진다. 외우기의 경계가 데이터 표본 하나가 아니라 무작위 데이터 전체의 성질로 정해지는 것은 자기 평균 덕분이다.</p>
+<div class="dialogue"><h3 id="문제-2-기대-수익-20-짜리-투자">문제 2. 기대 수익 20%짜리 투자</h3>
+<blockquote>
+<p>해마다 자산이 반반의 확률로 2배가 되거나 0.4배가 되는 투자가 있다. (가) 한 해 배율의 평균과, 배율의 로그 평균이 정하는 전형적인 한 해 배율을 구하라. (나) 10년 뒤 기대 자산과 중앙값은 처음의 몇 배인가? (다) 이 투자를 한 사람 가운데 10년 뒤 원금 이상을 가진 사람의 비율은 얼마이고, 기대 자산은 누가 만드는가?</p>
+</blockquote>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>평균 배율이 (2 + 0.4)/2 = 1.2니까 해마다 20%씩 버는 투자예요. 10년이면 1.2¹⁰ ≈ 6.19배고요. 무조건 해야죠.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>로그 평균은 (ln 2 + ln 0.4)/2 = −0.112야. 전형적인 한 해 배율이 e^(−0.112) ≈ 0.894라서 해마다 10%쯤 잃어.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>10년 동안 다섯 번 2배, 다섯 번 0.4배가 된 사람은 얼마를 갖고 있죠?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>2⁵ × 0.4⁵ = 0.8⁵ ≈ 0.328배요. 3분의 1로 줄었네요. 이게 중앙값이라고요? 기대 자산은 6.19배인데요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S09"><img src="images/cast/S09.webp" alt="이서연 S09" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>원금 이상이 되려면 2배가 열 번 가운데 여섯 번 이상 나와야 해. 그 확률이 (210 + 120 + 45 + 10 + 1)/1024 ≈ 37.7%야. 열 명 가운데 여섯 명은 손해를 봐.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 6.19배라는 기대 자산은 누가 만들었을까요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.webp" alt="김민준 M08" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>열 번 다 2배가 된 사람은 1024배예요. 1024명 가운데 한 명이요. 2배가 여덟 번 이상 나온 5.5%가 기대 자산의 78%를 만들어요. 평균은 그 사람들이 끌어올린 거네요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>기대 자산이 풀린 평균 자리고, 로그의 평균이 굳힌 평균 자리네.</p></div></div>
+</div><div class="dialogue"><h3 id="문제-3-시험-문장-네-개의-로그-확률">문제 3. 시험 문장 네 개의 로그 확률</h3>
+<blockquote>
+<p>언어 모델에게 시험 문장 네 개를 보여 주었더니, 모델이 매긴 문장 확률의 로그가 −20, −30, −40, −50이었다. (가) 문장마다 로그 확률을 먼저 구해 평균한 값과, 확률을 먼저 평균한 뒤 로그를 씌운 값을 구하라. (나) 이 모델이 전형적인 문장에 매기는 로그 확률은 어느 쪽인가? 시험 문장이 1000개라면 뒤의 값은 무엇에 끌려가는가?</p>
+</blockquote>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>확률을 평균한 다음 로그를 씌웠어요. ln((e⁻²⁰ + e⁻³⁰ + e⁻⁴⁰ + e⁻⁵⁰)/4) = −21.39예요. 평균 확률의 로그니까 이게 전형적인 값이죠.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S04"><img src="images/cast/S04.webp" alt="이서연 S04" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>로그를 먼저 평균하면 −35야. 14 가까이 차이가 나는데, 네 값은 −20에서 ln 4 = 1.39를 뺀 것과 거의 같아.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>민준 학생 값에 둘째, 셋째, 넷째 문장은 얼마나 보태졌죠?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>e⁻³⁰은 e⁻²⁰의 e⁻¹⁰ ≈ 0.00005배라… 거의 안 보태졌어요. 첫 문장 하나가 다 정했네요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>문장이 1000개면 확률이 가장 높은 한 문장의 로그 확률에서 ln 1000 ≈ 6.9를 뺀 값 근처가 되겠다. 나머지 999개는 거의 보이지 않고.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>모델을 평가할 때 문장마다 손실을 구해 평균하죠. 그 손실은 어느 쪽이었나요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>문장마다 음의 로그 확률을 먼저 구하고 평균하는 교차 엔트로피요. 로그를 먼저 씌우는 쪽이었네요. 아까 투자에서 로그 평균이 전형적인 사람을 알려 준 거랑 같아요.</p></div></div>
+</div>
+</article>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="17-스핀-글래스와-레플리카-방법.html">&larr; 굳은 무질서: 한 번 뽑히면 그대로인 무작위성</a><span class="page-count">2 / 11</span><a class="chapter-nav-next" href="17-스핀-글래스와-레플리카-방법-3.html">겹침: 두 배치가 얼마나 닮았나 &rarr;</a></nav>
+</main>
+<script type="module">
+const toggle = document.getElementById('theme-toggle');
+const frames = () => document.querySelectorAll('.widget-embed iframe');
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  toggle.textContent = t === 'dark' ? '\u2600\uFE0F' : '\u{1F319}';
+  frames().forEach(f => f.contentWindow && f.contentWindow.postMessage({ type: 'dyn-theme', theme: t }, '*'));
+}
+const curTheme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+setTheme(curTheme());
+toggle.addEventListener('click', () => {
+  const t = curTheme() === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('theme', t);
+  setTheme(t);
+  renderMermaid();
+});
+
+// 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  io.unobserve(e.target);
+  e.target.src = e.target.dataset.src + '&theme=' + curTheme();
+}), { rootMargin: '600px' });
+frames().forEach(f => io.observe(f));
+addEventListener('message', e => {
+  if (!e.data || e.data.type !== 'dyn-widget-height') return;
+  frames().forEach(f => { if (f.contentWindow === e.source) { f.style.height = e.data.h + 'px'; f.classList.add('ready'); } });
+});
+
+// 사이드바
+const sidebar = document.getElementById('sidebar');
+document.getElementById('sidebar-open').addEventListener('click', () => sidebar.classList.add('open'));
+document.getElementById('sidebar-close').addEventListener('click', () => sidebar.classList.remove('open'));
+sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', () => sidebar.classList.remove('open')));
+
+// 키보드 ←/→ 로 이전·다음 페이지
+addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  const a = document.querySelector(e.key === 'ArrowLeft' ? '.chapter-nav-prev' : e.key === 'ArrowRight' ? '.chapter-nav-next' : null);
+  if (a) location.href = a.href;
+});
+
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+</script>
+</body>
+</html>
