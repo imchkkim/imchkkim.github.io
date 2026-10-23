@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시간과 주파수를 함께: 짧은 구간 푸리에 변환과 웨이블릿 — 스펙트럼으로 보기: 에피사이클에서 구면 조화까지</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>@font-face{font-display:block;font-family:KaTeX_AMS;font-style:normal;font-weight:400;src:url(fonts/KaTeX_AMS-Regular.woff2) format("woff2"),url(fonts/KaTeX_AMS-Regular.woff) format("woff"),url(fonts/KaTeX_AMS-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Bold.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Regular.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Fraktur-Bold.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Bold.woff) format("woff"),url(fonts/KaTeX_Fraktur-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Fraktur-Regular.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Regular.woff) format("woff"),url(fonts/KaTeX_Fraktur-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Main-Bold.woff2) format("woff2"),url(fonts/KaTeX_Main-Bold.woff) format("woff"),url(fonts/KaTeX_Main-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Main-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Main-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Main-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Main-Italic.woff2) format("woff2"),url(fonts/KaTeX_Main-Italic.woff) format("woff"),url(fonts/KaTeX_Main-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Main-Regular.woff2) format("woff2"),url(fonts/KaTeX_Main-Regular.woff) format("woff"),url(fonts/KaTeX_Main-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Math-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Math-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Math-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Math-Italic.woff2) format("woff2"),url(fonts/KaTeX_Math-Italic.woff) format("woff"),url(fonts/KaTeX_Math-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:700;src:url(fonts/KaTeX_SansSerif-Bold.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Bold.woff) format("woff"),url(fonts/KaTeX_SansSerif-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:italic;font-weight:400;src:url(fonts/KaTeX_SansSerif-Italic.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Italic.woff) format("woff"),url(fonts/KaTeX_SansSerif-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:400;src:url(fonts/KaTeX_SansSerif-Regular.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Regular.woff) format("woff"),url(fonts/KaTeX_SansSerif-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Script;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Script-Regular.woff2) format("woff2"),url(fonts/KaTeX_Script-Regular.woff) format("woff"),url(fonts/KaTeX_Script-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size1;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size1-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size1-Regular.woff) format("woff"),url(fonts/KaTeX_Size1-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size2;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size2-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size2-Regular.woff) format("woff"),url(fonts/KaTeX_Size2-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size3;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size3-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size3-Regular.woff) format("woff"),url(fonts/KaTeX_Size3-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size4;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size4-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size4-Regular.woff) format("woff"),url(fonts/KaTeX_Size4-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Typewriter;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Typewriter-Regular.woff2) format("woff2"),url(fonts/KaTeX_Typewriter-Regular.woff) format("woff"),url(fonts/KaTeX_Typewriter-Regular.ttf) format("truetype")}.katex{font:normal 1.21em KaTeX_Main,Times New Roman,serif;line-height:1.2;position:relative;text-indent:0;text-rendering:auto}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.16.47"}.katex .katex-mathml{border:0;-webkit-clip-path:inset(50%);clip-path:inset(50%);height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.newline{display:block}.katex .base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .base,.katex .strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathboldfrak,.katex .textboldfrak{font-family:KaTeX_Fraktur;font-weight:700}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .mathsfit,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .hbox{width:100%}.katex .hbox,.katex .thinbox{display:inline-flex;flex-direction:row}.katex .thinbox{max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline,.katex .hline,.katex .mfrac .frac-line,.katex .overline .overline-line,.katex .rule,.katex .underline .underline-line{min-height:1px}.katex .mspace{display:inline-block}.katex .smash{display:inline;line-height:0}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.inner,.katex .llap>.inner,.katex .rlap>.inner{position:absolute}.katex .clap>.fix,.katex .llap>.fix,.katex .rlap>.fix{display:inline-block}.katex .llap>.inner{right:0}.katex .clap>.inner,.katex .rlap>.inner{left:0}.katex .clap>.inner>span{margin-left:-50%;margin-right:50%}.katex .rule{border:0 solid;display:inline-block;position:relative}.katex .hline,.katex .overline .overline-line,.katex .underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.root{margin-left:.2777777778em;margin-right:-.5555555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .sizing.reset-size2.size1{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .sizing.reset-size2.size3{font-size:1.1666666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .sizing.reset-size2.size4{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .sizing.reset-size2.size6{font-size:1.6666666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .sizing.reset-size2.size10{font-size:3.4566666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .sizing.reset-size2.size11{font-size:4.1466666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .sizing.reset-size3.size1{font-size:.7142857143em}.katex .fontsize-ensurer.reset-size3.size2,.katex .sizing.reset-size3.size2{font-size:.8571428571em}.katex .fontsize-ensurer.reset-size3.size3,.katex .sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .sizing.reset-size3.size4{font-size:1.1428571429em}.katex .fontsize-ensurer.reset-size3.size5,.katex .sizing.reset-size3.size5{font-size:1.2857142857em}.katex .fontsize-ensurer.reset-size3.size6,.katex .sizing.reset-size3.size6{font-size:1.4285714286em}.katex .fontsize-ensurer.reset-size3.size7,.katex .sizing.reset-size3.size7{font-size:1.7142857143em}.katex .fontsize-ensurer.reset-size3.size8,.katex .sizing.reset-size3.size8{font-size:2.0571428571em}.katex .fontsize-ensurer.reset-size3.size9,.katex .sizing.reset-size3.size9{font-size:2.4685714286em}.katex .fontsize-ensurer.reset-size3.size10,.katex .sizing.reset-size3.size10{font-size:2.9628571429em}.katex .fontsize-ensurer.reset-size3.size11,.katex .sizing.reset-size3.size11{font-size:3.5542857143em}.katex .fontsize-ensurer.reset-size4.size1,.katex .sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .sizing.reset-size5.size1{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .sizing.reset-size5.size2{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .sizing.reset-size5.size3{font-size:.7777777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .sizing.reset-size5.size4{font-size:.8888888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .sizing.reset-size5.size6{font-size:1.1111111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .sizing.reset-size5.size7{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .sizing.reset-size5.size10{font-size:2.3044444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .sizing.reset-size5.size11{font-size:2.7644444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .sizing.reset-size7.size1{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .sizing.reset-size7.size3{font-size:.5833333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .sizing.reset-size7.size4{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .sizing.reset-size7.size6{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .sizing.reset-size7.size10{font-size:1.7283333333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .sizing.reset-size7.size11{font-size:2.0733333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .sizing.reset-size8.size1{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .sizing.reset-size8.size2{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .sizing.reset-size8.size3{font-size:.4861111111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .sizing.reset-size8.size4{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .sizing.reset-size8.size6{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .sizing.reset-size8.size7{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .sizing.reset-size8.size10{font-size:1.4402777778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .sizing.reset-size8.size11{font-size:1.7277777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .sizing.reset-size9.size1{font-size:.2893518519em}.katex .fontsize-ensurer.reset-size9.size2,.katex .sizing.reset-size9.size2{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .sizing.reset-size9.size3{font-size:.4050925926em}.katex .fontsize-ensurer.reset-size9.size4,.katex .sizing.reset-size9.size4{font-size:.462962963em}.katex .fontsize-ensurer.reset-size9.size5,.katex .sizing.reset-size9.size5{font-size:.5208333333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .sizing.reset-size9.size6{font-size:.5787037037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .sizing.reset-size9.size7{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .sizing.reset-size9.size8{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .sizing.reset-size9.size10{font-size:1.2002314815em}.katex .fontsize-ensurer.reset-size9.size11,.katex .sizing.reset-size9.size11{font-size:1.4398148148em}.katex .fontsize-ensurer.reset-size10.size1,.katex .sizing.reset-size10.size1{font-size:.2410800386em}.katex .fontsize-ensurer.reset-size10.size2,.katex .sizing.reset-size10.size2{font-size:.2892960463em}.katex .fontsize-ensurer.reset-size10.size3,.katex .sizing.reset-size10.size3{font-size:.337512054em}.katex .fontsize-ensurer.reset-size10.size4,.katex .sizing.reset-size10.size4{font-size:.3857280617em}.katex .fontsize-ensurer.reset-size10.size5,.katex .sizing.reset-size10.size5{font-size:.4339440694em}.katex .fontsize-ensurer.reset-size10.size6,.katex .sizing.reset-size10.size6{font-size:.4821600771em}.katex .fontsize-ensurer.reset-size10.size7,.katex .sizing.reset-size10.size7{font-size:.5785920926em}.katex .fontsize-ensurer.reset-size10.size8,.katex .sizing.reset-size10.size8{font-size:.6943105111em}.katex .fontsize-ensurer.reset-size10.size9,.katex .sizing.reset-size10.size9{font-size:.8331726133em}.katex .fontsize-ensurer.reset-size10.size10,.katex .sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .sizing.reset-size10.size11{font-size:1.1996142719em}.katex .fontsize-ensurer.reset-size11.size1,.katex .sizing.reset-size11.size1{font-size:.2009646302em}.katex .fontsize-ensurer.reset-size11.size2,.katex .sizing.reset-size11.size2{font-size:.2411575563em}.katex .fontsize-ensurer.reset-size11.size3,.katex .sizing.reset-size11.size3{font-size:.2813504823em}.katex .fontsize-ensurer.reset-size11.size4,.katex .sizing.reset-size11.size4{font-size:.3215434084em}.katex .fontsize-ensurer.reset-size11.size5,.katex .sizing.reset-size11.size5{font-size:.3617363344em}.katex .fontsize-ensurer.reset-size11.size6,.katex .sizing.reset-size11.size6{font-size:.4019292605em}.katex .fontsize-ensurer.reset-size11.size7,.katex .sizing.reset-size11.size7{font-size:.4823151125em}.katex .fontsize-ensurer.reset-size11.size8,.katex .sizing.reset-size11.size8{font-size:.578778135em}.katex .fontsize-ensurer.reset-size11.size9,.katex .sizing.reset-size11.size9{font-size:.6945337621em}.katex .fontsize-ensurer.reset-size11.size10,.katex .sizing.reset-size11.size10{font-size:.8336012862em}.katex .fontsize-ensurer.reset-size11.size11,.katex .sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .accent .accent-body{position:relative}.katex .accent .accent-body:not(.accent-full){width:0}.katex .overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex svg{fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .stretchy:after,.katex .stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+</style>
+<style>/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-code: #f5f5f5;
+  --fg: #1a1a1a;
+  --fg-muted: #555;
+  --accent: #1565C0;
+  --border: #ddd;
+  --sidebar-bg: #fafafa;
+  --sidebar-width: 280px;
+  --chapter-gap: 3rem;
+  --max-width: 52rem;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1a2e;
+  --bg-code: #16213e;
+  --fg: #e0e0e0;
+  --fg-muted: #aaa;
+  --accent: #64b5f6;
+  --border: #333;
+  --sidebar-bg: #16213e;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.8;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ===== Main Content ===== */
+main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.chapter { margin-bottom: var(--chapter-gap); }
+
+hr.chapter-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: var(--chapter-gap) 0;
+}
+
+/* ===== Typography ===== */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+  font-weight: 700;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.3em; }
+h2 { font-size: 1.6rem; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+h3 { font-size: 1.3rem; }
+h4 { font-size: 1.1rem; }
+
+.chapter > h1:first-child,
+.chapter > h2:first-child,
+.chapter > h3:first-child { margin-top: 0; }
+
+p { margin: 0.8em 0; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+strong { font-weight: 700; }
+
+blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 0.5em 1em;
+  margin: 1em 0;
+  background: var(--bg-code);
+  color: var(--fg-muted);
+}
+
+/* 보법 노트: 본문 흐름 밖의 곁글 */
+aside.sidenote {
+  margin: 1.5em 0;
+  padding: 0.9em 1.2em;
+  border: 1px solid var(--border);
+  border-top: 3px solid #b8860b;
+  border-radius: 6px;
+  background: var(--bg-code);
+  font-size: 0.93em;
+}
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+[data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
+[data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
+
+/* 길잡이: 다른 권(이론 책 ↔ 응용 책)으로 잇는 안내. 곁글과 다르게 왼쪽 선 + 작은 글씨 */
+aside.guide {
+  margin: 1.2em 0;
+  padding: 0.6em 1em;
+  border-left: 3px solid #0093b8;
+  background: var(--bg-code);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.9em;
+}
+aside.guide p { margin: 0.2em 0; }
+aside.guide .guide-title { font-weight: 700; color: #0078a0; }
+[data-theme="dark"] aside.guide { border-left-color: #37a9be; }
+[data-theme="dark"] aside.guide .guide-title { color: #5cc4d8; }
+
+/* ===== Code ===== */
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9em;
+  background: var(--bg-code);
+  padding: 0.15em 0.3em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--bg-code);
+  padding: 1em 1.2em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1em 0;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85em;
+}
+
+/* ===== Tables ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: 0.95em;
+}
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.8em;
+  text-align: left;
+}
+th { background: var(--bg-code); font-weight: 600; }
+
+/* ===== Lists ===== */
+ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
+li { margin: 0.3em 0; }
+
+/* ===== SVG ===== */
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+}
+
+[data-theme="dark"] svg text { fill: var(--fg); }
+[data-theme="dark"] svg line,
+[data-theme="dark"] svg path { stroke: var(--fg-muted); }
+
+/* KaTeX 는 근호·긴 화살표를 SVG 로 그린다. 위 전역 규칙에서 빼낸다. */
+.katex svg {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: inherit;
+  max-width: none;
+  margin: 0;
+}
+[data-theme="dark"] .katex svg path { stroke: inherit; }
+
+/* ===== Images ===== */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+  border-radius: 6px;
+}
+
+/* ===== 따라 계산해 보기 / 연습문제 ===== */
+.worked, .exercises {
+  margin: 1.8em 0;
+  padding: 1em 1.3em;
+  border-left: 4px solid var(--accent);
+  background: var(--bg-code);
+  border-radius: 0 8px 8px 0;
+}
+.worked > :first-child, .exercises > :first-child { margin-top: 0; }
+.exercises ol { padding-left: 1.4em; }
+.exercises li { margin: 0.6em 0; }
+.exercises .level {
+  display: inline-block;
+  font-size: 0.75em;
+  padding: 0 0.5em;
+  margin-right: 0.4em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--fg-muted);
+  vertical-align: 0.1em;
+}
+details.answer { margin: 0.4em 0 0.2em; font-size: 0.95em; }
+details.answer summary { cursor: pointer; color: var(--accent); }
+
+/* ===== 같이 풀기 세션 (대화) ===== */
+.exercises + h4 {
+  margin-top: 1.2em;
+  font-size: 0.95em;
+  color: var(--fg-muted);
+  letter-spacing: 0.02em;
+}
+.exercises + h4::before { content: "💬 "; }
+/* 인물 색은 .turn 에도 둔다: 문제 밖 대화(16장 맺음 등)에서도 이름·선 색이 나오게 */
+.dialogue, .turn { --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; }
+.dialogue {
+  margin: 1.5em 0 2em;
+}
+[data-theme="dark"] :is(.dialogue, .turn) { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
+.turn {
+  display: flex;
+  gap: 0.9em;
+  align-items: flex-start;
+  margin: 0.7em 0;
+}
+.turn-body {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55em 0.95em;
+  border-radius: 10px;
+  background: var(--bg-code);
+}
+.turn-body p { margin: 0; font-weight: 350; }
+.turn-body strong { font-weight: 600; }
+
+/* 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨 */
+.dialogue blockquote {
+  background: #fff;
+  color: #111;
+  border: 1.5px solid #222;
+  border-radius: 4px;
+  padding: 0.9em 1.2em;
+  margin: 0.8em 0 1.4em;
+  font-size: 1.12em;
+  font-weight: 600;
+  line-height: 1.75;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.dialogue blockquote p { margin: 0; }
+.dialogue blockquote code { background: #eee; color: #111; }
+[data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+.turn-T { --who: var(--who-T); }
+.turn-M { --who: var(--who-M); }
+.turn-S { --who: var(--who-S); }
+.cast {
+  flex: 0 0 88px;
+  width: 88px;
+  margin: 0;
+}
+.cast img {
+  width: 88px; height: 88px;
+  object-fit: cover;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  float: none; box-shadow: none; max-width: none;
+}
+.cast figcaption {
+  margin-top: 0.25em;
+  text-align: center;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--who);
+}
+.cast-slot {
+  width: 88px; height: 88px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border: 1.5px dashed var(--who, var(--border));
+  border-radius: 12px;
+  color: var(--who);
+  font-size: 0.85em;
+  font-weight: 600;
+  opacity: 0.75;
+  line-height: 1.3;
+}
+.cast-slot small { font-weight: 400; font-size: 0.8em; color: var(--fg-muted); }
+/* 대화 사이의 수식·그림은 말풍선 폭에 맞춘다 */
+.dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: calc(88px + 0.9em); }
+@media (max-width: 600px) {
+  .cast, .cast img, .cast-slot { flex-basis: 56px; width: 56px; height: 56px; }
+  .cast-slot { font-size: 0.7em; }
+  .dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: 0; }
+}
+
+
+/* ===== KaTeX ===== */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}
+
+/* ===== Mermaid ===== */
+pre.mermaid {
+  background: transparent;
+  border: none;
+  text-align: center;
+  padding: 1em 0;
+}
+
+/* ===== Theme Toggle (목차 머리 안) ===== */
+#theme-toggle {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+#theme-toggle:hover { background: var(--border); }
+
+/* ===== Sidebar ===== */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 999;
+  transition: left 0.3s ease;
+  padding: 1rem;
+}
+#sidebar.open { left: 0; }
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-header h2 { font-size: 1.1rem; margin: 0; border: none; padding: 0; }
+.sidebar-actions { display: flex; align-items: center; gap: 0.4rem; }
+
+#sidebar-close {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: var(--fg);
+  padding: 0 0.3em;
+}
+
+#sidebar ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: chapter;
+}
+#sidebar li {
+  margin: 0.3em 0;
+}
+#sidebar a {
+  display: block;
+  padding: 0.4em 0.5em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--fg);
+}
+#sidebar a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+
+#sidebar-open {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 998;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#sidebar-open:hover { background: var(--border); }
+
+/* ===== Responsive ===== */
+@media (min-width: 1200px) {
+  #sidebar {
+    left: 0;
+    padding-top: 2rem;
+  }
+  #sidebar-open { display: none; }
+  #sidebar-close { display: none; }
+  main {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+@media (max-width: 600px) {
+  main { padding: 1rem 0.8rem 3rem; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  pre { font-size: 0.8em; padding: 0.8em; }
+}
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
+
+/* ===== Chapter Navigation ===== */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border);
+  gap: 1rem;
+}
+.chapter-nav a {
+  display: inline-block;
+  padding: 0.6em 1em;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9em;
+  color: var(--fg);
+  transition: background 0.2s;
+  max-width: 45%;
+}
+.chapter-nav a:hover {
+  background: var(--border);
+  text-decoration: none;
+}
+.chapter-nav-next { text-align: right; margin-left: auto; }
+.page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
+
+/* ===== 절 단위 페이지 ===== */
+.chapter-crumb { margin: 0 0 0.4em; font-size: 0.85em; }
+.chapter-crumb a { color: var(--fg-muted); }
+.chapter-paged > h2:first-of-type { margin-top: 0.4em; }
+#sidebar .sidebar-toc a.current { color: var(--accent); font-weight: 600; }
+
+/* ===== TOC Page ===== */
+.toc-page { padding-top: 1rem; }
+.toc-page h1 {
+  margin-bottom: 1.5rem;
+}
+/* 대문(교재 목록)으로 돌아가는 링크 */
+.site-nav { font-size: 0.9rem; }
+.site-nav a { color: var(--fg-muted); text-decoration: none; }
+.site-nav a:hover { color: var(--accent); }
+.site-nav + h1 { margin-top: 1rem; }
+@media print { .site-nav { display: none; } }
+.toc-list {
+  list-style: none;
+  padding: 0;
+  counter-reset: toc-ch;
+}
+.toc-list li {
+  margin: 0;
+}
+.toc-list a {
+  display: block;
+  padding: 0.7em 1em;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg);
+  font-size: 1.05em;
+  transition: background 0.2s;
+}
+.toc-list a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+/* 부 이름 줄(book.json 의 parts). 번호 없이 이름만 */
+.toc-list .toc-part {
+  margin-top: 1.6em;
+  padding: 0 1em 0.4em;
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+  border-bottom: 2px solid var(--border);
+}
+#sidebar .toc-part {
+  margin: 1.1em 0 0.2em;
+  padding: 0 0.5em;
+  font-size: 0.75em;
+  font-weight: 700;
+  color: var(--fg-muted);
+}
+
+/* ===== Sidebar Active ===== */
+#sidebar a.active {
+  background: var(--accent);
+  color: #fff;
+}
+#sidebar a.active:hover {
+  background: var(--accent);
+}
+
+/* ===== Print ===== */
+@media print {
+  #sidebar, #sidebar-open, #theme-toggle { display: none; }
+  main { margin: 0; max-width: none; }
+}
+
+/* ===== 그림과 캡션 ===== */
+figure.fig { margin: 1.8em auto; text-align: center; }
+figure.fig img { margin: 0 auto; }
+figure.fig figcaption {
+  margin-top: 0.5em;
+  font-size: 0.86em;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: center;
+}
+/* 초상화: 오른쪽에 작게 띄운다 */
+figure.fig-portrait {
+  float: right;
+  clear: right; /* 초상화가 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
+  width: 200px;
+  margin: 0.3em 0 1em 1.5em;
+  text-align: left;
+}
+figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
+/* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
+.portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
+.portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
+@media (max-width: 600px) {
+  figure.fig-portrait { float: none; width: 170px; margin: 1em auto; }
+  .portrait-row { gap: 1em; }
+  .portrait-row figure.fig-portrait { width: 140px; }
+}
+/* 다크모드에서 흰 바탕 그림이 눈부시지 않게 */
+[data-theme="dark"] figure.fig img { filter: brightness(0.92); }
+
+/* ===== 수식 ===== */
+.math-block { margin: 1.2em 0; }
+.math-block .katex-display { margin: 0; }
+.math-legend {
+  margin: -0.4em auto 1.6em;
+  padding: 0.2em 1em;
+  width: fit-content;
+  max-width: 100%;
+  border-left: 3px solid var(--border);
+  background: var(--bg-code);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.86em;
+}
+.math-legend .katex-display > .katex { text-align: left; }
+/* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
+[data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
+
+/* ===== 인터랙티브 위젯 ===== */
+.widget-embed {
+  margin: 1.8em 0 2.2em;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-code);
+}
+.widget-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3em 0.8em;
+  padding: 0.55em 1em;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9em;
+}
+.widget-tag {
+  font-size: 0.78em;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.03em;
+}
+.widget-label { font-weight: 600; flex: 1; min-width: 12em; }
+.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-embed iframe {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border: 0;
+  background: transparent;
+  color-scheme: normal;
+}
+.widget-embed noscript img { margin: 0; border-radius: 0; }
+
+/* ===== 장 안의 목차 (사이드바) ===== */
+.sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
+#sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
+.toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+</style>
+<script>
+(function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
+</script>
+</head>
+<body>
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="index.html" style="color:inherit;text-decoration:none">스펙트럼으로 보기: 에피사이클에서 구면 조화까지</a></h2>
+    <div class="sidebar-actions">
+      <button id="theme-toggle" aria-label="다크모드 전환">&#x1F319;</button>
+      <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
+    </div>
+  </div>
+  <ol><li><a href="preface.html">머리말: 스펙트럼으로 정보를 보기</a></li>
+<li class="toc-part">축을 바꿔 다시 적기</li>
+<li><a href="basis.html">기저: 같은 정보를 다른 축으로 다시 적기</a></li>
+<li><a href="fourier-series.html">푸리에 급수: 주기 함수를 물결의 합으로</a></li>
+<li><a href="epicycles.html">에피사이클: 돌아가는 화살표로 그림 그리기</a></li>
+<li class="toc-part">칸으로 적은 신호</li>
+<li><a href="dft-fft.html">이산 푸리에 변환과 고속 푸리에 변환</a></li>
+<li><a href="sampling.html">표본화: 칸 간격과 에일리어싱</a></li>
+<li><a href="time-frequency.html" class="active">시간과 주파수를 함께: 짧은 구간 푸리에 변환과 웨이블릿</a><ul class="sidebar-toc"><li><a href="time-frequency.html" class="current">짧은 구간 푸리에 변환: 창을 대고 옮기며 스펙트럼 재기</a></li><li><a href="time-frequency-2.html">불확정성: 짧은 창은 「언제」를, 긴 창은 「몇 Hz」를 또렷하게</a></li><li><a href="time-frequency-3.html">웨이블릿: 높은 음은 짧은 창, 낮은 음은 긴 창</a></li><li><a href="time-frequency-4.html">자주 하는 실수와 요약</a></li></ul></li>
+<li class="toc-part">대칭이 고르는 기저</li>
+<li><a href="shift-symmetry.html">평행이동 대칭: 왜 하필 사인과 코사인인가</a></li>
+<li><a href="symmetry-groups.html">대칭과 등변성: 대칭을 바꾸면 기저가 바뀐다</a></li>
+<li><a href="spherical-harmonics.html">구면 조화: 구 위의 푸리에</a></li>
+<li><a href="spectral-drawing.html">n차원 그림 그리기: 바탕의 차원을 올려도 같은 일</a></li>
+<li class="toc-part">예제</li>
+<li><a href="sound.html">음성: 소리를 스펙트럼으로 듣기</a></li>
+<li><a href="image.html">이미지: 그림을 스펙트럼으로 보기</a></li>
+<li><a href="signals-by-dimension.html">차원별 신호: 시계열, 영상, 부피, 그래프</a></li>
+<li class="toc-part">신경망이 보는 스펙트럼</li>
+<li><a href="kernels.html">커널: 무한히 많은 물결을 셈 한 번으로</a></li>
+<li><a href="spectral-bias.html">스펙트럼 편향: 신경망은 굵은 무늬부터 배운다</a></li>
+<li><a href="epilogue.html">맺음: 고정된 축에서 배우는 축으로</a></li></ol>
+</nav>
+<button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
+<main>
+<article class="chapter chapter-paged">
+<h1>시간과 주파수를 함께: 짧은 구간 푸리에 변환과 웨이블릿</h1>
+<h2 id="이-장의-물음">이 장의 물음</h2>
+<p>칸 N개로 적은 신호는 이산 푸리에 변환(DFT)으로 물결 N개의 계수로 바꿀 수 있었고, 거꾸로 되돌릴 수도 있었다. 그때 다룬 신호는 처음부터 끝까지 같은 물결이 되풀이되었다. 그런데 노래는 음이 바뀌고, 말소리는 「아」에서 「이」로 넘어가고, 공장 기계는 멀쩡히 돌다가 어느 순간 덜컥 소리를 낸다. 휴대폰의 노래 찾기 앱은 몇 초짜리 녹음에서 어느 음이 어느 순간에 울렸는지를 읽어야 하고, 음성 받아쓰기 프로그램은 「가」와 「나」 가운데 어느 것이 먼저 나왔는지 알아야 한다.</p>
+<p>ML에서도 같은 장면이 나온다. 음성 인식 모델 다수는 소리를 칸 그대로 받지 않고, 짧은 구간마다 잰 주파수 세기를 시간 순서대로 늘어놓은 그림을 입력으로 받는다. 소리 전체를 한 번에 물결로 나누면 안 될까? 왜 굳이 잘게 끊을까? 끊는다면 얼마나 길게 끊어야 할까?</p>
+<p>이 장은 다음 물음에 차례로 답한다.</p>
+<ul>
+<li>소리 전체의 스펙트럼에서 「이 음이 언제 울렸나」는 어디로 갔을까? 「언제」를 되찾으려면 어떻게 재야 할까?</li>
+<li>구간을 짧게 끊을수록 시각은 또렷해진다. 그 대가로 무엇이 흐려질까? 둘 다 한없이 또렷하게 할 수는 없을까?</li>
+<li>높은 음과 낮은 음에 같은 길이의 구간을 대야 할까? 음마다 구간 길이를 다르게 하면 무엇이 좋아질까?</li>
+</ul>
+<h2 id="짧은-구간-푸리에-변환-창을-대고-옮기며-스펙트럼-재기">짧은 구간 푸리에 변환: 창을 대고 옮기며 스펙트럼 재기</h2>
+<p>피아노로 도 → 미 → 솔을 0.5초씩 차례로 치고, 다음에는 솔 → 미 → 도로 거꾸로 쳐 보자. 귀에는 올라가는 가락과 내려가는 가락으로 분명히 다르게 들린다. 세 건반을 한꺼번에 눌러 1.5초 동안 울린 화음은 또 다르게 들린다. 세 소리를 각각 처음부터 끝까지 한 번에 이산 푸리에 변환에 넣으면 어떤 스펙트럼이 나올까?</p>
+<p>재는 빠르기 8000 Hz(1초에 8000번 재기)로 합성한 1.5초짜리 소리는 칸 12,000개다. DFT 의 주파수 눈금은 0.667 Hz 간격이다. 세 소리 모두 봉우리가 261.6 Hz(도), 329.6 Hz(미), 392.0 Hz(솔) 세 곳에 서고, 세 봉우리 근처(±20 Hz)에 든 세기는 차례로 친 두 소리에서 각각 전체의 33.1%, 화음에서 33.3%다. 도 → 미 → 솔과 솔 → 미 → 도의 세기 스펙트럼은 가장 크게 어긋나는 곳에서도 봉우리 높이의 0.9%만 다르다. 화음은 봉우리 자리와 세기 비율이 같고 모양만 다르다. 세 음이 1.5초 내내 울리므로 봉우리가 세 배쯤 높고(높이 비 3.09), 절반 높이에서 잰 폭은 0.58 Hz로 0.5초씩 울린 음의 1.75 Hz보다 좁다.</p>
+<p>소리 전체의 세기 스펙트럼은 「어떤 음이 얼마나 들어 있나」를 말해 주지만 「언제」는 말해 주지 않는다. 그렇다고 「언제」가 사라진 것은 아니다. DFT 는 되돌릴 수 있으므로 계수 12,000개 안에 가락의 순서가 모두 들어 있다. 들어 있는 자리는 계수의 위상(복소수 계수가 가리키는 각도)이다. 261.33 Hz 칸의 계수는 도 → 미 → 솔에서 −63.6°, 솔 → 미 → 도에서 177.0°를 가리킨다. 계수 하나하나는 1.5초 전체에 걸친 물결이라서, 「0.5초쯤 도가 끝났다」는 사실은 수천 개 계수의 위상이 함께 맞물려야 비로소 드러난다. 한 계수만 보고 시각을 읽을 수는 없다.</p>
+<h3 id="역사-두-극단-사이의-기술법">역사: 두 극단 사이의 기술법</h3>
+<p>1946년, 영국 럭비의 브리티시 톰슨–휴스턴 연구소에서 일하던 헝가리 출신 물리학자 가보르(Dennis Gabor)는 영국 전기공학회지(J. IEE) Part III 93권에 「통신 이론(Theory of communication)」을 냈다. 통신 신호를 어떻게 적을지 따지던 그는 신호를 적는 두 방법이 모두 한쪽 끝에 서 있다고 보았다. 시간에 따라 값을 적으면 순간마다의 값은 정확하지만 주파수가 보이지 않고, 푸리에 변환으로 적으면 주파수는 정확하지만 그 물결은 끝없는 과거에서 끝없는 미래까지 울리는 것으로 적힌다. 논문 요약은 시간에 따라 적기와 푸리에 변환으로 적기를 「시간 분석과 스펙트럼 분석이라는 두 극단」이라 부르고, 그 사이에 있는 새 기술법을 내놓는다고 썼다. 가로가 시간, 세로가 주파수인 평면에 신호를 그리는 그 그림을 그는 「정보 그림(information diagram)」이라 불렀다. 가보르는 이듬해인 1947년, 같은 연구소에서 전자 현미경의 상을 개선하려다 홀로그래피를 생각해 냈고, 그 일로 1971년 노벨 물리학상을 받았다.</p>
+<h3 id="창-100-ms-를-10-ms-씩-옮기기">창 100 ms 를 10 ms 씩 옮기기</h3>
+<p>가보르의 평면을 숫자로 채우는 가장 단순한 방법은 소리를 짧게 잘라 조각마다 DFT 를 하는 것이다. 도 → 미 → 솔에서 0.1초(800칸)씩 잘라 보자. 자른 끝에서 값이 뚝 끊기면 없던 주파수가 생기므로, 가운데는 1이고 양 끝으로 갈수록 0으로 내려가는 무게(해닝 창, 코사인 한 주기로 만든 종 모양)를 곱한 뒤 DFT 를 한다. 그 조각을 10 ms(80칸)씩 뒤로 옮기며 되풀이하면 1.5초 동안 조각이 150개 나온다. 조각마다 세 음의 주파수 칸 세기를 비교하면 아래와 같다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>조각 가운데 시각</th>
+<th>도 → 미 → 솔 (도·미·솔 세기 비)</th>
+<th>솔 → 미 → 도</th>
+<th>도 + 미 + 솔</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.25초</td>
+<td>1.00 · 0.00 · 0.00</td>
+<td>0.00 · 0.00 · 1.00</td>
+<td>0.33 · 0.33 · 0.33</td>
+</tr>
+<tr>
+<td>0.75초</td>
+<td>0.00 · 1.00 · 0.00</td>
+<td>0.00 · 1.00 · 0.00</td>
+<td>0.33 · 0.33 · 0.33</td>
+</tr>
+<tr>
+<td>1.25초</td>
+<td>0.00 · 0.00 · 1.00</td>
+<td>1.00 · 0.00 · 0.00</td>
+<td>0.33 · 0.33 · 0.33</td>
+</tr>
+</tbody>
+</table></div>
+<p>소리 전체로 잰 스펙트럼에서 거의 같았던 세 소리가 이제 확실히 갈린다. 도 → 미 → 솔에서 가장 센 음이 도에서 미로 바뀌는 조각은 가운데 시각 0.51초, 미에서 솔로 바뀌는 조각은 1.01초다. 실제로 음이 바뀐 0.5초와 1.0초에 10 ms 안쪽으로 맞는다.</p>
+<figure class="fig "><img src="images/time-frequency/three_sounds.png" alt="위: 세 소리 전체를 한 번에 DFT 한 세기 스펙트럼. 봉우리 자리가 셋 다 같다. 아래: 창 100 ms 를 5 ms 씩 옮기며 잰 스펙트로그램(가로 시각, 세로 주파수, 짙을수록 세다). 차례로 친 두 소리는 계단이 반대로 놓이고, 화음은 세 줄이 처음부터 끝까지 이어진다(sources/time-frequency/s1_whole.py, s2_stft.py, figs.py)" loading="lazy"><figcaption>위: 세 소리 전체를 한 번에 DFT 한 세기 스펙트럼. 봉우리 자리가 셋 다 같다. 아래: 창 100 ms 를 5 ms 씩 옮기며 잰 스펙트로그램(가로 시각, 세로 주파수, 짙을수록 세다). 차례로 친 두 소리는 계단이 반대로 놓이고, 화음은 세 줄이 처음부터 끝까지 이어진다(sources/time-frequency/s1_whole.py, s2_stft.py, figs.py)</figcaption></figure>
+<p>조각에 곱한 무게를 창 w(n)이라 하고, 창을 H칸씩 옮기며 조각마다 DFT 를 하는 계산을 <strong>짧은 구간 푸리에 변환</strong> (창을 대고 옮기며 재는 스펙트럼 / short-time Fourier transform, STFT)이라 한다. 조각마다 나온 세기를 세로로 세우고 시간 순서대로 가로로 늘어놓은 그림이 위의 아래 줄이고, 이 그림을 스펙트로그램이라 부른다.</p>
+<div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#c45a00"><mi>X</mi></mstyle><mo stretchy="false">[</mo><mstyle mathcolor="#a67a63"><mi>m</mi></mstyle><mo separator="true">,</mo><mstyle mathcolor="#0078e1"><mi>k</mi></mstyle><mo stretchy="false">]</mo><mo>=</mo><munder><mo>∑</mo><mstyle mathcolor="#a67a63"><mi>n</mi></mstyle></munder><mstyle mathcolor="#1b9e77"><mi>x</mi></mstyle><mo stretchy="false">[</mo><mstyle mathcolor="#a67a63"><mi>n</mi></mstyle><mo stretchy="false">]</mo><mtext>  </mtext><mstyle mathcolor="#f0694b"><mi>w</mi></mstyle><mo stretchy="false">[</mo><mstyle mathcolor="#a67a63"><mi>n</mi></mstyle><mo>−</mo><mstyle mathcolor="#a67a63"><mi>m</mi></mstyle><mstyle mathcolor="#a67a63"><mi>H</mi></mstyle><mo stretchy="false">]</mo><mtext>  </mtext><msup><mi>e</mi><mrow><mo>−</mo><mn>2</mn><mi>π</mi><mi>i</mi><mstyle mathcolor="#0078e1"><mi>k</mi></mstyle><mstyle mathcolor="#a67a63"><mi>n</mi></mstyle><mi mathvariant="normal">/</mi><mstyle mathcolor="#3c4bff"><mi>N</mi></mstyle></mrow></msup><mo separator="true">,</mo><mspace width="2em"/><mtext>스펙트로그램</mtext><mo>=</mo><mstyle mathcolor="#a000c8"><mi mathvariant="normal">∣</mi><mi>X</mi><mo stretchy="false">[</mo><mi>m</mi><mo separator="true">,</mo><mi>k</mi><mo stretchy="false">]</mo><msup><mi mathvariant="normal">∣</mi><mn>2</mn></msup></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#c45a00}{X}[\textcolor{#a67a63}{m}, \textcolor{#0078e1}{k}] = \sum_{\textcolor{#a67a63}{n}} \textcolor{#1b9e77}{x}[\textcolor{#a67a63}{n}]\; \textcolor{#f0694b}{w}[\textcolor{#a67a63}{n} - \textcolor{#a67a63}{m}\textcolor{#a67a63}{H}]\; e^{-2\pi i \textcolor{#0078e1}{k} \textcolor{#a67a63}{n} / \textcolor{#3c4bff}{N}}, \qquad \text{스펙트로그램} = \textcolor{#a000c8}{|X[m, k]|^2}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;color:#c45a00;">X</span><span class="mopen">[</span><span class="mord mathnormal" style="color:#a67a63;">m</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;color:#0078e1;">k</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3em;vertical-align:-1.25em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.9em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="color:#a67a63;">n</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.25em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="color:#1b9e77;">x</span><span class="mopen">[</span><span class="mord mathnormal" style="color:#a67a63;">n</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;color:#f0694b;">w</span><span class="mopen">[</span><span class="mord mathnormal" style="color:#a67a63;">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.188em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="color:#a67a63;">m</span><span class="mord mathnormal" style="margin-right:0.0813em;color:#a67a63;">H</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.938em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">2</span><span class="mord mathnormal mtight" style="margin-right:0.0359em;">π</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight" style="margin-right:0.0315em;color:#0078e1;">k</span><span class="mord mathnormal mtight" style="color:#a67a63;">n</span><span class="mord mtight">/</span><span class="mord mathnormal mtight" style="margin-right:0.109em;color:#3c4bff;">N</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord hangul_fallback">스펙트로그램</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.1141em;vertical-align:-0.25em;"></span><span class="mord" style="color:#a000c8;">∣</span><span class="mord mathnormal" style="margin-right:0.0785em;color:#a000c8;">X</span><span class="mopen" style="color:#a000c8;">[</span><span class="mord mathnormal" style="color:#a000c8;">m</span><span class="mpunct" style="color:#a000c8;">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;color:#a000c8;">k</span><span class="mclose" style="color:#a000c8;">]</span><span class="mord" style="color:#a000c8;"><span class="mord" style="color:#a000c8;">∣</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#a000c8;"><span class="mord mtight" style="color:#a000c8;">2</span></span></span></span></span></span></span></span></span></span></span></span></div>
+<div class="math-block math-legend"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#1b9e77"><mi>x</mi></mstyle><mo stretchy="false">[</mo><mstyle mathcolor="#a67a63"><mi>n</mi></mstyle><mo stretchy="false">]</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>n 번째 칸의 소리 값</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#f0694b"><mi>w</mi></mstyle><mo stretchy="false">[</mo><mo>⋅</mo><mo stretchy="false">]</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>창: 길이 </mtext><mi>N</mi><mtext> 칸, 가운데가 크고 양 끝이 0 에 가까운 무게 (이 장은 해닝 창)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#a67a63"><mi>m</mi></mstyle><mo separator="true">,</mo><mtext> </mtext><mstyle mathcolor="#a67a63"><mi>H</mi></mstyle></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>조각 번호와 옮기는 간격 (칸). 조각 </mtext><mi>m</mi><mtext> 은 </mtext><mi>m</mi><mi>H</mi><mtext> 번째 칸부터</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#0078e1"><mi>k</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>주파수 칸 번호: 창 길이 동안 </mtext><mi>k</mi><mtext> 번 되풀이하는 물결, </mtext><mi>k</mi><msub><mi>f</mi><mi>s</mi></msub><mi mathvariant="normal">/</mi><mi>N</mi><mtext> Hz</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#3c4bff"><mi>N</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>창 하나의 칸 수</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#c45a00"><mi>X</mi></mstyle><mo stretchy="false">[</mo><mstyle mathcolor="#a67a63"><mi>m</mi></mstyle><mo separator="true">,</mo><mstyle mathcolor="#0078e1"><mi>k</mi></mstyle><mo stretchy="false">]</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>조각 </mtext><mi>m</mi><mtext> 의 주파수 </mtext><mi>k</mi><mtext> 계수</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#a000c8"><mi mathvariant="normal">∣</mi><mi>X</mi><mo stretchy="false">[</mo><mi>m</mi><mo separator="true">,</mo><mi>k</mi><mo stretchy="false">]</mo><msup><mi mathvariant="normal">∣</mi><mn>2</mn></msup></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>조각 </mtext><mi>m</mi><mtext> 의 주파수 </mtext><mi>k</mi><mtext> 세기 (스펙트로그램의 한 칸)</mtext></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{ll}
+\textcolor{#1b9e77}{x}[\textcolor{#a67a63}{n}] &amp; \text{n 번째 칸의 소리 값} \\
+\textcolor{#f0694b}{w}[\cdot] &amp; \text{창: 길이 } N \text{ 칸, 가운데가 크고 양 끝이 0 에 가까운 무게 (이 장은 해닝 창)} \\
+\textcolor{#a67a63}{m},\ \textcolor{#a67a63}{H} &amp; \text{조각 번호와 옮기는 간격 (칸). 조각 } m \text{ 은 } mH \text{ 번째 칸부터} \\
+\textcolor{#0078e1}{k} &amp; \text{주파수 칸 번호: 창 길이 동안 } k \text{ 번 되풀이하는 물결, } k f_s / N \text{ Hz} \\
+\textcolor{#3c4bff}{N} &amp; \text{창 하나의 칸 수} \\
+\textcolor{#c45a00}{X}[\textcolor{#a67a63}{m}, \textcolor{#0078e1}{k}] &amp; \text{조각 } m \text{ 의 주파수 } k \text{ 계수} \\
+\textcolor{#a000c8}{|X[m, k]|^2} &amp; \text{조각 } m \text{ 의 주파수 } k \text{ 세기 (스펙트로그램의 한 칸)}
+\end{array}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:8.4em;vertical-align:-3.95em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4.45em;"><span style="top:-6.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#1b9e77;">x</span><span class="mopen">[</span><span class="mord mathnormal" style="color:#a67a63;">n</span><span class="mclose">]</span></span></span><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0269em;color:#f0694b;">w</span><span class="mopen">[</span><span class="mord">⋅</span><span class="mclose">]</span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#a67a63;">m</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0813em;color:#a67a63;">H</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;color:#0078e1;">k</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em;color:#3c4bff;">N</span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0785em;color:#c45a00;">X</span><span class="mopen">[</span><span class="mord mathnormal" style="color:#a67a63;">m</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;color:#0078e1;">k</span><span class="mclose">]</span></span></span><span style="top:0.59em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#a000c8;">∣</span><span class="mord mathnormal" style="margin-right:0.0785em;color:#a000c8;">X</span><span class="mopen" style="color:#a000c8;">[</span><span class="mord mathnormal" style="color:#a000c8;">m</span><span class="mpunct" style="color:#a000c8;">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;color:#a000c8;">k</span><span class="mclose" style="color:#a000c8;">]</span><span class="mord" style="color:#a000c8;"><span class="mord" style="color:#a000c8;">∣</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#a000c8;"><span class="mord mtight" style="color:#a000c8;">2</span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4.45em;"><span style="top:-6.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">n </span><span class="mord hangul_fallback">번째</span><span class="mord"> </span><span class="mord hangul_fallback">칸의</span><span class="mord"> </span><span class="mord hangul_fallback">소리</span><span class="mord"> </span><span class="mord hangul_fallback">값</span></span></span></span><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">창</span><span class="mord">: </span><span class="mord hangul_fallback">길이</span><span class="mord"> </span></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">칸</span><span class="mord">, </span><span class="mord hangul_fallback">가운데가</span><span class="mord"> </span><span class="mord hangul_fallback">크고</span><span class="mord"> </span><span class="mord hangul_fallback">양</span><span class="mord"> </span><span class="mord hangul_fallback">끝이</span><span class="mord"> 0 </span><span class="mord hangul_fallback">에</span><span class="mord"> </span><span class="mord hangul_fallback">가까운</span><span class="mord"> </span><span class="mord hangul_fallback">무게</span><span class="mord"> (</span><span class="mord hangul_fallback">이</span><span class="mord"> </span><span class="mord hangul_fallback">장은</span><span class="mord"> </span><span class="mord hangul_fallback">해닝</span><span class="mord"> </span><span class="mord hangul_fallback">창</span><span class="mord">)</span></span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">조각</span><span class="mord"> </span><span class="mord hangul_fallback">번호와</span><span class="mord"> </span><span class="mord hangul_fallback">옮기는</span><span class="mord"> </span><span class="mord hangul_fallback">간격</span><span class="mord"> (</span><span class="mord hangul_fallback">칸</span><span class="mord">). </span><span class="mord hangul_fallback">조각</span><span class="mord"> </span></span><span class="mord mathnormal">m</span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">은</span><span class="mord"> </span></span><span class="mord mathnormal">m</span><span class="mord mathnormal" style="margin-right:0.0813em;">H</span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">번째</span><span class="mord"> </span><span class="mord hangul_fallback">칸부터</span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">주파수</span><span class="mord"> </span><span class="mord hangul_fallback">칸</span><span class="mord"> </span><span class="mord hangul_fallback">번호</span><span class="mord">: </span><span class="mord hangul_fallback">창</span><span class="mord"> </span><span class="mord hangul_fallback">길이</span><span class="mord"> </span><span class="mord hangul_fallback">동안</span><span class="mord"> </span></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">번</span><span class="mord"> </span><span class="mord hangul_fallback">되풀이하는</span><span class="mord"> </span><span class="mord hangul_fallback">물결</span><span class="mord">, </span></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mord text"><span class="mord"> Hz</span></span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">창</span><span class="mord"> </span><span class="mord hangul_fallback">하나의</span><span class="mord"> </span><span class="mord hangul_fallback">칸</span><span class="mord"> </span><span class="mord hangul_fallback">수</span></span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">조각</span><span class="mord"> </span></span><span class="mord mathnormal">m</span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">의</span><span class="mord"> </span><span class="mord hangul_fallback">주파수</span><span class="mord"> </span></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">계수</span></span></span></span><span style="top:0.59em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">조각</span><span class="mord"> </span></span><span class="mord mathnormal">m</span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">의</span><span class="mord"> </span><span class="mord hangul_fallback">주파수</span><span class="mord"> </span></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">세기</span><span class="mord"> (</span><span class="mord hangul_fallback">스펙트로그램의</span><span class="mord"> </span><span class="mord hangul_fallback">한</span><span class="mord"> </span><span class="mord hangul_fallback">칸</span><span class="mord">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.95em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
+<p>창이 <span class="sym" style="color:#3c4bff">N</span>칸이면 주파수 칸의 간격은 재는 빠르기를 <span class="sym" style="color:#3c4bff">N</span>으로 나눈 값이다. 창 25 ms(200칸)면 40 Hz, 100 ms(800칸)면 10 Hz, 400 ms(3200칸)면 2.5 Hz 간격이어서, 창을 길게 잡을수록 주파수 눈금이 촘촘해진다. 그 대가로 무엇을 잃는지는 다음 개념에서 따진다.</p>
+<figure class="widget-embed" id="widget-time-frequency-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">창을 대고 옮기기</span><a class="widget-open" href="widgets/time-frequency.html?v=a35f4033#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/time-frequency.html?w=w1&embed=1&v=a35f4033" title="창을 대고 옮기기" loading="lazy"></iframe></figure>
+<h3 id="ml에서-whisper-가-받는-소리">ML에서: Whisper 가 받는 소리</h3>
+<p>오픈AI 가 2022년에 공개한 음성 인식 모델 Whisper 는 소리를 칸 그대로 받지 않는다. 공개 코드(<code>whisper/audio.py</code>)는 소리를 1초에 16,000칸으로 맞추고, 창 400칸(25 ms)의 해닝 창을 160칸(10 ms)씩 옮기며 <code>torch.stft</code> 로 짧은 구간 푸리에 변환을 하므로 이웃한 두 창은 60%가 겹친다. 입력 한 덩어리는 30초, 칸 480,000개다. 창 하나에서 주파수 칸이 0 Hz부터 8000 Hz까지 201개 나오고, 조각은 3001개가 나오는데 코드가 마지막 하나를 버려 3000개가 된다. 이 세기 201개를 귀의 음높이 눈금에 맞춰 80개(2023년에 나온 large-v3 판은 128개)로 묶고 로그를 씌운 것이 모델의 입력이다. 모델이 보는 것은 시간 칸 3000개 × 주파수 칸 80개짜리 그림이다.</p>
+<div class="dialogue"><h3 id="문제-1-카페의-하루-주문-기록">문제 1. 카페의 하루 주문 기록</h3>
+<blockquote>
+<p>카페 하나가 9시부터 17시까지 한 시간마다 아메리카노와 라떼 주문 수를 적었다. 첫째 날 아메리카노는 [4, 4, 3, 1, 0, 0, 0, 0], 라떼는 [0, 0, 0, 1, 2, 3, 3, 3]이고, 둘째 날 아메리카노는 [1, 2, 1, 2, 1, 2, 1, 2], 라떼는 [2, 1, 2, 1, 2, 1, 1, 2]다. (가) 두 날의 하루 합계를 비교하라. (나) 4시간 묶음을 2시간씩 옮기며(9~13시, 11~15시, 13~17시) 합계를 내면 두 날이 어떻게 달라 보이는가? (다) 묶음을 8시간으로 늘리면 어떻게 되는가?</p>
+</blockquote>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 둘 다 아메리카노 12잔, 라떼 12잔이에요. 똑같은 날이네요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>사장님이 두 날 모두 같은 순서로 원두와 우유를 준비하면 될까요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아… 첫째 날은 오전에 아메리카노만 나가고 오후에 라떼만 나갔어요. 합계만 보고는 그걸 몰라요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(나)를 하면 보여. 첫째 날은 9~13시 아메리카노 12 라떼 1, 11~15시 4와 6, 13~17시 0과 11. 둘째 날은 세 묶음 모두 6과 6이야.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(다)는요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>8시간이면 묶음이 하루 전체 하나라서 다시 12와 12, 두 날이 같아져요. 묶음이 길면 합계는 안정되는데 언제 팔렸는지가 사라지고, 한 시간 묶음까지 줄이면 시간은 정확하지만 한 칸에 서너 잔뿐이라 들쭉날쭉해요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>소리 전체 스펙트럼이 하루 합계고, 짧은 구간 푸리에 변환이 4시간 묶음이네요. 품목이 주파수고요.</p></div></div>
+</div><div class="dialogue"><h3 id="문제-2-늦게-시작한-가락-순서를-바꾼-가락">문제 2. 늦게 시작한 가락, 순서를 바꾼 가락</h3>
+<blockquote>
+<p>도 → 미 → 솔(1.5초) 앞에 0.2초 동안 아무 소리도 없는 구간을 붙여 1.7초짜리 소리를 만들었다. (가) 원래 소리도 끝에 0.2초 무음을 붙여 1.7초로 맞춘 뒤 두 소리를 DFT 하면, 세기 스펙트럼은 어떻게 다른가? (나) 주파수 f Hz 칸의 계수는 위상이 얼마나 바뀌는가? (다) 미 → 도 → 솔로 순서만 바꾼 소리의 세기 스펙트럼은 원래 도 → 미 → 솔과 같은가?</p>
+</blockquote>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(가)는 소리가 0.2초 밀렸을 뿐이니까 계수마다 같은 크기의 화살표가 돌기만 할 거예요. 세기는 같아요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>코드로 돌려 보니까 정말 같아요. 가장 큰 차이가 봉우리 높이의 2 × 10⁻¹⁶이라 계산기 반올림 수준이에요. (나)는… 0.2초면 f Hz 물결은 0.2f 바퀴만큼 늦게 출발하니까 위상이 −360° × f × 0.2 돌아요. 262.35 Hz 칸이면 −18,889°인데, 한 바퀴씩 빼면 −169.4°고 코드 결과도 −169.4°예요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>좋아요. 그럼 (다)도 같은 이유로 세기가 같을까요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>도, 미, 솔 조각을 자리만 바꿨으니까 조각마다 밀린 것뿐이잖아요. 그러면 같아야죠.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>조각마다 미는 시간이 같나요? 도는 0.5초 늦게, 미는 0.5초 일찍 옮겼어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>아, 조각마다 위상이 다른 만큼 돌아요. 도 물결의 계수는 도 조각에서만 오는 게 아니라 미, 솔 조각에서 번진 작은 꼬리도 더해지는데, 그 꼬리들이 서로 다른 각도로 돌면 더한 크기가 달라져요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>돌려 보니 가장 큰 차이가 봉우리 높이의 0.9%예요. 거꾸로 친 솔 → 미 → 도와 비슷한 크기고요. 전체를 한꺼번에 미는 건 세기를 하나도 안 바꾸고, 부분마다 다르게 미는 건 아주 조금 바꾸네요. 「언제」는 거의 다 위상에 들어 있었어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S11"><img src="images/cast/S11.webp" alt="이서연 S11" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>해석학 시간에 푸리에 변환의 평행이동 성질을 증명할 때 왜 절댓값만 남기면 성질이 깔끔해지는지 궁금했는데, 시각 정보가 위상으로 빠져나가서였네.</p></div></div>
+</div><div class="dialogue"><h3 id="문제-3-whisper-의-창으로-두-목소리-가르기">문제 3. Whisper 의 창으로 두 목소리 가르기</h3>
+<blockquote>
+<p>두 사람이 동시에 「아」 소리를 낸다. 한 사람의 목소리 높이(기본 주파수)는 110 Hz, 다른 사람은 130 Hz다. (가) Whisper 의 창(16,000 Hz에서 400칸)으로 짧은 구간 푸리에 변환을 하면, 주파수 칸 간격은 몇 Hz 인가? (나) 두 목소리의 봉우리가 갈라져 보이겠는가? (다) 옮기는 간격을 10 ms 에서 20 ms 로 늘리면 30초 입력의 시간 칸은 몇 개가 되는가? (위젯 1의 「문제 3: 110·130 Hz」로 창 길이를 바꿔 가며 확인해 보자.)</p>
+</blockquote>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 16,000 ÷ 400 = 40 Hz예요. (다)는 30,000 ms ÷ 20 ms = 1500개고요. (나)는 110과 130이 다른 칸에 들어가는지 보면 돼요. 110은 80 Hz 칸과 120 Hz 칸 사이, 130은 120 Hz 칸과 160 Hz 칸 사이니까 서로 다른 칸 사이에 있어요. 갈라지겠죠.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>위젯으로 창 25 ms 를 대 봐요. 줄이 몇 개 보이나요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>하나예요. 110과 130 사이에 굵은 띠 하나가 있어요. 칸이 다른데 왜 하나죠?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>칸 간격은 칸의 자리만 정하는 거야. 봉우리 하나가 얼마나 넓게 번지는지는 따로야. 해닝 창이 25 ms 면 봉우리가 양옆으로 두 칸씩, 80 Hz 정도 번져. 20 Hz 떨어진 두 봉우리는 그 안에서 겹쳐.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>가운데 120 Hz 의 세기를 110 Hz 의 세기로 나눠 보면 어떤 값이 나오는지, 창을 늘려 가며 재 봐요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.webp" alt="김민준 M08" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>25 ms 에서 1.07, 100 ms 에서 1.00이라 가운데가 오히려 세요. 200 ms 에서 거의 0으로 떨어지면서 두 줄로 갈라져요. 20 Hz를 가르려면 창이 1/20초 = 50 ms 보다는 훨씬 길어야 하네요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 창을 200 ms 로 늘리면, 「아」에서 「이」로 바뀌는 순간은 그만큼 흐려지지 않을까?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아까 카페 기록이랑 같네요. 묶음을 8시간으로 늘리니까 합계는 안정됐는데 언제 팔렸는지가 사라졌잖아요. 창을 늘리면 주파수는 갈라지는데 「언제」가 흐려지고요.</p></div></div>
+</div>
+</article>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="sampling-5.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="time-frequency-2.html">불확정성: 짧은 창은 「언제」를, 긴 창은 「몇 Hz」를 또렷하게 &rarr;</a></nav>
+</main>
+<script type="module">
+const toggle = document.getElementById('theme-toggle');
+const frames = () => document.querySelectorAll('.widget-embed iframe');
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  toggle.textContent = t === 'dark' ? '\u2600\uFE0F' : '\u{1F319}';
+  frames().forEach(f => f.contentWindow && f.contentWindow.postMessage({ type: 'dyn-theme', theme: t }, '*'));
+}
+const curTheme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+setTheme(curTheme());
+toggle.addEventListener('click', () => {
+  const t = curTheme() === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('theme', t);
+  setTheme(t);
+  renderMermaid();
+});
+
+// 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  io.unobserve(e.target);
+  e.target.src = e.target.dataset.src + '&theme=' + curTheme();
+}), { rootMargin: '600px' });
+frames().forEach(f => io.observe(f));
+addEventListener('message', e => {
+  if (!e.data || e.data.type !== 'dyn-widget-height') return;
+  frames().forEach(f => { if (f.contentWindow === e.source) { f.style.height = e.data.h + 'px'; f.classList.add('ready'); } });
+});
+
+// 사이드바
+const sidebar = document.getElementById('sidebar');
+document.getElementById('sidebar-open').addEventListener('click', () => sidebar.classList.add('open'));
+document.getElementById('sidebar-close').addEventListener('click', () => sidebar.classList.remove('open'));
+sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', () => sidebar.classList.remove('open')));
+
+// 키보드 ←/→ 로 이전·다음 페이지
+addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  const a = document.querySelector(e.key === 'ArrowLeft' ? '.chapter-nav-prev' : e.key === 'ArrowRight' ? '.chapter-nav-next' : null);
+  if (a) location.href = a.href;
+});
+
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+</script>
+</body>
+</html>
