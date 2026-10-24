@@ -9,7 +9,7 @@ GW.register("grpo-advantage", (el) => {
     default: {
       caption:
         "위쪽 원을 클릭하면 그 답의 보상이 1(정답) → 0.5(부분 점수) → 0(오답) 순으로 바뀐다. 막대는 각 답이 받는 어드밴티지 <span class='sym-A'>Â</span>. " +
-        "모두 같은 보상이면 모든 <span class='sym-A'>Â</span> 가 0 — 이 문제에서는 아무것도 배우지 않는다. ‘<span style='color:var(--sym-008deb, #008deb)'>σ</span>로 나누기’를 끄면 평균만 뺀 값이 된다.",
+        "모두 같은 보상이면 모든 <span class='sym-A'>Â</span> 가 0이 되어, 이 문제에서는 아무것도 배우지 않는다. ‘<span style='color:var(--sym-008deb, #008deb)'>σ</span>로 나누기’를 끄면 평균만 뺀 값이 된다.",
       options: [["ex", "본문 6/8"], ["p2", "문제 2"], ["all1", "모두 정답"], ["all0", "모두 오답"]],
       start: "ex",
     },
@@ -23,7 +23,7 @@ GW.register("grpo-advantage", (el) => {
   };
   const S = sets[el.dataset.set] || sets.default;
   const f = GW.frame(el, {
-    title: "GRPO 어드밴티지 — 같은 문제에 대한 8개 답을 서로 비교한다",
+    title: "GRPO 어드밴티지: 같은 문제에 대한 8개 답을 서로 비교한다",
     caption: S.caption,
   });
   const G = 8;
@@ -79,7 +79,7 @@ GW.register("grpo-advantage", (el) => {
     const mass = A.reduce((s, a) => s + Math.abs(a), 0);
     f.readout.innerHTML =
       `평균 <span class="sym-V">μ</span> = <b>${mu.toFixed(3)}</b> · 표준편차 <span style='color:var(--sym-008deb, #008deb)'>σ</span> = <b>${sd.toFixed(3)}</b> · 학습 시그널 Σ|<span class="sym-A">Â</span>| = <b>${mass.toFixed(2)}</b>` +
-      (sd < 1e-9 ? " — <b>모든 답의 보상이 같다. 그래디언트 0.</b>" : "");
+      (sd < 1e-9 ? " · <b>모든 답의 보상이 같다. 그래디언트 0.</b>" : "");
   }
   draw();
 });

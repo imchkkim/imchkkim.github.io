@@ -7,10 +7,10 @@
 GW.register("dpo-loss", (el) => {
   const sets = {
     default: {
-      title: "DPO 손실 — 레퍼런스 대비 마진을 얼마나 더 벌렸나",
+      title: "DPO 손실: 레퍼런스 대비 마진 z 가 얼마나 커졌나",
       caption:
-        "가로축은 학습 모델의 선호 마진 <span class='sym-pi'>Δ<sub>θ</sub></span>. 곡선은 <span class='sym-pi'>Δ<sub>θ</sub></span> = <span class='sym-ref'>Δ<sub>ref</sub></span> 인 지점(점선)에서 항상 손실 0.693 을 지난다 — " +
-        "레퍼런스와 똑같이 구분하면 아직 할 일이 남아 있다는 뜻이다. 그래디언트 크기 <span class='sym-A'>σ(−βz)</span>는 마진을 충분히 벌리면 0 으로 사라진다.",
+        "가로축은 학습 모델의 선호 마진 <span class='sym-pi'>Δ<sub>θ</sub></span>. 곡선은 <span class='sym-pi'>Δ<sub>θ</sub></span> = <span class='sym-ref'>Δ<sub>ref</sub></span> 인 지점(점선)에서 항상 손실 0.693 을 지난다. " +
+        "레퍼런스와 똑같이 구분하면 아직 할 일이 남아 있다는 뜻이다. 그래디언트 크기 <span class='sym-A'>σ(−βz)</span>는 마진 z 가 충분히 커지면 0 으로 사라진다.",
       ref: "레퍼런스",
       refWa: "레퍼런스와",
       start: "A",
@@ -21,7 +21,7 @@ GW.register("dpo-loss", (el) => {
       },
     },
     ref: {
-      title: "DPO 손실 — 레퍼런스 대비 마진을 얼마나 더 벌렸나",
+      title: "DPO 손실: 레퍼런스 대비 마진 z 가 얼마나 커졌나",
       caption:
         "가로축은 학습 모델의 선호 마진 <span class='sym-pi'>Δ<sub>θ</sub></span>, 세로 점선은 레퍼런스 마진 <span class='sym-ref'>Δ<sub>ref</sub></span>. " +
         "<span class='sym-ref'>Δ<sub>ref</sub></span> 를 움직이면 곡선이 어떻게 바뀌는지 보라. 단추는 아래 문제 1·2 의 값을 불러온다. 풀이를 마친 뒤 수치판과 견주어 보라.",
@@ -37,7 +37,7 @@ GW.register("dpo-loss", (el) => {
       },
     },
     beta: {
-      title: "DPO 손실 — β 에 따라 크기가 꺼지는 곳",
+      title: "DPO 손실: β 에 따라 크기가 꺼지는 곳",
       caption:
         "<span class='sym-beta'>β</span> 를 고른 뒤 <span class='sym-pi'>Δ<sub>θ</sub></span> 를 오른쪽으로 밀어, 그래디언트 크기 <span class='sym-A'>σ(−βz)</span> (점선)가 어디서 0.1 아래로 떨어지는지 찾아보라. " +
         "단추는 아래 문제 4 의 두 <span class='sym-beta'>β</span> 를 불러온다(<span class='sym-ref'>Δ<sub>ref</sub></span> = 0 이라 <span class='sym-R'>z</span> = <span class='sym-pi'>Δ<sub>θ</sub></span>).",
@@ -98,7 +98,7 @@ GW.register("dpo-loss", (el) => {
     c.dot(st.dth, g, "fs-A", 5);
     const z = st.dth - st.dref;
     f.readout.innerHTML =
-      `<span class="sym-R">z</span> = <span class="sym-pi">Δθ</span> − <span class="sym-ref">Δref</span> = <b>${GW.fmt(z, 2)}</b> · 손실 <span class="sym-J">L</span> <b>${GW.fmt(l, 3)}</b> · 그래디언트 크기 <span class="sym-A">σ(−βz)</span> <b>${GW.fmt(g, 3)}</b> — ` +
+      `<span class="sym-R">z</span> = <span class="sym-pi">Δθ</span> − <span class="sym-ref">Δref</span> = <b>${GW.fmt(z, 2)}</b> · 손실 <span class="sym-J">L</span> <b>${GW.fmt(l, 3)}</b> · 그래디언트 크기 <span class="sym-A">σ(−βz)</span> <b>${GW.fmt(g, 3)}</b>. ` +
       (z > 0.5 ? S.ref + "보다 더 벌렸다. 곡선이 평평해지며 학습이 느려진다." : z < -0.5 ? S.ref + "보다 오히려 좁혔다. 손실과 그래디언트가 모두 크다." : S.refWa + " 거의 같다. 아직 배울 것이 남았다.");
   }
   c.hover((x) => `<span class='sym-pi'>Δθ</span> = ${GW.fmt(x, 2)}<br><span class='sym-J'>L</span> = ${GW.fmt(L(x), 3)}<br><span class='sym-A'>σ(−βz)</span> = ${GW.fmt(G(x), 3)}`);

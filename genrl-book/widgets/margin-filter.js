@@ -1,17 +1,17 @@
 // JoyCaption의 마진 기반 필터링: 프롬프트마다 N개 응답을 심사해
 // (가) 무작위 2개로 쌍을 만들 때와 (나) 최상위 vs 최하위로 쌍을 만들 때의 마진 분포 비교.
-// 점수 = 프롬프트 난이도 평균 + 정규 잡음(σ), 1–10 으로 자름. 재현 가능한 난수.
+// 점수 = 프롬프트 난이도 평균 + 정규분포 노이즈(σ), 1–10 으로 자름. 재현 가능한 난수.
 GW.register("margin-filter", (el) => {
   const f = GW.frame(el, {
     title: "후보를 많이 뽑아 양 끝을 고르면 마진이 저절로 벌어진다",
     caption:
       "프롬프트 400개 각각에 대해 N개 응답을 1–10점으로 심사했다고 가정한 시뮬레이션. " +
       "「무작위 쌍」은 응답 두 개를 아무렇게나 짝지은 쌍(JoyCaption의 첫 시도), 「최상위 vs 최하위」는 N개 중 양 끝을 묶은 쌍이다. " +
-      "N과 흩어짐을 바꾸며 두 분포가 어떻게 움직이는지, 문턱을 넘어 남는 쌍이 얼마나 되는지 보라.",
+      "N과 품질의 표준편차 σ를 바꾸며 두 분포가 어떻게 움직이는지, 문턱을 넘어 남는 쌍이 얼마나 되는지 보라.",
   });
   const st = { N: 10, sd: 1.5, thr: 4 };
   GW.slider(f.controls, { label: "프롬프트당 후보 수 N", min: 2, max: 16, step: 1, value: st.N, fmt: (v) => v + "개", oninput: (v) => { st.N = v; draw(); } });
-  GW.slider(f.controls, { label: "응답 품질의 흩어짐 σ", min: 0.5, max: 3, step: 0.1, value: st.sd, fmt: (v) => v.toFixed(1), oninput: (v) => { st.sd = v; draw(); } });
+  GW.slider(f.controls, { label: "응답 품질의 표준편차 σ", min: 0.5, max: 3, step: 0.1, value: st.sd, fmt: (v) => v.toFixed(1), oninput: (v) => { st.sd = v; draw(); } });
   GW.slider(f.controls, { label: "남길 최소 마진", min: 1, max: 8, step: 1, value: st.thr, fmt: (v) => v + "점", oninput: (v) => { st.thr = v; draw(); } });
   GW.legend(f.stage, [["c4", "무작위 쌍"], ["c1", "최상위 vs 최하위"]]);
   const c = GW.chart(f.stage, { x: [-0.6, 9.6], y: [0, 0.5], xticks: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], xlabel: "쌍의 마진 (점수 차)", ylabel: "비율", yfmt: (v) => Math.round(v * 100) + "%", h: 270, label: "마진 분포" });
@@ -53,8 +53,8 @@ GW.register("margin-filter", (el) => {
     const keepR = rand.filter((v) => v >= st.thr).length / P, keepE = ext.filter((v) => v >= st.thr).length / P;
     const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
     f.readout.innerHTML =
-      `평균 마진 — 무작위 <b>${mean(rand).toFixed(2)}</b>점 · 양 끝 <b>${mean(ext).toFixed(2)}</b>점 &nbsp;|&nbsp; ` +
-      `${st.thr}점 이상이라 남는 쌍 — 무작위 <b>${Math.round(keepR * 100)}%</b> · 양 끝 <b>${Math.round(keepE * 100)}%</b>`;
+      `평균 마진: 무작위 <b>${mean(rand).toFixed(2)}</b>점 · 양 끝 <b>${mean(ext).toFixed(2)}</b>점 &nbsp;|&nbsp; ` +
+      `${st.thr}점 이상이라 남는 쌍: 무작위 <b>${Math.round(keepR * 100)}%</b> · 양 끝 <b>${Math.round(keepE * 100)}%</b>`;
   }
   draw();
 });

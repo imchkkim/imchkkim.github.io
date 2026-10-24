@@ -2,7 +2,7 @@
 // 디퓨전 포싱은 프레임마다 k 를 따로 둘 수 있어서, 같은 모델로 여러 스케줄을 다 돌릴 수 있다.
 GW.register("frame-noise-schedule", (el) => {
   const f = GW.frame(el, {
-    title: "노이즈 스케줄 격자 — 가로는 프레임, 세로는 디노이징 반복",
+    title: "노이즈 스케줄 격자: 가로는 프레임, 세로는 디노이징 반복",
     caption:
       "칸의 진하기와 숫자는 그 프레임의 노이즈 수준 <span style='color:var(--sym-4527a0, #4527a0)'>k</span>다(0 = 깨끗한 프레임, <span style='color:var(--sym-4527a0, #4527a0)'>K</span> = 순수 노이즈). " +
       "한 줄이 모델을 한 번 부르는 것이다. 전체 시퀀스 디퓨전은 모든 프레임을 같은 수준으로 걷어 낸다. 자기회귀는 한 프레임씩 끝까지 걷어 낸다. " +
@@ -59,7 +59,7 @@ GW.register("frame-noise-schedule", (el) => {
       const calls = R.length - 1;
       const first = R.findIndex((row) => row[0] === 0);
       f.readout.innerHTML = `모델 호출 <b>${calls}</b>번 (프레임 ${N}개, 프레임당 ${K}단계) &nbsp;|&nbsp; 첫 프레임이 깨끗해지는 반복: <b>${first}</b>` +
-        (st.mode === "full" ? " — 다만 모든 프레임이 동시에 끝나므로 길이가 고정되고, 스트리밍하듯 앞부분부터 내보낼 수 없다" : "");
+        (st.mode === "full" ? " &nbsp;|&nbsp; 다만 모든 프레임이 동시에 끝나므로 길이가 고정되고, 스트리밍하듯 앞부분부터 내보낼 수 없다" : "");
     }
   }
   draw();

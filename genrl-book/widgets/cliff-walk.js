@@ -1,7 +1,7 @@
 // 강가 산책로에서 SARSA 와 Q-러닝을 견준다.
 // Q-러닝 장 「Q-러닝: 최선의 수를 가정하고 배운다」 절에 놓인다.
 // 격자·보상 규칙은 sources/q-learning/riverside.py 와 같다: 4줄 × 10칸, 출발 S = (줄 3, 칸 0), 정자 G = (줄 3, 칸 9),
-// 맨 아래 줄 칸 1~8 은 강물(들어가면 −50 을 받고 출발점으로), 한 걸음마다 −1, 할인율 γ = 1, Q 표의 처음 값은 모두 0.
+// 맨 아래 줄 칸 1~8 은 강물(들어가면 −50 을 받고 출발점으로), 한 스텝마다 −1, 할인율 γ = 1, Q 표의 처음 값은 모두 0.
 // 탐색 확률 ε 과 학습률 α 로 두 방법을 같은 수만큼(학습 20번 × 에피소드 500) 돌린다.
 // 위: 학습 20번 가운데 가장 많이 나온 그리디 길(탐색 없이 표에서 가장 큰 칸만 따라간 길).
 // 아래: 에피소드마다의 리턴(탐색하며 걸은 그대로)을 학습 20번에 걸쳐 평균 내고 10 에피소드씩 이동 평균한 곡선.
@@ -133,7 +133,7 @@ GW.register("cliff-walk", (el) => {
       const { gp, n } = res[m].top;
       const pts = gp.pts.map(([r, cc]) => `${X0 + CELL * (cc + 0.5) + dy},${Y0 + CELL * (r + 0.5) + dy}`).join(" ");
       GW.s("polyline", { class: "w-line " + cls, points: pts, style: { strokeWidth: 3.5 } }, pathLayer);
-      lines.push(`${name}: ${gp.ok ? `${gp.pts.length - 1}걸음 길` : "길이 맴돎(도착 못 함)"} (학습 ${RUNS}번 가운데 ${n}번)`);
+      lines.push(`${name}: ${gp.ok ? `${gp.pts.length - 1}스텝 길` : "길이 맴돎(도착 못 함)"} (학습 ${RUNS}번 가운데 ${n}번)`);
     });
     gLegend.innerHTML = `<div class="w-readout">그리디 길 · ${lines.join(" · ")}</div>`;
 

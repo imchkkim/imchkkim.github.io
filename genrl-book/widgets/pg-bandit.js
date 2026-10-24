@@ -6,11 +6,11 @@
 // 난수 씨앗 7 이라 「처음으로」 뒤 첫 샘플은 늘 같다(로짓 0 이면 A). 설명글에는 문제의 답을 적지 않는다.
 GW.register("pg-bandit", (el) => {
   const f = GW.frame(el, {
-    title: "세 개의 답 중 하나를 고르는 정책 — 그래디언트는 어디로 미는가",
+    title: "세 개의 답 중 하나를 고르는 정책: 그래디언트는 어디로 미는가",
     caption:
       "막대는 각 답을 고를 확률 <span class='sym-pi'>π</span>, 막대 위 화살표는 정확한 그래디언트가 로짓을 미는 방향과 크기(<span class='sym-pi'>π<sub>k</sub></span>(<span class='sym-R'>r<sub>k</sub></span> − <span class='sym-J'>J</span>)). " +
-      "‘기대값으로 한 걸음’은 VPG, ‘샘플 1개로 한 걸음’은 뽑은 샘플로 추정해 걷는 방법(REINFORCE)이다. 보상에 상수 c 를 더한 뒤 두 방식의 학습 곡선을 비교해 보라. " +
-      "‘문제 5’, ‘문제 6’ 단추는 아래 두 문제의 처음 로짓과 보상을 불러온다. 수치판에는 방금 한 걸음에 쓴 그래디언트가 나온다. 풀이를 마친 뒤 견주어 보라.",
+      "‘기댓값으로 한 스텝’은 VPG, ‘샘플 1개로 한 스텝’은 뽑은 샘플로 그래디언트를 추정해 업데이트하는 방법(REINFORCE)이다. 보상에 상수 c 를 더한 뒤 두 방식의 학습 곡선을 비교해 보라. " +
+      "‘문제 5’, ‘문제 6’ 단추는 아래 두 문제의 처음 로짓과 보상을 불러온다. 수치판에는 방금 한 스텝에 쓴 그래디언트가 나온다. 풀이를 마친 뒤 비교해 보라.",
   });
   const ACT = ["서울입니다", "부산입니다", "서울이요"];
   const PRESETS = {
@@ -32,9 +32,9 @@ GW.register("pg-bandit", (el) => {
     value: "body",
     onchange: (k) => { Z0 = PRESETS[k].z.slice(); R = PRESETS[k].r.slice(); c = PRESETS[k].c || 0; sC.value = c; reset(); },
   });
-  GW.button(f.controls, "기대값으로 한 걸음 (VPG)", () => step("exact"));
-  GW.button(f.controls, "샘플 1개로 한 걸음", () => step("sample"));
-  GW.button(f.controls, "20걸음", () => { for (let i = 0; i < 20; i++) step(mode || "exact", true); draw(); });
+  GW.button(f.controls, "기댓값으로 한 스텝 (VPG)", () => step("exact"));
+  GW.button(f.controls, "샘플 1개로 한 스텝", () => step("sample"));
+  GW.button(f.controls, "20스텝", () => { for (let i = 0; i < 20; i++) step(mode || "exact", true); draw(); });
   GW.button(f.controls, "처음으로", reset);
   const sC = GW.slider(f.controls, { label: "보상에 더할 상수 c", min: -2, max: 5, step: 0.5, value: 0, fmt: (v) => GW.fmt(v, 1), oninput: (v) => { c = v; reset(); } });
 
@@ -42,7 +42,7 @@ GW.register("pg-bandit", (el) => {
   const left = GW.h("div", {}, row), right = GW.h("div", {}, row);
   const bars = GW.chart(left, { w: 300, h: 250, x: [0, 3], y: [0, 1], xticks: [], yticks: [0, 0.25, 0.5, 0.75, 1], ylabel: "확률 π", margin: { b: 44, l: 44 }, label: "답별 확률" });
   GW.legend(right, [["cs-J", "<span class=\"sym-J\">J</span> (기대 보상)"]]);
-  const line = GW.chart(right, { w: 300, h: 226, x: [0, 40], y: [0, 1], xlabel: "걸음", ylabel: "J", margin: { l: 40 }, label: "기대 보상 변화" });
+  const line = GW.chart(right, { w: 300, h: 226, x: [0, 40], y: [0, 1], xlabel: "스텝", ylabel: "J", margin: { l: 40 }, label: "기대 보상 변화" });
 
   function reset() { z = Z0.slice(); hist = [J(softmax(z))]; rng = GW.rng(7); stepN = 0; mode = null; lastG = null; draw(); }
 
@@ -90,12 +90,12 @@ GW.register("pg-bandit", (el) => {
     line.dot(hist.length - 1, hist[hist.length - 1], "fs-J", 4);
     // 처음 화면에서 곡선 칸이 빈 그래프로 보이지 않게, 아직 걷지 않았다는 안내를 둔다.
     if (hist.length === 1) {
-      GW.s("text", { class: "w-tick", x: line.X(22), y: line.Y(0.62), "text-anchor": "middle", text: "걸음 단추를 누르면" }, line.layer);
+      GW.s("text", { class: "w-tick", x: line.X(22), y: line.Y(0.62), "text-anchor": "middle", text: "스텝 단추를 누르면" }, line.layer);
       GW.s("text", { class: "w-tick", x: line.X(22), y: line.Y(0.62) + 16, "text-anchor": "middle", text: "J 의 변화가 그려진다" }, line.layer);
     }
     const ls = f.lastSample && mode === "sample" ? ` · 방금 뽑은 답 <b>${ACT[f.lastSample.a]}</b>, 가중치 <span class='sym-R'>r</span>+c = <b>${GW.fmt(f.lastSample.w, 1)}</b>` : "";
     const gs = lastG ? ` · 방금 쓴 그래디언트 (∂/∂z₁, ∂/∂z₂, ∂/∂z₃) = (<b>${lastG.map((g) => GW.fmt(g, 2)).join(", ")}</b>)` : "";
-    f.readout.innerHTML = `걸음 <b>${stepN}</b> · 기대 보상 <span class="sym-J">J</span> = <b>${Jv.toFixed(3)}</b>${ls}${gs}`;
+    f.readout.innerHTML = `스텝 <b>${stepN}</b> · 기대 보상 <span class="sym-J">J</span> = <b>${Jv.toFixed(3)}</b>${ls}${gs}`;
   }
   reset();
 });

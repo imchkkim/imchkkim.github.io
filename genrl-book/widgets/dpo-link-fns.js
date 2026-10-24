@@ -2,11 +2,11 @@
 // DPO −log σ(βz) / IPO (z − 1/(2β))² / 힌지(SLiC) max(0, 1 − βz) / SimPO식 목표 마진 −log σ(βz − γ)
 GW.register("dpo-link-fns", (el) => {
   const f = GW.frame(el, {
-    title: "링크 함수를 바꾸면 — ‘언제 그만 벌릴 것인가’가 달라진다",
+    title: "링크 함수를 바꾸면 ‘언제 그만 벌릴 것인가’가 달라진다",
     caption:
-      "DPO 곡선은 오른쪽으로 갈수록 0에 다가가기만 할 뿐 닿지 않는다 — 마진을 끝없이 벌리려는 힘이 남는다. " +
-      "IPO는 <span class='sym-R'>z*</span> = 1/(2<span class='sym-beta'>β</span>)에서 바닥을 친다. 힌지는 <span class='sym-R'>z</span> = 1/<span class='sym-beta'>β</span> 에서 손실과 그래디언트가 정확히 0이 된다. " +
-      "목표 마진 γ(SimPO)는 DPO 곡선을 γ/<span class='sym-beta'>β</span> 만큼 오른쪽으로 민다 — ‘최소 이만큼은 벌려라’.",
+      "DPO 곡선은 오른쪽으로 갈수록 0에 다가가기만 할 뿐 닿지 않는다. 그래서 마진을 끝없이 벌리려는 그래디언트가 남는다. " +
+      "IPO는 <span class='sym-R'>z*</span> = 1/(2<span class='sym-beta'>β</span>)에서 손실이 최솟값 0이 된다. 힌지는 <span class='sym-R'>z</span> = 1/<span class='sym-beta'>β</span> 에서 손실과 그래디언트가 정확히 0이 된다. " +
+      "목표 마진 γ(SimPO)는 DPO 곡선을 γ/<span class='sym-beta'>β</span> 만큼 오른쪽으로 민다. 뜻은 ‘최소 이만큼은 벌려라’다.",
   });
   const st = { beta: 0.25, gamma: 1.0 }; // 처음 β 는 본문 표의 0.25. 0.5 는 18장 문제 2의 값이라 처음 화면에 두지 않는다(수치판의 z* 가 답이 된다)
   GW.slider(f.controls, { label: "<span class=\"sym-beta\">β</span>", min: 0.2, max: 2, step: 0.05, value: st.beta, fmt: (v) => v.toFixed(2), oninput: (v) => { st.beta = v; draw(); } });
@@ -33,7 +33,7 @@ GW.register("dpo-link-fns", (el) => {
     c.fn(F.hinge, "c3", 300);
     c.fn(F.tgt, "c4 dash");
     const zI = 1 / (2 * st.beta), zH = 1 / st.beta;
-    if (zI <= 8) { c.dot(zI, 0, "f2", 5); c.text(zI - 0.15, 0.15, "IPO 바닥", "", "end"); }
+    if (zI <= 8) { c.dot(zI, 0, "f2", 5); c.text(zI - 0.15, 0.15, "IPO 최솟값", "", "end"); }
     if (zH <= 8) { c.dot(zH, 0, "f3", 5); c.text(zH + 0.15, 0.15, "힌지 멈춤", "", "start"); }
     f.readout.innerHTML =
       `<span class='sym-R'>z</span> = 6 에서 DPO 손실 <b>${F.dpo(6).toFixed(3)}</b> (0이 아님) · IPO 타깃 <span class='sym-R'>z*</span> = <b>${zI.toFixed(2)}</b> · ` +

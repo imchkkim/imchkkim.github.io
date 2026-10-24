@@ -3,10 +3,10 @@
 // 역방향  KL(q‖p) 최소화 = KL 제약 RL          → 한 봉우리를 골라 그 안에 머문다.
 GW.register("kl-direction", (el) => {
   const f = GW.frame(el, {
-    title: "같은 목표, 다른 방향의 KL — SFT는 덮고, RL은 고른다",
+    title: "같은 목표, 다른 방향의 KL: SFT는 덮고, RL은 고른다",
     caption:
       "초록은 목표 분포(SFT의 정답 분포 <span class='sym-tgt'>p<sub>data</sub></span>, RL의 최적 정책 <span class='sym-tgt'>π*</span>), 파랑은 봉우리 하나밖에 못 만드는 모델 <span class='sym-pi'>π<sub>θ</sub></span>. " +
-      "회색 띠는 목표가 거의 0인 ‘골짜기’ — 모델이 여기에 두는 확률은 데이터에도, 좋은 답에도 없는 응답, 즉 모델 자신의 실수다.",
+      "회색 띠는 목표가 거의 0인 ‘골짜기’다. 모델이 여기에 두는 확률은 데이터에도, 좋은 답에도 없는 응답, 즉 모델 자신의 실수다.",
   });
   const st = { sep: 1.8, w: 0.65, mode: "both" }; // 간격 2.2·비중 반반은 1장 문제 2의 값이라 처음 화면에 두지 않는다(수치판이 답이 된다)
   GW.segmented(f.controls, {

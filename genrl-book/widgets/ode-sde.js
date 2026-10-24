@@ -5,9 +5,9 @@
 // SDE: dx = [v + (g²/2)·∇log p_t(x)] dt + g dW,  ∇log p_t = −(x − m_t)/V_t  → 모든 t 에서 주변분포가 ODE 와 같다.
 GW.register("ode-sde", (el) => {
   const f = GW.frame(el, {
-    title: "같은 시작 노이즈에서 8장 생성하기 — ODE는 한 장, SDE는 여덟 장",
+    title: "같은 시작 노이즈에서 8장 생성하기: ODE는 한 장, SDE는 여덟 장",
     caption:
-      "흐름 매칭 모델은 보통 결정론적 ODE로 샘플링한다. 왼쪽 점선이 같은 시작 노이즈에서 ODE로 뽑은 8개다. " +
+      "플로우 매칭 모델은 보통 결정론적 ODE로 샘플링한다. 왼쪽 점선이 같은 시작 노이즈에서 ODE로 뽑은 8개다. " +
       "Flow-GRPO·DanceGRPO는 ODE를 ‘모든 시점에서 같은 분포를 주는’ SDE로 바꿔 스텝마다 노이즈를 넣는다. 오른쪽 히스토그램(2000장)은 노이즈 크기와 무관하게 목표 분포(점선)와 일치한다.",
   });
   const st = { g: 0.8, seed: 5 };
@@ -65,7 +65,7 @@ GW.register("ode-sde", (el) => {
     const eMean = ends.reduce((a, b) => a + b, 0) / ends.length;
     const eSd = Math.sqrt(ends.reduce((a, b) => a + (b - eMean) ** 2, 0) / ends.length);
     f.readout.innerHTML =
-      `같은 시작점 8개의 보상 표준편차 — ODE <b>0.000</b> · SDE <b>${sd.toFixed(3)}</b> (GRPO 어드밴티지의 재료)` +
+      `같은 시작점 8개의 보상 표준편차: ODE <b>0.000</b> · SDE <b>${sd.toFixed(3)}</b> (GRPO 어드밴티지의 재료)` +
       ` &nbsp;|&nbsp; SDE 결과 2000개: 평균 <b>${eMean.toFixed(2)}</b>, 표준편차 <b>${eSd.toFixed(2)}</b> (목표 2.00, 0.50)`;
   }
   draw();

@@ -1,6 +1,6 @@
 // 가치 반복: 서로 다른 두 처음 표가 한 점으로 모이는 모습.
 // 벨먼 방정식 장 「축약 사상: 가치 반복은 왜 한 점에 모이나」 절에 놓인다.
-// 세 구역 택시의 가치 표 두 개(A, B)에 벨먼 최적 연산자 𝒯 를 거듭 적용하고, 걸음마다 두 표의 가장 큰 칸 차이를 로그 눈금으로 그린다.
+// 세 구역 택시의 가치 표 두 개(A, B)에 벨먼 최적 연산자 𝒯 를 거듭 적용하고, 스텝마다 두 표의 가장 큰 칸 차이를 로그 눈금으로 그린다.
 // 점선은 상한 (배율)^k × (처음 차이). 배율 = γ × (1 − 퇴근 확률).
 // 숫자(목적지 확률, 요금, 기다리는 비용)는 sources/mdp/mdp_taxi.py, 처음 표와 기본 설정(퇴근 없음, γ = 0.95)은 sources/bellman/s3_contraction.py 와 같다.
 // 단추 하나는 아래 문제 8 의 설정(퇴근 1/10, γ = 1)을 불러온다. 설명글에는 문제의 답을 적지 않는다.
@@ -29,8 +29,8 @@ GW.register("value-iteration", (el) => {
     title: "가치 반복: 두 처음 표의 차이",
     caption:
       `표 A 는 모든 칸이 0, 표 B 는 고른 값에서 시작한다. 두 표에 같은 연산자 ${T} 를 한 번씩 적용할 때마다 세 칸 가운데 가장 큰 차이를 왼쪽 그림에 찍는다(세로는 로그 눈금). ` +
-      `점선은 「처음 차이 × 배율의 k제곱」, 가로 점선은 처음 차이의 1/1000 이다. ${gam} 를 1 쪽으로 밀 때 실선이 얼마나 눕는지, 퇴근 확률을 바꾸면 무엇이 배율 노릇을 하는지 보라. ` +
-      `오른쪽 표는 「걸음 k」 슬라이더의 걸음에서 두 표의 값과, 그 표로 고른 그리디 정책이다. 마지막 단추는 아래 문제 8 의 설정을 불러온다.`,
+      `점선은 「처음 차이 × 배율의 k제곱」, 가로 점선은 처음 차이의 1/1000 이다. ${gam} 를 1 가까이로 밀 때 실선이 얼마나 눕는지, 퇴근 확률을 바꾸면 무엇이 배율 노릇을 하는지 보라. ` +
+      `오른쪽 표는 「스텝 k」 슬라이더가 가리키는 스텝에서 두 표의 값과, 그 표로 고른 그리디 정책이다. 마지막 단추는 아래 문제 8 의 설정을 불러온다.`,
   });
 
   const st = { gamma: 0.95, end: 0, b: 0, k: 10 };
@@ -44,7 +44,7 @@ GW.register("value-iteration", (el) => {
   const bw = GW.h("span", { style: { whiteSpace: "nowrap" } }, row2);
   GW.h("span", { text: "표 B 의 처음 값 ", style: { marginRight: "0.3em" } }, bw);
   const bSeg = GW.segmented(bw, { options: PRESETS.map((p, i) => [i, p[0]]), value: st.b, onchange: (v) => { st.b = v; draw(); } });
-  const sK = GW.slider(f.controls, { label: "걸음 k", min: 0, max: 200, step: 1, value: st.k, fmt: (v) => String(v), oninput: (v) => { st.k = v; draw(); } });
+  const sK = GW.slider(f.controls, { label: "스텝 k", min: 0, max: 200, step: 1, value: st.k, fmt: (v) => String(v), oninput: (v) => { st.k = v; draw(); } });
   const btnRow = GW.h("div", { style: { display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.4rem" } }, f.controls);
   GW.button(btnRow, "처음 설정", () => { set(0.95, 0, 0, 10); });
   GW.button(btnRow, "문제 8 설정 불러오기", () => { set(1, 0.1, 0, 10); });
@@ -57,7 +57,7 @@ GW.register("value-iteration", (el) => {
   const grid = GW.h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "0.8rem" } }, f.stage);
   const left = GW.h("div", {}, grid), right = GW.h("div", {}, grid);
   GW.legend(left, [["c1", "두 표의 가장 큰 칸 차이"], ["cm", "처음 차이 × 배율<sup>k</sup>", "dash"]]);
-  const ch = GW.chart(left, { w: 320, h: 240, x: [0, 200], y: [-3, 3], xlabel: "걸음 k (𝒯 를 적용한 횟수)", margin: { l: 50, r: 12 }, label: "두 표의 차이, 로그 눈금", yfmt: (v) => (Number.isInteger(v) ? "10^" + v : "") });
+  const ch = GW.chart(left, { w: 320, h: 240, x: [0, 200], y: [-3, 3], xlabel: "스텝 k (𝒯 를 적용한 횟수)", margin: { l: 50, r: 12 }, label: "두 표의 차이, 로그 눈금", yfmt: (v) => (Number.isInteger(v) ? "10^" + v : "") });
   ch.clip();
   const tbl = GW.h("div", { style: { fontSize: "0.9em", overflowX: "auto" } }, right);
 
@@ -110,14 +110,14 @@ GW.register("value-iteration", (el) => {
       `<tr><td>A 로 고른 행동</td>${h.pA.map((a) => `<td style="text-align:right;padding:0 0.5em">${c("1c9c60", ACTS[a])}</td>`).join("")}</tr>` +
       `<tr><td>B 로 고른 행동</td>${h.pB.map((a) => `<td style="text-align:right;padding:0 0.5em">${c("1c9c60", ACTS[a])}</td>`).join("")}</tr></table>`;
     f.readout.innerHTML =
-      `점선의 배율 <b>${GW.fmt(rate, 3)}</b> · 걸음 ${st.k}: 가장 큰 칸 차이 <b>${GW.fmt(gaps[st.k], 4)}</b>` +
-      (st.k ? ` (앞 걸음의 ${GW.fmt(gaps[st.k] / Math.max(gaps[st.k - 1], 1e-12), 4)}배)` : "") +
-      ` · 처음의 1/1000 아래로: ${hit >= 0 ? `<b>${hit}</b>걸음` : `${KMAX}걸음 안에 안 닿음`}` +
+      `점선의 배율 <b>${GW.fmt(rate, 3)}</b> · 스텝 ${st.k}: 가장 큰 칸 차이 <b>${GW.fmt(gaps[st.k], 4)}</b>` +
+      (st.k ? ` (앞 스텝의 ${GW.fmt(gaps[st.k] / Math.max(gaps[st.k - 1], 1e-12), 4)}배)` : "") +
+      ` · 처음의 1/1000 아래로: ${hit >= 0 ? `<b>${hit}</b>스텝` : `${KMAX}스텝 안에 안 닿음`}` +
       ` · 상한 식 ln1000 / ln(1/배율) = ${isFinite(bound) ? GW.fmt(bound, 1) : "∞"}`;
   }
   ch.hover((x) => {
     const k = Math.round(x);
-    return k >= 0 && k <= 200 ? `걸음 ${k}` : "";
+    return k >= 0 && k <= 200 ? `스텝 ${k}` : "";
   });
   draw();
 });

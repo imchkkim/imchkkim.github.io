@@ -9,7 +9,7 @@
 GW.register("bt-sigmoid", (el) => {
   const mle = el.dataset.set === "mle";
   const f = GW.frame(el, {
-    title: "Bradley-Terry — 이길 확률은 실력 차의 시그모이드",
+    title: "Bradley-Terry: 이길 확률은 실력 차의 시그모이드",
     caption: mle
       ? "‘문제 6 (나)’ 단추는 두 선수의 실력 차를 0으로 둔다. ‘12경기 해 보기’를 여러 번 눌러 기록이 어떻게 흔들리는지 보고, " +
         "‘대회 1000번’으로 12경기짜리 대회를 1000번 치러 A가 7승 이상 한 비율을 세어 풀이와 견주어 보라."

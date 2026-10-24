@@ -9,10 +9,10 @@
 //   data-set="dapo" : (b) 「DAPO의 네 가지 처방」 절 — 같은 위젯, 문제 단추 없음
 GW.register("length-bias-grpo", (el) => {
   const f = GW.frame(el, {
-    title: "길이로 나누면 생기는 일 — 토큰 하나가 받는 힘",
+    title: "길이로 나누면 생기는 일: 토큰 하나가 받는 가중치",
     caption:
       "그룹은 짧은 정답, 긴 정답, 짧은 오답, 긴 오답 넷이고 어드밴티지는 +1, +1, −1, −1. 두 막대는 각각 가장 큰 값을 1로 맞춘 상대 크기다. " +
-      "파랑 = 토큰 하나당 가중치. 모든 토큰이 같은 가중치 w 를 받으면 그래디언트는 w·∇log π(응답) 이므로, 이것이 곧 <b>응답 전체의 로그확률</b>을 미는 힘이다. " +
+      "파랑 = 토큰 하나당 가중치. 모든 토큰이 같은 가중치 w 를 받으면 그래디언트는 w·∇log π(응답) 이므로, 토큰당 가중치 w 가 <b>응답 전체의 로그확률</b>에 걸리는 계수다. " +
       "주황 = 그 가중치를 토큰 수만큼 더한 합.",
   });
   let Ls = 40, Ll = 400, mode = "GRPO";
@@ -22,7 +22,7 @@ GW.register("length-bias-grpo", (el) => {
   const sL = GW.slider(f.controls, { label: "긴 답 길이", min: 200, max: 4000, step: 100, value: Ll, oninput: (v) => { Ll = v; draw(); } });
   if (el.dataset.set !== "dapo")
     GW.button(f.controls, "문제 1 값 (50 / 500)", () => { Ls = 50; Ll = 500; sS.value = Ls; sL.value = Ll; draw(); });
-  GW.legend(f.stage, [["c1", "토큰 하나당 (= 응답 로그확률을 미는 힘)"], ["c2", "토큰 수만큼 더한 합"]]);
+  GW.legend(f.stage, [["c1", "토큰 하나당 (= 응답 로그확률에 걸리는 계수)"], ["c2", "토큰 수만큼 더한 합"]]);
   const names = ["짧은 정답", "긴 정답", "짧은 오답", "긴 오답"];
   const c = GW.chart(f.stage, { x: [0, 4], y: [-1.2, 1.4], xticks: [], yticks: [-1, -0.5, 0, 0.5, 1], ylabel: "상대 가중치", h: 290, margin: { b: 30 }, label: "응답별 그래디언트 가중치" });
 
@@ -49,7 +49,7 @@ GW.register("length-bias-grpo", (el) => {
     const ratio = Math.abs(w.rawPer[2] / w.rawPer[3]);
     f.readout.innerHTML =
       `짧은 오답의 토큰은 긴 오답의 토큰보다 <b>${ratio.toFixed(ratio < 10 ? 2 : 0)}배</b> 세게 억제된다` +
-      (Math.abs(ratio - 1) < 1e-9 ? " — 길이와 무관하게 공평하다." : ` (길이 비 ${Ll}/${Ls}).`);
+      (Math.abs(ratio - 1) < 1e-9 ? ". 길이와 무관하게 공평하다." : ` (길이 비 ${Ll}/${Ls}).`);
   }
   draw();
 });

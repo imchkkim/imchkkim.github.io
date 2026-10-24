@@ -6,7 +6,7 @@
 // 설명글에는 문제의 답을 적지 않는다.
 GW.register("sampling-temp", (el) => {
   const f = GW.frame(el, {
-    title: "샘플링 온도 — 모델의 분포와 실제로 뽑히는 분포",
+    title: "샘플링 온도: 모델의 분포와 실제로 뽑히는 분포",
     caption:
       "진한 막대는 모델이 내놓은 확률 <span class='sym-pi'>π<sub>θ</sub></span>, 옅은 막대는 로짓을 샘플링 온도 T 로 나눈 뒤 실제로 뽑히는 확률이다. " +
       "처음 화면은 본문의 T = 0.5 다. T 를 1에 가까이, 또 1 너머로 옮기며 두 막대가 어떻게 벌어지는지, 가장 큰 토큰이 바뀌는지 보라. 수치판의 <span class='sym-ratio'>w</span> 는 두 확률의 비 " +

@@ -12,19 +12,19 @@ GW.register("reinforce-variance", (el) => {
     baseline: {
       modes: ["none", "const", "ema"],
       caption:
-        "점선은 참값이다. 보상에 더할 상수 c 를 올리고 베이스라인을 끄거나 켜서, 히스토그램의 중심과 폭, 학습 곡선 다섯 개가 흩어진 정도를 견줘 보라. " +
+        "점선은 참값이다. 보상에 더할 상수 c 를 올리고 베이스라인을 끄거나 켜서, 히스토그램의 중심과 폭, 학습 곡선 다섯 개가 서로 벌어진 정도를 비교해 보라. " +
         "이동평균은 지난 배치들의 평균 보상을 베이스라인으로 쓴다.",
     },
     default: {
       modes: ["none", "const", "ema", "loo", "incl"],
       caption:
-        "‘자기 뺀 평균’과 ‘자기 포함 평균’은 같은 프롬프트에서 한 번에 뽑은 " + Nsym + "개의 보상으로 베이스라인을 만든다. 앞의 것은 자기를 뺀 나머지의 평균, 뒤의 것은 자기까지 넣은 평균이다. ‘없음’은 베이스라인을 쓰지 않는다. " +
-        "추정치 평균을 참값(점선)과 견줘 보라. 단추는 아래 문제 7 의 값(" + Nsym + " = 4, c = 0, 자기 포함)을 불러온다.",
+        "‘자기 뺀 평균’과 ‘자기 포함 평균’은 같은 프롬프트에서 한 번에 뽑은 " + Nsym + "개의 보상으로 베이스라인을 만든다. ‘자기 뺀 평균’은 자기를 뺀 나머지의 평균, ‘자기 포함 평균’은 자기까지 넣은 평균이다. ‘없음’은 베이스라인을 쓰지 않는다. " +
+        "추정치 평균을 참값(점선)과 비교해 보라. 단추는 아래 문제 7 의 값(" + Nsym + " = 4, c = 0, 자기 포함)을 불러온다.",
       preset: { label: "문제 7 값 불러오기", mode: "incl", c: 0, N: 4 },
     },
   };
   const S = sets[el.dataset.set] || sets.default;
-  const f = GW.frame(el, { title: "베이스라인이 흔들림을 얼마나 줄이는가", caption: S.caption });
+  const f = GW.frame(el, { title: "베이스라인이 분산을 얼마나 줄이는가", caption: S.caption });
   const R = [1.0, 0.0, 0.6];
   const Z0 = [-0.6, 0.9, 0.0];
   const LR = 0.5, STEPS = 40, SEEDS = 5, HIST_N = 1500;
@@ -65,8 +65,8 @@ GW.register("reinforce-variance", (el) => {
   const left = GW.h("div", {}, row), right = GW.h("div", {}, row);
   GW.legend(left, [["c1", "추정치 분포"], ["c2 dash", "참값 ∂<span class=\"sym-J\">J</span>/∂z", "dash"]]);
   const hist = GW.chart(left, { w: 300, h: 240, x: [-1, 1], y: [0, 1], yticks: [], xlabel: "‘서울입니다’ 로짓의 그래디언트 추정", margin: { l: 16, r: 12 }, label: "그래디언트 추정치 히스토그램" });
-  GW.legend(right, [["cs-J", "<span class=\"sym-J\">J</span> — 학습 5회 (각각 다른 난수)"], ["cm dash", "정확한 기대값 (VPG)", "dash"]]);
-  const curves = GW.chart(right, { w: 300, h: 240, x: [0, STEPS], y: [0, 1], xlabel: "걸음", ylabel: "기대 보상 J", margin: { l: 40, r: 12 }, label: "학습 곡선" });
+  GW.legend(right, [["cs-J", "<span class=\"sym-J\">J</span>: 학습 5회 (각각 다른 난수)"], ["cm dash", "정확한 기댓값 (VPG)", "dash"]]);
+  const curves = GW.chart(right, { w: 300, h: 240, x: [0, STEPS], y: [0, 1], xlabel: "스텝", ylabel: "기대 보상 J", margin: { l: 40, r: 12 }, label: "학습 곡선" });
 
   // 배치 하나의 가중치 (r_i + c − b_i) 를 모드에 맞게 계산
   function weights(rs, b) {
@@ -143,7 +143,7 @@ GW.register("reinforce-variance", (el) => {
     const warn = st.mode === "loo" && st.N < 2 ? " · <b>" + Nsym + " = 1 이면 비교할 다른 샘플이 없어 베이스라인이 0 이 된다</b>" : "";
     f.readout.innerHTML =
       `추정치 평균 <b>${GW.fmt(mean, 3)}</b> (참값 ${GW.fmt(truth, 3)}) · 표준편차 <b>${GW.fmt(sd, 3)}</b> · ` +
-      `40걸음 뒤 <span class='sym-J'>J</span> 의 편차(5회) <b>${GW.fmt(fsd, 3)}</b>` + warn;
+      `40스텝 뒤 <span class='sym-J'>J</span> 의 편차(5회) <b>${GW.fmt(fsd, 3)}</b>` + warn;
   }
   hist.hover((x) => `추정치 ≈ ${GW.fmt(x, 3)}`);
   draw();

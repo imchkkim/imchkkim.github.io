@@ -21,7 +21,7 @@ GW.register("token-logprob", (el) => {
     })
   );
   const c = GW.chart(f.stage, { x: [0, 7], y: [-6, 0.4], xticks: [], ylabel: "로그확률", h: 280, margin: { b: 48 }, label: "토큰별 로그확률" });
-  GW.legend(f.stage, [["cs-pi", "log <span class=\"sym-pi\">π<sub>θ</sub></span> — 왼쪽 선호 응답 <span style='color:var(--sym-e000a5, #e000a5)'>y<sub>w</sub></span>(진하게), 오른쪽 비선호 응답 <span style='color:var(--sym-e000a5, #e000a5)'>y<sub>l</sub></span>(연하게)"]]);
+  GW.legend(f.stage, [["cs-pi", "log <span class=\"sym-pi\">π<sub>θ</sub></span>: 왼쪽 선호 응답 <span style='color:var(--sym-e000a5, #e000a5)'>y<sub>w</sub></span>(진하게), 오른쪽 비선호 응답 <span style='color:var(--sym-e000a5, #e000a5)'>y<sub>l</sub></span>(연하게)"]]);
 
   function bar(x, v, cls, label, sub) {
     const faint = cls === "f2"; cls = "fs-pi";

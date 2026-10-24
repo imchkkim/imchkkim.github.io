@@ -5,12 +5,12 @@
 // 설명글에는 문제의 답을 적지 않는다.
 GW.register("ppo-clip", (el) => {
   const f = GW.frame(el, {
-    title: "PPO 클리핑 — 비율 r 이 얼마나 멀어지면 멈추는가",
+    title: "PPO 클리핑: 비율 r 이 얼마나 멀어지면 멈추는가",
     caption:
       "가로축은 확률 비율 <span class='sym-ratio'>r</span> = <span class='sym-pi'>π<sub>θ</sub></span>/<span class='sym-ref'>π<sub>old</sub></span> (업데이트 전엔 1). 실선은 PPO 목적함수, 점선은 클리핑 없는 <span class='sym-ratio'>r</span>·<span class='sym-A'>A</span>. " +
-      "음영 구간에서는 목적함수가 평평해 그래디언트가 0 — 이 샘플은 더 이상 정책을 밀지 않는다. " +
+      "음영 구간에서는 목적함수가 평평해 그래디언트가 0이고, 그 샘플은 더 이상 정책을 밀지 않는다. " +
       "좋은 행동(<span class='sym-A'>A</span>&gt;0)은 1+<span style='color:var(--sym-1f6d7a, #1f6d7a)'>ε</span> 까지만 올리고, 나쁜 행동(<span class='sym-A'>A</span>&lt;0)은 1−<span style='color:var(--sym-1f6d7a, #1f6d7a)'>ε</span> 까지만 내린다. " +
-      "‘문제 5’, ‘문제 6’ 단추는 두 문제의 비율과 어드밴티지를 불러와 그래프에 점으로 찍는다. 풀이를 마친 뒤 수치판과 견주어 보라.",
+      "‘문제 5’, ‘문제 6’ 단추는 두 문제의 비율과 어드밴티지를 불러와 그래프에 점으로 찍는다. 풀이를 마친 뒤 수치판과 비교해 보라.",
   });
   let eps = 0.2, A = 1, pick = null;
   const PRESETS = {
@@ -81,7 +81,7 @@ GW.register("ppo-clip", (el) => {
   function draw() {
     panel(cp);
     panel(cn);
-    let html = `허용 범위 <span class="sym-ratio">r</span> ∈ [<b>${(1 - eps).toFixed(2)}</b>, <b>${(1 + eps).toFixed(2)}</b>] — 한 배치로 여러 번 업데이트해도 각 행동의 확률은 이 범위 밖으로 “이득을 보며” 나가지 못한다.`;
+    let html = `허용 범위 <span class="sym-ratio">r</span> ∈ [<b>${(1 - eps).toFixed(2)}</b>, <b>${(1 + eps).toFixed(2)}</b>]. 한 배치로 여러 번 업데이트해도 각 행동의 확률은 이 범위 밖으로 “이득을 보며” 나가지 못한다.`;
     if (pick) {
       const { r, a } = pick;
       const lo = 1 - eps, hi = 1 + eps;

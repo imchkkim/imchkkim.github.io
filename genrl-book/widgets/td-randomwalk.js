@@ -3,8 +3,8 @@
 //  - 기본(data-set 없음): 「시간차 학습: 다음 예측을 목표로 삼는다」 절. 위: 한 줄의 학습에서 칸마다의 값(에피소드를 하나씩 걸린다).
 //    아래: 에피소드 100개 동안의 RMS 오차를 100줄 평균한 곡선(시간차 α, 몬테카를로 α 를 따로 민다).
 //    단추 하나는 아래 문제 2 의 에피소드(4 → 5 → 6 → 5 → 4 → 5 → 6 → 7 → 끝)를 처음 값 0.5 에서 한 번 걸린다.
-//  - data-set="nstep": 「n걸음 시간차: 한 걸음과 끝까지 사이」 절. n 과 처음 값(0.5 / 0)을 고르면 α 마다 에피소드 10개 뒤의 RMS 오차(100줄 평균)를 그린다.
-//    아래 문제 11 의 에피소드에서 첫 칸의 n걸음 목표(참값 V 사용)를 수치판에 보인다.
+//  - data-set="nstep": 「n스텝 시간차: 한 스텝과 끝까지 사이」 절. n 과 처음 값(0.5 / 0)을 고르면 α 마다 에피소드 10개 뒤의 RMS 오차(100줄 평균)를 그린다.
+//    아래 문제 11 의 에피소드에서 첫 칸의 n스텝 목표(참값 V 사용)를 수치판에 보인다.
 // 길과 보상은 sources/td/walk.py 와 같다: 칸 1..7, 칸 4 출발, 오른쪽 끝 1점, 왼쪽 끝 0점, γ = 1, 참값 V(k) = k/8.
 // 난수는 위젯의 것이라 곡선의 숫자는 본문 표(스크립트 출력)와 조금 다르다. 설명글에는 문제의 답을 적지 않는다.
 GW.register("td-randomwalk", (el) => {
@@ -19,7 +19,7 @@ GW.register("td-randomwalk", (el) => {
     return [st, rw];
   }
   const newV = (init) => { const V = new Array(N + 2).fill(init); V[0] = 0; V[N + 1] = 0; return V; };
-  // n걸음 시간차 (n = Infinity 이면 몬테카를로). 걸음 순서대로 고친다
+  // n스텝 시간차 (n = Infinity 이면 몬테카를로). 스텝 순서대로 고친다
   function update(V, st, rw, a, n) {
     const T = rw.length;
     for (let t = 0; t < T; t++) {
@@ -94,24 +94,24 @@ GW.register("td-randomwalk", (el) => {
   });
   resetAll();
 
-  // ── n걸음 ──
+  // ── n스텝 ──
   function nstep() {
     const f = GW.frame(el, {
-      title: "n걸음 시간차: 에피소드 10개 뒤의 오차",
+      title: "n스텝 시간차: 에피소드 10개 뒤의 오차",
       caption:
-        `${ns} 걸음까지는 실제로 받은 보상을 더하고, 그 뒤는 ${ns} 걸음 뒤 칸의 값 ${Vs} 를 믿는다. ${ns} = 1 이 한 걸음 시간차, 맨 오른쪽(끝까지)이 몬테카를로다. ` +
+        `${ns} 스텝까지는 실제로 받은 보상을 더하고, 그 뒤는 ${ns} 스텝 뒤 칸의 값 ${Vs} 를 믿는다. ${ns} = 1 이 한 스텝 시간차, 맨 오른쪽(끝까지)이 몬테카를로다. ` +
         `곡선 하나는 ${al} 마다 에피소드 10개로 학습한 뒤의 RMS 오차(100줄 평균)이고, 흐린 두 선은 비교용 양 끝이다. ` +
-        `처음 값을 0.5(대충 맞는 추측)와 0(아무것도 모름)으로 바꿔 가며, 가장 낮은 오차를 내는 ${ns} 이 어디로 옮겨 가는지 보라. 수치판 마지막 줄은 아래 문제 11 의 에피소드에서 첫 칸의 ${ns} 걸음 목표다.`,
+        `처음 값을 0.5(대충 맞는 추측)와 0(아무것도 모름)으로 바꿔 가며, 가장 낮은 오차를 내는 ${ns} 이 어디로 옮겨 가는지 보라. 수치판 마지막 줄은 아래 문제 11 의 에피소드에서 첫 칸의 ${ns} 스텝 목표다.`,
     });
     const S = { n: 3, init: 0.5 };
     const nf = (v) => (v >= 17 ? "끝까지" : String(v));
-    GW.slider(f.controls, { label: "걸음 수 " + ns, min: 1, max: 17, step: 1, value: S.n, fmt: nf, oninput: (v) => { S.n = v; draw(); } });
+    GW.slider(f.controls, { label: "스텝 수 " + ns, min: 1, max: 17, step: 1, value: S.n, fmt: nf, oninput: (v) => { S.n = v; draw(); } });
     const w = GW.h("span", { style: { whiteSpace: "nowrap", marginLeft: "0.6rem" } }, f.controls);
     GW.h("span", { text: "처음 값 ", style: { marginRight: "0.3em" } }, w);
     GW.segmented(w, { options: [[0.5, "0.5"], [0, "0"]], value: S.init, onchange: (v) => { S.init = v; draw(); } });
     const ALPHAS = []; for (let a = 0.05; a <= 1.0001; a += 0.05) ALPHAS.push(+a.toFixed(2));
-    GW.legend(f.stage, [["c1", ns + " 걸음"], ["cm", "1 걸음 (흐림)"], ["c2", "끝까지 (흐림)"]]);
-    const ch = GW.chart(f.stage, { w: 560, h: 260, x: [0, 1], y: [0, 0.5], xlabel: "α", ylabel: "에피소드 10개 뒤 RMS 오차", margin: { l: 48, r: 14 }, label: "n걸음 시간차의 오차" });
+    GW.legend(f.stage, [["c1", ns + " 스텝"], ["cm", "1 스텝 (흐림)"], ["c2", "끝까지 (흐림)"]]);
+    const ch = GW.chart(f.stage, { w: 560, h: 260, x: [0, 1], y: [0, 0.5], xlabel: "α", ylabel: "에피소드 10개 뒤 RMS 오차", margin: { l: 48, r: 14 }, label: "n스텝 시간차의 오차" });
     const cache = {};
     function curve(n, init) {
       const key = n + ":" + init;
@@ -134,13 +134,13 @@ GW.register("td-randomwalk", (el) => {
       ch.path(c1, "cm thin"); ch.path(cM, "c2 thin dash"); ch.path(cn, "c1");
       let b = 0; cn.forEach((p, i) => { if (p[1] < cn[b][1]) b = i; });
       ch.dot(cn[b][0], cn[b][1], "f1");
-      // 문제 11: 에피소드 4,5,6,5,4,5,6,7,8 에서 t=0 의 n걸음 목표 (참값 V)
+      // 문제 11: 에피소드 4,5,6,5,4,5,6,7,8 에서 t=0 의 n스텝 목표 (참값 V)
       const T = PROB2.length - 1, h = Math.min(n, T);
       const tgt = h < T ? TRUE[PROB2[h]] : 1;
       f.readout.innerHTML =
         `${ns} = <b>${nf(S.n)}</b> · 처음 값 ${S.init} · 가장 낮은 오차 <b>${GW.fmt(cn[b][1], 3)}</b> (${al} = ${GW.fmt(cn[b][0], 2)}) · ` +
-        `비교: 1 걸음 ${GW.fmt(Math.min(...c1.map((p) => p[1])), 3)}, 끝까지 ${GW.fmt(Math.min(...cM.map((p) => p[1])), 3)}` +
-        `<br>문제 11 의 에피소드(4→5→6→5→4→5→6→7→오른끝), 첫 칸의 ${ns} 걸음 목표 (참값 ${Vs} 사용): <b>${GW.fmt(tgt, 3)}</b>`;
+        `비교: 1 스텝 ${GW.fmt(Math.min(...c1.map((p) => p[1])), 3)}, 끝까지 ${GW.fmt(Math.min(...cM.map((p) => p[1])), 3)}` +
+        `<br>문제 11 의 에피소드(4→5→6→5→4→5→6→7→오른끝), 첫 칸의 ${ns} 스텝 목표 (참값 ${Vs} 사용): <b>${GW.fmt(tgt, 3)}</b>`;
     }
     ch.hover((x) => {
       const n = S.n >= 17 ? Infinity : S.n, cn = curve(n, S.init);
