@@ -628,6 +628,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
 #sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
 .toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+
+/* 표지: 목차 페이지 첫머리. 그림의 원본과 그리는 스크립트는 ~/lameproof/shared/covers/ */
+.book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
+.book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
+@media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -679,7 +684,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="initialization.html">가중치 초기화: 신호가 커지지도 사라지지도 않게</a></p>
 <h2 id="직교-초기화-모든-방향의-길이를-지키기">직교 초기화: 모든 방향의 길이를 지키기</h2>
-<p>허 초기화로 ReLU 망의 분산을 지켰다. 분산은 칸 <span class="sym" style="color:#3c4bff">n</span>개의 평균적인 크기다. 무작위로 고른 입력 하나를 넣었을 때 그 길이가 지켜진다는 뜻이다. 그런데 학습에 필요한 그래디언트는 아무 방향에서나 오지 않는다. 손실이 특정한 방향으로 파라미터를 움직이라고 하면, 그 방향의 그래디언트가 아래층까지 살아서 와야 한다. 평균적인 방향의 길이는 지켜도, 어떤 방향은 크게 늘이고 어떤 방향은 거의 지워 버리는 행렬이라면 어떨까?</p>
+<p>허 초기화로 ReLU 망의 분산을 지켰다. 분산은 칸 <span class="sym" style="color:#3c4bff">n</span>개의 평균적인 크기이니, 무작위로 고른 입력 하나를 넣었을 때 그 길이가 지켜진다는 뜻이다. 그런데 학습에 필요한 그래디언트는 아무 방향에서나 오지 않아서, 손실이 특정한 방향으로 파라미터를 움직이라고 하면 그 방향의 그래디언트가 아래층까지 살아서 와야 한다. 평균적인 방향의 길이는 지켜도, 어떤 방향은 크게 늘이고 어떤 방향은 거의 지워 버리는 행렬이라면 어떨까?</p>
 <h3 id="역사-깊이와-상관없이-배우는-선형-망">역사: 깊이와 상관없이 배우는 선형 망</h3>
 <p>2013년 12월, 앤드루 색스(Andrew Saxe), 제임스 매클렐런드(James McClelland), 수리아 강굴리(Surya Ganguli)는 논문 「깊은 선형 신경망 학습의 비선형 동역학에 대한 정확한 해」를 공개했다(이듬해 표현 학습 국제 학회 ICLR 에 제출). 활성화 함수가 없는 선형 망은 층을 아무리 쌓아도 결국 행렬 하나와 같아서 표현력은 늘지 않는다. 그런데 학습의 움직임은 층을 쌓으면 비선형이 된다. 오래 정체하다가 갑자기 오차가 뚝 떨어지는, 비선형 망에서 보던 모습이 선형 망에서도 나타난다. 그들은 이 움직임을 식으로 정확히 풀었다.</p>
 <p>이 논문의 실험 하나가 초기화의 물음을 바꿨다. 층마다 미리 학습시켜 쌓은 선형 망은 층이 늘어도 학습에 걸리는 시간이 늘지 않았는데, 분산을 맞춘 가우스 무작위 가중치에서 출발한 망은 층이 늘수록 오래 걸렸다. 그들은 미리 학습 없이 그 학습 속도를 얻는 무작위 초기화가 있는지 물었고, 층마다 무작위 직교 행렬을 쓰면 미리 학습한 것과 구별되지 않게 깊이와 상관없이 빨리 배운다는 것을 보였다. 둘 다 크기를 지키는 초기화인데 왜 다를까? 그들의 답은 행렬을 여러 개 곱한 것의 특잇값(행렬이 축마다 늘이는 배율)에 있었다. 그리고 거꾸로 전해지는 자코비안의 곱이 가능한 한 많은 방향에서 길이를 거의 지키는 상태를 「동역학적 등거리성(dynamical isometry)」이라 이름 붙였다.</p>

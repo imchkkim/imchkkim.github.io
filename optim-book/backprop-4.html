@@ -628,6 +628,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
 #sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
 .toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+
+/* 표지: 목차 페이지 첫머리. 그림의 원본과 그리는 스크립트는 ~/lameproof/shared/covers/ */
+.book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
+.book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
+@media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -679,7 +684,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="backprop.html">역전파: 자코비안 곱을 거꾸로</a></p>
 <h2 id="체크포인팅-활성값을-다-남기지-않고-다시-계산한다">체크포인팅: 활성값을 다 남기지 않고 다시 계산한다</h2>
-<p>역전파는 거꾸로 훑을 때 칸마다 국소 미분값을 쓴다. 뉴런 하나에서는 1 − h², h − y, 그리고 곱셈 칸의 xᵢ였다. 이 값들은 앞으로 계산할 때 나온 중간값에서 온다. 그래서 앞으로 계산한 중간값을 거꾸로 훑을 때까지 버리지 못하고 들고 있어야 한다. 층마다 내놓은 이런 중간값을 활성값(activation)이라 부른다. 답만 낼 때는 넉넉하던 GPU 메모리가 학습을 시작하면 모자라는 일이 여기서 온다. 답만 낼 때는 층을 지나고 나면 앞 층의 값을 버려도 되지만, 학습할 때는 모든 층의 값을 끝까지 들고 있어야 한다. 층이 깊어질수록 늘어나는 이 메모리를, 계산을 조금 더 하는 대신 줄일 수는 없을까?</p>
+<p>역전파는 거꾸로 훑을 때 칸마다 국소 미분값을 쓰는데, 뉴런 하나에서는 1 − h², h − y, 그리고 곱셈 칸의 xᵢ였다. 이 값들은 앞으로 계산할 때 나온 중간값에서 오기 때문에, 앞으로 계산한 중간값을 거꾸로 훑을 때까지 버리지 못하고 들고 있어야 한다. 층마다 내놓은 이런 중간값을 활성값(activation)이라 부르는데, 답만 낼 때는 넉넉하던 GPU 메모리가 학습을 시작하면 모자라는 일이 여기서 온다. 답만 낼 때는 층을 지나고 나면 앞 층의 값을 버려도 되지만, 학습할 때는 모든 층의 값을 끝까지 들고 있어야 한다. 층이 깊어질수록 늘어나는 이 메모리를, 계산을 조금 더 하는 대신 줄일 수는 없을까?</p>
 <h3 id="역사-거꾸로-가려면-지나온-상태가-필요하다">역사: 거꾸로 가려면 지나온 상태가 필요하다</h3>
 <p>러멜하트·힌턴·윌리엄스의 1986년 논문도 이 비용을 알고 있었다. 그림 5의 설명에서 그들은 같은 망을 여러 번 되풀이해 돌리는 망(순환 신경망)에 역전파를 쓰려면, 앞으로 가는 동안 중간 단계의 출력이 거꾸로 가기에 필요하므로 단위마다 출력의 이력을 저장해야 한다고 적었다.</p>
 <p>계산을 거꾸로 되돌리는 데 드는 저장 공간의 문제는 그보다 앞서 계산 이론에서도 다뤄졌다. 그리반크는 찰스 베넷(Charles Bennett)이 1973년 튜링 기계의 계산을 되돌리는 문제를 다루면서, 계산 노력과 메모리를 맞바꾸는 체크포인트 방식을 미리 보여 주었다고 적었다. 그리반크 자신은 1992년 논문 「역방향 자동미분에서 시간과 공간의 복잡도를 로그로 늘게 하기」에서 남겨 둘 자리를 되풀이해 나누는 방법으로, 실행 시간이 T인 계산의 메모리와 다시 계산하는 시간을 둘 다 log T의 고정된 배수로 묶었다. 그 뒤 신경망 쪽에서는 톈치 천(Tianqi Chen)과 동료들이 2016년 논문 「선형보다 적은 메모리로 깊은 망 학습하기(Training Deep Nets with Sublinear Memory Cost)」에서 같은 생각을 깊은 신경망에 맞춰 정리했다.</p>
@@ -727,10 +732,10 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <figure class="fig "><img src="images/backprop/a4_checkpoint.png" alt="층 16개짜리 사슬을 거꾸로 지나는 동안 들고 있는 활성값. 한 줄이 거꾸로 지나는 층 하나이고 위에서 아래로 시간이 흐른다. 왼쪽부터 다 저장, 4칸마다 저장, 처음 것만 저장(sources/backprop/s4_checkpoint.py)" loading="lazy"><figcaption>층 16개짜리 사슬을 거꾸로 지나는 동안 들고 있는 활성값. 한 줄이 거꾸로 지나는 층 하나이고 위에서 아래로 시간이 흐른다. 왼쪽부터 다 저장, 4칸마다 저장, 처음 것만 저장(sources/backprop/s4_checkpoint.py)</figcaption></figure>
 <figure class="widget-embed" id="widget-backprop-w3"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 3: 체크포인팅 간격</span><a class="widget-open" href="widgets/backprop.html?v=d5bfdd0e#w3" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/backprop.html?w=w3&embed=1&v=d5bfdd0e" title="위젯 3: 체크포인팅 간격" loading="lazy"></iframe></figure>
 <h3 id="ml에서-큰-모델의-메모리와-torch-utils-checkpoint">ML에서: 큰 모델의 메모리와 <code>torch.utils.checkpoint</code></h3>
-<p>천과 동료들은 2016년 논문에서 층 수가 n인 망을 미니배치마다 앞으로 가기를 한 번 더 하는 비용으로, 층 수보다 훨씬 느리게 늘어나는 메모리로 학습할 수 있다고 보였다(얼마나 느리게인지는 아래 문제 11에서 직접 구한다). 그들이 보고한 대표 실험은 이미지넷의 1,000층짜리 잔차 신경망으로, 메모리를 48 GB에서 7 GB로 줄이는 데 실행 시간이 30%쯤 더 들었다. 파이토치에는 이 일을 하는 <code>torch.utils.checkpoint</code>가 있어서, 감싼 구간은 앞으로 갈 때 활성값을 남기지 않고 거꾸로 갈 때 다시 계산한다. 큰 언어 모델을 학습할 때 층마다, 또는 몇 층마다 이것을 거는 것이 흔한 설정이다. 학습이 추론보다 메모리를 많이 먹는 까닭이 거꾸로 가기에 쓸 활성값이었으니, 그 활성값을 줄이는 방법도 거꾸로 가기 쪽에서 나왔다.</p>
+<p>천과 동료들은 2016년 논문에서 층 수가 n인 망을 미니배치마다 앞으로 가기를 한 번 더 하는 비용으로, 층 수보다 훨씬 느리게 늘어나는 메모리로 학습할 수 있다고 보였다(얼마나 느리게인지는 아래 문제 11에서 직접 구한다). 그들이 보고한 대표 실험은 이미지넷의 1,000층짜리 잔차 신경망으로, 메모리를 48 GB에서 7 GB로 줄이는 데 실행 시간이 30%쯤 더 들었다. 파이토치에는 이 일을 하는 <code>torch.utils.checkpoint</code>가 있어서, 감싼 구간은 앞으로 갈 때 활성값을 남기지 않고 거꾸로 갈 때 다시 계산한다. 큰 언어 모델을 학습할 때 층마다, 또는 몇 층마다 이것을 거는 것이 흔한 설정이다. 학습이 추론보다 메모리를 많이 먹은 것은 거꾸로 가기에 쓸 활성값 때문이었으니, 그 활성값을 줄이는 방법도 거꾸로 가기 쪽에서 나왔다.</p>
 <div class="dialogue"><h3 id="문제-10-바둑을-거꾸로-복기하기">문제 10. 바둑을 거꾸로 복기하기</h3>
 <blockquote>
-<p>60수짜리 바둑 대국을 마지막 수부터 한 수씩 거꾸로 짚으며 복기하려 한다. 수마다 그 수를 두기 직전의 판이 눈앞에 있어야 한다. 기보(모든 수의 순서)는 있으니, 남겨 둔 판에서 수를 다시 놓으면 어느 판이든 만들 수 있다. 다만 판 사진을 찍어 둘 수 있는 장수가 정해져 있다. (가) 모든 판을 사진으로 남기면 몇 장인가? (나) 처음 빈 판 하나만 남기면 다시 놓는 수는 모두 몇 수인가? (다) 6수마다 사진을 남기면, 동시에 들고 있는 판은 최대 몇 장이고 다시 놓는 수는 몇 수인가? 20수마다라면?</p>
+<p>60수짜리 바둑 대국을 마지막 수부터 한 수씩 거꾸로 짚으며 복기하려면, 수마다 그 수를 두기 직전의 판이 눈앞에 있어야 한다. 기보(모든 수의 순서)는 있으니, 남겨 둔 판에서 수를 다시 놓으면 어느 판이든 만들 수 있다. 다만 판 사진을 찍어 둘 수 있는 장수가 정해져 있다. (가) 모든 판을 사진으로 남기면 몇 장인가? (나) 처음 빈 판 하나만 남기면 다시 놓는 수는 모두 몇 수인가? (다) 6수마다 사진을 남기면, 동시에 들고 있는 판은 최대 몇 장이고 다시 놓는 수는 몇 수인가? 20수마다라면?</p>
 </blockquote>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 60장이요. (나)는 마지막 수를 짚으려면 59수를 다시 놓아야 하고, 그다음은 58수… 0부터 59까지 더하면 1,770수예요. (다)는 사진이 10장이니까 10장이면 되지 않나요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>마지막 구간(55수~60수)을 거꾸로 짚을 때, 사진 말고 무엇을 들고 있어야 하죠?</p></div></div>

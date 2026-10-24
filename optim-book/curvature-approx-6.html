@@ -628,6 +628,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
 #sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
 .toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+
+/* 표지: 목차 페이지 첫머리. 그림의 원본과 그리는 스크립트는 ~/lameproof/shared/covers/ */
+.book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
+.book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
+@media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -764,7 +769,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h3 id="요약">요약</h3>
 <p>뉴턴법이 원하는 헤시안은 큰 모델에서 저장도 역도 불가능하다. 이 장의 방법들은 모두 「곡률 행렬의 무엇을 남기고 무엇을 버리나」에 대한 서로 다른 답이다.</p>
 <p>준뉴턴법은 헤시안을 계산하지 않고 스텝 s 와 그래디언트의 차이 y 로 할선 조건 Bs = y 를 맞추며 곡률의 어림을 쌓는다. 1950년대 데이비던이 고장 잦은 컴퓨터 위에서 시작했고, 1970년 네 사람이 따로 낸 BFGS가 표준이 되었다. 로젠브록 함수에서 경사하강의 10,916스텝을 34스텝으로 줄인다. 행렬을 저장하지 않고 최근 몇 쌍만 기억하는 L-BFGS가 큰 문제의 꼴이지만, 미니배치 노이즈 속에서는 그래디언트의 차이가 묻혀 잘 맞지 않는다.</p>
-<p>손실이 잔차의 제곱합이면 헤시안의 큰 덩어리 JᵀJ 를 자코비안만으로 얻는다. 가우스–뉴턴법이다. 휨이 늘 양수라 내리막을 놓치지 않고, 손실의 바닥에서 잔차가 작을수록 뉴턴법에 가까워진다. 손실이 확률로 정해지면 JᵀJ 대신 피셔 행렬을 쓴다. 피셔로 나눈 자연 그래디언트는 공부 시간을 시간으로 적든 분으로 적든 같은 6스텝으로 손실의 바닥에 닿지만, 피셔 역시 파라미터 수의 제곱 크기다.</p>
+<p>손실이 잔차의 제곱합이면 헤시안의 큰 덩어리 JᵀJ 를 자코비안만으로 얻는 가우스–뉴턴법을 쓸 수 있다. 휨이 늘 양수라 내리막을 놓치지 않고, 손실의 바닥에서 잔차가 작을수록 뉴턴법에 가까워진다. 손실이 확률로 정해지면 JᵀJ 대신 피셔 행렬을 쓴다. 피셔로 나눈 자연 그래디언트는 공부 시간을 시간으로 적든 분으로 적든 같은 6스텝으로 손실의 바닥에 닿지만, 피셔 역시 파라미터 수의 제곱 크기다.</p>
 <p>K-FAC 은 층마다 피셔 블록을 활성값 쪽과 역전파 쪽 두 작은 행렬의 크로네커 곱으로 어림한다. 저장은 (mn)² 칸에서 m² + n² 칸으로, 역은 작은 행렬 둘의 역으로 준다. 그 대가는 두 신호가 따로 논다는 가정이고, 큰 활성값이 큰 역전파 신호와 함께 오면 스텝이 너무 커진다. Shampoo 는 같은 두 조각을 층의 그래디언트 행렬 하나로 쌓고 양쪽에 −1/4제곱을 곱한다. 층의 속을 몰라도 되고, 축마다 따로 나누는 방법이 고치지 못하는 비스듬한 골짜기를 고친다.</p>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>Shampoo 의 무게는 결국 행렬의 −1/4제곱이었다. 메모리는 견딜 만해도, 한 변이 만 개를 넘는 행렬을 스텝마다 분해할 수는 없어 수십 스텝에 한 번 묵은 값을 쓴다. 한편 쌓기를 끄면 스텝은 그래디언트 행렬의 특잇값을 모두 1로 바꾼 행렬이 되었다. 곡률을 어림하려던 장치가, 쌓기를 끄면 곡률을 하나도 쓰지 않고 「모든 방향으로 고르게 한 스텝」을 내놓는다. 쌓기를 끈 Shampoo 가 특잇값을 모두 1로 맞추는 것은 우연일까? 스텝의 크기를 그래디언트 벡터의 길이가 아니라 다른 무엇으로 재면 이런 스텝이 저절로 「가장 가파른 스텝」이 되는 것은 아닐까? 그리고 특잇값을 1로 바꾸는 일을 분해 없이 행렬 곱만으로 할 수 있을까?</p>

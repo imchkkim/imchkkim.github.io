@@ -628,6 +628,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
 #sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
 .toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+
+/* 표지: 목차 페이지 첫머리. 그림의 원본과 그리는 스크립트는 ~/lameproof/shared/covers/ */
+.book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
+.book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
+@media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -679,8 +684,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="adaptive.html">적응 학습률: AdaGrad 에서 AdamW 까지</a></p>
 <h2 id="adam-두-이동-평균을-합치고-처음-스텝을-바로잡는다">Adam: 두 이동 평균을 합치고 처음 스텝을 바로잡는다</h2>
-<p>RMSProp 은 좌표마다 스텝의 크기를 맞춰 준다. 그런데 RMSProp 스텝의 방향은 지금 받은 그래디언트 하나가 정한다. 미니배치마다 그래디언트가 흔들리면 방향도 따라 흔들린다. 방향의 흔들림을 줄이는 방법은 이미 있다. 모멘텀은 지난 그래디언트들의 이동 평균 <span class="sym" style="color:#ff1eff">m</span>을 들고 다니며 그 평균 쪽으로 걸었다. 그렇다면 크기는 RMSProp 처럼 그래디언트 제곱의 이동 평균으로 맞추고, 방향은 모멘텀처럼 그래디언트의 이동 평균으로 정하면 둘의 좋은 점을 함께 얻지 않을까? 두 평균을 한 식에 넣으면 무엇이 새로 어긋날까?</p>
-<h3 id="역사-처음-스텝이-커지는-까닭을-짚다">역사: 처음 스텝이 커지는 까닭을 짚다</h3>
+<p>RMSProp 은 좌표마다 스텝의 크기를 맞춰 주지만, 스텝의 방향은 지금 받은 그래디언트 하나가 정하므로 미니배치마다 그래디언트가 흔들리면 방향도 따라 흔들린다. 방향의 흔들림을 줄이는 방법은 이미 있다. 모멘텀은 지난 그래디언트들의 이동 평균 <span class="sym" style="color:#ff1eff">m</span>을 들고 다니며 그 평균 쪽으로 걸었다. 그렇다면 크기는 RMSProp 처럼 그래디언트 제곱의 이동 평균으로 맞추고, 방향은 모멘텀처럼 그래디언트의 이동 평균으로 정하면 둘의 좋은 점을 함께 얻지 않을까? 두 평균을 한 식에 넣으면 무엇이 새로 어긋날까?</p>
+<h3 id="역사-처음-스텝은-왜-커질까">역사: 처음 스텝은 왜 커질까</h3>
 <p>2014년 12월 22일, 암스테르담 대학의 디데릭 킹마(Diederik Kingma)와 토론토 대학의 지미 바(Jimmy Ba)가 「Adam: 확률적 최적화 방법」을 아카이브에 올렸다. 이듬해 샌디에이고에서 열린 표현 학습 국제 학회(ICLR 2015)에서 발표했고, 2017년 1월에 올린 아홉째 판이 지금 읽는 판이다. 그들은 서론에 목표를 분명히 적었다. 드문 그래디언트에 강한 AdaGrad 와, 지형이 움직이는 온라인 학습(데이터가 들어오는 대로 한 스텝씩 배우는 학습)에 강한 RMSProp 의 장점을 합치는 것이다. 이름은 「적응적 모멘트 추정(adaptive moment estimation)」에서 왔다. 그래디언트의 평균이 1차 모멘트, 그래디언트 제곱의 평균이 2차 모멘트다.</p>
 <p>논문이 새로 짚은 것은 두 평균이 모두 0에서 시작한다는 점이었다. 그래디언트가 늘 <span class="sym" style="color:#b0892a">g</span>로 같다고 해도, 첫 스텝의 1차 모멘트는 0.9 × 0 + 0.1<span class="sym" style="color:#b0892a">g</span> = 0.1<span class="sym" style="color:#b0892a">g</span>, 2차 모멘트는 0.999 × 0 + 0.001<span class="sym" style="color:#b0892a">g</span>² = 0.001<span class="sym" style="color:#b0892a">g</span>²이다. 둘을 그대로 나누면 0.1<span class="sym" style="color:#b0892a">g</span>/(0.0316|<span class="sym" style="color:#b0892a">g</span>|) = 3.16이 되어, 첫 스텝이 학습률의 세 배를 넘는다. 2차 모멘트의 기억 길이가 1차 모멘트보다 백 배 길어서, 2차 모멘트 쪽이 0에서 훨씬 느리게 올라오기 때문이다. 킹마와 바는 <span class="sym" style="color:#a67a63">k</span>스텝째의 두 평균을 각각 1 − <span class="sym" style="color:#f0694b">β</span>₁ᵏ, 1 − <span class="sym" style="color:#f0694b">β</span>₂ᵏ로 나누면 0에서 시작한 탓에 생긴 편향이 정확히 지워진다는 것을 보였다. 논문이 권한 기본값은 학습률 0.001, <span class="sym" style="color:#f0694b">β</span>₁ = 0.9, <span class="sym" style="color:#f0694b">β</span>₂ = 0.999, 분모에 더하는 작은 수 10⁻⁸이고, 파이토치의 기본값도 지금 이 네 값과 같다.</p>
 <h3 id="곡률이-100배-다른-그릇에서-세-옵티마이저">곡률이 100배 다른 그릇에서 세 옵티마이저</h3>
@@ -711,7 +716,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </tr>
 </tbody>
 </table></div>
-<p>Adam 은 첫 열 스텝 동안 두 좌표를 똑같이 0.01씩 옮겼다. 스텝마다 학습률 크기만큼 걷는 것이다. 곡률이 100인 좌표도 1인 좌표도 같은 스텝 크기다. 곡률 비를 1, 10, 100, 1000으로 바꿔 가면 경사하강은 1스텝, 44스텝, 459스텝, 3000스텝 안에 못 닿음으로 늘어나는데, Adam 은 네 경우 모두 223스텝이다. 곡률 비가 스텝 수에서 빠졌다.</p>
+<p>Adam 은 첫 열 스텝 동안 두 좌표를 똑같이 0.01씩 옮겨, 곡률이 100인 좌표도 1인 좌표도 스텝마다 학습률 크기만큼 걸었다. 곡률 비를 1, 10, 100, 1000으로 바꿔 가면 경사하강은 1스텝, 44스텝, 459스텝, 3000스텝 안에 못 닿음으로 늘어나는데, Adam 은 네 경우 모두 223스텝이다. 곡률 비가 스텝 수에서 빠졌다.</p>
 <p>RMSProp 이 Adam 보다 빨리 닿은 것은 이 RMSProp 이 편향을 바로잡지 않았기 때문이다. <span class="sym" style="color:#8787ff">v</span>가 0에서 시작하니 첫 스텝에서 √<span class="sym" style="color:#8787ff">v</span> = √0.01 |<span class="sym" style="color:#b0892a">g</span>| = 0.1|<span class="sym" style="color:#b0892a">g</span>|이고, 스텝이 학습률의 열 배인 0.1이 된다. 이 그릇에서는 그 큰 첫 스텝이 우연히 이득이었다. 출발점이 바닥에 가까웠거나 그릇이 더 좁았다면 같은 큰 스텝이 바닥을 지나쳤을 것이다.</p>
 <figure class="fig "><img src="images/adaptive/a3_adam_bowl.png" alt="왼쪽: 곡률이 1과 100인 그릇 위에서 경사하강(황토, 학습률 1/L), RMSProp(연보라), Adam(자홍)의 길. 경사하강은 가파른 w₂ 를 한 스텝에 끝내고 완만한 w₁ 을 따라 기어간다. RMSProp 과 Adam 은 두 좌표가 같은 스텝 크기로 줄어 대각선으로 가므로 두 선이 겹친다. 오른쪽: 손실의 바닥까지의 거리(로그 눈금)(sources/adaptive/s3_adam.py, figs.py)" loading="lazy"><figcaption>왼쪽: 곡률이 1과 100인 그릇 위에서 경사하강(황토, 학습률 1/L), RMSProp(연보라), Adam(자홍)의 길. 경사하강은 가파른 w₂ 를 한 스텝에 끝내고 완만한 w₁ 을 따라 기어간다. RMSProp 과 Adam 은 두 좌표가 같은 스텝 크기로 줄어 대각선으로 가므로 두 선이 겹친다. 오른쪽: 손실의 바닥까지의 거리(로그 눈금)(sources/adaptive/s3_adam.py, figs.py)</figcaption></figure>
 <p>이렇게 그래디언트의 이동 평균과 그래디언트 제곱의 이동 평균을 함께 두고, 둘 다 0에서 시작한 편향을 바로잡은 뒤, 그래디언트의 이동 평균을 그래디언트 제곱의 이동 평균의 제곱근으로 나눠 걷는 방법을 <strong>Adam</strong> (두 이동 평균으로 걷는 옵티마이저 / adaptive moment estimation)이라 한다. 편향을 바로잡는 나눗셈을 「편향 보정(bias correction)」이라 부른다. 여기서 편향은 0에서 시작한 탓에 이동 평균이 참값보다 작게 나오는 통계의 bias 이고, 신경망 층이 뉴런마다 더하는 상수 b(바이어스)와는 다른 말이다.</p>
@@ -747,7 +752,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <p>그래디언트가 한동안 같은 쪽을 가리키면 <span class="sym" style="color:#ff1eff">m̂</span>과 √<span class="sym" style="color:#8787ff">v̂</span>이 둘 다 |<span class="sym" style="color:#b0892a">g</span>|에 가까워져, 한 스텝은 학습률 <span class="sym" style="color:#006600">η</span> 남짓이다. 그래디언트의 부호가 스텝마다 바뀌면 <span class="sym" style="color:#ff1eff">m̂</span>은 0 쪽으로 줄고 √<span class="sym" style="color:#8787ff">v̂</span>은 그대로라 스텝이 작아진다. Adam 의 한 스텝은 「그래디언트가 얼마나 한결같은가」에 따라 0과 <span class="sym" style="color:#006600">η</span> 사이에서 정해지고, 그래디언트의 크기 자체는 거의 들어가지 않는다. 킹마와 바도 논문에서 스텝의 크기가 대략 학습률로 묶인다고 적었다.</p>
 <figure class="widget-embed" id="widget-adaptive-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 1: 곡률 비와 세 옵티마이저</span><a class="widget-open" href="widgets/adaptive.html?v=e801d7c1#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/adaptive.html?w=w1&embed=1&v=e801d7c1" title="위젯 1: 곡률 비와 세 옵티마이저" loading="lazy"></iframe></figure>
 <h3 id="ml에서-옵티마이저의-기본값">ML에서: 옵티마이저의 기본값</h3>
-<p>Adam 이 나온 뒤로 신경망 논문에서 옵티마이저를 따로 설명하지 않으면 대개 Adam 이나 그 변형을 썼다는 뜻이 되었다. 쓰기 쉬운 까닭은 위의 두 성질에 있다. 학습률이 「한 스텝에 파라미터를 얼마나 옮길까」라는 눈에 보이는 양이라, 층마다 그래디언트 크기가 백 배씩 달라도 학습률 하나로 버틴다. 그리고 손실에 상수를 곱하거나 단위를 바꿔도 스텝 크기가 거의 바뀌지 않는다. 파이토치의 <code>torch.optim.Adam</code> 은 학습률 0.001, <code>betas=(0.9, 0.999)</code>, <code>eps=1e-8</code> 을 기본값으로 쓴다. 큰 언어 모델은 이 가운데 <span class="sym" style="color:#f0694b">β</span>₂를 바꿔 쓰는데, 그 까닭은 그래디언트 제곱을 얼마나 오래 기억하느냐에 있다.</p>
+<p>Adam 이 나온 뒤로 신경망 논문에서 옵티마이저를 따로 설명하지 않으면 대개 Adam 이나 그 변형을 썼다는 뜻이 되었다. Adam 이 이렇게 쓰기 쉬운 것은 위의 두 성질 덕분인데, 먼저 학습률이 「한 스텝에 파라미터를 얼마나 옮길까」라는 눈에 보이는 양이라 층마다 그래디언트 크기가 백 배씩 달라도 학습률 하나로 버틴다. 또 손실에 상수를 곱하거나 단위를 바꿔도 스텝 크기가 거의 바뀌지 않는다. 파이토치의 <code>torch.optim.Adam</code> 은 학습률 0.001, <code>betas=(0.9, 0.999)</code>, <code>eps=1e-8</code> 을 기본값으로 쓰고, 큰 언어 모델은 그래디언트 제곱을 얼마나 오래 기억할지 바꾸려고 이 가운데 <span class="sym" style="color:#f0694b">β</span>₂를 고쳐 쓴다.</p>
 <div class="dialogue"><h3 id="문제-7-연비-앱">문제 7. 연비 앱</h3>
 <blockquote>
 <p>차계부 앱이 연비를 「주행 거리의 이동 평균 ÷ 넣은 연료의 이동 평균」으로 보여 준다. 주행 거리 쪽은 「0.9 × 옛 평균 + 0.1 × 오늘 값」, 연료 쪽은 「0.999 × 옛 평균 + 0.001 × 오늘 값」으로 업데이트하고, 둘 다 0에서 시작한다. 날마다 40km를 달리고 4L를 넣으니 참 연비는 10km/L다. (가) 1일째, 10일째, 100일째, 1000일째에 앱이 보여 주는 연비는? (나) 11km/L 아래로 처음 내려오는 날은? (다) 이 앱을 어떻게 고치면 첫날부터 10을 보여 주는가?</p>

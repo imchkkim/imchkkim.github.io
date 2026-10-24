@@ -628,6 +628,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
 #sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
 .toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+
+/* 표지: 목차 페이지 첫머리. 그림의 원본과 그리는 스크립트는 ~/lameproof/shared/covers/ */
+.book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
+.book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
+@media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -679,9 +684,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="backprop.html">역전파: 자코비안 곱을 거꾸로</a></p>
 <h2 id="자동미분-식이-아니라-코드를-미분한다">자동미분: 식이 아니라 코드를 미분한다</h2>
-<p>역전파를 하려면 계산 그래프가 있어야 한다. 뉴런 하나는 손으로 그릴 수 있었지만, 실제 신경망은 반복문으로 층을 쌓고 조건문으로 가지를 나누는 수천 줄짜리 코드다. 그 그래프는 누가 그리나? 컴퓨터에게 미분을 시키는 옛 방법은 둘이었다. 하나는 미분 공식을 써서 도함수 식을 만드는 기호 미분이고, 다른 하나는 손실값만 쓰는 유한 차분이다. 둘 다 코드에 그대로 쓰기에는 무언가 모자랐다. 무엇이 모자랐고, 코드를 그대로 미분하는 방법은 어떻게 생겼을까?</p>
+<p>역전파를 하려면 계산 그래프가 있어야 한다. 뉴런 하나는 손으로 그릴 수 있었지만, 실제 신경망은 반복문으로 층을 쌓고 조건문으로 가지를 나누는 수천 줄짜리 코드다. 그 그래프는 누가 그리나? 컴퓨터에게 미분을 시키는 옛 방법은 둘이었다. 하나는 미분 공식을 써서 도함수 식을 만드는 기호 미분이고, 다른 하나는 손실값만 쓰는 유한 차분이다. 둘 다 코드에 그대로 쓰기에는 무언가 모자랐는데, 무엇이 모자랐고 코드를 그대로 미분하는 방법은 어떻게 생겼을까?</p>
 <h3 id="역사-컴파일러에서-다시-찾은-역방향">역사: 컴파일러에서 다시 찾은 역방향</h3>
-<p>역방향 계산을 사람 손 없이 프로그램이 만들어 주게 한 이른 시도로, 베른트 스페일페닝(Bernt Speelpenning)의 1980년 일리노이 대학교 박사 논문 「알고리즘으로 주어진 함수의 빠른 편미분 컴파일하기(Compiling Fast Partial Derivatives of Functions Given by Algorithms)」가 있다. 그리반크의 글에 따르면 스페일페닝은 빌 기어(Bill Gear)에게서 뻣뻣한 미분방정식(빠른 변화와 느린 변화가 섞인 방정식)의 자코비안을 계산하는 코드를 자동으로 만들라는 과제를 받았고, 컴파일러 최적화를 궁리하다 역방향에 닿았다. 그는 함수를 계산하는 동안 일어난 연산을 하나하나 차례로 쌓아 두고, 그 더미를 거꾸로 꺼내며 미분하는 그림을 그렸다.</p>
+<p>역방향 계산을 사람 손 없이 프로그램이 만들어 주게 한 이른 시도로는 베른트 스페일페닝(Bernt Speelpenning)의 1980년 일리노이 대학교 박사 논문이 있다. 논문 제목은 「알고리즘으로 주어진 함수의 빠른 편미분 컴파일하기(Compiling Fast Partial Derivatives of Functions Given by Algorithms)」다. 그리반크의 글에 따르면 스페일페닝은 빌 기어(Bill Gear)에게서 뻣뻣한 미분방정식(빠른 변화와 느린 변화가 섞인 방정식)의 자코비안을 계산하는 코드를 자동으로 만들라는 과제를 받았고, 컴파일러 최적화를 궁리하다 역방향에 닿았다. 그는 함수를 계산하는 동안 일어난 연산을 하나하나 차례로 쌓아 두고, 그 더미를 거꾸로 꺼내며 미분하는 그림을 그렸다.</p>
 <p>그 뒤에도 이 방법은 여러 번 다시 발견되었다. 그리반크 자신도 1987년 여름 미국 아르곤 국립연구소에 막 갔을 때, 호르헤 모레(Jorge Moré)에게서 「그래디언트를 함수와 비슷한 비용으로 계산할 수 없는 목적함수의 예를 하나 들어 보라」는 도전을 받고 역방향을 혼자 다시 찾았다고 적었다. 연산 하나하나에 미분 규칙을 붙이는 방식(연산자 오버로딩)으로 역방향을 처음 구현한 것은 구간 계산을 위해 파스칼을 넓힌 언어 PASCAL-SC였다고 그는 적었다.</p>
 <h3 id="로지스틱-사상을-여섯-번-되풀이하면">로지스틱 사상을 여섯 번 되풀이하면</h3>
 <p>기호 미분이 무엇에 막히는지 보려면, 코드로는 짧은데 식으로 풀면 길어지는 함수가 좋다. 반복문이 바로 그런 것을 만든다. x를 4x(1 − x)로 바꾸는 일(로지스틱 사상)을 k번 되풀이하는 함수를 보자. 코드로는 반복문 세 줄이다. 그런데 이 함수를 식 하나로 적으면 4x(1 − x)가 k번 겹친 식이 되고, 기호 미분은 그 겹친 식에 곱의 미분 법칙을 겹겹이 적용한다. 수식 처리 프로그램 심파이(sympy)로 식을 만들고 미분해 연산 수를 세었다.</p>
@@ -727,11 +732,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </tbody>
 </table></div>
 <p>미분한 식은 되풀이할 때마다 세 배 가까이 길어지고, 전개해 정리해도 두 배씩 길어진다. k = 6의 식은 x에 대한 63차 다항식이다. 같은 부분식이 식 안에 여러 번 나타나는데, 식으로 적는 한 그것을 한 번만 계산하고 나눠 쓸 수가 없다. 기호 미분을 막은 것은 미분 규칙보다, 계산을 「식」이라는 꼴로 옮겨 적는 일이었다.</p>
-<p>유한 차분은 식을 만들지 않으니 이 문제가 없지만, 어림이다. k = 6, x = 0.3에서 참값 f′ = −65.1931590859에 대해 간격 h를 줄여 가며 (f(x + h) − f(x))/h를 계산하면, 오차는 h = 10⁻⁶에서 1.8 × 10⁻³, 10⁻⁸에서 1.8 × 10⁻⁵, 10⁻¹⁰에서 6.8 × 10⁻⁶으로 줄다가, h를 더 줄이면 실수의 반올림 오차 때문에 오히려 커져 h = 10⁻¹²에서 4.7 × 10⁻³, 10⁻¹⁴에서는 0.049가 된다. 아무리 간격을 골라도 열 자리 넘게 맞히지는 못한다. 게다가 유한 차분은 파라미터 하나마다 한 번씩 계산해야 한다.</p>
-<p>세 번째 길은 식을 만들지 않고 코드를 실행하면서, 실제로 일어난 연산을 하나씩 기록하는 것이다. 되풀이 한 번에 곱셈 4·x, 뺄셈 1 − x, 두 값의 곱셈이 일어나므로 연산이 셋씩 기록된다. k = 6이면 기록은 18칸이고, 그 기록을 거꾸로 훑는 데 곱셈은 18번이다. 결과는 −65.1931590859로, 기호 미분의 값과의 차이가 4.3 × 10⁻¹⁴이다. 기록이 바로 계산 그래프다. 그래프를 사람이 미리 그리지 않아도, 코드가 실행되는 순서를 따라 저절로 그려진다. 이렇게 프로그램이 실행하는 기본 연산마다 미분 규칙을 붙이고, 실행된 연산의 기록 위에서 연쇄법칙을 계산해 정확한 미분값을 내는 방법을 <strong>자동미분</strong> (코드를 그대로 미분하기 / automatic differentiation)이라 한다. 기록을 앞으로 훑으면 순방향 모드, 거꾸로 훑으면 역전파다. 미분하는 대상은 그 순간 실행된 연산의 기록이다.</p>
+<p>유한 차분은 식을 만들지 않으니 이 문제가 없지만, 어림이다. k = 6, x = 0.3에서 참값 f′ = −65.1931590859에 대해 간격 h를 줄여 가며 (f(x + h) − f(x))/h를 계산하면, 오차는 h = 10⁻⁶에서 1.8 × 10⁻³, 10⁻⁸에서 1.8 × 10⁻⁵, 10⁻¹⁰에서 6.8 × 10⁻⁶으로 줄어든다. 그런데 h를 더 줄이면 실수의 반올림 오차 때문에 오차가 오히려 커져 h = 10⁻¹²에서 4.7 × 10⁻³, 10⁻¹⁴에서는 0.049가 되므로, 아무리 간격을 골라도 열 자리 넘게 맞히지는 못한다. 게다가 유한 차분은 파라미터 하나마다 한 번씩 계산해야 한다.</p>
+<p>세 번째 길은 식을 만들지 않고 코드를 실행하면서, 실제로 일어난 연산을 하나씩 기록하는 것이다. 되풀이 한 번에 곱셈 4·x, 뺄셈 1 − x, 두 값의 곱셈이 일어나므로 연산이 셋씩 기록된다. k = 6이면 기록은 18칸이고, 그 기록을 거꾸로 훑는 데 곱셈은 18번이다. 결과는 −65.1931590859로, 기호 미분의 값과의 차이가 4.3 × 10⁻¹⁴이다. 기록이 바로 계산 그래프다. 그래프를 사람이 미리 그리지 않아도, 코드가 실행되는 순서를 따라 저절로 그려진다. 이렇게 프로그램이 실행하는 기본 연산마다 미분 규칙을 붙이고, 실행된 연산의 기록 위에서 연쇄법칙을 계산해 정확한 미분값을 내는 방법을 <strong>자동미분</strong> (코드를 그대로 미분하기 / automatic differentiation)이라 한다. 기록을 앞으로 훑으면 순방향 모드, 거꾸로 훑으면 역전파이고, 어느 방향으로 훑든 미분하는 대상은 그 순간 실행된 연산의 기록이다.</p>
 <figure class="fig "><img src="images/backprop/a3_swell.png" alt="로지스틱 사상을 k번 되풀이한 함수의 미분을 얻는 데 드는 연산 수(로그 눈금). 기호 미분의 식은 되풀이할 때마다 몇 배씩 길어지고, 자동미분의 기록은 한 번에 세 칸씩 늘어난다(sources/backprop/s3_autodiff.py)" loading="lazy"><figcaption>로지스틱 사상을 k번 되풀이한 함수의 미분을 얻는 데 드는 연산 수(로그 눈금). 기호 미분의 식은 되풀이할 때마다 몇 배씩 길어지고, 자동미분의 기록은 한 번에 세 칸씩 늘어난다(sources/backprop/s3_autodiff.py)</figcaption></figure>
 <h3 id="ml에서-파이토치는-실행하면서-그래프를-만든다">ML에서: 파이토치는 실행하면서 그래프를 만든다</h3>
-<p>파이토치의 자동미분(autograd)은 이 방식을 그대로 쓴다. <code>requires_grad=True</code>인 텐서에서 시작한 연산은 실행될 때마다 「어느 연산이었고 무엇이 들어왔나」를 기록에 남기고, <code>loss.backward()</code>가 그 기록을 거꾸로 훑는다. 파이토치 팀이 2017년 NIPS 자동미분 워크숍에 낸 글 「파이토치의 자동미분(Automatic differentiation in PyTorch)」은 이것을 미리 그래프를 정의해 두고 기호로 미분하는 방식과 견주어, 순수하게 명령형으로 짠 프로그램(한 줄씩 차례로 실행되는 보통의 파이썬 코드)을 미분하는 방식이라고 설명하고, 루아 토치(Lua Torch), 체이너(Chainer), HIPS 오토그래드(Autograd) 같은 앞선 프로젝트를 이어받았다고 밝힌다. 그래프가 스텝마다 새로 그려지므로 반복 횟수가 입력마다 다른 반복문이나 데이터에 따라 갈리는 조건문도 그대로 미분된다. 그 대가로, 코드가 무엇을 실행했느냐가 곧 미분의 내용이 된다.</p>
+<p>파이토치의 자동미분(autograd)은 이 방식을 그대로 쓴다. <code>requires_grad=True</code>인 텐서에서 시작한 연산은 실행될 때마다 「어느 연산이었고 무엇이 들어왔나」를 기록에 남기고, <code>loss.backward()</code>가 그 기록을 거꾸로 훑는다. 파이토치 팀이 2017년 NIPS 자동미분 워크숍에 낸 글 「파이토치의 자동미분(Automatic differentiation in PyTorch)」은 이것을 미리 그래프를 정의해 두고 기호로 미분하는 방식과 견주어, 순수하게 명령형으로 짠 프로그램(한 줄씩 차례로 실행되는 보통의 파이썬 코드)을 미분하는 방식이라고 설명한다. 같은 글은 이 방식이 루아 토치(Lua Torch), 체이너(Chainer), HIPS 오토그래드(Autograd) 같은 앞선 프로젝트를 이어받았다고 밝힌다. 그래프가 스텝마다 새로 그려지므로 반복 횟수가 입력마다 다른 반복문이나 데이터에 따라 갈리는 조건문도 그대로 미분된다. 그 대가로, 코드가 무엇을 실행했느냐가 곧 미분의 내용이 된다.</p>
 <div class="dialogue"><h3 id="문제-7-택시-요금표의-그래디언트">문제 7. 택시 요금표의 그래디언트</h3>
 <blockquote>
 <p>어느 도시의 택시 요금은 2 km까지 기본요금 4,000원이고, 2 km를 넘으면 넘은 거리 1 km마다 1,000원이 붙는다(이 책에서 지은 요금표). 이 요금표를 <code>if 거리 &lt;= 2: 요금 = 4000 else: 요금 = 4000 + 1000*(거리 − 2)</code>로 짰다. (가) 1.5 km와 5 km에서 요금은? (나) 자동미분으로 「거리가 조금 늘면 요금이 얼마나 느나」를 구하면 각각 얼마가 나오는가? (다) 거리가 정확히 2 km이면 무엇이 나오겠는가? 2 km에서 나온 미분은 「맞는」 답인가?</p>
@@ -745,7 +750,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조교님이 「제출 시각 기준」으로만 지각을 따지니까 마감 정각에 낸 사람은 지각이 아닌데, 1초 늦으면 지각인 거랑 같네요. 경계에서는 규칙을 어떻게 적었느냐가 답을 정해요.</p></div></div>
 </div><div class="dialogue"><h3 id="문제-8-같은-함수-다른-코드">문제 8. 같은 함수, 다른 코드</h3>
 <blockquote>
-<p>절댓값 함수를 두 가지로 짰다. 하나는 <code>torch.abs(x)</code>, 다른 하나는 <code>torch.sqrt(x*x)</code>다. 두 코드는 모든 x에서 같은 값을 낸다. (가) x = −3에서 두 코드의 자동미분 값은? (나) x = 0에서는? (다) 두 코드가 같은 함수인데 미분이 다르다면, 자동미분이 틀린 것인가?</p>
+<p>절댓값 함수를 <code>torch.abs(x)</code>와 <code>torch.sqrt(x*x)</code> 두 가지로 짰는데, 두 코드는 모든 x에서 같은 값을 낸다. (가) x = −3에서 두 코드의 자동미분 값은? (나) x = 0에서는? (다) 두 코드가 같은 함수인데 미분이 다르다면, 자동미분이 틀린 것인가?</p>
 </blockquote>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>같은 함수니까 미분도 같겠죠. x = −3에서는 둘 다 −1이고, x = 0에서는 꺾인 점이니까 둘 다 0쯤 나올 것 같아요. 돌려 볼게요… −3에서는 둘 다 −1.0이에요. 그런데 0에서 abs는 0.0인데 sqrt(x*x)는 <code>nan</code>이에요!</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p><code>nan</code>은 계산할 수 없는 값이라는 뜻이죠. sqrt(x*x)의 기록에는 어떤 연산이 남았을까요? 하나씩 거꾸로 따라가 보세요.</p></div></div>
@@ -756,7 +761,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그래서 벡터를 길이로 나누는 코드에서 <code>sqrt(x.pow(2).sum())</code> 같은 걸 쓸 때 작은 수를 더해 두는 거였구나. 학습하다가 어느 날 손실이 <code>nan</code>이 됐는데, 벡터가 우연히 0이었을 때였나 봐요. 보고서 분량을 「쪽수 ÷ 0이 아닌 장 수」로 쟀더니 빈 보고서에서 계산기가 멈춘 거랑 같네요.</p></div></div>
 </div><div class="dialogue"><h3 id="문제-9-backward-를-두-번-부르면">문제 9. <code>backward()</code>를 두 번 부르면</h3>
 <blockquote>
-<p>손실 L = ½(w·x − y)²에서 w = 0.5, x = 2, y = 3이다. 파이토치에서 이 손실을 계산하고 <code>L.backward()</code>를 부른 뒤 <code>w.grad</code>를 본다. 손실 계산과 <code>L.backward()</code>를 <code>w.grad</code>를 지우지 않고 세 번 되풀이한다. (가) 한 번 부른 뒤 <code>w.grad</code>는? (나) 두 번, 세 번 부른 뒤에는? (다) 미니배치 32개의 그래디언트가 필요한데 메모리가 모자라 8개씩 넷으로 나눠 계산해야 한다. (나)에서 본 성질을 어떻게 쓰면 되는가?</p>
+<p>손실 L = ½(w·x − y)²에서 w = 0.5, x = 2, y = 3이다. 파이토치에서 이 손실을 계산하고 <code>L.backward()</code>를 부른 뒤 <code>w.grad</code>를 보는 일을, <code>w.grad</code>를 지우지 않고 세 번 되풀이한다. (가) 한 번 부른 뒤 <code>w.grad</code>는? (나) 두 번, 세 번 부른 뒤에는? (다) 미니배치 32개의 그래디언트가 필요한데 메모리가 모자라 8개씩 넷으로 나눠 계산해야 한다. (나)에서 본 성질을 어떻게 쓰면 되는가?</p>
 </blockquote>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 (wx − y)·x = (1 − 3) × 2 = −4예요. (나)도 같은 계산을 다시 하니까 계속 −4겠죠. 돌려 볼게요… −4, −8, −12예요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래디언트를 「채운다」고 했는데, 이미 값이 있는 칸에 새 그래디언트를 넣을 때 파이토치는 덮어쓸까요, 더할까요?</p></div></div>

@@ -628,6 +628,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
 #sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
 .toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+
+/* 표지: 목차 페이지 첫머리. 그림의 원본과 그리는 스크립트는 ~/lameproof/shared/covers/ */
+.book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
+.book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
+@media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -679,7 +684,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="sgd.html">확률적 경사하강: 노이즈 섞인 그래디언트로 걷기</a></p>
 <h2 id="워밍업-처음-몇-스텝은-학습률을-천천히-올린다">워밍업: 처음 몇 스텝은 학습률을 천천히 올린다</h2>
-<p>선형 배율 규칙대로 배치를 키우면서 학습률을 키우면 끝의 노이즈 플로어는 그대로 지킬 수 있었다. 그런데 이 규칙을 내세운 고얄과 동료들(2017)은 이 규칙이 신경망이 빠르게 바뀌는 학습 초반에는 깨진다고 적었다. 경사하강에서 이미 비슷한 일을 보았다. w⁴/4처럼 바닥에서 멀어질수록 곡률이 커지는 손실은, 바닥 근처에서 안전한 학습률로도 먼 출발점에서는 터졌다. 신경망의 처음 파라미터가 그런 「먼 출발점」이라면, 학습 끝에 쓸 학습률을 처음부터 쓰면 안 될 것이다. 그렇다고 학습률을 내내 작게 두면 느리다. 처음 몇 스텝만 어떻게 하면 될까?</p>
+<p>선형 배율 규칙대로 배치를 키우면서 학습률을 키우면 끝의 노이즈 플로어는 그대로 지킬 수 있었다. 그런데 이 규칙을 내세운 고얄과 동료들(2017)은 이 규칙이 신경망이 빠르게 바뀌는 학습 초반에는 깨진다고 적었다. 경사하강에서 이미 비슷한 일을 보았다. w⁴/4처럼 바닥에서 멀어질수록 곡률이 커지는 손실은, 바닥 근처에서 안전한 학습률로도 먼 출발점에서는 터졌다. 신경망의 처음 파라미터가 그런 「먼 출발점」이라면, 학습 끝에 쓸 학습률을 처음부터 쓰면 안 될 것이다. 그렇다고 학습률을 내내 작게 두면 느린데, 처음 몇 스텝만 어떻게 하면 될까?</p>
 <h3 id="역사-resnet-110의-0-01과-고얄-외의-점진-워밍업">역사: ResNet-110의 0.01과 고얄 외의 점진 워밍업</h3>
 <p>허와 동료들은 ResNet 논문에서 CIFAR-10으로 110층짜리 망을 학습할 때 처음 학습률 0.1이 수렴을 시작하기에는 조금 크다는 것을 알았다. 그래서 훈련 오차가 80% 아래로 내려갈 때까지(약 400스텝) 0.01로 학습하다가 0.1로 돌아갔다. 낮은 학습률로 잠깐 걷고 원래 학습률로 돌아가는 이 방법을 고얄과 동료들은 「일정한 워밍업(constant warmup)」이라 불렀다.</p>
 <p>고얄과 동료들은 배치 크기 8192에서 학습률 3.2를 쓰려다 이 방법으로는 모자라다는 것을 알았다. 처음 5 에포크를 0.1로 학습한 뒤 3.2로 올리자, 낮은 학습률에서 벗어나는 순간 훈련 오차가 튀었다. 그래서 학습률을 0.1에서 시작해 스텝마다 같은 양씩 올려 5 에포크 뒤에 3.2에 닿게 하는 「점진 워밍업(gradual warmup)」을 냈다. ResNet-50의 이미지넷 검증 오류율(다섯 번 학습의 평균)은 다음과 같았다.</p>
@@ -721,7 +726,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </table></div>
 <p>워밍업이 없으면 기준보다 1.2%포인트쯤 나빴고, 논문은 이 1.2%포인트가 대부분 훈련 오차가 높아서 생겼다고 보았다. 점진 워밍업을 하자 훈련 곡선이 작은 배치의 곡선과 거의 겹쳤다.</p>
 <h3 id="층-두-개짜리-신경망을-큰-가중치에서-출발시키기">층 두 개짜리 신경망을 큰 가중치에서 출발시키기</h3>
-<p>배달 1000건 회귀를 가장 작은 신경망으로 바꿔 보자. 1km당 걸리는 시간을 <span class="sym" style="color:#665522">w</span> 하나로 두는 대신, 두 가중치의 곱 <span class="sym" style="color:#665522">u</span>·<span class="sym" style="color:#665522">v</span>로 둔다. 예측은 <span class="sym" style="color:#665522">u</span>·<span class="sym" style="color:#665522">v</span>·<span class="sym" style="color:#1b9e77">x</span>이다. 층이 둘인 선형 신경망에서 가중치 하나씩만 남긴 꼴이다. 처음 가중치를 크게 잡아 <span class="sym" style="color:#665522">u</span> = <span class="sym" style="color:#665522">v</span> = 5에서 출발한다(예측은 1km당 25분으로, 실제 4분과 한참 다르다). 이 출발점은 설명을 위해 고른 것이다.</p>
+<p>배달 1000건 회귀를 가장 작은 신경망으로 바꿔 보자. 1km당 걸리는 시간을 <span class="sym" style="color:#665522">w</span> 하나로 두는 대신 두 가중치의 곱 <span class="sym" style="color:#665522">u</span>·<span class="sym" style="color:#665522">v</span>로 두면, 예측 <span class="sym" style="color:#665522">u</span>·<span class="sym" style="color:#665522">v</span>·<span class="sym" style="color:#1b9e77">x</span>는 층이 둘인 선형 신경망에서 가중치 하나씩만 남긴 꼴이 된다. 처음 가중치를 크게 잡아 <span class="sym" style="color:#665522">u</span> = <span class="sym" style="color:#665522">v</span> = 5에서 출발한다(예측은 1km당 25분으로, 실제 4분과 한참 다르다). 이 출발점은 설명을 위해 고른 것이다.</p>
 <p>이 손실은 자리마다 곡률이 다르다. 손실의 2차 편미분을 모은 헤시안의 가장 큰 고윳값, 곧 파라미터 (u, v)의 한 점에서 가장 가파르게 휜 방향의 곡률 <span class="sym" style="color:#0093b8">λ</span>을 재면 출발점에서는 736.3이고, 바닥(<span class="sym" style="color:#665522">u</span> = <span class="sym" style="color:#665522">v</span> = 2.00)에서는 82.65다. 학습률의 상한 2/<span class="sym" style="color:#0093b8">λ</span>으로 바꾸면 출발점에서는 0.0027, 바닥에서는 0.0242다. 바닥에서는 안전한 학습률도 출발점에서는 아홉 배쯤 크다.</p>
 <p>기준으로 배치 크기 5, 학습률 0.005로 학습하면 씨앗 20개 모두 무사히 내려가고, 600스텝 뒤 손실의 평균은 1.1405다. 선형 배율 규칙대로 배치 크기를 10, 학습률을 0.01로 두 배씩 키워 보자. 0.01은 바닥의 상한 0.0242보다 작지만 출발점의 상한 0.0027보다는 크다. 씨앗 20개 가운데 14개가 터진다. 씨앗 1을 따라가면 첫 스텝의 학습률 × 곡률이 7.36으로 2를 한참 넘어, <span class="sym" style="color:#665522">u</span>와 <span class="sym" style="color:#665522">v</span>가 5에서 −6.32로 바닥을 지나쳐 반대쪽으로 날아간다. 그다음은 19.13, −769.9이고, 네 스텝째에 곱 <span class="sym" style="color:#665522">u</span><span class="sym" style="color:#665522">v</span>가 10¹⁵을 넘는다.</p>
 <p>같은 배치 크기 10, 목표 학습률 0.01에서 처음 50스텝 동안 학습률을 0부터 0.01까지 직선으로 올려 보자. 씨앗 20개 모두 무사하고, 600스텝 뒤 손실의 평균은 1.1434로 기준 1.1405와 거의 같다. 씨앗 1에서 학습률이 0.001인 5스텝째에 <span class="sym" style="color:#665522">u</span> = <span class="sym" style="color:#665522">v</span> = 3.26으로 내려와 곡률이 289로 줄고, 학습률이 0.004인 20스텝째에는 2.02까지 내려와 곡률이 85로 바닥과 거의 같아진다. 스텝마다 학습률이 오르는 비율보다 곡률이 내려오는 비율이 커서, 600스텝 내내 학습률 × 곡률은 0.98을 넘지 않는다.</p>
@@ -743,7 +748,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>워밍업은 이제 큰 모델 학습의 기본 설정이다. GPT-3는 3000억 토큰 학습의 처음 3억 7500만 토큰 동안 학습률을 직선으로 올렸고, 그 뒤 코사인으로 줄였다. 워밍업 다음 코사인이라는 이 스케줄 조합은 언어 모델과 이미지 모델 모두에서 흔히 보인다. 신경망에서 학습 초반에 무엇이 그렇게 빨리 바뀌는지, 그리고 곡률이 학습 동안 어떻게 움직이는지는 그 자체로 연구 거리다. 실제 신경망의 곡률을 재며 학습률과 비교하는 일은 샤프니스(헤시안의 가장 큰 고윳값)를 다룰 때 본격적으로 한다.</p>
 <div class="dialogue"><h3 id="문제-13-워밍업은-몇-스텝이면-되나">문제 13. 워밍업은 몇 스텝이면 되나</h3>
 <blockquote>
-<p>층 두 개짜리 신경망(<span class="sym" style="color:#665522">u</span> = <span class="sym" style="color:#665522">v</span> = 5에서 출발, 배치 크기 10, 목표 학습률 0.01)에서 직선 워밍업의 스텝 수 <span class="sym" style="color:#a67a63">W</span>를 줄여 간다. (가) <span class="sym" style="color:#a67a63">W</span> = 50, 5, 2에서 씨앗 20개 가운데 몇 개가 터지는가? (나) <span class="sym" style="color:#a67a63">W</span> = 2면 첫 스텝의 학습률은 0.005다. 출발점의 학습률의 상한 0.0027보다 큰데도 터지지 않는 까닭은? (다) 워밍업 스텝 수는 무엇에 맞춰 정해야 하는가?</p>
+<p>층 두 개짜리 신경망(<span class="sym" style="color:#665522">u</span> = <span class="sym" style="color:#665522">v</span> = 5에서 출발, 배치 크기 10, 목표 학습률 0.01)에서 직선 워밍업의 스텝 수 <span class="sym" style="color:#a67a63">W</span>를 줄여 간다. (가) <span class="sym" style="color:#a67a63">W</span> = 50, 5, 2에서 씨앗 20개 가운데 몇 개가 터지는가? (나) <span class="sym" style="color:#a67a63">W</span> = 2면 첫 스텝의 학습률은 0.005다. 출발점의 학습률의 상한 0.0027보다 큰데도 왜 터지지 않는가? (다) 워밍업 스텝 수는 무엇에 맞춰 정해야 하는가?</p>
 </blockquote>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>출발점에서 0.0027보다 작아야 하니까, 0.01까지 올리려면 곡률이 다 내려올 때까지 몇십 스텝은 필요하겠죠. <span class="sym" style="color:#a67a63">W</span> = 50은 안전하고, 2는 터질 것 같아요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>위젯 3에서 <span class="sym" style="color:#a67a63">W</span>를 50, 5, 2로 놓아 봐요.</p></div></div>
@@ -754,7 +759,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>고얄 논문은 5 에포크, GPT-3는 3000억 토큰 가운데 3억 7500만 토큰이니까 0.125%예요. 비율이 이렇게 다른 것도 학습 길이가 아니라 초반 곡률이 내려오는 데 걸리는 스텝에 맞췄다고 보면 이상하지 않네요. 운동할 때 준비 운동 시간은 본 운동 시간에 비례해서 늘리는 게 아니라 몸이 풀리는 데 걸리는 시간만큼 하는 것처럼요.</p></div></div>
 </div><div class="dialogue"><h3 id="문제-14-낮게-있다가-뛰기와-천천히-올리기">문제 14. 낮게 있다가 뛰기와 천천히 올리기</h3>
 <blockquote>
-<p>고얄과 동료들은 낮은 학습률로 머물다가 목표 학습률로 뛰는 일정한 워밍업이 배치 크기 8192에서 오히려 워밍업이 없는 것보다 나빴다고 보고했다(25.88% 대 24.84%). 층 두 개짜리 신경망(<span class="sym" style="color:#665522">u</span> = <span class="sym" style="color:#665522">v</span> = 5, 배치 크기 10, 목표 0.01)에서 (가) 학습률 0.002로 딱 한 스텝 걸은 뒤 0.01로 뛰면 씨앗 20개 가운데 몇 개가 터지는가? (나) 그 한 스텝 뒤 씨앗 1의 곡률 상한과 학습률의 상한은 얼마인가? (다) 층 두 개짜리 신경망과 논문(이미지넷)의 결과가 다른 까닭을 어떻게 생각해 볼 수 있는가? (풀어 본 뒤 위젯 3의 「문제 14 불러오기」로 확인해 보자.)</p>
+<p>고얄과 동료들은 낮은 학습률로 머물다가 목표 학습률로 뛰는 일정한 워밍업이 배치 크기 8192에서 오히려 워밍업이 없는 것보다 나빴다고 보고했다(25.88% 대 24.84%). 층 두 개짜리 신경망(<span class="sym" style="color:#665522">u</span> = <span class="sym" style="color:#665522">v</span> = 5, 배치 크기 10, 목표 0.01)에서 (가) 학습률 0.002로 딱 한 스텝 걸은 뒤 0.01로 뛰면 씨앗 20개 가운데 몇 개가 터지는가? (나) 그 한 스텝 뒤 씨앗 1의 곡률 상한과 학습률의 상한은 얼마인가? (다) 층 두 개짜리 신경망과 논문(이미지넷)의 결과가 왜 다른지 어떻게 생각해 볼 수 있는가? (풀어 본 뒤 위젯 3의 「문제 14 불러오기」로 확인해 보자.)</p>
 </blockquote>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>논문에서 일정한 워밍업이 나빴으니까 여기서도 터지겠죠. 한 스텝이면 너무 짧기도 하고요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>위젯에서 확인해 봐요. 그리고 오른쪽 그림에서 둘째 스텝의 학습률 × 곡률도 보세요.</p></div></div>

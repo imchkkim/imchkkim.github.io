@@ -628,6 +628,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
 #sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
 .toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+
+/* 표지: 목차 페이지 첫머리. 그림의 원본과 그리는 스크립트는 ~/lameproof/shared/covers/ */
+.book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
+.book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
+@media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -679,7 +684,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="gradient-jacobian.html">그래디언트와 자코비안: 미분 가능성에서 연쇄법칙까지</a></p>
 <h2 id="연쇄법칙-자코비안을-곱한다">연쇄법칙: 자코비안을 곱한다</h2>
-<p>신경망은 층을 차례로 거치는 사상들의 연결이다. 입력이 첫 층을 지나 은닉 상태가 되고, 그것이 다음 층을 지나고, 맨 끝에서 손실 숫자 하나가 나온다. 층 하나의 자코비안은 그 층의 식만 보면 구할 수 있다는 것을 tanh 층에서 보았다. 그런데 학습에 필요한 것은 맨 끝 손실을 맨 앞 파라미터로 미분한 그래디언트다. 층마다의 자코비안을 알면 전체의 그래디언트를 얻을 수 있을까? 얻을 수 있다면 어떻게 이어 붙여야 할까?</p>
+<p>신경망은 층을 차례로 거치는 사상들의 연결이다. 입력이 첫 층을 지나 은닉 상태가 되고, 그것이 다음 층을 지나고, 맨 끝에서 손실 숫자 하나가 나온다. 층 하나의 자코비안은 그 층의 식만 보면 구할 수 있다는 것을 tanh 층에서 보았지만, 학습에 필요한 것은 맨 끝 손실을 맨 앞 파라미터로 미분한 그래디언트다. 층마다의 자코비안을 알면 전체의 그래디언트를 얻을 수 있을까, 얻을 수 있다면 어떻게 이어 붙여야 할까?</p>
 <h3 id="역사-라이프니츠의-메모">역사: 라이프니츠의 메모</h3>
 <p>합성 함수를 미분하는 규칙은 미적분의 시작과 거의 함께 나왔다. 고트프리트 빌헬름 라이프니츠(Gottfried Wilhelm Leibniz)는 1676년의 메모에서 √(a + bz + cz²)처럼 함수 안에 함수가 든 식을 미분하면서, 안쪽 식을 새 변수 하나로 놓고 바깥 함수의 미분과 안쪽 식의 미분을 곱하는 계산을 했다. 그 메모에는 부호 하나를 틀린 자리가 있었다고 전해진다. 1684년 그가 미분 계산을 처음 인쇄해 알린 논문 「극대와 극소를 위한 새로운 방법(Nova methodus pro maximis et minimis)」은 곱의 미분, 나눗셈의 미분 같은 규칙을 실었고, 함수 안에 함수가 든 식도 그 안에서 같은 방식으로 다뤘다고 전해진다. 라이프니츠가 만든 dy/dx 표기에서는 이 규칙이 dz/dx = (dz/dy)(dy/dx)처럼 분수를 약분하는 모양이 되어, 표기 자체가 규칙을 외우게 해 주었다. 변수가 여럿이 되면 이 곱은 숫자의 곱이 아니라 행렬의 곱이 되고, 약분처럼 보이던 모양은 「행렬의 줄과 칸 수가 맞아야 곱할 수 있다」는 조건으로 바뀐다.</p>
 <h3 id="그릇을-제곱-사상-뒤에-놓으면">그릇을 제곱 사상 뒤에 놓으면</h3>
@@ -717,7 +722,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>환율 계산도 그렇네요. 원을 달러로, 달러를 엔으로 바꿀 때 환율을 곱하지 더하지는 않잖아요.</p></div></div>
 </div><div class="dialogue"><h3 id="문제-11-어디서-잰-그래디언트인가">문제 11. 어디서 잰 그래디언트인가</h3>
 <blockquote>
-<p>합성 <span class="sym" style="color:#d62728">f</span>∘<span class="sym" style="color:#1e694b">g</span>(<span class="sym" style="color:#1e694b">g</span>는 제곱 사상, <span class="sym" style="color:#d62728">f</span>(<span class="sym" style="color:#008787">u</span>, <span class="sym" style="color:#008787">v</span>) = <span class="sym" style="color:#008787">u</span>² + 3<span class="sym" style="color:#008787">v</span>²)의 (1, 0.5)에서의 그래디언트를 두 학생이 구했다. 민준은 그릇의 그래디언트를 입력 점 (1, 0.5)에서 재서 <span class="sym" style="color:#4c5d80">J</span>ᵀ에 곱했다. 서연은 그릇의 그래디언트는 바른 자리에서 쟀지만 <span class="sym" style="color:#4c5d80">J</span>를 전치하지 않고 곱했다. (가) 두 사람이 얻은 값은? (나) 바른 값 (9, 10.5)와 견줘 각각 무엇이 틀렸는가? (다) 바른 값이 맞는지 확인할 방법은?</p>
+<p>합성 <span class="sym" style="color:#d62728">f</span>∘<span class="sym" style="color:#1e694b">g</span>(<span class="sym" style="color:#1e694b">g</span>는 제곱 사상, <span class="sym" style="color:#d62728">f</span>(<span class="sym" style="color:#008787">u</span>, <span class="sym" style="color:#008787">v</span>) = <span class="sym" style="color:#008787">u</span>² + 3<span class="sym" style="color:#008787">v</span>²)의 (1, 0.5)에서의 그래디언트를 두 학생이 구했다. 민준은 그릇의 그래디언트를 입력 점 (1, 0.5)에서 재서 <span class="sym" style="color:#4c5d80">J</span>ᵀ에 곱했고, 서연은 그릇의 그래디언트는 바른 자리에서 쟀지만 <span class="sym" style="color:#4c5d80">J</span>를 전치하지 않고 곱했다. (가) 두 사람이 얻은 값은? (나) 바른 값 (9, 10.5)와 견줘 각각 무엇이 틀렸는가? (다) 바른 값이 맞는지 확인할 방법은?</p>
 </blockquote>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>저는 그릇 그래디언트를 (1, 0.5)에서 재서 (2, 3)이 나왔고, <span class="sym" style="color:#4c5d80">J</span>ᵀ(2, 3) = (2 × 2 + 1 × 3, −1 × 2 + 2 × 3) = (7, 4)예요. 그릇 식에 넣는 건 어차피 같은 점이잖아요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>나는 <span class="sym" style="color:#4c5d80">J</span>(1.5, 6) = (2 × 1.5 − 1 × 6, 1 × 1.5 + 2 × 6) = (−3, 13.5). 2 × 2라 곱셈은 되니까 순서는 상관없다고 생각했어.</p></div></div>

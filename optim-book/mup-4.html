@@ -628,6 +628,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
 #sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
 .toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+
+/* 표지: 목차 페이지 첫머리. 그림의 원본과 그리는 스크립트는 ~/lameproof/shared/covers/ */
+.book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
+.book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
+@media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -679,13 +684,13 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="mup.html">μP: 폭이 달라져도 같은 학습률로</a></p>
 <h2 id="μtransfer-좁은-망에서-고른-학습률을-넓은-망에-옮기기">μTransfer: 좁은 망에서 고른 학습률을 넓은 망에 옮기기</h2>
-<p>μP 에서는 은닉 특징이 폭과 상관없이 같은 크기로 움직였다. 한 스텝이 망 안쪽을 흔드는 정도가 폭과 상관없다면, 가장 좋은 학습률도 폭과 상관없이 한자리에 있어야 하지 않을까? 그렇다면 큰 모델의 학습률을 작은 모델에서 미리 찾아 그대로 옮겨 쓸 수 있다. 정말 그럴까?</p>
+<p>μP 에서는 은닉 특징이 폭과 상관없이 같은 크기로 움직였다. 한 스텝이 망 안쪽을 흔드는 정도가 폭과 상관없다면, 가장 좋은 학습률도 폭과 상관없이 한자리에 있어야 하지 않을까? 그렇다면 큰 모델의 학습률을 작은 모델에서 미리 찾아 그대로 옮겨 쓸 수 있을 텐데, 정말 그럴까?</p>
 <h3 id="역사-4-000만-개로-67억-개를-조율하다">역사: 4,000만 개로 67억 개를 조율하다</h3>
 <p>μP 가 나오기 전 큰 모델의 학습률은 사람이 정했다. GPT-3 표의 여덟 학습률을 폭에 대해 그려 보면 폭이 넓을수록 작게 잡았다는 것은 보이지만, 그 값들이 어떤 규칙을 따른 것인지는 논문에 적혀 있지 않다.</p>
 <figure class="fig "><img src="images/mup/h4_gpt3_lr.png" alt="GPT-3 논문 표 2.1 의 여덟 모델. 가로축은 폭(d_model), 세로축은 학습률(두 축 모두 로그 눈금). 파란 점선은 가장 작은 모델에서 출발해 폭에 반비례로 줄였을 때, 회색 점선은 여덟 점에 맞춘 직선(기울기 −0.77). 논문 숫자를 다시 그렸다(sources/mup/figs.py)" loading="lazy"><figcaption>GPT-3 논문 표 2.1 의 여덟 모델. 가로축은 폭(d_model), 세로축은 학습률(두 축 모두 로그 눈금). 파란 점선은 가장 작은 모델에서 출발해 폭에 반비례로 줄였을 때, 회색 점선은 여덟 점에 맞춘 직선(기울기 −0.77). 논문 숫자를 다시 그렸다(sources/mup/figs.py)</figcaption></figure>
 <p>「Tensor Programs V」(양 외, 2022)는 μP 에서는 가장 좋은 학습률이 폭이 바뀌어도 거의 같다는 성질을 큰 모델에서 시험했다. 그들은 작은 모델에서 하이퍼파라미터를 고르고 큰 모델에는 손대지 않고 옮겨 쓰는 방법을 μTransfer 라 불렀다. 파라미터 4,000만 개짜리 모델에서 옮겨 온 설정으로 67억 개짜리 GPT-3 모델을 학습해 논문에 실린 같은 크기 GPT-3 의 성능을 넘었고, 그 조율에 든 계산은 프리트레인 전체의 7% 였다. 1,300만 개짜리 모델에서 옮긴 설정으로 3억 5,000만 개짜리 BERT-large 를 넘은 결과도 함께 실렸다. 저자들은 구현을 <code>pip install mup</code> 한 줄로 받을 수 있게 공개했다.</p>
 <h3 id="폭-32-에서-2-048-까지">폭 32 에서 2,048 까지</h3>
-<p>표준 파라미터화의 학습률 훑기에 쓴 망(입력 16차원, 은닉층 둘, Adam 300스텝)을 그대로 두고 μP 로만 바꿨다. 출력층 초기화를 <span class="sym" style="color:#87965a">s</span> = 32/<span class="sym" style="color:#3c4bff">n</span>배로 작게, 은닉층과 출력층의 학습률을 <span class="sym" style="color:#006600">η</span> × <span class="sym" style="color:#87965a">s</span>로 붙였다. 표 3 의 Adam 칸을 폭 32 에 맞춘 꼴이라 폭 32 에서는 두 규칙이 똑같은 망이다. 기준 학습률 <span class="sym" style="color:#006600">η</span>를 2⁻¹⁴ 부터 2⁻⁴ 까지 두 배 간격으로 훑었다.</p>
+<p>표준 파라미터화의 학습률 훑기에 쓴 망(입력 16차원, 은닉층 둘, Adam 300스텝)을 그대로 두고 μP 로만 바꿨다. 출력층 초기화를 <span class="sym" style="color:#87965a">s</span> = 32/<span class="sym" style="color:#3c4bff">n</span>배로 작게, 은닉층과 출력층의 학습률을 <span class="sym" style="color:#006600">η</span> × <span class="sym" style="color:#87965a">s</span>로 붙였는데, 표 3 의 Adam 칸을 폭 32 에 맞춘 꼴이라 폭 32 에서는 두 규칙이 똑같은 망이다. 기준 학습률 <span class="sym" style="color:#006600">η</span>를 2⁻¹⁴ 부터 2⁻⁴ 까지 두 배 간격으로 훑었다.</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -732,7 +737,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>그러니 μP 와 Muon 은 같은 물음에 대한 두 답이다. 파라미터 공간에서 공정한 한 스텝이란 무엇인가? 그 답은 스텝을 어떤 노름으로 재느냐를 먼저 정해야 나온다. 좌표의 칸 수로 재면 표준 파라미터화가 되고, 스펙트럼 노름으로 재면 μP 와 Muon 이 된다.</p>
 <div class="dialogue"><h3 id="문제-9-작은-냄비에서-간을-보고-큰-솥에">문제 9. 작은 냄비에서 간을 보고 큰 솥에</h3>
 <blockquote>
-<p>국을 2 L 냄비에 끓여 보니 소금 16 g 이 딱 맞았다. 잔치를 위해 같은 국을 20 L 솥에 끓인다. (가) 소금을 그대로 16 g 넣으면 농도는 몇 %인가? 농도를 지키려면 몇 g 이 필요한가? (나) 「간이 모자라면 한 숟갈(3 g)씩 더 넣는다」는 규칙을 두 냄비에 똑같이 쓰면, 한 숟갈이 농도를 바꾸는 정도는 각각 얼마인가? (다) 작은 냄비에서 알아낸 것 가운데 큰 솥에 그대로 옮길 수 있는 것은 무엇인가?</p>
+<p>국을 2 L 냄비에 끓여 보니 소금 16 g 이 딱 맞았는데, 잔치를 위해 같은 국을 20 L 솥에 끓인다. (가) 소금을 그대로 16 g 넣으면 농도는 몇 %인가? 농도를 지키려면 몇 g 이 필요한가? (나) 「간이 모자라면 한 숟갈(3 g)씩 더 넣는다」는 규칙을 두 냄비에 똑같이 쓰면, 한 숟갈이 농도를 바꾸는 정도는 각각 얼마인가? (다) 작은 냄비에서 알아낸 것 가운데 큰 솥에 그대로 옮길 수 있는 것은 무엇인가?</p>
 </blockquote>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가) 2 L 에 16 g 이면 0.8% 예요. 20 L 에 16 g 이면 0.08% 라 싱겁고, 농도를 지키려면 160 g. (다)는 「소금 16 g」을 옮기면 안 되고 「0.8%」를 옮겨야겠네요. 그럼 숟갈 규칙도 똑같이 쓰면 되겠죠.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>한 숟갈이 농도를 얼마나 바꾸는지 두 냄비에서 계산해 볼까요?</p></div></div>
