@@ -649,8 +649,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="epicycles.html">에피사이클: 돌아가는 화살표로 그림 그리기</a></li>
 <li class="toc-part">칸으로 적은 신호</li>
 <li><a href="dft-fft.html">이산 푸리에 변환과 고속 푸리에 변환</a></li>
-<li><a href="sampling.html">표본화: 칸 간격과 에일리어싱</a></li>
-<li><a href="time-frequency.html">시간과 주파수를 함께: 짧은 구간 푸리에 변환과 웨이블릿</a></li>
+<li><a href="sampling.html">샘플링: 칸 간격과 에일리어싱</a></li>
+<li><a href="time-frequency.html">시간과 주파수를 함께: 단시간 푸리에 변환과 웨이블릿</a></li>
 <li class="toc-part">대칭이 고르는 기저</li>
 <li><a href="shift-symmetry.html">평행이동 대칭: 왜 하필 사인과 코사인인가</a></li>
 <li><a href="symmetry-groups.html">대칭과 등변성: 대칭을 바꾸면 기저가 바뀐다</a></li>
@@ -670,7 +670,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <h1>커널: 무한히 많은 물결을 셈 한 번으로</h1>
 <h2 id="이-장의-물음">이 장의 물음</h2>
-<p>지금까지는 축을 미리 정해 두었다. 신호를 사인·코사인 물결의 축에 사영해 계수를 읽고, 계수가 빨리 줄어들면 물결 몇 개로 신호를 거의 다 적었다. 그런데 실험실에서 잰 점 여섯 개만 손에 있고, 그 사이를 매끄럽게 이어야 한다면 어떨까? 직선 하나로는 점들을 지나지 못한다. 물결을 특징으로 몇 개 써서 맞추면 되겠지만, 어떤 주파수를 몇 개 써야 할지 모른다. 많이 쓸수록 곡선은 유연해지고 계산은 무거워진다. 끝없이 많이 쓰면 계산을 할 수 없다.</p>
+<p>지금까지는 축을 미리 정해 두었다. 신호를 사인·코사인 물결의 축에 사영해 계수를 읽고, 계수가 빨리 줄어들면 물결 몇 개로 신호를 거의 다 적었다. 그런데 실험실에서 잰 점 여섯 개만 손에 있고, 그 사이를 매끄럽게 이어야 한다면 어떨까? 직선 하나로는 점들을 지나지 못한다. 물결을 특징으로 몇 개 써서 맞추면 되겠지만, 어떤 주파수를 몇 개 써야 할지 모른다. 많이 쓸수록 곡선은 유연해지지만 계산은 무거워지고, 끝없이 많이 쓰면 계산을 할 수 없다.</p>
 <p>ML에서도 같은 장면이 나온다. 트랜스포머의 어텐션은 길이 N인 글에서 토큰 둘씩 짝지어 「닮은 정도」를 N × N 개 계산한다. 서포트 벡터 머신은 데이터 점 둘씩의 닮은 정도만 알면 학습할 수 있다고 알려져 있고, 폭이 아주 넓은 신경망의 학습은 입력 둘을 받는 함수 하나로 적힌다는 결과가 있다. 하이퍼파라미터를 고르는 도구들은 몇 번 돌려 본 결과만으로 「다음엔 어디를 돌려 볼까」를 정한다. 넷 모두 입력 둘의 닮은 정도를 재는 함수 하나에 기댄다.</p>
 <p>이 장은 다음 물음에 차례로 답한다.</p>
 <ul>
@@ -706,7 +706,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </tbody>
 </table></div>
 <p>직선 a + bx로는 오르다 내렸다 다시 오르는 점들을 지날 수 없다. 흔한 처방은 입력을 여러 개의 특징으로 펴는 것이다. 특징을 (1, x, x², x³, x⁴, x⁵) 여섯 개로 펴면 계수 여섯 개로 점 여섯 개를 정확히 지나는 곡선이 나온다. 그런데 이 곡선은 점이 끝난 x = 7에서 11.0으로 치솟는다. 거듭제곱 특징은 x가 커지면 제멋대로 커지기 때문이다. 특징을 cos ωx, sin ωx 같은 물결로 바꾸면 치솟지는 않지만, 이번에는 주파수 ω를 무엇으로 몇 개 고를지가 문제다. 넉넉하게 많이 쓰고 싶은데, 특징이 늘수록 계수도 늘고 계산도 는다.</p>
-<p>특징을 쓴 회귀의 답을 들여다보면 실마리가 있다. 점이 특징 수보다 적을 때, 0에서 출발해 경사하강으로 맞춘 계수는 늘 데이터 점들의 특징 벡터를 섞은 꼴로 남는다(가장 짧은 해, 최소 노름 해). 그러면 새 입력 x에서의 예측은 「데이터 점 xᵢ의 특징」과 「x의 특징」의 내적들을 무게 붙여 더한 값이 된다. 계수를 구할 때도 특징 벡터끼리의 내적만 나온다. 특징 벡터 자체는 어디에도 따로 쓰이지 않는다. 그렇다면 특징을 만들지 않고 내적만 바로 계산할 수는 없을까?</p>
+<p>특징을 쓴 회귀의 답을 들여다보면 실마리가 있다. 점이 특징 수보다 적을 때, 0에서 출발해 경사하강으로 맞춘 계수는 늘 데이터 점들의 특징 벡터를 섞은 꼴로 남는다(가장 짧은 해, 최소 노름 해). 그러면 새 입력 x에서의 예측은 「데이터 점 xᵢ의 특징」과 「x의 특징」의 내적들을 무게 붙여 더한 값이 된다. 계수를 구할 때도 특징 벡터끼리의 내적만 나오고, 특징 벡터 자체는 어디에도 따로 쓰이지 않는다. 그렇다면 특징을 만들지 않고 내적만 바로 계산할 수는 없을까?</p>
 <h3 id="역사-특징을-곱하자-대신-내적을-바꾸자">역사: 「특징을 곱하자」 대신 「내적을 바꾸자」</h3>
 <p>내적만 바꿔 끼우는 생각은 1960년대 소련의 패턴 인식 연구에서 나왔다. 아이제르만(Mark Aizerman), 브라베르만(Emmanuel Braverman), 로조노에르(Lev Rozonoer)는 1964년 학술지 『자동화와 원격 제어』에 「패턴 인식 학습에서 퍼텐셜 함수 방법의 이론적 기초」를 실었다. 학습한 점마다 그 둘레에 전기 퍼텐셜 같은 봉우리를 하나씩 세우고, 새 점의 부류를 봉우리들의 합으로 정하는 방법이다. 봉우리 하나의 값은 두 점을 받는 함수였고, 그 함수가 어떤 특징 공간의 내적과 같다는 것이 그들 이론의 바탕이었다.</p>
 <p>이 생각이 널리 쓰이게 된 것은 30년쯤 뒤 미국 벨 연구소에서다. 이자벨 가이언(Isabelle Guyon)이 2016년에 남긴 회고에 따르면, 1991년 그들 모임은 블라디미르 뱁닉(Vladimir Vapnik)이 오래 연구해 온 「여백이 가장 큰 경계」 알고리즘을 실제로 돌려 보고 있었다. 가이언과 베른하르트 보저(Bernhard Boser)가 버클리로 옮기기 전에 남은 석 달 동안, 보저가 그 알고리즘을 구현했다. 직선 경계가 어느 정도 통하자 뱁닉은 특징끼리의 곱을 새 특징으로 넣자고 했다. 가이언은 그 대신 퍼텐셜 함수 방법의 「커널 트릭」을 쓰자고 했다. 가이언의 회고에는 뱁닉이 처음에는 이 제안을 꺼렸다고 적혀 있다. 퍼텐셜 함수 방법을 만든 사람들이 1960년대 러시아 시절 같은 연구소의 경쟁 팀이었기 때문이라고 한다. 결과는 1992년 보저·가이언·뱁닉의 「여백이 가장 큰 분류기를 위한 학습 알고리즘(A Training Algorithm for Optimal Margin Classifiers)」으로 학습 이론 학회 COLT 에 실렸고, 지금 서포트 벡터 머신이라 부르는 방법의 출발점이 되었다. 뱁닉이 하려던 「특징끼리 곱하기」와 가이언이 고른 「내적 바꿔 끼우기」가 어떻게 같은 일인지는 바로 아래 예에서 손으로 확인할 수 있다.</p>
@@ -776,9 +776,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>점 여섯 개를 가우스 커널(폭 <span class="sym" style="color:#a67a63">ℓ</span> = 1)로 풀어 보자. 커널 행렬의 첫 줄은 1, 0.607, 0.236, 0.008, 0.000, 0.000이다. 첫 점(<span class="sym" style="color:#a67a63">x</span> = 0.5)은 1.5와는 꽤 닮았고(0.607) 3.6 너머와는 거의 닮지 않았다. 연립방정식을 풀면 계수는 <span class="sym" style="color:#c45a00">α</span> = (−0.778, 2.754, −1.288, 1.559, −3.113, 1.748)이고, 곡선은 여섯 점을 정확히 지난다. 점 사이 <span class="sym" style="color:#a67a63">x</span> = 2.9에서 <span class="sym" style="color:#1b9e77">f</span> = 0.251, 점이 끝난 <span class="sym" style="color:#a67a63">x</span> = 7에서 0.466이고, <span class="sym" style="color:#a67a63">x</span> = 10까지 가면 0.0001로 0에 붙는다. 봉우리가 모두 데이터 점 근처에만 서 있으니, 데이터에서 멀어지면 곡선이 0으로 내려앉는다. 거듭제곱 특징처럼 치솟지 않는다.</p>
 <figure class="fig "><img src="images/kernels/kernel_fit.png" alt="왼쪽: 점 6개를 가우스 커널(폭 ℓ = 1)로 맞춘 곡선(초록)과 그것을 이루는 봉우리 여섯 αᵢ K(xᵢ, x)(갈색). 오른쪽: 같은 점을 거듭제곱 특징 여섯 개 (1, x, …, x⁵)로 맞춘 곡선(회색 점선)은 점 밖에서 치솟는다(s1_trick.py, figs.py)" loading="lazy"><figcaption>왼쪽: 점 6개를 가우스 커널(폭 ℓ = 1)로 맞춘 곡선(초록)과 그것을 이루는 봉우리 여섯 αᵢ K(xᵢ, x)(갈색). 오른쪽: 같은 점을 거듭제곱 특징 여섯 개 (1, x, …, x⁵)로 맞춘 곡선(회색 점선)은 점 밖에서 치솟는다(s1_trick.py, figs.py)</figcaption></figure>
 <p>폭 <span class="sym" style="color:#a67a63">ℓ</span>은 「얼마나 떨어지면 닮지 않았다고 볼까」를 정한다. <span class="sym" style="color:#a67a63">ℓ</span> = 0.3이면 점끼리 거의 닮지 않아 커널 행렬이 단위 행렬에 가깝고, 계수가 값과 거의 같으며(<span class="sym" style="color:#c45a00">α</span>₁ = 0.595), 곡선은 점 사이에서 0으로 꺼졌다 올라온다(<span class="sym" style="color:#1b9e77">f</span>(2.9) = 0.023). <span class="sym" style="color:#a67a63">ℓ</span> = 3이면 모든 점이 서로 닮아 커널 행렬이 거의 겹친 줄들로 차고, 계수가 수천 단위로 커진다(가장 큰 것 7,899). 위젯에서 폭을 바꿔 봉우리들이 어떻게 서로 지우며 곡선을 만드는지 보자.</p>
-<figure class="widget-embed" id="widget-kernels-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">커널 함수로 점 6개 맞추기</span><a class="widget-open" href="widgets/kernels.html?v=d1b4fa68#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/kernels.html?w=w1&embed=1&v=d1b4fa68" title="커널 함수로 점 6개 맞추기" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-kernels-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">커널 함수로 점 6개 맞추기</span><a class="widget-open" href="widgets/kernels.html?v=6d321f66#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/kernels.html?w=w1&embed=1&v=6d321f66" title="커널 함수로 점 6개 맞추기" loading="lazy"></iframe></figure>
 <h3 id="ml에서-서포트-벡터-머신과-최소-노름-해">ML에서: 서포트 벡터 머신과 최소 노름 해</h3>
-<p>보저·가이언·뱁닉의 서포트 벡터 머신은 여백이 가장 큰 경계를 구하는 문제를 계산 과정에서 데이터 점끼리의 내적만 나오는 꼴로 바꾼 뒤, 그 내적을 커널 함수로 바꿔 끼웠다. 그래서 직선 경계를 구하는 알고리즘이 그대로 곡선 경계를 구한다. 특징을 쓴 선형 모델을 0에서 출발시켜 경사하강으로 학습하는 경우에도 같은 일이 생긴다. 계수가 늘 데이터 점들의 특징을 섞은 꼴로 남으므로, 학습이 끝난 모델은 커널 함수로 푼 연립방정식의 답과 같다.</p>
+<p>보저·가이언·뱁닉의 서포트 벡터 머신은 여백이 가장 큰 경계를 구하는 문제를 계산 과정에서 데이터 점끼리의 내적만 나오는 꼴로 바꾼 뒤, 그 내적을 커널 함수로 바꿔 끼웠다. 그래서 직선 경계를 구하는 알고리즘이 그대로 곡선 경계를 구한다. 특징을 쓴 선형 모델을 0에서 출발시켜 경사하강으로 학습해도 답이 데이터 점끼리의 내적으로만 적힌다. 계수가 늘 데이터 점들의 특징을 섞은 꼴로 남으므로, 학습이 끝난 모델은 커널 함수로 푼 연립방정식의 답과 같다.</p>
 <aside class="guide"><p class="guide-title">길잡이 · 『최적화: 경사하강에서 Muon 까지』 「최소 노름 해: 0에서 출발한 경사하강이 고르는 해」</p><p>0에서 출발한 경사하강이 왜 가장 짧은 해를 고르는지, 손글씨 숫자 6만 장에서 데이터 점끼리의 내적 행렬로 그 해를 직접 계산한 실험. <a href="https://lameproof.com/optim-book/implicit-bias.html">이어 읽기</a></p>
 </aside>
 <div class="dialogue"><h3 id="문제-1-영화-취향을-장르-쌍으로-비교하기">문제 1. 영화 취향을 장르 쌍으로 비교하기</h3>
@@ -814,7 +814,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>2.5 × 10¹¹ × 8 = 2 × 10¹²바이트, 2,000 GB예요. GPU 스물다섯 장에도 안 들어가요. (나)는 50만 × 1,000 × 8 = 4 GB고요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(다)도 차이가 커. <span class="sym" style="color:#3c4bff">N</span>³/3은 4.2 × 10¹⁶이고 <span class="sym" style="color:#3c4bff">N</span> × 10⁶은 5 × 10¹¹이야. 8만 배가 넘어. <span class="sym" style="color:#3c4bff">N</span>이 열 배가 되면 커널 행렬 쪽은 천 배, 특징 쪽은 열 배로 늘고.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>점 여섯 개일 때는 커널 함수가 특징 무한 개를 셈 한 번으로 바꿔 줬어요. 점이 50만 개가 되면 무엇 때문에 계산이 무거워지죠?</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>이번에는 점 수 때문에 무거워져요. 커널 함수는 특징이 몇 개든 상관없게 해 주는 대신, 점 둘씩의 표를 다 만들어야 하니까요. 점이 많으면 거꾸로 특징을 적당히 몇 개만 만드는 쪽이 낫겠네요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>이번에는 점 수 때문에 무거워져요. 커널 함수는 특징이 몇 개든 상관없게 해 주는 대신, 점 둘씩의 표를 다 만들어야 하니까요. 점이 많으면 거꾸로 특징을 적당히 몇 개만 만들어 N × (특징 수) 행렬로 푸는 편이 낫겠네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그런데 가우스 커널은 특징이 무한 개라서 몇 개만 고를 수가 없잖아요. 앞에서부터 끊으면 원점에서 먼 점이 틀렸고요. 다른 방법으로 몇 개를 골라야겠어요.</p></div></div>
 </div>
 </article>
