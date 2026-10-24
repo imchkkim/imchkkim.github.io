@@ -706,10 +706,10 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="09-액터크리틱.html">9. Actor-Critic: 비평가를 곁에 두다</a></p>
 <h4 id="비평가의-청구서-두-번째-모델이-드는-비용">비평가의 청구서: 두 번째 모델이 드는 비용</h4>
-<p>가치함수, 시간차, GAE를 모두 모으면 학습 한 바퀴는 어떤 모습일까? 그리고 토큰마다 책임을 묻는 대가로 무엇을 치르게 될까?</p>
+<p>가치함수, 시간차, GAE를 모두 모으면 학습 한 바퀴는 어떤 모습이고, 토큰마다 책임을 묻는 대가로 무엇을 치르게 될까?</p>
 <h5 id="역사-기억-창고-대신-여러-일꾼">역사: 기억 창고 대신 여러 일꾼</h5>
 <p>딥러닝으로 게임을 배우던 2010년대 중반, 딥마인드의 앞선 방법 DQN은 지나간 경험을 커다란 기억 창고(리플레이 버퍼)에 쌓아 두고 무작위로 꺼내 학습했다. 바로 이어진 장면끼리는 너무 비슷해서 학습이 불안정해지기 때문이다. 대신 창고는 메모리와 계산을 많이 먹었고, 예전 정책이 만든 데이터로도 배울 수 있는 방법에만 쓸 수 있었다. 지금 정책이 뽑은 데이터로만 배우는 Actor-Critic은 창고를 쓸 수 없었다.</p>
-<p>2016년 므니(Volodymyr Mnih)와 딥마인드 동료들은 창고 대신 일꾼 여럿을 두었다(ICML 2016). 여러 작업자가 각자 게임을 동시에 돌리면 한순간에도 서로 다른 장면을 겪으므로, 창고 없이도 데이터가 고르게 섞인다. 이렇게 어드밴티지로 액터와 비평가를 함께 업데이트한 A3C(Asynchronous Advantage Actor-Critic, 서로 기다리지 않고 따로 도는 어드밴티지 Actor-Critic)는 GPU 없이 16코어 CPU 한 대로 나흘을 학습해, GPU로 8~10일 학습한 방법들보다 아타리(Atari 2600) 게임 57개의 평균 점수를 높였다. 작업자들이 발맞춰 도는 버전인 A2C와 함께, 이 구조가 딥러닝 시대 Actor-Critic의 표준 틀이 되었다.</p>
+<p>2016년 므니(Volodymyr Mnih)와 딥마인드 동료들은 창고 대신 일꾼 여럿을 두었다(ICML 2016). 여러 작업자가 각자 게임을 동시에 돌리면 한순간에도 서로 다른 장면을 겪으므로, 창고 없이도 데이터가 고르게 섞인다. 이렇게 어드밴티지로 액터와 비평가를 함께 업데이트한 방법이 A3C(Asynchronous Advantage Actor-Critic, 서로 기다리지 않고 따로 도는 어드밴티지 Actor-Critic)다. A3C는 GPU 없이 16코어 CPU 한 대로 나흘을 학습해, GPU로 8~10일 학습한 방법들보다 아타리(Atari 2600) 게임 57개의 평균 점수를 높였다. 작업자들이 발맞춰 도는 버전인 A2C와 함께, 이 구조가 딥러닝 시대 Actor-Critic의 표준 틀이 되었다.</p>
 <h5 id="actor-critic-한-바퀴">Actor-Critic 한 바퀴</h5>
 <div class="table-scroll"><table>
 <thead>
@@ -748,7 +748,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tbody>
 </table></div>
 <h5 id="ml에서-언어-모델에서-비싼-이유">ML에서: 언어 모델에서 비싼 이유</h5>
-<p>비평가는 공짜가 아니다. 언어 모델에서 특히 비싸다.</p>
+<p>비평가는 공짜가 아니고, 언어 모델에서는 특히 비싸다.</p>
 <ol>
 <li><strong>크기.</strong> &quot;이 풀이 앞부분에서 결국 맞힐 확률&quot;을 예측하려면 풀이를 정책만큼 이해해야 한다. 그래서 비평가는 흔히 보상 모델이나 정책을 복사해 시작하고, 크기도 그만큼 크다. 오픈AI의 InstructGPT(2022)는 1.3B·6B·175B(파라미터 13억·60억·1,750억 개) 정책 모두에 6B 보상 모델에서 시작한 6B 비평가를 붙였다. 175B 비평가를 쓰면 PPO의 계산량이 크게 늘고, 175B 보상 모델은 학습이 불안정했기 때문이다. 비평가를 정책과 같은 7B(파라미터 70억 개)로 두고 혼합 정밀도 Adam(널리 쓰는 옵티마이저 Adam을 16비트와 32비트 수를 섞어 돌리는 방식)으로 학습하면, 파라미터 값뿐 아니라 그래디언트와 옵티마이저 상태도 메모리에 올라간다. 두 모델에 얼마나 드는지는 아래 문제 5에서 세어 본다.</li>
 <li><strong>정확도.</strong> 게임의 비평가는 점수가 수시로 들어오는 장면을 아주 많이 보며 배운다. 언어 모델의 비평가는 &quot;천 토큰짜리 풀이의 300번째 토큰 시점에서 결국 맞힐 확률&quot;을, 끝에 한 번 주어지는 0/1 점수만 보고 배워야 한다. 학습 초기의 비평가는 거의 무작위이고, GAE의 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#993600"><mi>λ</mi></mstyle><mo>&lt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\textcolor{#993600}{\lambda} &lt; 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7335em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="color:var(--sym-993600, #993600);">λ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></eq> 부분은 그 무작위 예측을 어드밴티지에 섞는다.</li>
@@ -772,7 +772,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </blockquote>
 <h5 id="문제-6-겹쳐-쓰는-5-할인-쿠폰">문제 6: 겹쳐 쓰는 5% 할인 쿠폰</h5>
 <div class="exercise">
-<p>어느 가게는 5% 할인 쿠폰을 몇 장이든 겹쳐 쓰게 해 준다. 쿠폰 한 장은 그때의 가격에서 5%를 깎는다. 10,000원짜리 물건에 쿠폰을 20장 겹쳐 쓰면 얼마가 되나? 100장이면? 몇 장째부터 원래 값의 절반 아래로 떨어지나?</p>
+<p>어느 가게는 5% 할인 쿠폰을 몇 장이든 겹쳐 쓰게 해 주는데, 쿠폰 한 장은 그때의 가격에서 5%를 깎는다. 10,000원짜리 물건에 쿠폰을 20장 겹쳐 쓰면 얼마가 되나? 100장이면? 몇 장째부터 원래 값의 절반 아래로 떨어지나?</p>
 </div>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">5%씩 20장이면 100% 깎이니까 0원이요. 100장이면 오히려 돈을 받아야 하고요.</div></div>
@@ -781,7 +781,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">0.95를 13번 곱하면 0.513, 14번이면 0.488이니까 14장째부터 절반 아래야. 한 장은 5%뿐인데 스무 장이면 원가의 64%가, 백 장이면 99% 넘게 사라져.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 「0.95면 거의 1」이라는 느낌은 곱하는 횟수가 적을 때만 맞아요.</div></div>
 </div><blockquote>
-<p><strong>정리</strong> 한 장마다 0.95를 곱한다. 20장이면 약 3,585원(원가의 36%), 100장이면 약 59원(0.6%). 14장째부터 절반 아래로 떨어진다. 작은 비율도 곱이 쌓이면 빠르게 0에 가까워진다.</p>
+<p><strong>정리</strong> 한 장마다 0.95를 곱한다. 20장이면 약 3,585원(원가의 36%), 100장이면 약 59원(0.6%). 14장째부터 절반 아래로 떨어지니, 작은 비율도 곱이 쌓이면 빠르게 0에 가까워진다.</p>
 </blockquote>
 <h5 id="문제-7-킬러-따라서-를-사랑하는-비평가">문제 7: (킬러) &quot;따라서&quot;를 사랑하는 비평가</h5>
 <div class="exercise">

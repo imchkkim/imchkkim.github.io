@@ -710,16 +710,16 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p><strong>원문</strong>: fpgaminer, <em>“How OpenAI Misled You on RLHF”</em>
 <a href="https://aerial-toothpaste-34a.notion.site/How-OpenAI-Misled-You-on-RLHF-1f83f742d9dd80a68129d06503464aff">https://aerial-toothpaste-34a.notion.site/How-OpenAI-Misled-You-on-RLHF-1f83f742d9dd80a68129d06503464aff</a></p>
 </blockquote>
-<p>JoyCaption은 이미지를 보고 캡션(그림을 설명하는 글)을 쓰는 오픈소스 모델이다. 이미지 생성 모델을 학습시키려면 이미지마다 설명글이 있어야 해서, 이런 모델로 수만 장에 캡션을 한꺼번에 붙인다. 그런데 정답 캡션을 그대로 따라 쓰게 하는 지도 학습, 곧 SFT(supervised fine-tuning)만 마친 JoyCaption은 응답 100개 가운데 9.6개꼴로 헛발질을 했다. 같은 구절을 끝없이 되풀이하는 반복 루프에 빠지거나 쓸모없는 출력을 냈다. 이미지 1만 장에 캡션을 붙이면 960장이 망가진다는 뜻이다.</p>
+<p>JoyCaption은 이미지를 보고 캡션(그림을 설명하는 글)을 쓰는 오픈소스 모델이다. 이미지 생성 모델을 학습시키려면 이미지마다 설명글이 있어야 해서, 이런 모델로 수만 장에 캡션을 한꺼번에 붙인다. 그런데 정답 캡션을 그대로 따라 쓰게 하는 지도 학습, 곧 SFT(supervised fine-tuning)만 마친 JoyCaption은 응답 100개 가운데 9.6개꼴로, 같은 구절을 끝없이 되풀이하는 반복 루프에 빠지거나 쓸모없는 출력을 내는 헛발질을 했다. 이미지 1만 장에 캡션을 붙이면 960장이 망가진다는 뜻이다.</p>
 <p>제작자 fpgaminer가 이 경험을 적은 글의 제목은 「OpenAI는 RLHF를 어떻게 잘못 알렸나」다. RLHF(사람의 선호로 모델을 강화학습하는 과정)는 InstructGPT 소개글 이후 안전과 얼라인먼트(사람이 바라는 방식으로 답하게 맞추기)를 위한 기술로 알려졌다. 그는 이것이 오해라고 본다. 강화학습이 하는 일은 모델이 지시를 <strong>믿을 만하게</strong> 따르게 만드는 것이고, SFT만 거친 모델은 태스크에 따라 많아야 90% 남짓 믿을 만해서 열 번에서 스무 번에 한 번은 헛발질한다는 것이 그의 경험이다. JoyCaption 저장소의 설명서는 GPT-4o 같은 상용 모델의 헛발질 비율을 0.01%로 적는다.</p>
-<p>그렇다면 열 번에 한 번 헛발질하는 모델은 어떻게 고칠까? 정답 캡션을 더 많이 보여 주면 될까, 모델이 실제로 저지른 실수를 직접 눌러야 할까? 실수를 누르기로 했다면 그 실수는 어디서 가져오고 무엇과 짝지어야 할까? 이 장은 개인 개발자 한 사람이 오프라인 DPO(미리 모아 둔 선호 쌍으로 학습하는 DPO)를 두 라운드 돌린 기록을 따라가며, 선호 쌍·마진·레퍼런스 같은 개념이 현장에서 어떻게 부딪히는지 본다.</p>
+<p>그렇다면 열 번에 한 번 헛발질하는 모델을 고치려면 정답 캡션을 더 많이 보여 주면 될까, 모델이 실제로 저지른 실수를 직접 눌러야 할까? 실수를 누르기로 했다면 그 실수는 어디서 가져오고 무엇과 짝지어야 할까? 이 장은 개인 개발자 한 사람이 오프라인 DPO(미리 모아 둔 선호 쌍으로 학습하는 DPO)를 두 라운드 돌린 기록을 따라가며, 선호 쌍·마진·레퍼런스 같은 개념이 현장에서 어떻게 부딪히는지 본다.</p>
 <h4 id="좋은-선호쌍-모델이-실제로-저지르는-실수를-담는다">좋은 선호쌍: 모델이 실제로 저지르는 실수를 담는다</h4>
-<p>DPO 데이터셋을 만들 때 가장 먼저 부딪히는 물음은 이것이다. 어떤 두 응답을 짝지어야 모델이 무언가를 배울까? 점수 차이가 크면 될까, 아니면 다른 조건이 더 있을까? JoyCaption의 기록은 어떤 쌍이 좋은 쌍인가에 대한 현장의 답을 보여 준다.</p>
+<p>DPO 데이터셋을 만들 때 가장 먼저 부딪히는 물음은 어떤 두 응답을 짝지어야 모델이 무언가를 배우느냐다. 점수 차이가 크면 될까, 아니면 다른 조건이 더 있을까? JoyCaption의 기록은 어떤 쌍이 좋은 쌍인가에 대한 현장의 답을 보여 준다.</p>
 <h5 id="역사-joycaption이-dpo를-고른-이유">역사: JoyCaption이 DPO를 고른 이유</h5>
 <p>JoyCaption은 메타가 공개한 언어 모델 Llama 3.1 8B(파라미터 80억 개)에 구글의 이미지 인코더 SigLIP2를 붙인 VLM(Visual Language Model, 시각 언어 모델: 이미지를 보고 글을 쓰는 언어 모델)이다. 이미지 생성 모델(디퓨전 모델)을 학습시킬 캡션을 쓰려고 만들었고, 상용 모델이 거절하는 성인용(NSFW) 이미지까지 고르게 다루도록 검열 없이 학습했다. 누구나 생성 모델 학습에 쓰라고 학습된 파라미터를 무료로 공개했고, fpgaminer는 이것을 취미로 만든다.</p>
 <p>앞 공개판(Alpha Two)까지는 SFT만 썼고, Beta One이 강화학습을 쓴 첫 공개판이다. 강화학습이 처음이었던 그는 가장 단순한 방법을 골랐다. 오프라인 DPO(선호 응답과 비선호 응답의 쌍으로, 보상 모델 없이 정책(응답을 뽑는 모델)을 직접 학습하는 방법)를 여러 라운드 돌리는 것이다. 학습 코드에서 바꿀 것은 두 가지뿐이었다. 한 예제가 「프롬프트 + 응답 하나」에서 「프롬프트 + 응답 둘」이 되고, 학습 전 모델을 얼려 둔 레퍼런스의 로그확률을 함께 계산한다. 남은 일은 데이터셋이었다.</p>
 <h5 id="데이터셋은-어떻게-만들었는가">데이터셋은 어떻게 만들었는가</h5>
-<p>사람에게 응답의 순위를 매기게 하는 것이 가장 좋지만, DPO 데이터셋은 1만 쌍 단위로 필요해서 혼자 만드는 사람에게는 돈이 문제였다. 그래서 심사는 다른 모델에게 맡겼다. 그는 모델이 답을 쓰는 것보다 답을 판정하는 것을 훨씬 잘한다고 보았다. 캡션을 쓰려면 이미지를 이해하고, 지시를 지키고, 글을 짜야 해서 사람도 서너 번 고쳐 쓰지만, 캡션이 맞는지 보는 일은 한 번 읽으면 된다.</p>
+<p>사람에게 응답의 순위를 매기게 하는 것이 가장 좋지만, DPO 데이터셋은 1만 쌍 단위로 필요해서 혼자 만드는 사람에게는 돈이 문제였다. 그래서 심사는 다른 모델에게 맡겼는데, 그는 모델이 답을 쓰는 것보다 답을 판정하는 것을 훨씬 잘한다고 보았다. 캡션을 쓰려면 이미지를 이해하고, 지시를 지키고, 글을 짜야 해서 사람도 서너 번 고쳐 쓰지만, 캡션이 맞는지 보는 일은 한 번 읽으면 된다.</p>
 <div class="table-scroll"><table>
 <thead>
 <tr>
@@ -752,7 +752,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tbody>
 </table></div>
 <h5 id="서핑-사진-한-장으로-본-네-가지-쌍">서핑 사진 한 장으로 본 네 가지 쌍</h5>
-<p>실제 쌍은 어떻게 생겼을까? 원문은 쌍의 실제 예를 싣지 않았다. 아래 그림과 표는 이 장이 <strong>설명을 위해 지은 예</strong>다. 해질녘 바다에서 서핑하는 사람의 사진 한 장을 두고 네 종류의 쌍을 짓는다. 그림을 보며 캡션이 맞는지 직접 따져 보라.</p>
+<p>실제 쌍은 어떻게 생겼을까? 원문은 쌍의 실제 예를 싣지 않았으므로, 아래 그림과 표는 이 장이 <strong>설명을 위해 지은 예</strong>다. 해질녘 바다에서 서핑하는 사람의 사진 한 장을 두고 네 종류의 쌍을 지을 테니, 그림을 보며 캡션이 맞는지 직접 따져 보라.</p>
 <svg class="fig" viewBox="0 0 560 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="해질녘 바다에서 흰 숏보드를 탄 서퍼 한 명이 몸을 낮추고 두 팔을 벌린 채 파도를 탄다">
   <rect class="fa2" x="0" y="0" width="560" height="170"/>
   <circle class="f2" cx="420" cy="150" r="42"/>
@@ -842,7 +842,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M07.webp" alt="김민준 (깨달음)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">마진은 필요조건이었네요. 넓은 마진이 <em>실제 실수</em>를 가리켜야 좋은 쌍이고요.</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">분포 안에 있다는 것도 필요조건일 뿐이었어. 둘 다 갖춰야 오답노트 (나) 같은 칸이 되는구나.</div></div>
 </div><blockquote>
-<p><strong>정리</strong> 마진 크기 순서는 좋은 쌍의 순서가 아니다. 예제 1은 마진이 좁아(1점) 차이가 취향 수준이고 심사 순서도 흔들린다. 예제 4는 마진이 넓지만(9점) <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>l</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_l}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0197em;color:var(--sym-e000a5, #e000a5);">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 이 모델이 거의 내놓지 않는 답이다. 예제 2는 넓은 마진(6점)이 모델의 <strong>실제 약점</strong>(반복 루프)을 가리킨다. 넓은 마진과 「모델이 실제로 저지르는 실수」는 둘 다 필요조건이다.</p>
+<p><strong>정리</strong> 마진 크기 순서는 좋은 쌍의 순서가 아니다. 예제 1은 마진이 좁아(1점) 차이가 취향 수준이고 심사 순서도 흔들리며, 예제 4는 마진이 넓지만(9점) <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#e000a5"><msub><mi>y</mi><mi>l</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#e000a5}{y_l}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-e000a5, #e000a5);">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-e000a5, #e000a5);"><span class="mord mathnormal mtight" style="margin-right:0.0197em;color:var(--sym-e000a5, #e000a5);">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq> 이 모델이 거의 내놓지 않는 답이다. 반면 예제 2는 넓은 마진(6점)이 모델의 <strong>실제 약점</strong>(반복 루프)을 가리킨다. 넓은 마진과 「모델이 실제로 저지르는 실수」는 둘 다 필요조건이다.</p>
 </blockquote>
 
 </section>

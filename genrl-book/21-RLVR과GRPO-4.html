@@ -706,7 +706,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="21-RLVR과GRPO.html">21. RLVR과 GRPO: 비평가를 내려놓다</a></p>
 <h4 id="deepseek-r1-정답-보상이-추론-습관을-키웠다">DeepSeek-R1: 정답 보상이 추론 습관을 키웠다</h4>
-<p>비평가는 그룹 평균으로, 보상 모델은 검증기로 바뀌었다. 학습하는 동안 올려 두는 모델만 세면 정책과 레퍼런스, DPO와 똑같이 둘이다.</p>
+<p>비평가는 그룹 평균으로, 보상 모델은 검증기로 바뀌었으니, 학습하는 동안 올려 두는 모델만 세면 정책과 레퍼런스로 DPO와 똑같이 둘이다.</p>
 <pre class="mermaid">graph LR
     subgraph ppo[&quot;PPO (RLHF)&quot;]
         direction LR
@@ -781,14 +781,14 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 </tbody>
 </table></div>
-<p>모델 수는 같다. 차이는 <strong>데이터가 어디서 오는가</strong>다. GRPO는 고정 데이터·탐색 부재라는 DPO의 구조적 한계를 대부분 넘어선다. 대가는 &quot;정답이 있는 도메인&quot;이라는 전제와, 매 스텝 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#5f970c"><mi>G</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#5f970c}{G}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="color:var(--sym-5f970c, #5f970c);">G</span></span></span></span></eq>개씩 생성하는 비용이다.</p>
+<p>모델 수는 같아도 <strong>데이터가 어디서 오는가</strong>가 달라서, GRPO는 고정 데이터·탐색 부재라는 DPO의 구조적 한계를 대부분 넘어선다. 대가는 &quot;정답이 있는 도메인&quot;이라는 전제와, 매 스텝 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#5f970c"><mi>G</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#5f970c}{G}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="color:var(--sym-5f970c, #5f970c);">G</span></span></span></span></eq>개씩 생성하는 비용이다.</p>
 <h5 id="역사-resnet-모먼트">역사: “ResNet 모먼트”</h5>
 <p>DPO의 변형들을 CNN의 역사에 비유해 보자. IPO, KTO, ORPO, SimPO는 AlexNet에서 GoogLeNet까지처럼 각자 의미 있는 개선이지만, &quot;오프라인 고정 데이터&quot;라는 틀은 같았다. ResNet은 달랐다. 잔차 연결이라는 단순한 아이디어 하나가 CNN만의 문제가 아니라 깊은 신경망 전체의 문제(그래디언트 소실)를 풀었고, 이후 거의 모든 아키텍처에 들어갔다.</p>
 <p>GRPO + RLVR의 알고리즘 자체는 새롭지 않다. 같은 프롬프트의 다른 답들로 베이스라인을 잡는 발상은 REINFORCE의 베이스라인에서 이어지는 것이고 같은 시기의 RLOO(자기를 뺀 나머지 답의 평균을 베이스라인으로 쓰는 방법, 2024년 2월)도 같은 발상이며, 정답 보상도 오래된 아이디어다. 그런데도 GRPO + RLVR을 ResNet에 비유할 만한 이유는 <strong>DeepSeek-R1(2025년 1월)이 보여준 파급력</strong>이다.</p>
 <h5 id="역사-sft-없이-정답-보상만으로">역사: SFT 없이 정답 보상만으로</h5>
 <p>GRPO + RLVR을 이루는 두 발상(그룹 베이스라인과 정답 검사 보상)은 하나하나 새롭지 않았다. 같은 입력에 대한 다른 답으로 베이스라인을 잡는 발상은 캡션 모델의 SCST와 RLOO에, 정답 검사를 보상으로 쓰는 일은 툴루 3에 이미 있었다. 이 조합을 널리 알린 것은 2025년 1월 DeepSeek-R1 논문의 한 실험이다.</p>
-<p>DeepSeek 팀은 프리트레인만 마친 베이스 모델 DeepSeek-V3-Base에 SFT(정답 예시를 그대로 따라 쓰게 하는 지도 파인튜닝)를 전혀 하지 않고 곧바로 GRPO를 돌렸다. 이 모델을 R1-Zero라 불렀다. 주문은 「생각을 <code>&lt;think&gt;</code> 태그 안에 먼저 쓰고 답을 써라」는 틀 하나뿐이었다. 반성하라거나 특정한 풀이법을 쓰라는 말은 일부러 넣지 않았다고 논문은 적었다. 보상도 규칙 둘뿐이었다. 수학은 정해진 상자 안에 쓴 최종 답이 맞는지, 코드는 테스트를 통과하는지를 보는 정확도 보상, 그리고 생각을 태그 안에 썼는지 보는 형식 보상이다.</p>
-<p>학습이 진행되자 미국 고교 수학 경시대회 AIME 2024 문제의 정답률(문제마다 16번 답하게 해 맞힌 비율의 평균)이 15.6%에서 71.0%로 올랐다. 한 번에 맞히는 71.0%는 같은 표에 실린 OpenAI o1-0912의 74.4%에 가깝고, 64번 답하게 해 가장 많이 나온 답을 고르면 86.7%로 그보다 높았다. 응답은 수백 토큰에서 수천 토큰으로 길어졌고, 자기 풀이를 되돌아보며 다시 따지는 행동과 다른 풀이를 시도하는 행동이 저절로 나타났다. 논문에 실린 중간 모델의 풀이에는 「Wait, wait. Wait. That’s an aha moment I can flag here.(잠깐, 잠깐. 여기가 깨달음의 순간이라고 표시해 둘 만하다)」라는 문장이 있다. 연구진은 이 장면을 자기들에게도 깨달음의 순간이었다고 적었다. 학습 보상은 수학 답 비교와 코드 테스트 같은 규칙 채점이었는데, 대학원 수준 과학 객관식 모음 GPQA Diamond에서도 73.3%를 냈다.</p>
+<p>DeepSeek 팀은 프리트레인만 마친 베이스 모델 DeepSeek-V3-Base에 SFT(정답 예시를 그대로 따라 쓰게 하는 지도 파인튜닝)를 전혀 하지 않고 곧바로 GRPO를 돌렸고, 이 모델을 R1-Zero라 불렀다. 주문은 「생각을 <code>&lt;think&gt;</code> 태그 안에 먼저 쓰고 답을 써라」는 틀 하나뿐이었고, 반성하라거나 특정한 풀이법을 쓰라는 말은 일부러 넣지 않았다고 논문은 적었다. 보상도 수학은 정해진 상자 안에 쓴 최종 답이 맞는지, 코드는 테스트를 통과하는지를 보는 정확도 보상과, 생각을 태그 안에 썼는지 보는 형식 보상의 두 규칙뿐이었다.</p>
+<p>학습이 진행되자 미국 고교 수학 경시대회 AIME 2024 문제의 정답률(문제마다 16번 답하게 해 맞힌 비율의 평균)이 15.6%에서 71.0%로 올랐다. 한 번에 맞히는 71.0%는 같은 표에 실린 OpenAI o1-0912의 74.4%에 가깝고, 64번 답하게 해 가장 많이 나온 답을 고르면 86.7%로 그보다 높았다. 응답은 수백 토큰에서 수천 토큰으로 길어졌고, 자기 풀이를 되돌아보며 다시 따지는 행동과 다른 풀이를 시도하는 행동이 저절로 나타났다. 논문에 실린 중간 모델의 풀이에는 「Wait, wait. Wait. That’s an aha moment I can flag here.(잠깐, 잠깐. 여기가 깨달음의 순간이라고 표시해 둘 만하다)」라는 문장이 있는데, 연구진은 이 장면을 자기들에게도 깨달음의 순간이었다고 적었다. 학습 보상은 수학 답 비교와 코드 테스트 같은 규칙 채점이었는데, 대학원 수준 과학 객관식 모음 GPQA Diamond에서도 73.3%를 냈다.</p>
 <svg class="fig" viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AIME 2024 정답률: R1-Zero 학습 전 15.6%, 학습 후 71.0%, 학습 후 64번 다수결 86.7%, OpenAI o1-0912 74.4%">
   <text class="t-strong" x="20" y="22" style="font-size:16px">AIME 2024 정답률 (%)</text>
   <line class="sgrid" x1="40" y1="40" x2="545" y2="40"/>
@@ -818,7 +818,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   <text x="470" y="306" text-anchor="middle" style="font-size:16px">o1-0912</text>
 </svg>
 <p>(DeepSeek-R1 논문 arXiv 첫 판(2025년 1월)의 본문과 표 2의 수치로 다시 그렸다. 학습 중의 곡선은 수치가 공개되지 않아 그리지 않았다.)</p>
-<p>검증기는 최종 답만 본다. 그런데 정답에 이른 응답을 강화하면 그 안에 담긴 풀이 전체가 함께 강화된다. 문제를 쪼개는 습관, 중간 결과를 검산하는 습관, 막히면 다른 방법을 시도하는 습관이 모두 그 풀이 안에 들어 있다. 최종 답에 준 보상을 이런 풀이 습관까지 이어 주는 것이 답 앞에 적는 풀이 과정, <strong>CoT</strong>(Chain of Thought, 단계별 사고)다. 이 습관들은 수학에만 쓰이지 않는다. 그래서 수학 RLVR이 수학 지식보다 <strong>단계적으로 생각하는 방법</strong>을 강화했다고 풀이할 수 있다. 논문도 같은 뜻으로, 푸는 법을 가르치지 않고 알맞은 보상만 주었더니 모델이 스스로 풀이 전략을 키웠다고 적었다.</p>
+<p>검증기는 최종 답만 보지만, 정답에 이른 응답을 강화하면 그 안에 담긴 풀이 전체가 함께 강화된다. 문제를 쪼개는 습관, 중간 결과를 검산하는 습관, 막히면 다른 방법을 시도하는 습관이 모두 그 풀이 안에 들어 있다. 최종 답에 준 보상을 이런 풀이 습관까지 이어 주는 것이 답 앞에 적는 풀이 과정, <strong>CoT</strong>(Chain of Thought, 단계별 사고)다. 이 습관들은 수학에만 쓰이지 않는다. 그래서 수학 RLVR이 수학 지식보다 <strong>단계적으로 생각하는 방법</strong>을 강화했다고 풀이할 수 있다. 논문도 같은 뜻으로, 푸는 법을 가르치지 않고 알맞은 보상만 주었더니 모델이 스스로 풀이 전략을 키웠다고 적었다.</p>
 <h5 id="ml에서-r1-이후-몇-달">ML에서: R1 이후 몇 달</h5>
 <p>R1 이후 몇 달 사이에 벌어진 일:</p>
 <ul>
@@ -830,7 +830,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </ul>
 <h5 id="문제-7-정답이-없는-곳의-grpo">문제 7: 정답이 없는 곳의 GRPO</h5>
 <div class="exercise">
-<p>고객 상담 챗봇의 말투를 다듬고 싶다. 좋은 말투에는 정답이 없어 검증기를 만들 수 없다. (가) 그래도 GRPO를 쓰려면 RLHF-PPO의 네 모델(정책, 레퍼런스, 보상 모델, 비평가) 가운데 무엇을 다시 들여와야 하는가? (나) 그때 강화학습 동안 메모리에 올려 두는 모델은 몇 개이고, 그 가운데 파라미터가 업데이트되는 것은 몇 개인가? RLHF-PPO와 비교하시오.</p>
+<p>고객 상담 챗봇의 말투를 다듬고 싶은데, 좋은 말투에는 정답이 없어 검증기를 만들 수 없다. (가) 그래도 GRPO를 쓰려면 RLHF-PPO의 네 모델(정책, 레퍼런스, 보상 모델, 비평가) 가운데 무엇을 다시 들여와야 하는가? (나) 그때 강화학습 동안 메모리에 올려 두는 모델은 몇 개이고, 그 가운데 파라미터가 업데이트되는 것은 몇 개인가? RLHF-PPO와 비교하시오.</p>
 </div>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">(가)는 보상 모델이요. 그런데 보상 모델이 돌아오면 그냥 PPO로 돌아가는 거 아니에요? 비평가도 같이 들여와야 할 것 같은데요.</div></div>
@@ -843,7 +843,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">그 차이가 꽤 크겠네요. 학습하는 모델은 파라미터 말고도 그래디언트랑 옵티마이저 상태까지 들고 있어야 하잖아요. Adam이면 파라미터마다 숫자 두 개를 더 들고 있고요.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">채점 기준표는 학기 전에 만들어 두고 그대로 쓰고, 한 학기 동안 바뀌는 건 공부하는 학생뿐인 거랑 같네요.</div></div>
 </div><blockquote>
-<p><strong>정리</strong> (가) 보상 모델. 비평가는 돌아오지 않는다: 그룹 평균은 점수가 어디서 왔든 계산된다. 두 대체(검증기, 그룹 평균)는 서로 독립이다. DeepSeekMath의 GRPO는 보상 모델과, 툴루 3의 RLVR은 비평가가 있는 PPO와 짝지어졌다. (나) 정책·레퍼런스·보상 모델 셋을 올리고 정책 하나만 업데이트한다. RLHF-PPO는 넷을 올리고 둘(정책, 비평가)을 업데이트한다.</p>
+<p><strong>정리</strong> (가) 보상 모델. 그룹 평균은 점수가 어디서 왔든 계산되므로 비평가는 돌아오지 않는다. 두 대체(검증기, 그룹 평균)는 서로 독립이라, 실제로 DeepSeekMath의 GRPO는 보상 모델과, 툴루 3의 RLVR은 비평가가 있는 PPO와 짝지어졌다. (나) 정책·레퍼런스·보상 모델 셋을 올리고 정책 하나만 업데이트하지만, RLHF-PPO는 넷을 올리고 둘(정책, 비평가)을 업데이트한다.</p>
 </blockquote>
 
 </section>
