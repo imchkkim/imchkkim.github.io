@@ -686,7 +686,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <h1>역전파: 자코비안 곱을 거꾸로</h1>
 <h2 id="q-backprop">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
-<p>파이토치로 신경망을 학습시킬 때 그래디언트는 <code>loss.backward()</code> 한 줄로 얻는다. 파라미터(학습으로 고치는 숫자들)가 백만 개든 십억 개든 이 줄 하나가 파라미터마다 손실의 그래디언트를 채워 넣고, 걸리는 시간은 손실을 한 번 계산하는 시간과 자릿수가 같다. 그런데 미분 없이 손실값만 써서 그래디언트를 어림하던 0차 방법(파라미터 하나를 조금 바꿔 손실이 얼마나 변하는지 보는 유한 차분)은 파라미터 하나마다 손실을 한 번씩 더 계산해야 했다. 파라미터가 백만 개면 손실을 백만 번 넘게 계산한다. 같은 그래디언트인데 유한 차분은 손실 계산의 백만 배가 들고 <code>loss.backward()</code>는 몇 배로 끝난다. 두 방법의 비용 차이는 어디서 올까?</p>
+<p>파이토치로 신경망을 학습시킬 때 그래디언트는 <code>loss.backward()</code> 한 줄로 얻는다. 파라미터(학습으로 고치는 숫자들)가 백만 개든 십억 개든 이 줄 하나가 파라미터마다 손실의 그래디언트를 채워 넣고, 걸리는 시간은 손실을 한 번 계산하는 시간과 자릿수가 같다. 그런데 미분 없이 손실값만 써서 그래디언트를 근사하던 0차 방법(파라미터 하나를 조금 바꿔 손실이 얼마나 변하는지 보는 유한 차분)은 파라미터 하나마다 손실을 한 번씩 더 계산해야 했다. 파라미터가 백만 개면 손실을 백만 번 넘게 계산한다. 같은 그래디언트인데 유한 차분은 손실 계산의 백만 배가 들고 <code>loss.backward()</code>는 몇 배로 끝난다. 두 방법의 비용 차이는 어디서 올까?</p>
 <p>미분을 할 줄 안다고 해서 저절로 싸지는 것도 아니다. 손실은 층을 여럿 거친 함수라서, 함수를 이어 붙이면 미분은 단계마다의 미분을 곱한 것이라는 연쇄법칙을 쓰게 된다. 곱셈은 순서를 바꿔도 답이 같은데, 그렇다면 어느 쪽 끝부터 곱하느냐는 상관이 없을까?</p>
 <p>그리고 학습을 해 본 사람은 다른 것도 겪는다. 같은 모델로 답을 내기만 할 때는 넉넉하던 GPU 메모리가 학습을 시작하면 모자라서, 미니배치(한 스텝에 쓰는 데이터 묶음)를 줄여야 하는 일이 흔하다. 그래디언트를 구하는 일이 왜 메모리를 그렇게 많이 먹을까?</p>
 <p>이 장은 다음 물음에 차례로 답한다.</p>
@@ -733,6 +733,12 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </tbody>
 </table></div>
 <p>점이 붙은 것은 「입력을 조금 바꿨을 때 그 단계의 값이 입력 변화의 몇 배로 바뀌나」, 곧 그 단계의 값을 입력으로 미분한 값이다. 편미분 ∂y/∂x₁을 얻으려면 ẋ₁ = 1, ẋ₂ = ẋ₃ = 0으로 놓고 함수를 한 번 계산한다. ∂y/∂x₂, ∂y/∂x₃도 같은 방식이다. 그래서 웽거트의 「편미분 생성기」 서브루틴은 함숫값을 한 번 구한 뒤, 편미분 하나마다 함수 서브루틴을 한 번씩, 모두 세 번 더 부른다. 입력이 셋이면 세 번이고, 입력이 백만 개면 백만 번이다.</p>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>식을 단계로 쪼개서 값이랑 미분을 같이 계산하는 거면, 지금은 파이토치가 알아서 해 주잖아요. 두 쪽짜리 글로 실을 만한 일이었나요?</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>1964년에 도함수가 필요한 프로그램을 짜던 사람은 무엇을 했다고 했죠?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>손으로 미분해서 도함수 식을 따로 적어 넣었다고요. 음, 그러면 손으로 옮긴 도함수 식이 틀려도 프로그램은 그냥 돌아가니까 틀린 줄도 모르겠네요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래서 웽거트는 이 프로그램을 도함수 식을 점검하는 도구로도 내놓았어요. 또 지금 파이토치에서는 <code>a * b</code>라고만 써도 곱셈의 미분 규칙이 따라붙죠. 그때 포트란에는 곱셈 기호에 새 뜻을 붙이는 기능이 없었어요. 그 기능(연산자 오버로딩)이 포트란 표준에 들어온 것은 1990년이에요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 그래서 단계마다 값과 미분을 내주는 서브루틴을 따로 만들어 불러야 했구나. 식 하나를 표처럼 네 단계로 풀어 적은 거네요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 편미분 생성기는 입력 하나마다 함수를 한 번씩 다시 불렀잖아요. 신경망처럼 입력이 많으면, 이 방법으로 그래디언트 하나를 얻는 데 몇 번이나 계산해야 해요?</p></div></div>
 <h3 id="뉴런-하나를-앞으로-따라가기">뉴런 하나를 앞으로 따라가기</h3>
 <p>웽거트의 방법이 신경망에서 얼마나 드는지 보려면, 신경망을 이루는 세 가지 계산을 모두 갖춘 가장 작은 예가 좋다. 입력 셋을 가중치로 섞는 선형 결합, 선형 결합의 값을 휘는 활성화 함수, 정답과의 차이를 재는 손실 함수다. 이 세 계산을 한 줄로 이으면 뉴런 하나짜리 신경망이 되고, 파라미터가 셋이라 「입력마다 한 번」이 몇 번인지 눈으로 셀 수 있다.</p>
 <p>데이터는 x = (2, −1, 1)이고 정답은 y = 1, 파라미터는 w = (0.3, 0.2, 0.1)로 두자(이 책에서 고른 값이다). 1층에서 z = w₁x₁ + w₂x₂ + w₃x₃ = 0.6 − 0.2 + 0.1 = 0.5, 2층에서 h = tanh z = 0.4621, 3층에서 손실 L = ½(h − y)² = 0.1447이다. 이렇게 계산을 작은 칸으로 쪼개고 「어느 칸의 값이 어느 칸으로 들어가는가」를 화살표로 이은 그림을 계산 그래프(computational graph)라 한다. 웽거트의 표에서 단계 하나가 칸 하나다.</p>
@@ -779,13 +785,14 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </tr>
 </tbody>
 </table></div>
-<p>파라미터가 열 배가 되면 비용은 백 배가 되는데, 웽거트의 편미분 생성기가 함수를 입력 수만큼 부른 것과 같은 사정이다. 유한 차분과 달리 어림이 없는 정확한 미분이 나오지만, 「입력 하나에 한 번」이라는 점은 유한 차분과 같다.</p>
+<p>파라미터가 열 배가 되면 비용은 백 배가 되는데, 웽거트의 편미분 생성기가 함수를 입력 수만큼 부른 것과 같은 사정이다. 유한 차분과 달리 근사가 아닌 정확한 미분이 나오지만, 「입력 하나에 한 번」이라는 점은 유한 차분과 같다.</p>
 <h3 id="ml에서-입력은-적고-출력은-많을-때">ML에서: 입력은 적고 출력은 많을 때</h3>
 <p>순방향 모드가 쓸모없는 것은 아니다. 1을 넣은 입력 하나에 대해서는 출력이 몇 개든 한 번 훑기로 모든 출력의 미분이 나온다. 그래서 「입력 하나, 또는 입력 공간의 한 방향에 대해, 많은 출력이 얼마나 민감한가」를 물을 때는 순방향 모드가 맞는 도구다. 파이토치에는 이것을 계산하는 함수 <code>torch.func.jvp</code>가 따로 있다. 이름의 jvp는 자코비안–벡터 곱(Jacobian-vector product)의 머리글자로, 자코비안에 방향 벡터 하나를 곱한 값, 곧 위에서 한 「한 방향으로 한 번 훑기」의 결과를 돌려준다. 손실처럼 출력이 하나뿐이고 파라미터가 수백만 개인 경우는 그 반대 모양이다.</p>
 <div class="dialogue"><h3 id="prob-backprop-bakery-cost-sheet">문제 1. 빵집의 원가표<span id="문제-1-빵집의-원가표" class="anchor-alias"></span></h3>
 <blockquote>
 <p>동네 빵집의 케이크 한 개는 반죽 2판과 크림 1통으로 만든다. 반죽 1판에는 밀가루 0.3 kg과 버터 0.1 kg, 크림 1통에는 버터 0.2 kg과 설탕 0.15 kg이 든다. 재료 값은 1 kg에 밀가루 2,000원, 버터 12,000원, 설탕 1,500원이다(이 책에서 지은 값). (가) 케이크 한 개의 원가는? (나) 밀가루 값만 1원 오르면 케이크 원가는 몇 원 오르는가? 「재료 → 반죽·크림 → 케이크」 순서로 1원 오른 값이 어디까지 번지는지 따라가 보라. (다) 세 재료의 값이 각각 1원 오를 때의 영향을 모두 알려면 원가표를 몇 번 훑어야 하는가? 곱셈은 몇 번인가?</p>
 </blockquote>
+<figure class="fig "><img src="images/backprop/p01_bakery.png" alt="빵집 원가표: 밀가루·버터·설탕(1 kg 값)이 반죽 1판·크림 1통에 들어가는 양과, 반죽 2판·크림 1통으로 만드는 케이크(sources/backprop/problems_figs.py)" loading="lazy"><figcaption>빵집 원가표: 밀가루·버터·설탕(1 kg 값)이 반죽 1판·크림 1통에 들어가는 양과, 반죽 2판·크림 1통으로 만드는 케이크(sources/backprop/problems_figs.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 반죽 한 판이 600 + 1,200 = 1,800원, 크림이 2,400 + 225 = 2,625원이니까 1,800 × 2 + 2,625 = 6,225원이에요. (나)는 밀가루가 반죽에만 들어가니까 0.3원이요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>밀가루 값이 1원 오르면 반죽 한 판이 0.3원 오르죠. 그다음엔 그 0.3원이 어디로 가나요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 케이크에 반죽이 두 판 들어가니까 0.3 × 2 = 0.6원이네요. 반죽에서 멈추면 안 되고 끝까지 따라가야 하는구나.</p></div></div>
@@ -797,6 +804,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <blockquote>
 <p>입력 t 하나에서 u = t², 그리고 출력 세 개 a = u, b = u·t, c = u·u를 계산한다. (가) t = 1.5일 때 세 출력의 값은? (나) t의 방향 미분 ṫ = 1을 넣고 앞으로 한 번 훑어 세 출력의 미분 da/dt, db/dt, dc/dt를 구하라. 곱셈은 몇 번인가? (다) 출력 쪽에서 시작해 거꾸로 따라가는 방법이 있다면, 세 미분을 다 얻는 데 몇 번 훑어야 할 것 같은가?</p>
 </blockquote>
+<figure class="fig "><img src="images/backprop/p02_one_to_three.png" alt="입력 t = 1.5에서 u = t²를 거쳐 출력 a = u, b = u·t, c = u·u로 가는 계산 그래프와 입력에 넣는 방향 미분 ṫ = 1(sources/backprop/problems_figs.py)" loading="lazy"><figcaption>입력 t = 1.5에서 u = t²를 거쳐 출력 a = u, b = u·t, c = u·u로 가는 계산 그래프와 입력에 넣는 방향 미분 ṫ = 1(sources/backprop/problems_figs.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 2.25, 3.375, 5.0625요. (나)는 출력이 셋이니까 세 번 훑어야 하지 않나요? 출력마다 하나씩요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>순방향 모드에서 1을 넣는 곳은 어디죠? 입력이에요, 출력이에요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>입력이요… 입력은 t 하나뿐이네요. 그럼 한 번이에요.</p></div></div>
@@ -810,6 +818,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <blockquote>
 <p>가로세로 28칸짜리 흑백 손글씨 숫자 그림(픽셀 784개)을 받아 은닉 뉴런 100개를 거쳐 숫자 10개의 점수를 내는 2층 신경망이 있다. (가) 가중치와 편향을 합친 파라미터는 몇 개인가? (나) 순방향 모드로 손실의 그래디언트 전체를 얻으려면 몇 번 훑어야 하는가? 한 번 훑는 데 1밀리초가 든다고 치면(가정) 한 스텝에 몇 초인가? (다) 「픽셀 하나를 바꾸면 숫자 열 개의 점수가 각각 얼마나 바뀌나」를 알고 싶다면 몇 번 훑으면 되는가?</p>
 </blockquote>
+<figure class="fig "><img src="images/backprop/p03_digit_net.png" alt="픽셀 784개 → 은닉 뉴런 100개 → 숫자 점수 10개로 가는 2층 신경망과 끝의 손실 하나(sources/backprop/problems_figs.py)" loading="lazy"><figcaption>픽셀 784개 → 은닉 뉴런 100개 → 숫자 점수 10개로 가는 2층 신경망과 끝의 손실 하나(sources/backprop/problems_figs.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>784 × 100 + 100에 100 × 10 + 10을 더하면 79,510개요. 순방향 모드면 79,510번 훑어야 하니까 79.5초, 1분 20초쯤이에요. 학습 한 스텝에요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>학습은 보통 몇 스텝을 하죠?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>수천 스텝은 하죠. 이 작은 모델도 한 스텝에 1분이 넘으면 며칠이 걸려요. 그런데 0차 방법(유한 차분)으로 해도 손실을 79,511번 계산해야 하니까 비슷하네요. 순방향 모드는 정확하다는 것만 나아요.</p></div></div>
