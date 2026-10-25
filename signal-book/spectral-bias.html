@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 스펙트럼으로 정보를 보기</a></li>
 <li class="toc-part">축을 바꿔 다시 적기</li>
 <li><a href="basis.html">기저: 같은 정보를 다른 축으로 다시 적기</a></li>
@@ -669,7 +685,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="signals-by-dimension.html">차원별 신호: 시계열, 영상, 부피, 그래프</a></li>
 <li class="toc-part">신경망이 보는 스펙트럼</li>
 <li><a href="kernels.html">커널: 무한히 많은 물결을 셈 한 번으로</a></li>
-<li><a href="spectral-bias.html" class="active">스펙트럼 편향: 신경망은 굵은 무늬부터 배운다</a><ul class="sidebar-toc"><li><a href="spectral-bias.html" class="current">스펙트럼 편향: 굵은 물결이 먼저 맞는다</a></li><li><a href="spectral-bias-sec-ntk-eigenvalue-decay.html">왜 늦게 배우나: 신경 탄젠트 커널의 고윳값이 높은 주파수에서 작다</a></li><li><a href="spectral-bias-sec-fourier-features.html">푸리에 특징: 좌표를 물결로 펴서 넣기</a></li><li><a href="spectral-bias-sec-positional-encoding-revisited.html">위치 인코딩 다시 보기: 사인 인코딩, RoPE, 시간 넣기</a></li><li><a href="spectral-bias-sec-spectral-bias-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="spectral-bias.html" class="active">스펙트럼 편향: 신경망은 굵은 무늬부터 배운다</a><ul class="sidebar-toc"><li><a href="spectral-bias.html" class="current">스펙트럼 편향: 굵은 물결이 먼저 맞는다</a></li><li><a href="spectral-bias-sec-ntk-eigenvalue-decay.html">왜 늦게 배우나: 신경 탄젠트 커널의 고윳값이 높은 주파수에서 작다</a></li><li><a href="spectral-bias-sec-fourier-features.html">푸리에 특징: 좌표를 물결로 펴서 넣기</a></li><li><a href="spectral-bias-sec-positional-encoding-revisited.html">위치 인코딩 다시 보기: 사인 인코딩, RoPE, 시간 넣기</a></li><li><a href="spectral-bias-sec-spectral-bias-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="epilogue.html">맺음: 고정된 축에서 배우는 축으로</a></li></ol>
 </nav>
 <button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
@@ -690,8 +706,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>구간 [−1, 1) 위의 함수 하나를 신경망에게 맞추게 해 보자. 굵은 물결 sin π<span class="sym" style="color:#a67a63">x</span>(구간 안에서 한 번 출렁인다)에 가는 물결 0.5 sin 10π<span class="sym" style="color:#a67a63">x</span>(열 번 출렁인다)를 더한 함수다. 망은 입력 <span class="sym" style="color:#a67a63">x</span> 하나를 받아 숫자 하나를 내놓고, 학습 점에서 정답과의 차이 제곱을 줄이도록 스텝마다 파라미터를 고친다. 망의 손실은 숫자 하나로 줄어들 뿐이라서, 그 안에서 굵은 물결과 가는 물결 가운데 어느 것이 먼저 맞춰지는지는 손실만 봐서는 모른다. 스텝마다 남은 오차를 물결로 나눠 보면 무엇이 보일까?</p>
 <h3 id="hist-frequency-principle" class="history" data-people="rahaman-nasim xu-zhiqin">역사: 신경망은 반복 풀이법과 거꾸로 간다<span id="역사-신경망은-반복-풀이법과-거꾸로-간다" class="anchor-alias"></span></h3>
 <p>2017년 무렵, 파라미터가 데이터보다 훨씬 많은 신경망이 아무렇게나 붙인 정답까지 외울 수 있다는 실험이 알려지면서 물음이 하나 생겼다. 무엇이든 외울 수 있는 망이 왜 실제 데이터에서는 외우지 않고 쓸 만한 규칙을 찾을까? 라하만(Nasim Rahaman)과 벤지오(Yoshua Bengio), 쿠르빌(Aaron Courville) 등 여덟 명은 이 물음을 주파수로 따졌다. 그들은 2019년 국제기계학습학회(ICML)에 낸 「신경망의 스펙트럼 편향에 대하여(On the Spectral Bias of Neural Networks)」에서 [0, 1] 위의 점 200개에 주파수 5, 10, …, 50 인 사인 물결 열 개를 더한 함수를 망에게 맞추게 했다. 망은 6층 폭 256 의 ReLU 망(음수를 0 으로 바꾸는 꺾은선 함수를 층마다 쓰는 망)이었고, 100 스텝마다 망의 출력을 이산 푸리에 변환해 주파수마다 얼마나 배웠는지를 그렸더니, 낮은 주파수가 먼저 배워졌다. 높은 주파수일수록 진폭을 크게(0.1 에서 1.0 까지) 주어 「높은 주파수를 먼저 배울 이유」를 일부러 만들어 준 실험에서도 순서는 바뀌지 않았다. 아래 그림은 그 실험을 줄여서 다시 돌린 것이다. 진폭 0.1 인 주파수 5 는 900 스텝에 과녁의 90% 를 넘게 배웠고, 진폭 0.4 인 주파수 20 은 6400 스텝이 걸렸으며, 진폭 1.0 으로 가장 큰 주파수 50 은 1만 스텝 뒤에도 22% 만 배웠다.</p>
-<figure class="fig "><img src="images/spectral-bias/rahaman_redraw.png" alt="라하만 외 2019 의 실험 1 을 줄여서 다시 돌린 것. [0, 1] 위 점 200개, 주파수 5..50 의 사인 열 개(진폭은 0.1 에서 1.0 으로 높은 주파수일수록 크다), 6층 폭 256 ReLU 망, Adam. 칸의 밝기는 망 출력의 그 주파수 진폭을 과녁 진폭으로 나눈 값이다. 논문은 위상 10벌을 평균하고 8만 스텝을 돌렸고, 여기서는 위상 한 벌로 1만 스텝만 돌렸다(sources/spectral-bias/s0_rahaman.py, figs.py)" loading="lazy"><figcaption>라하만 외 2019 의 실험 1 을 줄여서 다시 돌린 것. [0, 1] 위 점 200개, 주파수 5..50 의 사인 열 개(진폭은 0.1 에서 1.0 으로 높은 주파수일수록 크다), 6층 폭 256 ReLU 망, Adam. 칸의 밝기는 망 출력의 그 주파수 진폭을 과녁 진폭으로 나눈 값이다. 논문은 위상 10벌을 평균하고 8만 스텝을 돌렸고, 여기서는 위상 한 벌로 1만 스텝만 돌렸다(sources/spectral-bias/s0_rahaman.py, figs.py)</figcaption></figure>
+<figure class="fig "><img src="images/spectral-bias/rahaman_redraw.png" alt="라하만 외 2019 의 실험 1 을 줄여서 다시 돌린 것. 0 과 1 사이 점 200개, 주파수 5..50 의 사인 열 개(진폭은 0.1 에서 1.0 으로 높은 주파수일수록 크다), 6층 폭 256 ReLU 망, Adam. 칸의 밝기는 망 출력의 그 주파수 진폭을 과녁 진폭으로 나눈 값이다. 논문은 위상 10벌을 평균하고 8만 스텝을 돌렸고, 여기서는 위상 한 벌로 1만 스텝만 돌렸다(sources/spectral-bias/s0_rahaman.py, figs.py)" loading="lazy"><figcaption>라하만 외 2019 의 실험 1 을 줄여서 다시 돌린 것. 0 과 1 사이 점 200개, 주파수 5..50 의 사인 열 개(진폭은 0.1 에서 1.0 으로 높은 주파수일수록 크다), 6층 폭 256 ReLU 망, Adam. 칸의 밝기는 망 출력의 그 주파수 진폭을 과녁 진폭으로 나눈 값이다. 논문은 위상 10벌을 평균하고 8만 스텝을 돌렸고, 여기서는 위상 한 벌로 1만 스텝만 돌렸다(sources/spectral-bias/s0_rahaman.py, figs.py)</figcaption></figure>
 <p>비슷한 때 쉬즈친(Zhi-Qin John Xu)과 동료들은 2018년 7월 arXiv 에 올린 「주파수 영역에서 본 깊은 신경망의 학습」에서 같은 현상을 「주파수 원리」라고 불렀다. 이듬해 1월에 올린 글에서 그들은 이 순서가 수치해석의 오래된 반복 풀이법과 반대라는 점을 짚었다. 커다란 연립방정식을 반복으로 푸는 흔한 방법들(그들이 견준 것은 야코비 방법이다)은 높은 주파수의 오차를 먼저 지우고 낮은 주파수의 오차를 오래 남긴다. 신경망은 거꾸로 낮은 주파수부터 맞춘다. 그들은 망이 낮은 주파수부터 맞추기 때문에 실제 데이터에서 잘 일반화하는 면이 있고, 같은 이유로 이웃한 입력의 답이 마구 뒤바뀌는 문제(비트의 홀짝 맞히기 같은)는 어려워한다고 보았다.</p>
+<figure class="fig "><img src="images/spectral-bias/jacobi_reverse.png" alt="가중 야코비 방법(ω = 2/3)으로 1차원 푸아송 문제를 칸 64개에서 풀 때 오차의 주파수마다 지워진 비율로, 위 그림과 같은 색 지도인데 밝은 칸이 오른쪽(높은 주파수)부터 차서 k = 48 성분은 2번 만에 90% 가 지워지고 k = 1 성분은 200번 뒤에도 15% 만 지워진다(처음 오차는 모든 주파수에 진폭 1 로 둔 장난감, 직접 계산해 그림, sources/spectral-bias/h_history.py)" loading="lazy"><figcaption>가중 야코비 방법(ω = 2/3)으로 1차원 푸아송 문제를 칸 64개에서 풀 때 오차의 주파수마다 지워진 비율로, 위 그림과 같은 색 지도인데 밝은 칸이 오른쪽(높은 주파수)부터 차서 k = 48 성분은 2번 만에 90% 가 지워지고 k = 1 성분은 200번 뒤에도 15% 만 지워진다(처음 오차는 모든 주파수에 진폭 1 로 둔 장난감, 직접 계산해 그림, sources/spectral-bias/h_history.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>망의 출력을 100 스텝마다 이산 푸리에 변환해서 그린 거면, 지금은 FFT 한 줄이잖아요. 그게 왜 2019년에야 논문이 됐어요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>변환은 그때도 한 줄이었어요. 어려웠던 건 무엇을 변환할지였죠. 망이 실제로 다루던 데이터를 떠올려 봐요. 사진을 분류하는 망이라면 입력이 몇 차원이죠?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>사진 한 장이 칸 수천 개니까 수천 차원이요. 음, 그 공간에 고른 칸을 깔 수가 있나… 한 축에 열 칸만 둬도 칸 수가 10 의 수천 제곱이네요. 칸이 없으면 이산 푸리에 변환도 못 하고요.</p></div></div>
@@ -769,7 +786,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>굵은 물결은 100 스텝 만에 진폭 0.002 만 남기고 다 맞춰졌지만, 같은 100 스텝 동안 가는 물결은 0.500 에서 0.480 으로 거의 그대로였고 처음 몇십 스텝에는 오히려 0.547 까지 커지기도 했다. 가는 물결이 과녁 진폭의 10%(0.05) 아래로 내려간 것은 1699 스텝째로, 굵은 물결이 같은 기준(0.1 아래)에 닿은 54 스텝째의 31배쯤 늦다. 씨앗을 0 에서 4 까지 바꿔도 가는 물결은 1472~2433 스텝, 굵은 물결은 48~61 스텝으로 순서는 같았다.</p>
 <figure class="fig "><img src="images/spectral-bias/bias_steps.png" alt="왼쪽: 과녁(초록)과 스텝 0, 55, 1007 의 망 출력(빨강). 55 스텝에 굵은 물결은 거의 맞고 가는 물결은 없다. 오른쪽: 학습 점에서 잰 남은 오차의 진폭, 굵은 물결 k = 1 과 가는 물결 k = 10(s1_bias.py, figs.py)" loading="lazy"><figcaption>왼쪽: 과녁(초록)과 스텝 0, 55, 1007 의 망 출력(빨강). 55 스텝에 굵은 물결은 거의 맞고 가는 물결은 없다. 오른쪽: 학습 점에서 잰 남은 오차의 진폭, 굵은 물결 k = 1 과 가는 물결 k = 10(s1_bias.py, figs.py)</figcaption></figure>
 <p>이렇게 신경망이 오차의 낮은 주파수 성분을 먼저 줄이고 높은 주파수 성분을 늦게 줄이는 경향을 <strong>스펙트럼 편향</strong> (낮은 주파수부터 배우는 경향 / spectral bias)이라 한다. 여기서 「편향」은 망이 고를 수 있는 답 가운데 어느 쪽으로 기우는지를 가리키는 말이고, 통계에서 표본평균이 참값에서 벗어나는 정도를 부르는 「편향」(추정량의 bias)과는 다른 뜻이다. 망에게 가는 물결을 그릴 힘이 없는 것은 아니어서, 3000 스텝이면 둘 다 맞췄지만, 굵은 무늬를 먼저 그리고 가는 무늬는 오래 걸린다.</p>
-<figure class="widget-embed" id="widget-spectral-bias-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">스텝마다 주파수별 남은 오차</span><a class="widget-open" href="widgets/spectral-bias.html?v=331ac847#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/spectral-bias.html?w=w1&embed=1&v=331ac847" title="스텝마다 주파수별 남은 오차" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-spectral-bias-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">스텝마다 주파수별 남은 오차</span><a class="widget-open" href="widgets/spectral-bias.html?v=d926b64e#w1">크게 열기</a></div><iframe data-src="widgets/spectral-bias.html?w=w1&embed=1&v=d926b64e" title="스텝마다 주파수별 남은 오차" loading="lazy"></iframe></figure>
 <h3 id="ml에서-좌표를-넣는-망은-그림을-뭉갠다">ML에서: 좌표를 넣는 망은 그림을 뭉갠다</h3>
 <p>좌표를 넣고 색이나 밀도를 받는 망에서는 스펙트럼 편향이 그림으로 드러난다. NeRF 논문(밀든홀 외 2020)은 공간의 점 (x, y, z) 와 보는 방향을 그대로 넣은 망이 「색과 모양의 높은 주파수 변화를 잘 나타내지 못했다」고 적고, 이를 라하만 외의 스펙트럼 편향으로 설명했다. 줄여 보는 실험의 표에서도 좌표를 펴는 일을 뺀 판은 보는 방향을 뺀 판과 함께 가장 크게 나빠졌고, 그림은 「지나치게 매끈해진」 모습이었다. 사진의 가는 결은 높은 주파수 물결이므로, 망이 그것을 배우기 전에 학습이 끝나거나, 배우는 데 스텝이 너무 많이 든다. NeRF 가 스펙트럼 편향을 어떻게 피했는지는 좌표를 물결로 펴서 넣는 방법에서 본다.</p>
 <div class="dialogue"><h3 id="prob-spectral-singing-app-score">문제 1. 노래 연습 앱의 점수<span id="문제-1-노래-연습-앱의-점수" class="anchor-alias"></span></h3>
@@ -818,7 +835,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>시험 공부할 때 배점이 큰 서술형부터 하라고들 하는데, 저는 결국 손이 익은 객관식부터 풀게 되는 거랑 비슷하네요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="kernels-sec-kernels-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="spectral-bias-sec-ntk-eigenvalue-decay.html">왜 늦게 배우나: 신경 탄젠트 커널의 고윳값이 높은 주파수에서 작다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="kernels-sec-kernels-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="spectral-bias-sec-ntk-eigenvalue-decay.html">왜 늦게 배우나: 신경 탄젠트 커널의 고윳값이 높은 주파수에서 작다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

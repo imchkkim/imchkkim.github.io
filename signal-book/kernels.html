@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 스펙트럼으로 정보를 보기</a></li>
 <li class="toc-part">축을 바꿔 다시 적기</li>
 <li><a href="basis.html">기저: 같은 정보를 다른 축으로 다시 적기</a></li>
@@ -668,7 +684,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="image.html">이미지: 그림을 스펙트럼으로 보기</a></li>
 <li><a href="signals-by-dimension.html">차원별 신호: 시계열, 영상, 부피, 그래프</a></li>
 <li class="toc-part">신경망이 보는 스펙트럼</li>
-<li><a href="kernels.html" class="active">커널: 무한히 많은 물결을 셈 한 번으로</a><ul class="sidebar-toc"><li><a href="kernels.html" class="current">커널 함수: 특징을 만들지 않고 내적만 계산하기</a></li><li><a href="kernels-sec-bochner-theorem.html">보흐너 정리: 평행이동 불변 커널 함수는 주파수 분포에서 나온다</a></li><li><a href="kernels-sec-random-fourier-features.html">랜덤 푸리에 특징: 주파수 분포에서 물결을 뽑아 특징으로</a></li><li><a href="kernels-sec-gaussian-process-kernel-covariance.html">가우스 과정: 커널 함수를 공분산으로 쓴 함수의 분포</a></li><li><a href="kernels-sec-kernels-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="kernels.html" class="active">커널: 무한히 많은 물결을 셈 한 번으로</a><ul class="sidebar-toc"><li><a href="kernels.html" class="current">커널 함수: 특징을 만들지 않고 내적만 계산하기</a></li><li><a href="kernels-sec-bochner-theorem.html">보흐너 정리: 평행이동 불변 커널 함수는 주파수 분포에서 나온다</a></li><li><a href="kernels-sec-random-fourier-features.html">랜덤 푸리에 특징: 주파수 분포에서 물결을 뽑아 특징으로</a></li><li><a href="kernels-sec-gaussian-process-kernel-covariance.html">가우스 과정: 커널 함수를 공분산으로 쓴 함수의 분포</a></li><li><a href="kernels-sec-kernels-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="spectral-bias.html">스펙트럼 편향: 신경망은 굵은 무늬부터 배운다</a></li>
 <li><a href="epilogue.html">맺음: 고정된 축에서 배우는 축으로</a></li></ol>
 </nav>
@@ -717,11 +733,12 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h3 id="hist-kernel-trick-svm" class="history" data-people="guyon-isabelle vapnik-vladimir boser-bernhard">역사: 「특징을 곱하자」 대신 「내적을 바꾸자」<span id="역사-특징을-곱하자-대신-내적을-바꾸자" class="anchor-alias"></span></h3>
 <p>내적만 바꿔 끼우는 생각은 1960년대 소련의 패턴 인식 연구에서 나왔다. 아이제르만(Mark Aizerman), 브라베르만(Emmanuel Braverman), 로조노에르(Lev Rozonoer)는 1964년 학술지 『자동화와 원격 제어』에 「패턴 인식 학습에서 퍼텐셜 함수 방법의 이론적 기초」를 실었다. 학습한 점마다 그 둘레에 전기 퍼텐셜 같은 봉우리를 하나씩 세우고, 새 점의 부류를 봉우리들의 합으로 정하는 방법이다. 봉우리 하나의 값은 두 점을 받는 함수였고, 그 함수가 어떤 특징 공간의 내적과 같다는 것이 그들 이론의 바탕이었다.</p>
 <p>이 생각이 널리 쓰이게 된 것은 30년쯤 뒤 미국 벨 연구소에서다. 이자벨 가이언(Isabelle Guyon)이 2016년에 남긴 회고에 따르면, 1991년 그들 모임은 블라디미르 뱁닉(Vladimir Vapnik)이 오래 연구해 온 「여백이 가장 큰 경계」 알고리즘을 실제로 돌려 보고 있었다. 가이언과 베른하르트 보저(Bernhard Boser)가 버클리로 옮기기 전에 남은 석 달 동안, 보저가 그 알고리즘을 구현했다. 직선 경계가 어느 정도 통하자 뱁닉은 특징끼리의 곱을 새 특징으로 넣자고 했고, 가이언은 그 대신 퍼텐셜 함수 방법의 「커널 트릭」을 쓰자고 했다. 가이언의 회고에는 뱁닉이 처음에는 이 제안을 꺼렸다고 적혀 있는데, 퍼텐셜 함수 방법을 만든 사람들이 1960년대 러시아 시절 같은 연구소의 경쟁 팀이었기 때문이라고 한다. 결과는 1992년 보저·가이언·뱁닉의 「여백이 가장 큰 분류기를 위한 학습 알고리즘(A Training Algorithm for Optimal Margin Classifiers)」으로 학습 이론 학회 COLT 에 실렸고, 지금 서포트 벡터 머신이라 부르는 방법의 출발점이 되었다. 뱁닉이 하려던 「특징끼리 곱하기」와 가이언이 고른 「내적 바꿔 끼우기」가 어떻게 같은 일인지는 바로 아래 예에서 손으로 확인할 수 있다.</p>
+<figure class="fig "><img src="images/kernels/h1_potential.png" alt="1964년 퍼텐셜 함수 방법을 지어낸 점 36개로 다시 그린 그림. 학습한 점마다 가까울수록 큰 봉우리를 세우고(부류 A 는 +, 부류 B 는 −) 그 합이 0 인 선을 경계로 삼으면, 직선으로 가를 수 없는 안쪽 무리와 바깥 고리도 갈린다(점은 씨앗 1964 로 지어낸 값, 원 논문의 그림이 아님)" loading="lazy"><figcaption>1964년 퍼텐셜 함수 방법을 지어낸 점 36개로 다시 그린 그림. 학습한 점마다 가까울수록 큰 봉우리를 세우고(부류 A 는 +, 부류 B 는 −) 그 합이 0 인 선을 경계로 삼으면, 직선으로 가를 수 없는 안쪽 무리와 바깥 고리도 갈린다(점은 씨앗 1964 로 지어낸 값, 원 논문의 그림이 아님)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>내적 자리에 함수 하나를 바꿔 끼우는 거잖아요. 1964년에 있던 생각을 서포트 벡터 머신에 쓰기까지 30년 가까이 걸렸다는 게 좀 신기해요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>바꿔 끼우려면 먼저 알고리즘 안에 내적이 보여야 해요. 여백이 가장 큰 경계를 구하는 문제를 처음 적으면 무엇이 보이죠?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>음, 경계의 방향이랑 점마다 경계까지의 거리요. 점끼리의 내적은 바로 안 보이네요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래서 그 문제를 계산 과정에 데이터 점끼리의 내적만 나오는 꼴로 고쳐 써야 바꿔 끼울 자리가 생겨요. 내적 대신 두 점을 받는 함수를 넣어도 된다는 이론은 경쟁하던 다른 팀의 1960년대 논문에 있었고요.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>뱁닉은 특징끼리 곱하자고 했죠. 입력이 100칸이면 두 칸씩 곱한 특징만 1만 칸이에요. 석 달 안에 돌려 봐야 하는데 점마다 특징을 1만 칸씩 만들어 곱하는 건 부담이었겠네요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>뱁닉은 특징끼리 곱하자고 했죠. 입력이 100칸이면 두 칸씩 곱한 특징만 5,050칸이에요. 석 달 안에 돌려 봐야 하는데 점마다 특징을 5천 칸씩 만들어 곱하는 건 부담이었겠네요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>곱한 특징을 다 만들어 내적한 값이 원래 입력으로 한 번 계산한 값과 똑같이 나오려면, 특징을 어떻게 만들어야 해요?</p></div></div>
 <h3 id="특징-셋을-셈-한-번으로-특징-무한-개를-셈-한-번으로">특징 셋을 셈 한 번으로, 특징 무한 개를 셈 한 번으로</h3>
 <p>입력 x 하나를 특징 셋 z(x) = (1, √2 x, x²)로 편다고 하자. x = 2와 y = 3이면 z(2) = (1, 2.828, 4), z(3) = (1, 4.243, 9)이고, 두 특징 벡터의 내적은 1 + 12 + 36 = 49다. 그런데 (1 + 2 × 3)² = 7² = 49로 같은 것은 우연이 아니다. (1 + xy)²을 풀면 1 + 2xy + x²y²이고, 세 항이 바로 특징 셋의 곱 1·1, √2x·√2y, x²·y²이다. 특징을 만들어 곱해 더하는 대신 원래 입력의 곱 xy 하나로 셈을 끝낸 것이다. 뱁닉이 제안한 「특징끼리의 곱」을 직접 만들면 특징 수가 거듭제곱으로 늘지만, 그 내적은 원래 입력의 내적을 제곱한 값 하나로 계산된다.</p>
@@ -789,7 +806,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>점 여섯 개를 가우시안 커널(폭 <span class="sym" style="color:#a67a63">ℓ</span> = 1)로 풀어 보자. 커널 행렬의 첫 줄은 1, 0.607, 0.236, 0.008, 0.000, 0.000이다. 첫 점(<span class="sym" style="color:#a67a63">x</span> = 0.5)은 1.5와는 꽤 닮았고(0.607) 3.6 너머와는 거의 닮지 않았다. 연립방정식을 풀면 계수는 <span class="sym" style="color:#c45a00">α</span> = (−0.778, 2.754, −1.288, 1.559, −3.113, 1.748)이고, 곡선은 여섯 점을 정확히 지난다. 점 사이 <span class="sym" style="color:#a67a63">x</span> = 2.9에서 <span class="sym" style="color:#1b9e77">f</span> = 0.251, 점이 끝난 <span class="sym" style="color:#a67a63">x</span> = 7에서 0.466이고, <span class="sym" style="color:#a67a63">x</span> = 10까지 가면 0.0001로 0에 붙는다. 봉우리가 모두 데이터 점 근처에만 서 있으니, 데이터에서 멀어지면 곡선이 0으로 내려앉는다. 거듭제곱 특징처럼 치솟지 않는다.</p>
 <figure class="fig "><img src="images/kernels/kernel_fit.png" alt="왼쪽: 점 6개를 가우시안 커널(폭 ℓ = 1)로 맞춘 곡선(초록)과 그것을 이루는 봉우리 여섯 αᵢ K(xᵢ, x)(갈색). 오른쪽: 같은 점을 거듭제곱 특징 여섯 개 (1, x, …, x⁵)로 맞춘 곡선(회색 점선)은 점 밖에서 치솟는다(s1_trick.py, figs.py)" loading="lazy"><figcaption>왼쪽: 점 6개를 가우시안 커널(폭 ℓ = 1)로 맞춘 곡선(초록)과 그것을 이루는 봉우리 여섯 αᵢ K(xᵢ, x)(갈색). 오른쪽: 같은 점을 거듭제곱 특징 여섯 개 (1, x, …, x⁵)로 맞춘 곡선(회색 점선)은 점 밖에서 치솟는다(s1_trick.py, figs.py)</figcaption></figure>
 <p>폭 <span class="sym" style="color:#a67a63">ℓ</span>은 「얼마나 떨어지면 닮지 않았다고 볼까」를 정한다. <span class="sym" style="color:#a67a63">ℓ</span> = 0.3이면 점끼리 거의 닮지 않아 커널 행렬이 단위 행렬에 가깝고, 계수가 값과 거의 같으며(<span class="sym" style="color:#c45a00">α</span>₁ = 0.595), 곡선은 점 사이에서 0으로 꺼졌다 올라온다(<span class="sym" style="color:#1b9e77">f</span>(2.9) = 0.023). <span class="sym" style="color:#a67a63">ℓ</span> = 3이면 모든 점이 서로 닮아 커널 행렬이 거의 겹친 줄들로 차고, 계수가 수천 단위로 커진다(가장 큰 것 7,899). 위젯에서 폭을 바꿔 봉우리들이 어떻게 서로 지우며 곡선을 만드는지 보자.</p>
-<figure class="widget-embed" id="widget-kernels-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">커널 함수로 점 6개 맞추기</span><a class="widget-open" href="widgets/kernels.html?v=eebf901a#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/kernels.html?w=w1&embed=1&v=eebf901a" title="커널 함수로 점 6개 맞추기" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-kernels-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">커널 함수로 점 6개 맞추기</span><a class="widget-open" href="widgets/kernels.html?v=7ad38500#w1">크게 열기</a></div><iframe data-src="widgets/kernels.html?w=w1&embed=1&v=7ad38500" title="커널 함수로 점 6개 맞추기" loading="lazy"></iframe></figure>
 <h3 id="ml에서-서포트-벡터-머신과-최소-노름-해">ML에서: 서포트 벡터 머신과 최소 노름 해</h3>
 <p>보저·가이언·뱁닉의 서포트 벡터 머신은 여백이 가장 큰 경계를 구하는 문제를 계산 과정에서 데이터 점끼리의 내적만 나오는 꼴로 바꾼 뒤, 그 내적을 커널 함수로 바꿔 끼웠다. 그래서 직선 경계를 구하는 알고리즘이 그대로 곡선 경계를 구한다. 특징을 쓴 선형 모델을 0에서 출발시켜 경사하강으로 학습해도 답이 데이터 점끼리의 내적으로만 적힌다. 계수가 늘 데이터 점들의 특징을 섞은 꼴로 남으므로, 학습이 끝난 모델은 커널 함수로 푼 연립방정식의 답과 같다.</p>
 <aside class="guide"><p class="guide-title">길잡이 · 『최적화: 경사하강에서 Muon 까지』 「최소 노름 해: 0에서 출발한 경사하강이 고르는 해」</p><p>0에서 출발한 경사하강이 왜 가장 짧은 해를 고르는지, 손글씨 숫자 6만 장에서 데이터 점끼리의 내적 행렬로 그 해를 직접 계산한 실험. <a href="https://lameproof.com/optim-book/implicit-bias.html">이어 읽기</a></p>
@@ -834,7 +851,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그런데 가우시안 커널은 특징이 무한 개라서 몇 개만 고를 수가 없잖아요. 앞에서부터 끊으면 원점에서 먼 점이 틀렸고요. 다른 방법으로 몇 개를 골라야겠어요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="signals-by-dimension-sec-signals-by-dimension-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="kernels-sec-bochner-theorem.html">보흐너 정리: 평행이동 불변 커널 함수는 주파수 분포에서 나온다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="signals-by-dimension-sec-signals-by-dimension-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="kernels-sec-bochner-theorem.html">보흐너 정리: 평행이동 불변 커널 함수는 주파수 분포에서 나온다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');
