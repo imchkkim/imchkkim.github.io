@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -660,7 +661,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="rate-distortion.html">레이트–디스토션과 정보 병목: 무엇을 버려도 되는가</a></li>
 <li><a href="rate-reduction.html">코딩 레이트와 코딩 레이트 감소: 클러스터별로 적으면 짧아진다</a></li>
 <li class="toc-part">신경망을 압축으로 읽기</li>
-<li><a href="denoising-compression.html" class="active">디노이징: 낮은 차원으로 끌어당기기</a><ul class="sidebar-toc"><li><a href="denoising-compression.html" class="current">법선 성분: 디노이저는 자료에서 벗어난 방향만 지운다</a></li><li><a href="denoising-compression-2.html">사영 행렬: 평평한 자료에서 디노이저는 주성분 분석과 만난다</a></li><li><a href="denoising-compression-3.html">고정점: 같은 디노이저를 되풀이하면 남는 것</a></li><li><a href="denoising-compression-4.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="denoising-compression.html" class="active">디노이징: 낮은 차원으로 끌어당기기</a><ul class="sidebar-toc"><li><a href="denoising-compression.html" class="current">법선 성분: 디노이저는 자료에서 벗어난 방향만 지운다</a></li><li><a href="denoising-compression-sec-projection-denoiser-pca.html">사영 행렬: 평평한 자료에서 디노이저는 주성분 분석과 만난다</a></li><li><a href="denoising-compression-sec-denoiser-fixed-points.html">고정점: 같은 디노이저를 되풀이하면 남는 것</a></li><li><a href="denoising-compression-sec-denoising-compression-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="unrolled-layers.html">언롤드 최적화: 층은 최적화의 한 스텝</a></li>
 <li><a href="memorization.html">암기와 일반화: 일반화란 무엇인가</a></li>
 <li><a href="closed-loop.html">오토인코더와 클로즈드 루프: 되살린 것을 다시 압축하기</a></li>
@@ -672,7 +673,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter chapter-paged">
 <h1>디노이징: 낮은 차원으로 끌어당기기</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-denoising-compression">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>규칙이 있는 자료는 겉보기 칸 수보다 적은 수로 적을 수 있다. 자료가 평평한 면 근처에 모여 있으면 주성분 분석이 그 면의 축을 찾아 주었고, 면 하나로 모자라면 조각마다 다른 축을 고르는 희소 코딩이 있었다. 무엇을 버려도 되는지는 레이트–디스토션과 코딩 레이트가 셈해 주었다. 그런데 이 방법들은 모두 깨끗한 자료를 앞에 두고 축이나 코드를 직접 고르는 일이었다.</p>
 <p>요즘 그림을 만드는 디퓨전 모델은 그런 축을 고르지 않고, 학습에서 하는 일도 하나뿐이다. 깨끗한 그림에 노이즈를 섞고, 노이즈 섞인 그림에서 깨끗한 그림을 맞히게 제곱 오차로 가르친다. 휴대폰 카메라의 야간 사진 노이즈 제거도 노이즈 섞인 사진에서 깨끗한 사진을 맞히도록 배운 신경망이다. 이런 디노이저(노이즈 낀 입력에서 노이즈를 걷어 낸 값을 내는 함수)는 「축」이나 「비트」라는 말을 한 번도 듣지 않는다. 그래도 압축과 관계가 있을까?</p>
 <ul>
@@ -681,12 +682,19 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>자료가 평평한 면 위에 있으면 디노이저와 주성분 분석은 어떤 관계일까?</li>
 <li>같은 디노이저를 거듭 쓰면 무엇이 남을까? 노이즈의 세기를 바꿔 가며 쓰면 어떻게 될까?</li>
 </ul>
-<h2 id="법선-성분-디노이저는-자료에서-벗어난-방향만-지운다">법선 성분: 디노이저는 자료에서 벗어난 방향만 지운다</h2>
+<h2 id="sec-normal-component-removal">법선 성분: 디노이저는 자료에서 벗어난 방향만 지운다<span id="법선-성분-디노이저는-자료에서-벗어난-방향만-지운다" class="anchor-alias"></span></h2>
 <p>어두운 곳에서 찍은 휴대폰 사진은 화소 수백만 개가 저마다 조금씩 틀린 밝기를 받아서 자글자글하다. 카메라 앱의 노이즈 제거는 그 사진 한 장만 받을 뿐, 어느 화소에 얼마의 노이즈가 섞였는지 적힌 쪽지는 없다. 노이즈는 모든 화소에 고르게 섞였는데, 디노이저는 그 가운데 무엇을 알아보고 지울 수 있을까? 노이즈가 섞인 방향 가운데 지울 수 있는 방향과 지울 수 없는 방향이 따로 있을까?</p>
-<h3 id="역사-오토인코더가-배운-화살표">역사: 오토인코더가 배운 화살표</h3>
+<h3 id="hist-autoencoder-score-arrows" class="history" data-people="alain-guillaume bengio-yoshua">역사: 오토인코더가 배운 화살표<span id="역사-오토인코더가-배운-화살표" class="anchor-alias"></span></h3>
 <p>노이즈 섞인 입력을 깨끗하게 되살리도록 신경망을 가르치는 방법은 2008년 빈센트(Pascal Vincent)·라로셸(Hugo Larochelle)·벤지오(Yoshua Bengio)·만자골(Pierre-Antoine Manzagol)의 디노이징 오토인코더로 널리 퍼졌다. 그 이야기는 디퓨전 책에 있으므로 여기서는 그 뒤의 물음 하나만 꺼내는데, 되살리기를 잘 배운 오토인코더는 자료에 대해 무엇을 알게 된 것일까?</p>
 <p>몬트리올 대학의 알랭(Guillaume Alain)과 벤지오는 「규제한 오토인코더는 자료를 낸 분포에서 무엇을 배우는가(What Regularized Auto-Encoders Learn from the Data-Generating Distribution)」라는 논문을 2012년에 원고로 공개했다. 이 논문은 2014년 『Journal of Machine Learning Research』에 실렸다. 그때까지는 되살리기 오차를 「이 입력이 얼마나 자료답지 않은가」를 재는 에너지처럼 읽는 해석이 있었다. 두 사람은 이 해석이 맞지 않는다고 보고, 되살린 값에서 입력을 뺀 화살표 r(x) − x 에 눈을 돌렸다. 노이즈가 작은 디노이징 오토인코더와 가까운 학습 기준에서, 이 화살표는 자료 밀도의 로그를 미분한 방향(스코어)을 가리킨다는 것이 그들의 결과다. 논문의 그림 5는 나선 위에 놓인 2차원 자료에서 배운 화살표를 그렸다. 화살표는 나선 밖에서는 가장 가까운 나선 쪽을 가리키고, 나선 위에서는 거의 0이다.</p>
 <figure class="fig "><img src="images/denoising-compression/spiral_arrows.png" alt="나선 위의 자료(초록)에 크기 σ = 0.15 의 노이즈를 섞은 점(회색)에서, 가장 좋은 디노이저가 내놓는 값까지 그은 화살표(진홍). 나선 위 점 20,000개로 표본 평균을 내 디노이저를 계산했다. 알랭·벤지오(2014) 그림 5의 생각을 이 책에서 다시 그린 것이다" loading="lazy"><figcaption>나선 위의 자료(초록)에 크기 σ = 0.15 의 노이즈를 섞은 점(회색)에서, 가장 좋은 디노이저가 내놓는 값까지 그은 화살표(진홍). 나선 위 점 20,000개로 표본 평균을 내 디노이저를 계산했다. 알랭·벤지오(2014) 그림 5의 생각을 이 책에서 다시 그린 것이다</figcaption></figure>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>되살린 값에서 입력을 빼서 화살표로 본다는 건 뺄셈 한 번이잖아요. 그게 2012년에야 나온 게 좀 신기해요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>손글씨 숫자 그림으로 오토인코더를 배웠다면, 그 화살표는 몇 칸짜리일까요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>28 × 28 이니까 784칸이요. 아, 784칸짜리 화살표는 그려 볼 수가 없네요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그려 본다 해도 맞는지 견줄 기준이 있어야 해요. 화살표가 스코어를 가리키는지 확인하려면 무엇을 알아야 하죠?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>스코어는 자료 밀도의 로그를 미분한 거니까… 밀도를 알아야 하는데요. 손글씨 그림의 밀도는 아무도 모르잖아요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래서 밀도를 손에 쥔 2차원 장난감이 쓸모가 있어요. 논문의 그림 5도 나선이었죠. 이 화살표를 받아 그림을 만들어 내는 디퓨전 모델은 그로부터 몇 해 뒤에야 나왔고요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>나선 위에서는 화살표가 거의 0이었다고 했죠. 그럼 노이즈 낀 점이 나선을 따라 밀린 만큼은, 화살표가 되돌려 주지 못하는 건가요?</p></div></div>
 <h3 id="원-위의-점에-노이즈를-섞으면">원 위의 점에 노이즈를 섞으면</h3>
 <p>나선은 모양이 복잡해 화살표의 크기를 셈하기 어렵다. 계산이 끝까지 되는 가장 간단한 굽은 자료로 바꾸자. 반지름 1인 원 위에 고르게 놓인 점이다. 점 하나는 칸 두 개(가로, 세로)로 적히지만, 원 위에서 움직일 수 있는 방향은 원을 따라 도는 한 방향뿐이다. 겉보기 차원 2, 내재 차원 1이다. 곧은 선 위의 자료는 아래에서 따로 보겠지만, 원은 굽어 있어서 「직선 하나에 사영하면 끝」으로는 풀리지 않는다.</p>
 <p>원 위의 점 <span class="sym" style="color:#1b9e77">x₀</span> 에 세기 <span class="sym" style="color:#1f6066">σ</span> 의 가우스 노이즈를 섞어 <span class="sym" style="color:#1b9e77">x</span> = <span class="sym" style="color:#1b9e77">x₀</span> + <span class="sym" style="color:#1f6066">σ</span><span class="sym" style="color:#1f6066">ε</span> 를 만드는데, 노이즈 <span class="sym" style="color:#1f6066">ε</span> 는 가로와 세로에 똑같은 크기로 서로 상관없이 섞인다. 노이즈 낀 점 <span class="sym" style="color:#1b9e77">x</span> 만 받아 원래 점 <span class="sym" style="color:#1b9e77">x₀</span> 를 짐작할 때, 제곱 오차의 평균이 가장 작은 답은 「<span class="sym" style="color:#1b9e77">x</span> 를 낳았을 법한 원래 점들의 평균」, 곧 조건부 평균 E[<span class="sym" style="color:#1b9e77">x₀</span> ∣ <span class="sym" style="color:#1b9e77">x</span>]다. 이 조건부 평균을 가장 좋은 디노이저 <span class="sym" style="color:#a5003c">f</span>(<span class="sym" style="color:#1b9e77">x</span>) 라 부르자. 이 평균이 스코어와 한 줄로 이어진다는 것(트위디 공식)은 디퓨전 책의 집이다.</p>
@@ -764,19 +772,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </aside>
 <aside class="guide"><p class="guide-title">길잡이 · 『MLP에서 디퓨전 트랜스포머까지』 「디노이징 오토인코더: 일부러 망가뜨린 그림을 되살리기」</p><p>빈센트 외(2008)의 디노이징 오토인코더와, 망가뜨린 그림을 되살리며 배우는 신경망의 실제 학습. <a href="https://lameproof.com/diffusion-book/denoising.html">이어 읽기</a></p>
 </aside>
-<div class="dialogue"><h3 id="문제-1-곧은-도로-위-자동차의-gps">문제 1. 곧은 도로 위 자동차의 GPS</h3>
+<div class="dialogue"><h3 id="prob-denoising-gps-straight-road">문제 1. 곧은 도로 위 자동차의 GPS<span id="문제-1-곧은-도로-위-자동차의-gps" class="anchor-alias"></span></h3>
 <blockquote>
 <p>동서로 곧게 뻗은 도로 위를 자동차가 달린다. 휴대폰 GPS 는 동서와 남북으로 각각 표준편차 10 m 의 오차를 서로 상관없이 낸다. 지도 앱은 자동차가 도로 위에 있다는 것을 안다. (가) 앱이 GPS 가 찍은 점을 고친다면 어떻게 고치는 것이 좋은가? (나) 고치기 전과 뒤에, 찍힌 점과 실제 자리 사이 거리의 제곱 평균은 각각 몇 m² 인가?</p>
 </blockquote>
+<figure class="fig "><img src="images/denoising-compression/p01_gps_road.png" alt="동서로 곧은 도로(회색 띠), 자동차의 실제 자리(초록), GPS 가 찍은 점 200개(회색). GPS 오차는 동서·남북으로 각각 표준편차 10 m" loading="lazy"><figcaption>동서로 곧은 도로(회색 띠), 자동차의 실제 자리(초록), GPS 가 찍은 점 200개(회색). GPS 오차는 동서·남북으로 각각 표준편차 10 m</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>도로 위에 있다는 걸 아니까, 찍힌 점에서 가장 가까운 도로 위 점으로 옮기면 되겠네요. 그럼 오차가 거의 없어지지 않아요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>동쪽으로 8 m 밀려 찍힌 점이 있어요. 도로 위로 옮기면 그 8 m 는 어떻게 되죠?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 도로가 동서로 뻗어 있으니까 동쪽으로 밀린 8 m 는 도로 위로 옮겨도 8 m 그대로 남아요. 남북으로 벗어난 것만 없어지네요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그러면 (나)는 칸마다 분산이 100 m² 씩이니까 고치기 전에는 200 m², 고친 뒤에는 동서 100 m² 만 남아. 거리로 치면 14.1 m 가 10.0 m 가 되는 거고. 모의로 20만 번 뽑아도 199.5 와 100.0 이 나와.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>교수님이 과제 채점하실 때 서식 틀린 건 다 잡아내시는데, 내용이 그럴듯하게 틀린 건 못 잡으시잖아요. 서식 오류가 남북 오차, 내용 오류가 동서 오차예요. 형식에서 벗어난 건 티가 나는데, 형식 안에서 틀린 건 티가 안 나요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-노이즈가-크면-접선-성분도-줄어든다">문제 2. 노이즈가 크면 접선 성분도 줄어든다</h3>
+</div><div class="dialogue"><h3 id="prob-denoising-tangent-shrinkage">문제 2. 노이즈가 크면 접선 성분도 줄어든다<span id="문제-2-노이즈가-크면-접선-성분도-줄어든다" class="anchor-alias"></span></h3>
 <blockquote>
 <p>원 위의 자료에 노이즈 세기 <span class="sym" style="color:#1f6066">σ</span> = 0.8 을 섞고 가장 좋은 디노이저로 고쳤다. 오차를 <span class="sym" style="color:#1f6066">σ</span>² 으로 나눈 값은 디노이저 전에 법선 0.998, 접선 1.000 이었고, 뒤에는 법선 0.615, 접선 0.225 였다. 한 번 고친 점들의 반지름은 평균 0.656 이었다. (가) 작은 <span class="sym" style="color:#1f6066">σ</span> 에서는 접선 성분이 그대로 남았는데, 여기서는 0.225로 줄었다. 디노이저가 원을 따라 밀린 노이즈까지 알아보게 된 것인가? (나) 법선 성분은 왜 0.615 나 남았는가?</p>
 </blockquote>
+<figure class="fig "><img src="images/denoising-compression/p02_large_noise.png" alt="왼쪽: 원 위 자료에 σ = 0.8 의 노이즈를 섞은 점. 오른쪽: 문제에 주어진 법선·접선 방향의 제곱 오차 ÷ σ²(디노이저 전 회색, 뒤 진홍)" loading="lazy"><figcaption>왼쪽: 원 위 자료에 σ = 0.8 의 노이즈를 섞은 점. 오른쪽: 문제에 주어진 법선·접선 방향의 제곱 오차 ÷ σ²(디노이저 전 회색, 뒤 진홍)</figcaption></figure>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>노이즈가 크면 원 둘레의 아무 데서나 왔을 수 있으니까 접선 성분은 더 못 지워야 하는데, 줄었어. 이상해.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>디노이저가 더 똑똑해진 거 아니야? 노이즈가 크면 학습할 게 많아서.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>이 디노이저는 학습한 게 아니라 식으로 계산한 가장 좋은 디노이저예요. 고친 점은 어디에 있었죠?</p></div></div>
@@ -790,10 +800,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(나)도 그거구나. 출력이 원 안쪽에 있으니까 원래 점과 지름 방향으로 떨어지게 돼요. 법선 오차가 남은 건 못 지워서가 아니라, 일부러 안쪽으로 들어가서 생긴 거네요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 노이즈가 작을 때 디노이저는 원 위로 올려놓는 일만 했어요. 노이즈가 크면 후보들 사이에서 몸을 사리는 일, 그러니까 평균 쪽으로 움츠러드는 일이 더 커져요. 법선을 지우고 접선을 남긴다는 말은 노이즈가 작을 때의 이야기예요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S11"><img src="images/cast/S11.webp" alt="이서연 S11" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>해석학에서 근삿값을 쓸 때 「충분히 작은 h 에 대해」를 빼먹으면 틀렸어요. 디노이저가 사영처럼 움직인다는 말에도 「충분히 작은 <span class="sym" style="color:#1f6066">σ</span>」라는 조건이 붙어 있었고요. 여기서는 노이즈 세기 <span class="sym" style="color:#1f6066">σ</span> 가 h 노릇을 해요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-3-디노이저의-오차로-내재-차원-재기">문제 3. 디노이저의 오차로 내재 차원 재기</h3>
+</div><div class="dialogue"><h3 id="prob-denoising-intrinsic-dimension">문제 3. 디노이저의 오차로 내재 차원 재기<span id="문제-3-디노이저의-오차로-내재-차원-재기" class="anchor-alias"></span></h3>
 <blockquote>
 <p>모양을 모르는 자료가 50칸 공간에 있다. 가장 좋은 디노이저의 오차 합을 <span class="sym" style="color:#1f6066">σ</span>² 으로 나눈 값이 <span class="sym" style="color:#1f6066">σ</span> = 0.02, 0.05, 0.1, 0.2 에서 1.988, 2.000, 1.994, 1.957 이었다. (가) 이 자료의 내재 차원은 얼마로 보이는가? (나) 원 위 자료(2칸)에서 같은 값은 <span class="sym" style="color:#1f6066">σ</span> = 1.0 일 때 0.655 였다. 원에서 잰 0.655 를 그대로 내재 차원으로 읽으면 무엇이 틀리는가? (다) 학습한 그림 디노이저에 이 방법을 쓸 때 조심할 점은 무엇인가?</p>
 </blockquote>
+<figure class="fig "><img src="images/denoising-compression/p03_error_ratio.png" alt="문제에 주어진 값. 모양을 모르는 50칸 자료에서 σ 넷의 디노이저 뒤 오차 합 ÷ σ²(진홍)과, 원 위 자료에서 σ = 1.0 일 때의 값(초록)" loading="lazy"><figcaption>문제에 주어진 값. 모양을 모르는 50칸 자료에서 σ 넷의 디노이저 뒤 오차 합 ÷ σ²(진홍)과, 원 위 자료에서 σ = 1.0 일 때의 값(초록)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 50칸이니까 50 아니에요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>디노이저를 거치기 전, 노이즈 낀 점 그대로의 오차 합을 <span class="sym" style="color:#1f6066">σ</span>² 으로 나누면 얼마가 나올까요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>노이즈가 칸마다 <span class="sym" style="color:#1f6066">σ</span>² 씩 섞이니까… 50이요. 아, 50은 디노이저 전 값이네요. 디노이저 뒤에는 2쯤만 남았으니까, 자료가 움직일 수 있는 방향이 둘이라는 거예요.</p></div></div>
@@ -808,7 +819,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조별 과제 기여도를 「빼면 결과물이 얼마나 나빠지나」로 재는 거랑 비슷하네요. 잘 빼는 법을 모르는 사람이 재면 다들 기여도가 커 보여요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="rate-reduction-5.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="denoising-compression-2.html">사영 행렬: 평평한 자료에서 디노이저는 주성분 분석과 만난다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="rate-reduction-sec-rate-reduction-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="denoising-compression-sec-projection-denoiser-pca.html">사영 행렬: 평평한 자료에서 디노이저는 주성분 분석과 만난다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

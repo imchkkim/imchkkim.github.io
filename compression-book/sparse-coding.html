@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -655,7 +656,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="mdl.html">최소 기술 길이와 오컴: 모델까지 적어야 공평하다</a></li>
 <li class="toc-part">자료가 고르는 축</li>
 <li><a href="pca.html">주성분 분석과 저랭크 근사</a></li>
-<li><a href="sparse-coding.html" class="active">희소 코딩: 축은 많이, 쓰는 축은 몇 개만</a><ul class="sidebar-toc"><li><a href="sparse-coding.html" class="current">희소 코드: 축은 넘치게, 쓰는 축은 몇 개만</a></li><li><a href="sparse-coding-2.html">L1 페널티: 모서리가 0을 만든다</a></li><li><a href="sparse-coding-3.html">ISTA: 경사 한 스텝, 소프트 스레숄딩 한 번</a></li><li><a href="sparse-coding-4.html">딕셔너리 러닝: 코드와 축을 번갈아 고치기</a></li><li><a href="sparse-coding-5.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="sparse-coding.html" class="active">희소 코딩: 축은 많이, 쓰는 축은 몇 개만</a><ul class="sidebar-toc"><li><a href="sparse-coding.html" class="current">희소 코드: 축은 넘치게, 쓰는 축은 몇 개만</a></li><li><a href="sparse-coding-sec-l1-penalty-corners.html">L1 페널티: 모서리가 0을 만든다</a></li><li><a href="sparse-coding-sec-ista-soft-thresholding.html">ISTA: 경사 한 스텝, 소프트 스레숄딩 한 번</a></li><li><a href="sparse-coding-sec-dictionary-learning.html">딕셔너리 러닝: 코드와 축을 번갈아 고치기</a></li><li><a href="sparse-coding-sec-sparse-coding-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li class="toc-part">버려도 되는 것</li>
 <li><a href="rate-distortion.html">레이트–디스토션과 정보 병목: 무엇을 버려도 되는가</a></li>
 <li><a href="rate-reduction.html">코딩 레이트와 코딩 레이트 감소: 클러스터별로 적으면 짧아진다</a></li>
@@ -672,7 +673,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter chapter-paged">
 <h1>희소 코딩: 축은 많이, 쓰는 축은 몇 개만</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-sparse-coding">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>자료에 규칙이 있으면 짧게 적을 수 있는데, 가장 단순한 규칙은 자료가 평평한 면 하나 근처에 모여 있는 것이다. 그러면 분산이 큰 방향 몇 개(주성분 축)를 골라 점마다 그 축의 좌표만 적으면 된다. 그런데 자료가 면 하나에 모여 있지 않고, 서로 다른 방향의 직선 여러 개에 나뉘어 놓여 있다면 어떨까? 직선 하나하나는 1차원인데, 그 직선들을 다 품는 평평한 면은 훨씬 넓어야 한다.</p>
 <p>언어 모델의 속을 들여다본 연구자들도 비슷한 일을 겪었다. 뉴런 하나의 값이 언제 커지는지 모아 보면, 서로 관계없어 보이는 여러 문맥에서 함께 커지는 일이 흔하다. 2023년의 한 연구가 들여다본 작은 언어 모델에서는 뉴런 하나가 학술 인용, 영어 대화, HTTP 요청, 한국어 글에 함께 반응했다. 뉴런 하나가 뜻 하나를 맡는다면 이런 일이 없어야 한다. 모델이 뉴런 수보다 많은 「뜻」을 담고 있고, 뜻마다 뉴런들을 섞은 방향 하나를 쓰고 있는 것일까? 그렇다면 그 방향들은 어떻게 찾아낼까?</p>
 <ul>
@@ -681,11 +682,18 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>「0이 아닌 계수가 가장 적은 답」을 찾는 일은 계산이 감당될까? 감당되지 않는다면 무엇으로 대신할까?</li>
 <li>축 자체를 자료에서 배울 수 있을까? 그 일이 언어 모델 속의 「뜻의 방향」을 찾는 일과 어떻게 이어질까?</li>
 </ul>
-<h2 id="희소-코드-축은-넘치게-쓰는-축은-몇-개만">희소 코드: 축은 넘치게, 쓰는 축은 몇 개만</h2>
+<h2 id="sec-sparse-code-overcomplete-axes">희소 코드: 축은 넘치게, 쓰는 축은 몇 개만<span id="희소-코드-축은-넘치게-쓰는-축은-몇-개만" class="anchor-alias"></span></h2>
 <p>평면 위의 점 300개가 원점을 지나는 세 직선 위에 놓여 있다고 하자. 직선은 0°, 60°, 120° 방향이고, 직선마다 점이 100개씩 −1에서 1 사이에 고르게 흩어져 있다(씨앗 0, 계산은 <code>sources/sparse-coding/s1_star.py</code>). 그림으로 그리면 꼭짓점이 여섯인 별 모양인 이 점들을 짧게 적고 싶다. 자료가 고르는 가장 좋은 평평한 면을 찾는 주성분 분석에 맡기면, 공분산의 두 고윳값이 0.184와 0.174로 거의 같게 나온다. 주성분 분석의 눈에는 이 별이 둥근 구름과 다르지 않다는 뜻이다. 첫 주성분 축 하나로 적으면 상대 제곱 오차가 0.487이라 거의 절반을 잃고, 축 둘을 다 쓰면 오차는 0이지만 점마다 좌표 둘을 적어야 한다. 그런데 눈으로 보면 어느 점이든 세 직선 가운데 하나 위에 있다는 분명한 규칙이 이 자료에 있다. 이 규칙을 적는 데 쓰려면 축을 어떻게 골라야 할까?</p>
-<h3 id="역사-축이-너무-많을-때-어느-것을-고르나">역사: 축이 너무 많을 때 어느 것을 고르나</h3>
+<h3 id="hist-matching-pursuit-dictionaries" class="history" data-people="mallat-stephane zhang-zhifeng">역사: 축이 너무 많을 때 어느 것을 고르나<span id="역사-축이-너무-많을-때-어느-것을-고르나" class="anchor-alias"></span></h3>
 <p>신호처리에서는 오래전부터 신호를 정해진 축(푸리에 축, 웨이블릿 축)의 합으로 적어 왔다. 축 한 벌이 모든 신호에 잘 맞지는 않는다. 그래서 1990년대 초, 여러 벌의 축을 한데 모아 놓고 신호마다 잘 맞는 몇 개만 골라 쓰자는 생각이 나왔다. 말라(Stéphane Mallat)와 장(Zhifeng Zhang)은 1993년 「시간–주파수 딕셔너리로 하는 정합 추구(Matching Pursuits with Time-Frequency Dictionaries)」를 냈다. 이 논문은 자리와 길이와 진동수가 다른 짧은 물결 조각을 신호의 칸 수보다 훨씬 많이 모아 둔 딕셔너리(축을 모은 것, dictionary)를 썼다.</p>
 <p>축이 칸 수보다 많으면 같은 신호를 적는 방법이 하나로 정해지지 않는다. 가장 적은 축을 쓰는 표현을 찾으려면 축의 묶음을 모두 견주어야 하는데, 축이 많으면 그 계산은 감당할 수 없다. 말라와 장은 그 대신 욕심껏 고르는 방법을 택했다. 지금 남은 신호와 가장 닮은 축 하나를 골라 그만큼 빼고, 남은 것과 가장 닮은 축을 다시 고르기를 되풀이한다. 몇 해 뒤 첸(Scott Shaobing Chen)·도노호(David Donoho)·손더스(Michael Saunders)는 이런 넘치는 딕셔너리로 신호를 쪼개는 방법들을 견주었다. 그들은 계수의 제곱합이 가장 작은 표현을 고르는 방법(틀의 방법), 욕심껏 하나씩 고르는 방법(정합 추구), 특별한 딕셔너리에서 가장 좋은 직교 축 한 벌을 고르는 방법을 나란히 놓았다. 표현이 하나로 정해지지 않는다는 것, 그래서 「어느 표현을 고를지」가 따로 정해야 할 물음이라는 것이 이 줄기의 출발점이다.</p>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>축이 칸 수보다 많으면 축 묶음을 다 해 보면 되잖아요. 지금 GPU면 금방일 것 같은데요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>묶음이 몇 가지인지부터 세어 볼까요? 축 하나하나를 쓰거나 안 쓰거나예요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>음, 축마다 두 가지니까 2를 축 수만큼 곱해요. 축이 1,000개면 2¹⁰⁰⁰… 이건 지금 GPU로도 안 되네요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 욕심껏 하나씩 고른 답이 가장 적은 축을 쓴 답이라는 건 어떻게 알았어요?</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>1993년에는 그걸 확인할 길이 없었어요. 묶음을 다 볼 수도 없었고, 욕심껏 고른 답이 가장 적은 축의 답과 같아지는 조건도 그때는 알려져 있지 않았어요. 말라와 장은 보장 없이 욕심껏 고르기를 택한 거예요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>축이 칸 수보다 많지 않고 서로 독립이면 표현이 하나로 정해지니까 고를 일도 없었겠네요. 축을 넘치게 둔 순간 고민이 생긴 거고요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>별 모양으로 치면 평면에 축 셋을 둔 거네요. 그럼 점 하나를 적을 때 셋 가운데 몇 개를 써야 짧아지는 거예요?</p></div></div>
 <h3 id="별-모양을-축-셋으로-적기">별 모양을 축 셋으로 적기</h3>
 <p>별 모양 자료로 돌아가자. 주성분 축 둘 대신 세 직선의 방향을 따라 놓인 길이 1인 벡터 a1, a2, a3(0°, 60°, 120° 방향)을 축으로 삼는다. 평면에 축이 셋이니 축이 차원보다 많지만, 그 대신 점 하나를 적을 때 세 축 가운데 그 점이 놓인 직선의 축 하나만 쓰면 된다. 예를 들어 (0.826, 0)은 0.826·a1이고, 300점 모두 이렇게 계수 하나로 오차 없이 적힌다.</p>
 <figure class="fig "><img src="images/sparse-coding/star_axes.png" alt="별 모양 점 300개. 왼쪽: 주성분 축 둘. 분산이 0.184와 0.174로 거의 같아 어느 방향도 특별하지 않다고 본다. 점마다 좌표 둘이 0이 아니다. 오른쪽: 세 직선 방향의 축 a1, a2, a3. 점마다 셋 가운데 하나만 쓰면 되므로 계수 하나로 적힌다(sources/sparse-coding/s1_star.py, figs.py)" loading="lazy"><figcaption>별 모양 점 300개. 왼쪽: 주성분 축 둘. 분산이 0.184와 0.174로 거의 같아 어느 방향도 특별하지 않다고 본다. 점마다 좌표 둘이 0이 아니다. 오른쪽: 세 직선 방향의 축 a1, a2, a3. 점마다 셋 가운데 하나만 쓰면 되므로 계수 하나로 적힌다(sources/sparse-coding/s1_star.py, figs.py)</figcaption></figure>
@@ -706,20 +714,22 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </aside>
 <h3 id="ml에서-차원보다-많은-특징을-담는-중첩">ML에서: 차원보다 많은 특징을 담는 중첩</h3>
 <p>엘해이지(Nelson Elhage) 외의 「중첩의 장난감 모델(Toy Models of Superposition)」(2022)은 별 모양 자료와 같은 그림을 신경망 안에서 찾았다. 특징 다섯 개를 숨은 칸 두 개에 넣었다가 ReLU(음수를 0으로 바꾸는 함수)를 거쳐 다시 꺼내도록 작은 신경망을 학습시켰더니, 특징마다 켜질 확률이 5%로 드물 때 다섯 특징의 방향이 평면 위에 정오각형으로 놓였다. 차원보다 많은 특징을 서로 다른 방향에 겹쳐 담는 이 일을 그들은 중첩(superposition)이라 불렀고, 특징이 드물게 켜질수록 중첩이 일어난다고 보고했다. 큰 언어 모델에서 뉴런 하나가 왜 여러 뜻에 반응하는지를 중첩으로 설명하자는 생각이 중첩 가설이다. 별 모양으로 말하면 평면(뉴런 둘)에 직선 셋(특징 셋)을 담은 것인데, 드물게 켜진다는 조건이 왜 중요한지는 아래 문제 3에서 계산해 본다.</p>
-<div class="dialogue"><h3 id="문제-1-방사형-도로-도시의-주소">문제 1. 방사형 도로 도시의 주소</h3>
+<div class="dialogue"><h3 id="prob-sparse-radial-city-address">문제 1. 방사형 도로 도시의 주소<span id="문제-1-방사형-도로-도시의-주소" class="anchor-alias"></span></h3>
 <blockquote>
 <p>도심을 지나는 큰길 세 개만 있는 도시에서, 큰길 하나는 동서로 나 있고 나머지 둘은 그 길과 60°, 120°를 이룬다. 큰길 위의 가게 위치를 친구에게 알리려 한다. (가) 「동쪽으로 몇 km, 북쪽으로 몇 km」로 알리면 숫자가 몇 개 필요한가? 「몇 번 큰길, 도심에서 몇 km」로 알리면? (나) 큰길 번호를 비트로 적으면 몇 비트인가? (다) 큰길에서 벗어난 골목 안의 카페(동쪽 1 km, 북쪽 1 km)는 어떻게 알려야 하는가?</p>
 </blockquote>
+<figure class="fig "><img src="images/sparse-coding/p01_radial_city.png" alt="도심에서 만나는 큰길 셋(동서, 60°, 120°)과 2번 큰길 위의 가게, 큰길에서 벗어난 카페(동 1 km, 북 1 km)(sources/sparse-coding/problems_figs.py)" loading="lazy"><figcaption>도심에서 만나는 큰길 셋(동서, 60°, 120°)과 2번 큰길 위의 가게, 큰길에서 벗어난 카페(동 1 km, 북 1 km)(sources/sparse-coding/problems_figs.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 동쪽, 북쪽 두 숫자요. 큰길로 말하면 번호랑 거리니까… 이것도 두 개 아니에요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>두 숫자가 같은 종류인가요? 동쪽 몇 km와 북쪽 몇 km는 어떤 값이든 될 수 있죠. 큰길 번호는요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 번호는 셋 중 하나밖에 안 돼요. log₂ 3 = 1.585비트면 되니까, 실수 하나에 1.6비트쯤 붙은 거네요. 동쪽·북쪽은 실수가 둘이고요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(다)의 카페는 어느 큰길 위에도 없어. 동서 큰길과 60° 큰길 두 방향을 섞어야 해. 계산하면 동서로 0.423 km 가고 60° 큰길 방향으로 1.155 km 가는 거야. 숫자 둘이 다 필요해.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 큰길 위라는 규칙이 있을 때만 「번호 + 거리」가 짧아요. 규칙을 벗어난 점은 축 둘을 써야 하고요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조별 과제 자료를 공유할 때 「3번 폴더 두 번째 파일」이라고 하면 짧은데, 아무 폴더에도 안 넣은 파일은 경로를 다 불러 줘야 하잖아요. 폴더가 큰길이네요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-축이-셋인-평면에서-한-점을-적는-방법">문제 2. 축이 셋인 평면에서 한 점을 적는 방법</h3>
+</div><div class="dialogue"><h3 id="prob-sparse-three-axis-plane">문제 2. 축이 셋인 평면에서 한 점을 적는 방법<span id="문제-2-축이-셋인-평면에서-한-점을-적는-방법" class="anchor-alias"></span></h3>
 <blockquote>
 <p>평면의 세 축 <span class="sym" style="color:#9467bd">a</span>1 = (1, 0), <span class="sym" style="color:#9467bd">a</span>2 = (1/2, √3/2), <span class="sym" style="color:#9467bd">a</span>3 = (−1/2, √3/2)로 점 <span class="sym" style="color:#1b9e77">x</span> = (1, 0)을 <span class="sym" style="color:#ff5a78">z</span>₁<span class="sym" style="color:#9467bd">a</span>1 + <span class="sym" style="color:#ff5a78">z</span>₂<span class="sym" style="color:#9467bd">a</span>2 + <span class="sym" style="color:#ff5a78">z</span>₃<span class="sym" style="color:#9467bd">a</span>3으로 적는다. (가) 가능한 (<span class="sym" style="color:#ff5a78">z</span>₁, <span class="sym" style="color:#ff5a78">z</span>₂, <span class="sym" style="color:#ff5a78">z</span>₃)를 모두 적어라. (나) 그 가운데 계수의 제곱합이 가장 작은 것은? (다) 0이 아닌 계수가 가장 적은 것은? 두 답이 같은가?</p>
 </blockquote>
+<figure class="fig "><img src="images/sparse-coding/p02_three_axes.png" alt="평면의 세 축 a1, a2, a3과 적으려는 점 x = (1, 0)(sources/sparse-coding/problems_figs.py)" loading="lazy"><figcaption>평면의 세 축 a1, a2, a3과 적으려는 점 x = (1, 0)(sources/sparse-coding/problems_figs.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>이건 바로 (1, 0, 0)이죠. <span class="sym" style="color:#9467bd">a</span>1이 (1, 0)이니까요. 끝 아니에요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그건 하나의 답이에요. 축이 셋이고 식은 둘(가로, 세로)인데, 답이 하나뿐일까요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>식을 세우면 가로는 <span class="sym" style="color:#ff5a78">z</span>₁ + <span class="sym" style="color:#ff5a78">z</span>₂/2 − <span class="sym" style="color:#ff5a78">z</span>₃/2 = 1, 세로는 (√3/2)(<span class="sym" style="color:#ff5a78">z</span>₂ + <span class="sym" style="color:#ff5a78">z</span>₃) = 0이에요.</p></div></div>
@@ -731,10 +741,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>제곱은 큰 값을 크게 벌주니까, 계수 1을 한 축에 다 주는 것보다 셋에 나눠 주는 걸 좋아하네요. (다)의 답은 (1, 0, 0)이고, 두 기준이 서로 다른 답을 골라요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래서 「0이 아닌 계수가 적은 답」을 고르려면 제곱합이 아닌 다른 기준이 필요해요. 그 기준이 무엇일지는 열어 둡시다.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S11"><img src="images/cast/S11.webp" alt="이서연 S11" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>선형대수 시간에 과소결정 연립방정식을 풀면 유사역행렬로 최소 노름 해를 구했어요. 그게 늘 정답인 줄 알았는데, 그 해도 여러 해 가운데 「제곱합」이라는 기준으로 하나를 고른 거였네요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-3-숨은-칸-둘에-특징-셋">문제 3. 숨은 칸 둘에 특징 셋</h3>
+</div><div class="dialogue"><h3 id="prob-sparse-superposition-hidden-units">문제 3. 숨은 칸 둘에 특징 셋<span id="문제-3-숨은-칸-둘에-특징-셋" class="anchor-alias"></span></h3>
 <blockquote>
 <p>특징 셋을 숨은 칸 둘로 줄였다 되살리는 장난감 모델이 있다. 특징 i의 값 fᵢ를 120° 간격의 방향 wᵢ에 실어 숨은 칸 h = Σ fᵢwᵢ를 만들고, 꺼낼 때는 특징마다 wᵢ·h를 계산한 뒤 ReLU(음수는 0)를 씌운다. w1 = (0, 1), w2, w3은 w1을 120°, 240° 돌린 방향이다. (가) 특징 1만 1로 켜지면 꺼낸 값은? (나) 특징 1과 2가 함께 1로 켜지면? (다) 특징마다 따로 확률 0.05로 켜진다면, 켜진 경우 가운데 둘 이상 함께 켜지는 경우는 얼마인가?</p>
 </blockquote>
+<figure class="fig "><img src="images/sparse-coding/p03_superposition.png" alt="왼쪽: 120° 간격으로 놓은 방향 w1, w2, w3. 오른쪽: 특징 셋을 숨은 칸 h(2칸)에 실었다가 특징마다 ReLU(wᵢ·h)로 꺼내는 흐름(sources/sparse-coding/problems_figs.py)" loading="lazy"><figcaption>왼쪽: 120° 간격으로 놓은 방향 w1, w2, w3. 오른쪽: 특징 셋을 숨은 칸 h(2칸)에 실었다가 특징마다 ReLU(wᵢ·h)로 꺼내는 흐름(sources/sparse-coding/problems_figs.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 h = w1이고 내적이 1, −0.5, −0.5예요. ReLU를 씌우면 (1, 0, 0). 완벽하게 되살렸어요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>숨은 칸이 둘인데 특징 셋을 되살렸네요. 어떻게 가능했죠?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>다른 특징 방향과의 내적이 −0.5로 늘 음수라서 ReLU가 지워 줬어요. 120°로 벌려 놓았으니 서로 끼어드는 값이 음수 쪽으로만 나오는 거고요.</p></div></div>
@@ -749,7 +760,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>강의실 하나를 세 동아리가 요일을 나눠 쓰는 거랑 비슷해요. 모임이 드물면 겹칠 일이 거의 없는데, 셋 다 매일 모이면 못 쓰죠.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="pca-5.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="sparse-coding-2.html">L1 페널티: 모서리가 0을 만든다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="pca-sec-pca-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="sparse-coding-sec-l1-penalty-corners.html">L1 페널티: 모서리가 0을 만든다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');
