@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 압축은 이해인가</a></li>
 <li class="toc-part">짧게 적는다는 것</li>
 <li><a href="low-dimension.html">예측할 수 있으면 낮은 차원</a></li>
@@ -664,7 +680,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="denoising-compression.html">디노이징: 낮은 차원으로 끌어당기기</a></li>
 <li><a href="unrolled-layers.html">언롤드 최적화: 층은 최적화의 한 스텝</a></li>
 <li><a href="memorization.html">암기와 일반화: 일반화란 무엇인가</a></li>
-<li><a href="closed-loop.html" class="active">오토인코더와 클로즈드 루프: 되살린 것을 다시 압축하기</a><ul class="sidebar-toc"><li><a href="closed-loop.html">재구성 오차: 되살린 것을 원래 자료와만 비교하면</a></li><li><a href="closed-loop-sec-self-consistency.html">자기 일관: 되살린 것을 다시 압축해 코드끼리 비교한다</a></li><li><a href="closed-loop-sec-closed-loop-transcription.html" class="current">클로즈드 루프 전사: 인코더와 디코더가 코딩 레이트를 두고 겨룬다</a></li><li><a href="closed-loop-sec-closed-loop-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="closed-loop.html" class="active">오토인코더와 클로즈드 루프: 되살린 것을 다시 압축하기</a><ul class="sidebar-toc"><li><a href="closed-loop.html">재구성 오차: 되살린 것을 원래 자료와만 비교하면</a></li><li><a href="closed-loop-sec-self-consistency.html">자기 일관: 되살린 것을 다시 압축해 코드끼리 비교한다</a></li><li><a href="closed-loop-sec-closed-loop-transcription.html" class="current">클로즈드 루프 전사: 인코더와 디코더가 코딩 레이트를 두고 겨룬다</a></li><li><a href="closed-loop-sec-closed-loop-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li class="toc-part">관점의 한계</li>
 <li><a href="limits.html">압축만으로 충분한가: 짧게 적기가 말해 주지 않는 것</a></li>
 <li><a href="epilogue.html">맺음: 일곱 권을 압축의 눈으로</a></li></ol>
@@ -677,7 +693,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>자기 일관은 되살린 것을 같은 인코더로 다시 읽는데, 그 인코더가 무딘 눈이라면 어떨까? 클러스터가 섞인 각도의 인코더나, 줄무늬를 보지 못하는 인코더는 디코더가 엉뚱한 것을 그려도 같은 코드로 읽어 줄 수 있다. 검사관이 디코더와 한편이 되면 검사가 아니다. 인코더가 일부러 원래 자료와 되살린 것의 차이를 찾아내려 애쓰고, 디코더는 그 눈을 속일 수 없을 만큼 잘 그리려 애쓰게 할 수는 없을까?</p>
 <h3 id="hist-ctrl-minimax-game" class="history">역사: 옮겨 적기를 두 사람의 놀이로<span id="역사-옮겨-적기를-두-사람의-놀이로" class="anchor-alias"></span></h3>
 <p>2021년 11월 연구자 열한 명이 arXiv 에 올린 논문은 이듬해 3월 《엔트로피》 24권 4호에 「CTRL: Closed-Loop Transcription to an LDR via Minimaxing Rate Reduction」이라는 제목으로 실렸다. 열한 명은 다이, 퉁 Shengbang Tong, 리 Mingyang Li, 우 Ziyang Wu, 프센카 Michael Psenka, 찬 Kwan Ho Ryan Chan, 자이 Pengyuan Zhai, 위 Yaodong Yu, 위안 Xiaojun Yuan, 선 Heung-Yeung Shum, 마 Yi Ma 다. 전사(transcription)는 자료를 코드로 옮겨 적는다는 뜻이고, LDR 은 클러스터마다 서로 독립인 선형 부분공간을 차지하는 표현(linear discriminative representation)이다. 같은 연구실이 앞서 내놓은 코딩 레이트 감소(MCR²)는 라벨이 있는 자료를 그런 표현으로 옮기는 인코더를 배웠지만, 옮기는 방향이 자료에서 표현으로 가는 한쪽뿐이었다(논문의 말로 「one-sided」). 그 표현에서 자료를 되살리는 디코더는 그 목표에 들어 있지 않았다.</p>
-<p>그들의 답은 인코더와 디코더를, 코딩 레이트 감소로 점수를 매기는 한 판의 놀이에 올리는 것이었다. 인코더는 원래 자료와 옮겨 적었다 되살린 것의 차이를 키우려 하고, 디코더는 원래 자료와 되살린 것의 차이를 줄이려 한다. 논문은 MNIST, CIFAR-10, STL-10, CelebA, LSUN 침실, ImageNet 에서 실험했고, 디코더가 만든 그림의 질과 인코더의 분류 성능이 GAN, VAE, 그리고 GAN 과 VAE 를 섞은 방법들과 맞먹거나 더 낫다고 보고했다. 이 책의 참고서인 부캐넌·파이·왕·마의 『Principles and Practice of Deep Representation Learning』도 「Consistent and Self-Consistent Representations」라는 한 장에서 이런 자기 일관 표현과 클로즈드 루프를 다룬다.</p>
+<p>그들의 답은 인코더와 디코더를, 코딩 레이트 감소로 점수를 매기는 한 판의 놀이에 올리는 것이었다. 인코더는 원래 자료와 옮겨 적었다 되살린 것의 차이를 키우려 하고, 디코더는 원래 자료와 되살린 것의 차이를 줄이려 한다.</p>
+<figure class="fig "><img src="images/closed-loop/h_ctrl_loop.jpg" alt="CTRL 논문의 그림 1. 인코더 f가 자료 x와 되살린 x̂를 모두 코드 z, ẑ로 옮기고, 디코더 g는 z에서 x̂를 되살린다. 왼쪽은 자료 공간, 오른쪽은 코드 공간이다. 논문은 인코더를 차이를 재는 「되먹임 센서」, 디코더를 차이를 바로잡는 「제어기」라고 불렀다(출처: X. Dai 외, 「CTRL: Closed-Loop Transcription to an LDR via Minimaxing Rate Reduction」, 《Entropy》 24(4):456, 2022, Figure 1. CC BY 4.0)" loading="lazy"><figcaption>CTRL 논문의 그림 1. 인코더 f가 자료 x와 되살린 x̂를 모두 코드 z, ẑ로 옮기고, 디코더 g는 z에서 x̂를 되살린다. 왼쪽은 자료 공간, 오른쪽은 코드 공간이다. 논문은 인코더를 차이를 재는 「되먹임 센서」, 디코더를 차이를 바로잡는 「제어기」라고 불렀다(출처: X. Dai 외, 「CTRL: Closed-Loop Transcription to an LDR via Minimaxing Rate Reduction」, 《Entropy》 24(4):456, 2022, Figure 1. CC BY 4.0)</figcaption></figure>
+<p>논문은 MNIST, CIFAR-10, STL-10, CelebA, LSUN 침실, ImageNet 에서 실험했고, 디코더가 만든 그림의 질과 인코더의 분류 성능이 GAN, VAE, 그리고 GAN 과 VAE 를 섞은 방법들과 맞먹거나 더 낫다고 보고했다.</p>
+<figure class="fig "><img src="images/closed-loop/h_ctrl_recon.jpg" alt="같은 논문의 그림 3. 맨 윗줄이 입력 그림이고, 아랫줄들은 각 방법이 코드에서 되살린 그림이다. (a) MNIST, (b) CIFAR-10은 VAE-GAN과 CTRL의 두 꼴(CTRL-Binary, CTRL-Multi)을, (c) ImageNet은 CTRL의 두 꼴만 견준다(출처: X. Dai 외, 《Entropy》 24(4):456, 2022, Figure 3. CC BY 4.0)" loading="lazy"><figcaption>같은 논문의 그림 3. 맨 윗줄이 입력 그림이고, 아랫줄들은 각 방법이 코드에서 되살린 그림이다. (a) MNIST, (b) CIFAR-10은 VAE-GAN과 CTRL의 두 꼴(CTRL-Binary, CTRL-Multi)을, (c) ImageNet은 CTRL의 두 꼴만 견준다(출처: X. Dai 외, 《Entropy》 24(4):456, 2022, Figure 3. CC BY 4.0)</figcaption></figure>
+<p>이 책의 참고서인 부캐넌·파이·왕·마의 『Principles and Practice of Deep Representation Learning』도 「Consistent and Self-Consistent Representations」라는 한 장에서 이런 자기 일관 표현과 클로즈드 루프를 다룬다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>코딩 레이트 감소에 디코더를 하나 붙이고 재구성 손실을 더하면 끝나는 거 아니에요? 왜 놀이까지 만들어요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 재구성 손실은 어디서 재죠?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>자료 공간에서요… 아, 그러면 다시 화소 거리로 돌아가네요.</p></div></div>
@@ -703,7 +723,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>디코더가 선형 디코더(<span class="sym" style="color:#1e694b">α</span> = 0)를 쓰면 자기 일관이 지켜져서 <span class="sym" style="color:#ff5a78">Ẑ</span> = <span class="sym" style="color:#ff5a78">Z</span>이고, 점수는 <span class="sym" style="color:#0078e1">J</span> = 2<span class="sym" style="color:#0078e1">ΔR</span>(<span class="sym" style="color:#ff5a78">Z</span>)가 된다. 그러면 인코더는 클러스터가 가장 잘 갈리는 각도를 찾게 된다. 0°에서 180°까지 1° 눈금으로 재면 그 각도는 <span class="sym" style="color:#665522">θ</span> = 140°이고, 점수는 5.363비트, 재구성 오차는 0.325다. 재구성 오차만 보는 인코더라면 주축 <span class="sym" style="color:#665522">θ</span> = 3.9°(재구성 오차 0.184, <span class="sym" style="color:#0078e1">ΔR</span> 1.707비트)를 골랐을 것이다. 놀이에 올린 인코더는 되살리기를 조금 양보하고 클러스터가 갈리는 코드를 고른다.</p>
 <figure class="fig "><img src="images/closed-loop/game.png" alt="인코더 각도 θ에 따른 놀이의 점수 J(θ, 0) = 2ΔR(Z)(실선, 왼쪽 눈금)와 재구성 오차 D(점선, 오른쪽 눈금). 재구성 오차가 가장 작은 각도는 4°, 점수가 가장 큰 각도는 140°다. 다이 외(2022)의 클로즈드 루프 놀이를 이 책의 장난감에서 다시 그린 것" loading="lazy"><figcaption>인코더 각도 θ에 따른 놀이의 점수 J(θ, 0) = 2ΔR(Z)(실선, 왼쪽 눈금)와 재구성 오차 D(점선, 오른쪽 눈금). 재구성 오차가 가장 작은 각도는 4°, 점수가 가장 큰 각도는 140°다. 다이 외(2022)의 클로즈드 루프 놀이를 이 책의 장난감에서 다시 그린 것</figcaption></figure>
 <p>디코더 쪽에서는 무엇이 일어날까? 디코더가 대표점을 섞으면 다시 얻은 코드가 클러스터마다 오그라들어 처음 코드와 달라지고, 인코더는 처음 코드와 다시 얻은 코드의 차이를 점수로 받아 간다. 디코더가 점수를 줄이려면 다시 얻은 코드를 처음 코드와 같게 만들어야 한다. 디코더가 실제로 어느 <span class="sym" style="color:#1e694b">α</span>를 고르는지, 재구성 오차로 고를 때와 무엇이 다른지는 아래 문제 8에서 위젯 3으로 따져 본다. 이렇게 인코더와 디코더가 코드 공간의 코딩 레이트 감소를 점수로 겨루며 옮겨 적기와 되살리기를 함께 배우는 방법을 <strong>클로즈드 루프 전사</strong> (코딩 레이트를 두고 겨루며 옮겨 적고 되살리기, closed-loop transcription)라 한다.</p>
-<figure class="widget-embed" id="widget-closed-loop-w3"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 3: 인코더와 디코더의 놀이판</span><a class="widget-open" href="widgets/closed-loop.html?v=2a2d144d#w3" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/closed-loop.html?w=w3&embed=1&v=2a2d144d" title="위젯 3: 인코더와 디코더의 놀이판" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-closed-loop-w3"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 3: 인코더와 디코더의 놀이판</span><a class="widget-open" href="widgets/closed-loop.html?v=0260c085#w3">크게 열기</a></div><iframe data-src="widgets/closed-loop.html?w=w3&embed=1&v=0260c085" title="위젯 3: 인코더와 디코더의 놀이판" loading="lazy"></iframe></figure>
 <p>점 180개 장난감의 놀이는 인코더의 선택지가 각도 하나, 디코더의 선택지가 섞는 비율 하나뿐이어서 쉽게 끝난다. 깊은 신경망 둘을 겨루게 하면 GAN 처럼 학습이 흔들릴 수 있고, 논문의 실험이 보인 것은 그 놀이를 실제로 돌려 쓸 만한 결과를 얻었다는 데까지다. 장난감 놀이가 보여 주는 것은 점수의 짜임, 곧 무엇을 키우고 무엇을 줄이게 되어 있는가이다.</p>
 <h3 id="ml에서-표현이-한-점으로-무너지는-문제">ML에서: 표현이 한 점으로 무너지는 문제</h3>
 <p>라벨 없이 표현을 배우는 자기 지도 학습에서는 같은 그림을 두 번 다르게 자르거나 색을 바꾼 두 장(두 시점)의 표현이 가까워지도록 학습한다. 이 목표만 두면 모든 그림을 같은 표현 하나로 보내 두 시점의 거리를 언제나 0으로 만드는 쉬운 답이 있는데, 이렇게 모든 표현이 하나로 모이는 것을 표현의 무너짐(collapse)이라 한다. 2021년 바르데스(Adrien Bardes)·퐁스(Jean Ponce)·르쿤(Yann LeCun)의 VICReg 는 표현의 칸마다 분산이 일정 값 아래로 내려가지 않게 하는 항과 칸끼리의 공분산을 줄이는 항을 더해 이를 막았다. 2023년 퉁·천(Yubei Chen)·마·르쿤의 EMP-SSL 은 같은 자리에 코딩 레이트 <span class="sym" style="color:#0078e1">R</span>(<span class="sym" style="color:#ff5a78">Z</span>) = ½ log₂ det(I + <span class="sym" style="color:#3c4bff">d</span>/(<span class="sym" style="color:#3c4bff">b</span><span class="sym" style="color:#697800">ε</span>²) <span class="sym" style="color:#ff5a78">Z</span><span class="sym" style="color:#ff5a78">Z</span>ᵀ)를 키우는 항(총 코딩 레이트)을 넣고(<span class="sym" style="color:#3c4bff">d</span> 는 표현의 칸 수, <span class="sym" style="color:#3c4bff">b</span> 는 한 묶음의 그림 수, <span class="sym" style="color:#697800">ε</span> 는 허용 오차, <span class="sym" style="color:#ff5a78">Z</span> 는 표현을 열로 늘어놓은 행렬, I 는 단위 행렬. 논문은 로그의 밑을 적지 않았고, 이 책은 비트로 세려고 밑을 2로 적는다), 이것을 VICReg 공분산 항의 부드러운 판으로 볼 수 있다고 적었다. 코딩 레이트는 표현들이 여러 방향으로 퍼질수록 크다. 클로즈드 루프 놀이의 <span class="sym" style="color:#0078e1">ΔR</span>(<span class="sym" style="color:#ff5a78">Z</span>)가 코드의 클러스터를 서로 떼어 놓듯, 이 항은 표현 전체가 한 점이나 한 직선으로 오그라들지 못하게 붙든다.</p>
@@ -816,7 +836,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>훨씬 작네. 인코더는 <span class="sym" style="color:#0078e1">J</span>를 키우려고 하니까 이런 각도에 머물지 않겠어.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 놀이는 한쪽만 보면 안 되고 두 쪽을 함께 봐야 해요. 스크립트로 1° 눈금 모든 각도를 보면 디코더가 <span class="sym" style="color:#1e694b">α</span> = 0을 고르지 않는 각도는 37°에서 48° 사이의 일곱 곳뿐이고, 인코더가 <span class="sym" style="color:#0078e1">J</span>를 가장 크게 하는 <span class="sym" style="color:#665522">θ</span> = 140°에서 디코더의 답은 <span class="sym" style="color:#1e694b">α</span> = 0이에요. 「디코더의 가장 좋은 대답을 본 뒤 인코더가 고른 값」과 「인코더의 가장 좋은 대답을 본 뒤 디코더가 고른 값」이 똑같이 5.363비트로 만나요. 출제자와 수험생의 안장점과 같은 자리예요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>과제 채점을 대충 하는 조교한테는 대충 낸 과제가 통하는데, 꼼꼼한 조교가 오면 안 통하는 거네요. 그러니까 조교가 꼼꼼해야 과제도 제대로 하게 돼요.</p></div></div>
-<figure class="preset-card"><a href="widgets/closed-loop.html?p=prob-closed-decoder-choice&v=2a2d144d#w3" target="_blank" rel="noopener"><img src="images/closed-loop/preset-prob-closed-decoder-choice.png" alt="위젯 3 · 문제 8 설정" loading="lazy"></a><figcaption><a href="widgets/closed-loop.html?p=prob-closed-decoder-choice&v=2a2d144d#w3" target="_blank" rel="noopener">위젯에서 열기: 위젯 3 · 문제 8 설정 ↗</a></figcaption></figure>
+<figure class="preset-card"><a href="widgets/closed-loop.html?p=prob-closed-decoder-choice&v=0260c085#w3"><img src="images/closed-loop/preset-prob-closed-decoder-choice.png" alt="위젯 3 · 문제 8 설정" loading="lazy"></a><figcaption><a href="widgets/closed-loop.html?p=prob-closed-decoder-choice&v=0260c085#w3">위젯에서 열기: 위젯 3 · 문제 8 설정</a></figcaption></figure>
 </div><div class="dialogue"><h3 id="prob-closed-collapsed-coding-rate">문제 9. 무너진 표현의 코딩 레이트<span id="문제-9-무너진-표현의-코딩-레이트" class="anchor-alias"></span></h3>
 <blockquote>
 <p>자기 지도 학습의 한 묶음에 그림 네 장이 있고, 각 그림의 표현은 2차원 벡터다. 총 코딩 레이트 <span class="sym" style="color:#0078e1">R</span> = ½ log₂ det(I + <span class="sym" style="color:#3c4bff">d</span>/(<span class="sym" style="color:#3c4bff">b</span><span class="sym" style="color:#697800">ε</span>²) <span class="sym" style="color:#ff5a78">Z</span><span class="sym" style="color:#ff5a78">Z</span>ᵀ)(<span class="sym" style="color:#3c4bff">d</span> = 2, <span class="sym" style="color:#3c4bff">b</span> = 4, <span class="sym" style="color:#697800">ε</span> = 0.5, <span class="sym" style="color:#ff5a78">Z</span> 는 표현을 열로 놓은 2 × 4 행렬)를 (가) 네 표현이 모두 (1, 0)일 때 (나) (1, 0), (−1, 0), (1, 0), (−1, 0)일 때 (다) (1, 0), (0, 1), (−1, 0), (0, −1)일 때 구하라. 두 시점의 표현을 가깝게 하는 항만으로 학습하면 어떤 일이 생기고, 이 <span class="sym" style="color:#0078e1">R</span> 을 키우는 항을 더하면 무엇이 달라지는가?</p>
@@ -833,7 +853,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>팀원 넷이 각자 다른 부분을 맡아야 하는데, 서로 비슷하게만 하라고 하면 넷이 똑같은 부분을 해 오는 거네요. 맡은 부분이 겹치지 않게 하라는 규칙이 하나 더 있어야 해요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="closed-loop-sec-self-consistency.html">&larr; 자기 일관: 되살린 것을 다시 압축해 코드끼리 비교한다</a><span class="page-count">3 / 4</span><a class="chapter-nav-next" href="closed-loop-sec-closed-loop-summary.html">자주 하는 실수와 요약 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="closed-loop-sec-self-consistency.html">&larr; 자기 일관: 되살린 것을 다시 압축해 코드끼리 비교한다</a><span class="page-count">3 / 4</span><a class="chapter-nav-next" href="closed-loop-sec-closed-loop-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

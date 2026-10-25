@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 압축은 이해인가</a></li>
 <li class="toc-part">짧게 적는다는 것</li>
 <li><a href="low-dimension.html">예측할 수 있으면 낮은 차원</a></li>
@@ -662,7 +678,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="rate-reduction.html">코딩 레이트와 코딩 레이트 감소: 클러스터별로 적으면 짧아진다</a></li>
 <li class="toc-part">신경망을 압축으로 읽기</li>
 <li><a href="denoising-compression.html">디노이징: 낮은 차원으로 끌어당기기</a></li>
-<li><a href="unrolled-layers.html" class="active">언롤드 최적화: 층은 최적화의 한 스텝</a><ul class="sidebar-toc"><li><a href="unrolled-layers.html">언롤드 최적화: 되풀이 K번을 K층으로 적는다</a></li><li><a href="unrolled-layers-sec-lista-learned-thresholds.html" class="current">LISTA: ISTA 스텝의 행렬과 문턱을 배우면 층이 준다</a></li><li><a href="unrolled-layers-sec-crate-attention-compression.html">CRATE: 어텐션은 압축의 스텝, MLP 는 희소화의 스텝</a></li><li><a href="unrolled-layers-sec-unrolled-layers-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="unrolled-layers.html" class="active">언롤드 최적화: 층은 최적화의 한 스텝</a><ul class="sidebar-toc"><li><a href="unrolled-layers.html">언롤드 최적화: 되풀이 K번을 K층으로 적는다</a></li><li><a href="unrolled-layers-sec-lista-learned-thresholds.html" class="current">LISTA: ISTA 스텝의 행렬과 문턱을 배우면 층이 준다</a></li><li><a href="unrolled-layers-sec-crate-attention-compression.html">CRATE: 어텐션은 압축의 스텝, MLP 는 희소화의 스텝</a></li><li><a href="unrolled-layers-sec-unrolled-layers-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="memorization.html">암기와 일반화: 일반화란 무엇인가</a></li>
 <li><a href="closed-loop.html">오토인코더와 클로즈드 루프: 되살린 것을 다시 압축하기</a></li>
 <li class="toc-part">관점의 한계</li>
@@ -757,7 +773,7 @@ c-10,0,-16.667,5,-20,15z M410 15 H367 v585 v0 v585 h43z"/></svg></span></span></
 </tbody>
 </table></div>
 <p>LISTA 다섯 층의 오차는 1.59%로, ISTA 가 65스텝을 돌아야 닿는 오차다. 한 층만으로도 ISTA 19스텝만큼 간다. 학습 자료에서의 오차(5층 1.40%)와 시험 자료에서의 오차(1.59%)가 비슷하니, 학습 자료 하나하나를 외운 것이 아니라 축 3개짜리 자료 전체에 통하는 지름길을 배운 것이다. 배운 값도 들여다볼 만하다. 다섯 층의 문턱 평균은 0.221, 0.150, 0.113, 0.089, 0.060 으로 층을 지날수록 작아지고, 모두 ISTA 의 문턱 0.0199 보다 크다. 앞쪽 층은 아주 큰 계수만 통과시켜 쓸 축을 먼저 고르고, 뒤쪽 층은 문턱을 낮춰 계수의 크기를 다듬는다. 이렇게 되풀이 알고리즘을 펼친 층의 행렬과 문턱을 자료로 학습해, 적은 층으로 그 알고리즘의 답을 흉내 내는 신경망을 <strong>LISTA</strong> (학습한 ISTA, learned ISTA)라 한다.</p>
-<figure class="widget-embed" id="widget-unrolled-layers-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 1: 층 수를 늘리면: ISTA 와 LISTA 의 코드가 정답에 다가가는 모습</span><a class="widget-open" href="widgets/unrolled-layers.html?v=c031f846#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/unrolled-layers.html?w=w1&embed=1&v=c031f846" title="위젯 1: 층 수를 늘리면: ISTA 와 LISTA 의 코드가 정답에 다가가는 모습" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-unrolled-layers-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 1: 층 수를 늘리면: ISTA 와 LISTA 의 코드가 정답에 다가가는 모습</span><a class="widget-open" href="widgets/unrolled-layers.html?v=ea2cc557#w1">크게 열기</a></div><iframe data-src="widgets/unrolled-layers.html?w=w1&embed=1&v=ea2cc557" title="위젯 1: 층 수를 늘리면: ISTA 와 LISTA 의 코드가 정답에 다가가는 모습" loading="lazy"></iframe></figure>
 <p>위젯에서 층 수를 1부터 올려 보면, ISTA 의 코드는 처음에 축 대부분에 계수를 주었다가 수십 스텝에 걸쳐 하나씩 0으로 떨어뜨린다. LISTA 의 코드는 첫 층부터 쓸 축이 적고, 다섯 층 안에 정답 코드의 막대 가까이 간다. 다만 LISTA 다섯 층의 코드는 시험 자료에서 평균 7.5개의 계수가 0이 아니어서, 3.2개인 정답 코드보다 많다. LISTA 는 정답 코드와의 제곱 거리를 줄이도록 배웠을 뿐 0의 개수를 세라고 배우지 않았으므로, 작은 계수 몇 개가 남는다.</p>
 <h3 id="ml에서-끝까지-펼치면-고정점-깊은-평형-모델">ML에서: 끝까지 펼치면 고정점, 깊은 평형 모델</h3>
 <p>LISTA 는 층 수를 줄이는 방향으로 갔지만, 거꾸로 층 수를 늘려 같은 층을 끝없이 쌓으면 어떻게 될까? ISTA 처럼 같은 상자를 되풀이하는 층이 한 점으로 모인다면, 끝없이 쌓은 신경망의 출력은 그 점, 곧 <span class="sym" style="color:#ff5a78">z</span>* = f(<span class="sym" style="color:#ff5a78">z</span>*, <span class="sym" style="color:#1b9e77">x</span>) 를 만족하는 고정점이다. 바이(Shaojie Bai)·콜터(J. Zico Kolter)·콜툰(Vladlen Koltun)의 「깊은 평형 모델(Deep Equilibrium Models)」(NeurIPS 2019)은 여러 깊은 순서열 모델(문장처럼 차례가 있는 자료를 다루는 모델)의 숨은 층들이 어떤 고정점 쪽으로 다가간다는 관찰에서 출발했다. 이 모델은 층을 쌓는 대신 고정점을 방정식 풀이로 바로 찾고, 그래디언트도 층마다 거꾸로 거슬러 가지 않고 고정점의 식에서 바로 구하므로, 학습에 드는 메모리가 층 수와 상관없이 일정하다. 초록에 따르면 WikiText-103 같은 언어 모델 실험에서 메모리를 최대 88% 줄였다. 되풀이가 정말 한 점으로 모이는지는 그 층이 거리를 줄이는 함수인지에 달려 있다.</p>
@@ -808,7 +824,7 @@ c-10,0,-16.667,5,-20,15z M410 15 H367 v585 v0 v585 h43z"/></svg></span></span></
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>구구단 문제가 떠오르네요. LISTA 는 외운 범위 밖에서도 대충은 맞히는데, 정확히 맞히려면 결국 덧셈으로 돌아가야 해요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S11"><img src="images/cast/S11.webp" alt="이서연 S11" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>언롤드 최적화를 학습하면 층 수를 버는 대신 「끝까지 돌면 정답에 닿는다」는 보장을 내려놓는 거야.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>위젯 1에서 문제 6 설정을 불러와 층 수 K 를 10까지 올려 보고, 같은 자리의 ISTA 곡선과 비교해 보세요.</p></div></div>
-<figure class="preset-card"><a href="widgets/unrolled-layers.html?p=prob-unrolled-unseen-data&v=c031f846#w1" target="_blank" rel="noopener"><img src="images/unrolled-layers/preset-prob-unrolled-unseen-data.png" alt="위젯 1 · 문제 6 설정" loading="lazy"></a><figcaption><a href="widgets/unrolled-layers.html?p=prob-unrolled-unseen-data&v=c031f846#w1" target="_blank" rel="noopener">위젯에서 열기: 위젯 1 · 문제 6 설정 ↗</a></figcaption></figure>
+<figure class="preset-card"><a href="widgets/unrolled-layers.html?p=prob-unrolled-unseen-data&v=ea2cc557#w1"><img src="images/unrolled-layers/preset-prob-unrolled-unseen-data.png" alt="위젯 1 · 문제 6 설정" loading="lazy"></a><figcaption><a href="widgets/unrolled-layers.html?p=prob-unrolled-unseen-data&v=ea2cc557#w1">위젯에서 열기: 위젯 1 · 문제 6 설정</a></figcaption></figure>
 </div>
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="unrolled-layers.html">&larr; 언롤드 최적화: 되풀이 K번을 K층으로 적는다</a><span class="page-count">2 / 4</span><a class="chapter-nav-next" href="unrolled-layers-sec-crate-attention-compression.html">CRATE: 어텐션은 압축의 스텝, MLP 는 희소화의 스텝 &rarr;</a></nav>

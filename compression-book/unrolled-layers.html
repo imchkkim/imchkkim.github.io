@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 압축은 이해인가</a></li>
 <li class="toc-part">짧게 적는다는 것</li>
 <li><a href="low-dimension.html">예측할 수 있으면 낮은 차원</a></li>
@@ -662,7 +678,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="rate-reduction.html">코딩 레이트와 코딩 레이트 감소: 클러스터별로 적으면 짧아진다</a></li>
 <li class="toc-part">신경망을 압축으로 읽기</li>
 <li><a href="denoising-compression.html">디노이징: 낮은 차원으로 끌어당기기</a></li>
-<li><a href="unrolled-layers.html" class="active">언롤드 최적화: 층은 최적화의 한 스텝</a><ul class="sidebar-toc"><li><a href="unrolled-layers.html" class="current">언롤드 최적화: 되풀이 K번을 K층으로 적는다</a></li><li><a href="unrolled-layers-sec-lista-learned-thresholds.html">LISTA: ISTA 스텝의 행렬과 문턱을 배우면 층이 준다</a></li><li><a href="unrolled-layers-sec-crate-attention-compression.html">CRATE: 어텐션은 압축의 스텝, MLP 는 희소화의 스텝</a></li><li><a href="unrolled-layers-sec-unrolled-layers-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="unrolled-layers.html" class="active">언롤드 최적화: 층은 최적화의 한 스텝</a><ul class="sidebar-toc"><li><a href="unrolled-layers.html" class="current">언롤드 최적화: 되풀이 K번을 K층으로 적는다</a></li><li><a href="unrolled-layers-sec-lista-learned-thresholds.html">LISTA: ISTA 스텝의 행렬과 문턱을 배우면 층이 준다</a></li><li><a href="unrolled-layers-sec-crate-attention-compression.html">CRATE: 어텐션은 압축의 스텝, MLP 는 희소화의 스텝</a></li><li><a href="unrolled-layers-sec-unrolled-layers-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="memorization.html">암기와 일반화: 일반화란 무엇인가</a></li>
 <li><a href="closed-loop.html">오토인코더와 클로즈드 루프: 되살린 것을 다시 압축하기</a></li>
 <li class="toc-part">관점의 한계</li>
@@ -686,6 +702,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h3 id="hist-iteration-as-neural-circuit" class="history" data-people="rozell-christopher">역사: 되풀이를 신경 회로로 그리기<span id="역사-되풀이를-신경-회로로-그리기" class="anchor-alias"></span></h3>
 <p>희소 코딩을 뇌가 정말 할 수 있느냐는 물음은 계산 신경과학의 오랜 걱정거리였다. 최소화 문제를 푸는 컴퓨터 프로그램은 중앙에서 모든 계수를 한꺼번에 들여다보지만, 신경 세포는 이웃과 신호를 주고받을 뿐이다. 로젤(Christopher Rozell)·존슨(Don Johnson)·바라니우크(Richard Baraniuk)·올스하우젠(Bruno Olshausen)은 2008년 『Neural Computation』에 낸 논문에서 신경 세포를 닮은 단위 여럿이 서로를 억누르며 시간에 따라 움직이는 계를 세웠다. 논문 제목은 「문턱과 국소 경쟁으로 하는 희소 코딩(Sparse Coding via Thresholding and Local Competition in Neural Circuits)」이다. 단위마다 입력이 문턱을 넘어야 출력을 내고, 비슷한 축을 맡은 단위끼리는 서로를 억누른다. 이 계가 멈추는 곳이 희소 코딩 문제의 답이고, 그렇게 얻은 코드는 보통의 중앙 계산 방법과 비슷하게 희소했다고 그들은 보고했다.</p>
 <p>이 계를 시간을 한 칸씩 끊어 계산하면 ISTA 를 닮은 되풀이가 된다. 되풀이 알고리즘을 「계산 절차」가 아니라 「되먹임이 있는 회로」로 볼 수 있다는 것이다. 회로를 시간 칸마다 잘라 옆으로 늘어놓으면 층이 쌓인 그림이 된다.</p>
+<figure class="fig "><img src="images/unrolled-layers/h1_lca.png" alt="로젤 외(2008)의 국소 경쟁 회로를 이 장의 장난감 문제(축 40개, λ = 0.1)의 자료 하나에 돌려 본 것. 왼쪽: 단위 40개의 내부 상태 u 가 시간에 따라 움직이고, 문턱 ±λ 를 넘은 단위만 출력을 내며 닮은 단위를 누른다. 한때 문턱을 넘었던 축 1(점선)은 켜진 세 축에 눌려 문턱 안으로 돌아온다. 오른쪽: 회로가 멈춘 곳의 출력(점)이 L1 문제의 답 z*(회색 막대)와 겹친다. 논문의 그림이 아니라 논문의 식을 이 책에서 풀어 그린 것" loading="lazy"><figcaption>로젤 외(2008)의 국소 경쟁 회로를 이 장의 장난감 문제(축 40개, λ = 0.1)의 자료 하나에 돌려 본 것. 왼쪽: 단위 40개의 내부 상태 u 가 시간에 따라 움직이고, 문턱 ±λ 를 넘은 단위만 출력을 내며 닮은 단위를 누른다. 한때 문턱을 넘었던 축 1(점선)은 켜진 세 축에 눌려 문턱 안으로 돌아온다. 오른쪽: 회로가 멈춘 곳의 출력(점)이 L1 문제의 답 z*(회색 막대)와 겹친다. 논문의 그림이 아니라 논문의 식을 이 책에서 풀어 그린 것</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>서로 억누르는 단위 여럿이라니, 지금 같으면 행렬 곱 한 줄이잖아요. 뇌가 그걸 할 수 있냐는 게 왜 그렇게 오래된 걱정이었어요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>컴퓨터 프로그램은 계수 마흔 개를 한 메모리에 올려 두고 한꺼번에 고쳐요. 신경 세포 하나는 그 마흔 개를 볼 수 없고, 이웃에게서 오는 신호만 받아요. 제 앞만 보는 단위들이 중앙에서 푼 것과 같은 답에 닿는지를 보이는 게 그 논문이 한 일이에요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>각자 제 입력만 보고 움직이면 엉뚱한 데서 멈출 수도 있겠네요. 닮은 축 둘이 둘 다 켜진 채로요.</p></div></div>
@@ -809,7 +826,7 @@ I &amp; \text{단위행렬}
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조교님이 제 코드를 보고 「이건 버블 정렬이랑 모양이 같네」 하셨는데, 정말 정렬을 하는지는 돌려 보고서야 알았어요. 잔차 블록도 모양만 봐서는 몰라요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="denoising-compression-sec-denoising-compression-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="unrolled-layers-sec-lista-learned-thresholds.html">LISTA: ISTA 스텝의 행렬과 문턱을 배우면 층이 준다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="denoising-compression-sec-denoising-compression-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="unrolled-layers-sec-lista-learned-thresholds.html">LISTA: ISTA 스텝의 행렬과 문턱을 배우면 층이 준다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

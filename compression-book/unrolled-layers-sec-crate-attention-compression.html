@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 압축은 이해인가</a></li>
 <li class="toc-part">짧게 적는다는 것</li>
 <li><a href="low-dimension.html">예측할 수 있으면 낮은 차원</a></li>
@@ -662,7 +678,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="rate-reduction.html">코딩 레이트와 코딩 레이트 감소: 클러스터별로 적으면 짧아진다</a></li>
 <li class="toc-part">신경망을 압축으로 읽기</li>
 <li><a href="denoising-compression.html">디노이징: 낮은 차원으로 끌어당기기</a></li>
-<li><a href="unrolled-layers.html" class="active">언롤드 최적화: 층은 최적화의 한 스텝</a><ul class="sidebar-toc"><li><a href="unrolled-layers.html">언롤드 최적화: 되풀이 K번을 K층으로 적는다</a></li><li><a href="unrolled-layers-sec-lista-learned-thresholds.html">LISTA: ISTA 스텝의 행렬과 문턱을 배우면 층이 준다</a></li><li><a href="unrolled-layers-sec-crate-attention-compression.html" class="current">CRATE: 어텐션은 압축의 스텝, MLP 는 희소화의 스텝</a></li><li><a href="unrolled-layers-sec-unrolled-layers-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="unrolled-layers.html" class="active">언롤드 최적화: 층은 최적화의 한 스텝</a><ul class="sidebar-toc"><li><a href="unrolled-layers.html">언롤드 최적화: 되풀이 K번을 K층으로 적는다</a></li><li><a href="unrolled-layers-sec-lista-learned-thresholds.html">LISTA: ISTA 스텝의 행렬과 문턱을 배우면 층이 준다</a></li><li><a href="unrolled-layers-sec-crate-attention-compression.html" class="current">CRATE: 어텐션은 압축의 스텝, MLP 는 희소화의 스텝</a></li><li><a href="unrolled-layers-sec-unrolled-layers-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="memorization.html">암기와 일반화: 일반화란 무엇인가</a></li>
 <li><a href="closed-loop.html">오토인코더와 클로즈드 루프: 되살린 것을 다시 압축하기</a></li>
 <li class="toc-part">관점의 한계</li>
@@ -678,6 +694,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h3 id="hist-unrolled-gradient-to-attention" class="history" data-people="ma-yi yu-yaodong">역사: 그래디언트를 펼친 신경망에서 어텐션까지<span id="역사-그래디언트를-펼친-신경망에서-어텐션까지" class="anchor-alias"></span></h3>
 <p>코딩 레이트 감소를 한 줄씩 되짚어 보자. 토큰(신경망 안에서 그림 조각이나 낱말 하나를 나타내는 벡터) n 개를 주어진 정밀도 <span class="sym" style="color:#697800">ε</span> 로 적는 데 드는 비트를 토큰 하나로 나눈 값이 코딩 레이트다. 토큰들이 낮은 차원의 평평한 조각 몇 개에 모여 있을수록 작다. 토큰을 종류별로 나눈 모임을 클러스터라 하자(같은 물체를 찍은 그림 조각들이 한 클러스터). 토큰 전체의 코딩 레이트에서 클러스터마다 따로 적은 코딩 레이트를 뺀 것이 코딩 레이트 감소 ΔR 이고, 전체는 넓게 펼치고 클러스터 하나하나는 좁게 모은 표현일수록 크다.</p>
 <p>마(Yi Ma)의 연구 모임은 이 목적에서 신경망을 바로 만들어 보는 시도를 이어 왔다. 찬(Kwan Ho Ryan Chan) 외의 ReduNet(JMLR 2022)은 코딩 레이트 감소를 키우는 경사 스텝을 그대로 층으로 펼쳤다. 층의 연산과 파라미터를 역전파로 배우는 대신 앞에서부터 한 층씩 계산해 정했다(역전파로 다듬을 수도 있다). 위(Yaodong Yu) 외의 「희소 코딩 레이트 감소로 만든 흰 상자 트랜스포머(White-Box Transformers via Sparse Rate Reduction)」(NeurIPS 2023)는 앞선 연구가 코딩 레이트의 그래디언트에 든 역행렬 탓에 큰 자료로 넓히기 어려웠다고 적고, 두 가지를 바꿨다. 클러스터별 코딩 레이트를 줄이는 그래디언트 스텝은 softmax 로 닮은 토큰끼리 섞는 근사로 바꾸고, 역행렬이 드는 전체 코딩 레이트의 그래디언트 대신 표현을 희소하게 만드는 ISTA 한 스텝을 썼다. 그렇게 얻은 층을 CRATE 라 불렀다.</p>
+<figure class="fig "><img src="images/unrolled-layers/h2_redunet.png" alt="ReduNet 논문 23쪽의 그림 6과 알고리즘 1. 위 왼쪽이 경사 스텝 하나를 펼친 ReduNet 의 한 층이고, 오른쪽은 견주어 놓은 ResNet·ResNeXt 의 층이다. 알고리즘 5번째 줄에서 층마다 전체에 하나, 클러스터마다 하나씩 n × n 역행렬을 계산한다. 출처: Chan, Yu, You, Qi, Wright, Ma, JMLR 23(114), 2022, https://www.jmlr.org/papers/v23/21-0631.html, CC BY 4.0" loading="lazy"><figcaption>ReduNet 논문 23쪽의 그림 6과 알고리즘 1. 위 왼쪽이 경사 스텝 하나를 펼친 ReduNet 의 한 층이고, 오른쪽은 견주어 놓은 ResNet·ResNeXt 의 층이다. 알고리즘 5번째 줄에서 층마다 전체에 하나, 클러스터마다 하나씩 n × n 역행렬을 계산한다. 출처: Chan, Yu, You, Qi, Wright, Ma, JMLR 23(114), 2022, https://www.jmlr.org/papers/v23/21-0631.html, CC BY 4.0</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>목적을 정해 두고 그래디언트 스텝을 펼치면 끝이잖아요. ReduNet 에서 이미 한 걸 왜 몇 년 뒤에 다시 고쳐야 했어요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>ReduNet 의 층에는 코딩 레이트의 그래디언트가 그대로 들어 있어요. 그 그래디언트 식 안에 무엇이 있었죠?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>역행렬이요. 음, 토큰 차원이 커지면 그 행렬도 커지고, 클러스터마다 하나씩이니까… 층마다 그걸 다 뒤집어야 하네요.</p></div></div>
@@ -810,7 +827,7 @@ c &amp; \text{코딩 레이트에서 오는 상수 } \textcolor{#3c4bff}{p}/(\te
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조교님이 「네 컴퓨터에서 돌아간다고 채점 서버에서도 돈다는 보장은 없다」고 하셨어요. 장난감에서 된 건 장난감에서 된 거예요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="unrolled-layers-sec-lista-learned-thresholds.html">&larr; LISTA: ISTA 스텝의 행렬과 문턱을 배우면 층이 준다</a><span class="page-count">3 / 4</span><a class="chapter-nav-next" href="unrolled-layers-sec-unrolled-layers-summary.html">자주 하는 실수와 요약 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="unrolled-layers-sec-lista-learned-thresholds.html">&larr; LISTA: ISTA 스텝의 행렬과 문턱을 배우면 층이 준다</a><span class="page-count">3 / 4</span><a class="chapter-nav-next" href="unrolled-layers-sec-unrolled-layers-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

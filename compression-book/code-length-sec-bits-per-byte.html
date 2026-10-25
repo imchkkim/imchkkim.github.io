@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,10 +664,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 압축은 이해인가</a></li>
 <li class="toc-part">짧게 적는다는 것</li>
 <li><a href="low-dimension.html">예측할 수 있으면 낮은 차원</a></li>
-<li><a href="code-length.html" class="active">코드 길이: 예측기가 곧 압축기</a><ul class="sidebar-toc"><li><a href="code-length.html">크래프트 부등식: 짧은 코드는 나눠 가질 수밖에 없다</a></li><li><a href="code-length-sec-huffman-code.html">허프만 코드: 가장 좋은 길이 −log₂ p 를 정수로 맞추기</a></li><li><a href="code-length-sec-arithmetic-coding.html">산술 코딩: 예측기가 그대로 압축기가 된다</a></li><li><a href="code-length-sec-bits-per-byte.html" class="current">바이트당 비트: 언어 모델의 손실은 코드 길이다</a></li><li><a href="code-length-sec-code-length-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="code-length.html" class="active">코드 길이: 예측기가 곧 압축기</a><ul class="sidebar-toc"><li><a href="code-length.html">크래프트 부등식: 짧은 코드는 나눠 가질 수밖에 없다</a></li><li><a href="code-length-sec-huffman-code.html">허프만 코드: 가장 좋은 길이 −log₂ p 를 정수로 맞추기</a></li><li><a href="code-length-sec-arithmetic-coding.html">산술 코딩: 예측기가 그대로 압축기가 된다</a></li><li><a href="code-length-sec-bits-per-byte.html" class="current">바이트당 비트: 언어 모델의 손실은 코드 길이다</a></li><li><a href="code-length-sec-code-length-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="mdl.html">최소 기술 길이와 오컴: 모델까지 적어야 공평하다</a></li>
 <li class="toc-part">자료가 고르는 축</li>
 <li><a href="pca.html">주성분 분석과 저랭크 근사</a></li>
@@ -769,7 +785,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>손실 <span class="sym" style="color:#d62728">𝓛</span>을 ln 2로 나누면 토큰 하나를 산술 코딩으로 적는 데 드는 비트가 되고, 거기에 토큰 수를 바이트 수로 나눈 값을 곱하면 원래 글 한 바이트를 적는 데 드는 비트가 된다. 원래 글 한 바이트에 드는 이 비트 수를 <strong>바이트당 비트</strong> (bits per byte)라 한다. 원래 글은 바이트당 8비트이므로, 바이트당 비트를 8로 나누면 줄인 크기가 원래 크기의 몇 분의 일인지가 나온다. 퍼플렉서티(perplexity) e^<span class="sym" style="color:#d62728">𝓛</span>은 같은 손실을 거듭제곱으로 되돌린 값이다. 손실, 퍼플렉서티, 바이트당 비트는 단위만 다른 한 양이고, 퍼플렉서티가 무엇을 세는지는 아래 문제 10에서 찾아본다.</p>
 <aside class="guide"><p class="guide-title">길잡이 · 『ML 입문자를 위한 동역학』 「k차 마르코프 체인: 상태를 넓히면 다시 체인이 된다」</p><p>앞 k글자를 한 상태로 묶으면 다시 마르코프 체인이 된다는 것, 그리고 앞 토큰 수천 개를 보는 언어 모델을 아주 큰 체인으로 보는 눈. <a href="https://lameproof.com/dynamics-book/markov-ergodic-sec-higher-order-markov-chain.html">이어 읽기</a></p>
 </aside>
-<figure class="widget-embed" id="widget-code-length-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 예측기를 바꾸면 같은 글의 비트가 바뀐다</span><a class="widget-open" href="widgets/code-length.html?v=aa753593#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/code-length.html?w=w2&embed=1&v=aa753593" title="위젯 2: 예측기를 바꾸면 같은 글의 비트가 바뀐다" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-code-length-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 예측기를 바꾸면 같은 글의 비트가 바뀐다</span><a class="widget-open" href="widgets/code-length.html?v=d1116597#w2">크게 열기</a></div><iframe data-src="widgets/code-length.html?w=w2&embed=1&v=d1116597" title="위젯 2: 예측기를 바꾸면 같은 글의 비트가 바뀐다" loading="lazy"></iframe></figure>
 <h3 id="ml에서-친칠라는-png-보다-그림을-잘-줄인다">ML에서: 친칠라는 PNG 보다 그림을 잘 줄인다</h3>
 <p>델레탕 외의 「언어 모델링은 압축이다」는 딥마인드의 언어 모델 친칠라(파라미터 700억 개, 주로 글로 학습)에 산술 코딩을 붙여 글(enwik9), 그림(ImageNet 그림 조각), 소리(LibriSpeech 낭독 음성)를 1GB씩, 2,048바이트 조각마다 따로 줄였다. 논문의 표 1에 따르면 친칠라는 enwik9를 원래 크기의 8.3%로 줄였고(gzip은 조각으로 자르지 않고도 32.3%), 그림 조각을 48.0%, 소리를 21.0%로 줄여 그림 전용 압축기 PNG(58.5%)와 소리 전용 압축기 FLAC(30.3%)보다 작게 만들었다. 초록에는 그림 43.4%, 소리 16.4%로 표 1과 다르게 적혀 있지만, 어느 쪽이든 글로 배운 예측기가 그림과 소리에서도 전용 압축기를 앞선다.</p>
 <figure class="fig "><img src="images/code-length/deletang_rates.png" alt="델레탕 외(ICLR 2024) 표 1의 압축률을 이 책에서 다시 그린 것. 줄인 크기 ÷ 원래 크기(%), 작을수록 잘 줄인 것이다. 친칠라 70B와 FLAC은 2,048바이트 조각마다 따로 줄인 값, gzip과 PNG는 조각 없이 줄인 값이다. 초록에는 친칠라가 ImageNet 43.4%, LibriSpeech 16.4%로 적혀 있다" loading="lazy"><figcaption>델레탕 외(ICLR 2024) 표 1의 압축률을 이 책에서 다시 그린 것. 줄인 크기 ÷ 원래 크기(%), 작을수록 잘 줄인 것이다. 친칠라 70B와 FLAC은 2,048바이트 조각마다 따로 줄인 값, gzip과 PNG는 조각 없이 줄인 값이다. 초록에는 친칠라가 ImageNet 43.4%, LibriSpeech 16.4%로 적혀 있다</figcaption></figure>
@@ -816,7 +832,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>마트에서 라면 값을 봉지당이 아니라 그램당으로 보는 거네요. 큰 봉지가 봉지당은 비싸도 그램당은 쌀 수 있으니까요. 토큰이 봉지고 바이트가 그램이에요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="code-length-sec-arithmetic-coding.html">&larr; 산술 코딩: 예측기가 그대로 압축기가 된다</a><span class="page-count">4 / 5</span><a class="chapter-nav-next" href="code-length-sec-code-length-summary.html">자주 하는 실수와 요약 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="code-length-sec-arithmetic-coding.html">&larr; 산술 코딩: 예측기가 그대로 압축기가 된다</a><span class="page-count">4 / 5</span><a class="chapter-nav-next" href="code-length-sec-code-length-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

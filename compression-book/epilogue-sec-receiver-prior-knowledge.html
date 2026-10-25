@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 압축은 이해인가</a></li>
 <li class="toc-part">짧게 적는다는 것</li>
 <li><a href="low-dimension.html">예측할 수 있으면 낮은 차원</a></li>
@@ -667,7 +683,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="closed-loop.html">오토인코더와 클로즈드 루프: 되살린 것을 다시 압축하기</a></li>
 <li class="toc-part">관점의 한계</li>
 <li><a href="limits.html">압축만으로 충분한가: 짧게 적기가 말해 주지 않는 것</a></li>
-<li><a href="epilogue.html" class="active">맺음: 일곱 권을 압축의 눈으로</a><ul class="sidebar-toc"><li><a href="epilogue.html">처음부터 돌아보기</a></li><li><a href="epilogue-sec-entropy-counting-bits.html">엔트로피: 경우의 수의 로그는 적는 데 드는 비트 수다</a></li><li><a href="epilogue-sec-receiver-prior-knowledge.html" class="current">받는 쪽이 이미 아는 것: 대칭이 고른 축, 매니폴드, 디노이저</a></li><li><a href="epilogue-sec-what-compression-leaves-open.html">압축이 정하지 않는 것: 어느 해를 고를지, 무엇을 할지</a></li><li><a href="epilogue-sec-open-questions.html">남은 물음</a></li><li><a href="epilogue-sec-epilogue-summary.html">자주 하는 실수와 요약</a></li></ul></li></ol>
+<li><a href="epilogue.html" class="active">맺음: 일곱 권을 압축의 눈으로</a><ul class="sidebar-toc"><li><a href="epilogue.html">처음부터 돌아보기</a></li><li><a href="epilogue-sec-entropy-counting-bits.html">엔트로피: 경우의 수의 로그는 적는 데 드는 비트 수다</a></li><li><a href="epilogue-sec-receiver-prior-knowledge.html" class="current">받는 쪽이 이미 아는 것: 대칭이 고른 축, 매니폴드, 디노이저</a></li><li><a href="epilogue-sec-what-compression-leaves-open.html">압축이 정하지 않는 것: 어느 해를 고를지, 무엇을 할지</a></li><li><a href="epilogue-sec-open-questions.html">남은 물음</a></li><li><a href="epilogue-sec-epilogue-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li></ol>
 </nav>
 <button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
 <main>
@@ -678,12 +694,13 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h3 id="hist-bottleneck-autoencoder" class="history" data-people="kramer-mark">역사: 가운데가 좁은 신경망<span id="역사-가운데가-좁은-신경망" class="anchor-alias"></span></h3>
 <p>1991년 MIT 화학공학과의 크레이머(Mark A. Kramer)는 『AIChE 저널』에 「자기 연상 신경망을 쓴 비선형 주성분 분석(Nonlinear Principal Component Analysis Using Autoassociative Neural Networks)」을 실었다. 공정 자료처럼 여러 측정값이 서로 굽은 관계로 얽혀 있을 때, 주성분 분석은 직선 관계만 찾는다는 것이 그의 고민이었다. 그는 입력을 그대로 출력으로 되살리도록 신경망을 학습시키되, 가운데 층의 칸 수를 입력보다 훨씬 적게 두었다. 이렇게 가운데 층의 값 몇 개가 굽은 관계까지 담은 「주성분」이 되는 신경망은 오늘날 오토인코더라 부르는 구조의 이른 예다.</p>
 <p>압축의 눈으로 보면 이 구조는 일을 둘로 나눈다. 앞 절반(인코더)은 점마다 가운데 층의 숫자 몇 개를 내고, 뒤 절반(디코더)은 그 숫자로 점을 되살린다. 점마다 보내는 것은 숫자 몇 개뿐이지만, 받는 쪽은 디코더 전체를 미리 가지고 있어야 한다. 크레이머의 논문은 이것을 비트로 세지 않았는데, 디코더를 적는 비트까지 세면 어떻게 되는지가 이 절의 물음이다.</p>
+<figure class="fig "><img src="images/epilogue/hist_kramer_network.png" alt="크레이머의 다섯 층 신경망: 점마다 보내는 것은 병목 층의 숫자 2개이고, 받는 쪽은 디코더의 파라미터 53개를 미리 가지고 있어야 한다. 크레이머(1991)의 구조를 다시 그림, 칸 수는 보기로 고른 값(sources/epilogue/h_history.py)" loading="lazy"><figcaption>크레이머의 다섯 층 신경망: 점마다 보내는 것은 병목 층의 숫자 2개이고, 받는 쪽은 디코더의 파라미터 53개를 미리 가지고 있어야 한다. 크레이머(1991)의 구조를 다시 그림, 칸 수는 보기로 고른 값(sources/epilogue/h_history.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>가운데를 좁게 두고 입력을 되살리게 하는 신경망이면, 지금은 파이토치로 열 줄이면 짜요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>1991년은 역전파 학습이 널리 알려진 1986년에서 다섯 해 뒤였어요. 크레이머는 굽은 관계를 담으려고 가운데 층 앞뒤에 층을 하나씩 더 두었는데, 층을 그렇게 겹겹이 쌓은 신경망을 학습시키는 일 자체가 그때는 까다로웠어요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>가운데 칸 수는 어떻게 정해요? 음, 너무 적으면 못 되살리고, 입력만큼 많으면 그냥 베껴 내기만 할 텐데요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>되살린 오차만 보면 칸이 많을수록 늘 좋아 보여요. 크레이머의 논문은 오차 말고 디코더를 적는 비트는 세지 않았고요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 디코더가 클수록 점을 되살리는 사람이 미리 가지고 있어야 할 게 커지는데, 그건 오차에 안 나오네요.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>오토인코더를 디코더까지 넣은 코드 길이로 읽은 논문은 1994년 힌턴과 제멜에게서 나와요. 크레이머보다 세 해 뒤예요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>오토인코더의 목표를 코드 길이(코드를 적는 비트와 되살린 오차를 적는 비트의 합)로 읽은 논문은 1994년 힌턴과 제멜에게서 나와요. 크레이머보다 세 해 뒤예요. 그 논문도 디코더의 파라미터를 적는 비트는 셈에 넣지 않았어요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그러면 되살리는 사람이 미리 가진 디코더의 비트는 자료 하나하나가 내는 게 아니라, 누가 언제 내는 거예요?</p></div></div>
 <h3 id="축을-보내느냐-받는-쪽이-만드느냐">축을 보내느냐, 받는 쪽이 만드느냐</h3>
 <p>칸 16개짜리 신호를 두 가지 마련했다. (ㄱ)은 느린 물결 셋(1번, 2번, 3번 물결, 세기 1, 0.6, 0.3)을 위상만 무작위로 바꿔 더한 신호여서, 칸을 고리처럼 이어 붙였을 때 어느 칸에서 보아도 통계가 같은 미는 대칭이 있다. (ㄴ)은 늘 4번 칸 둘레에 서는 봉우리 하나로 높이와 폭만 신호마다 다르며, 두 신호 모두 칸마다 표준편차 0.05의 노이즈를 더했다.</p>
@@ -695,7 +712,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <figure class="fig "><img src="images/epilogue/symmetry_two_part.png" alt="위: 두 자료의 예 셋. 아래: 신호 수 n에 따라 신호 하나에 드는 비트(모델 비트를 n으로 나눠 더한 값). 갈색은 대칭이 고른 축(축은 0비트), 보라는 자료가 고른 축(축 96개 숫자를 보냄). 미는 대칭이 있는 신호에서는 n = 1,024까지 갈색이 늘 짧고, 4번 칸 봉우리에서는 n = 96과 128 사이에서 보라가 짧아진다(sources/epilogue/s3_symmetry.py, figs.py)" loading="lazy"><figcaption>위: 두 자료의 예 셋. 아래: 신호 수 n에 따라 신호 하나에 드는 비트(모델 비트를 n으로 나눠 더한 값). 갈색은 대칭이 고른 축(축은 0비트), 보라는 자료가 고른 축(축 96개 숫자를 보냄). 미는 대칭이 있는 신호에서는 n = 1,024까지 갈색이 늘 짧고, 4번 칸 봉우리에서는 n = 96과 128 사이에서 보라가 짧아진다(sources/epilogue/s3_symmetry.py, figs.py)</figcaption></figure>
 <p>미는 대칭이 있는 신호에서는 어느 n에서도 대칭이 고른 축이 짧다. 자료가 고른 축도 결국 물결 모양에 가까워지지만, 받는 쪽이 대칭만으로 만들 수 있는 축을 1,536비트 들여 보내는 것이다. 4번 칸 봉우리에서는 순서가 바뀐다. 봉우리는 물결 몇 개로 잘 적히지 않아 잔차가 크고, 신호 하나에 드는 비트가 91비트 근처에서 더 내려가지 않는다. 자료가 고른 축은 처음에는 축 값이 무거워 길지만, 신호가 96개에서 128개 사이를 넘으면 신호 하나가 나눠 지는 축 값의 비트가 작아져 더 짧아진다. 1,024개에서는 신호 하나에 77.6비트로, 대칭이 고른 축의 91.1비트보다 13비트 넘게 짧다.</p>
 <p>그러면 대칭이 준 압축은 정말 공짜일까? 대칭이 고른 축은 비트가 들지 않은 것이 아니라, 「미는 대칭이 있다」는 짧은 사실 하나로 축 96개 숫자를 대신한 것이다. 그 사실이 자료에 맞으면 축 값을 아끼고, 맞지 않으면(봉우리처럼) 잔차로 더 치른다. 미분기하학의 매니폴드도 같은 구조다. 자료가 어떤 낮은 차원의 곳 위에 있는지 아는 사람은 점마다 그곳 위의 자리 몇 개만 적으면 되지만, 그곳의 모양은 누군가 한 번 적어 두어야 한다. 디노이저는 그 모양을 신경망의 파라미터로 적어 둔 것이다. 자료가 사는 곳에서 벗어난 방향을 지우는 디노이저를 가진 쪽은 노이즈에서 출발해 디노이저를 거듭 불러 그곳의 점을 되살린다. 디퓨전의 생성을 압축 풀기로 읽는 것은 이 뜻이다.</p>
-<figure class="widget-embed" id="widget-epilogue-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 받는 쪽이 이미 아는 축</span><a class="widget-open" href="widgets/epilogue.html?v=768d9f56#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/epilogue.html?w=w2&embed=1&v=768d9f56" title="위젯 2: 받는 쪽이 이미 아는 축" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-epilogue-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 받는 쪽이 이미 아는 축</span><a class="widget-open" href="widgets/epilogue.html?v=5b5c3030#w2">크게 열기</a></div><iframe data-src="widgets/epilogue.html?w=w2&embed=1&v=5b5c3030" title="위젯 2: 받는 쪽이 이미 아는 축" loading="lazy"></iframe></figure>
 <aside class="guide"><p class="guide-title">길잡이 · 『스펙트럼으로 보기: 에피사이클에서 구면 조화까지』 「원형 행렬: 모든 필터가 같은 물결을 축으로 쓴다」</p><p>미는 대칭이 있으면 왜 어떤 필터든 같은 물결을 고유벡터로 가지는지. 대칭 하나가 축을 데이터 없이 정해 준다는 것의 수학. <a href="https://lameproof.com/signal-book/shift-symmetry-sec-circulant-matrix-eigenvectors.html">이어 읽기</a></p>
 </aside>
 <aside class="guide"><p class="guide-title">길잡이 · 『미분기하학의 언어들』 「매니폴드: 어디를 확대해도 평면인 공간」</p><p>낮은 차원의 「곳」이 수학에서 무엇인지, 확대하면 평면인 조각들이 모여 전체로 어떤 모양을 이루는지. <a href="https://lameproof.com/diffgeo-book/charts.html">이어 읽기</a></p>
