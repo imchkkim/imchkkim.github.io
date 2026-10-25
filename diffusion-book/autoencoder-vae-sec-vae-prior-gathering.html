@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,12 +664,13 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: MLP에서 디퓨전 트랜스포머까지</a></li>
 <li class="toc-part">기본기</li>
 <li><a href="conditional-prob.html">조건부 확률분포: p(a∣b) 와 p(b∣a)</a></li>
 <li class="toc-part">오토인코더와 VAE</li>
 <li><a href="teaching-generation.html">생성을 가르치는 법: 분류기를 뒤집으면</a></li>
-<li><a href="autoencoder-vae.html" class="active">오토인코더에서 VAE 로</a><ul class="sidebar-toc"><li><a href="autoencoder-vae.html">오토인코더: 그림 자신을 정답으로 삼기</a></li><li><a href="autoencoder-vae-sec-autoencoder-empty-neighborhood.html">점만 모으면: 오토인코더의 이웃은 비어 있다</a></li><li><a href="autoencoder-vae-sec-vae-encoder-distribution.html">인코더 분포: 점 하나를 정규분포로 넓히기</a></li><li><a href="autoencoder-vae-sec-vae-prior-gathering.html" class="current">VAE: 인코더 분포를 사전분포 안으로 모으기</a></li><li><a href="autoencoder-vae-sec-vae-reparameterization.html">재파라미터화: 뽑기를 거쳐 미분하기</a></li><li><a href="autoencoder-vae-sec-vae-elbo-bound.html">ELBO: 잴 수 없는 로그우도의 하한</a></li><li><a href="autoencoder-vae-sec-autoencoder-vae-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="autoencoder-vae.html" class="active">오토인코더에서 VAE 로</a><ul class="sidebar-toc"><li><a href="autoencoder-vae.html">오토인코더: 그림 자신을 정답으로 삼기</a></li><li><a href="autoencoder-vae-sec-autoencoder-empty-neighborhood.html">점만 모으면: 오토인코더의 이웃은 비어 있다</a></li><li><a href="autoencoder-vae-sec-vae-encoder-distribution.html">인코더 분포: 점 하나를 정규분포로 넓히기</a></li><li><a href="autoencoder-vae-sec-vae-prior-gathering.html" class="current">VAE: 인코더 분포를 사전분포 안으로 모으기</a></li><li><a href="autoencoder-vae-sec-vae-reparameterization.html">재파라미터화: 뽑기를 거쳐 미분하기</a></li><li><a href="autoencoder-vae-sec-vae-elbo-bound.html">ELBO: 잴 수 없는 로그우도의 하한</a></li><li><a href="autoencoder-vae-sec-autoencoder-vae-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li class="toc-part">조건을 붙여가기</li>
 <li><a href="denoising.html">디노이징과 조건부 디노이징: 고치다 보면 만들게 된다</a></li>
 <li><a href="condition-elbo.html">조건과 ELBO</a></li>
@@ -695,6 +711,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>같은 그림에 앞 절의 인코더 분포 <span class="sym" style="color:#ff5a78">q<sub>φ</sub></span>(<span class="sym" style="color:#8c564b">z</span> ∣ <span class="sym" style="color:#1b9e77">x</span>)도 겹쳐 그렸다. 인코더 분포는 칸마다 따로 퍼진 둥근 타원이라, 비스듬히 누운 사후분포를 꼭 맞추지는 못한다. 인코더 분포는 계산할 수 있는 모양으로 사후분포를 흉내 낸 근사다. 인코더 분포와 사후분포가 얼마나 어긋나는지는 뒤의 ELBO 절에서 KL 발산으로 잰다.</p>
 <h3 id="hist-vae-two-teams" class="history" data-people="kingma-diederik welling-max rezende-danilo">역사: 두 팀이 같은 해에 같은 답에 닿았다<span id="역사-두-팀이-같은-해에-같은-답에-닿았다" class="anchor-alias"></span></h3>
 <p>이 방법은 두 팀이 따로 내놓았다. 킹마(Diederik Kingma)와 웰링(Max Welling)은 2013년 12월 논문 「오토인코딩 변분 베이즈」에서 이렇게 물었다. 연속인 잠재 변수가 있고, 그 사후분포(그림을 본 뒤 잠재 변수의 분포)를 계산할 수 없고, 데이터셋이 클 때 어떻게 효율적으로 추론하고 학습할 것인가. 답은 두 가지였다. 하한(뒤의 ELBO 절)을 다시 써서 보통의 확률적 경사하강으로 바로 올릴 수 있게 하는 것, 그리고 계산할 수 없는 사후분포를 흉내 내는 「인식 모델」을 그림마다 따로 풀지 않고 신경망 하나로 함께 학습하는 것. 한 달 뒤인 2014년 1월 레젠데(Danilo Jimenez Rezende), 모하메드(Shakir Mohamed), 비어스트라(Daan Wierstra)도 근사 사후분포를 나타내는 인식 모델을 「확률적인 인코더」로 두는 같은 구조를 내놓았다. 앞의 인식 모델이 곧 인코더다.</p>
+<figure class="fig "><img src="images/autoencoder-vae/h_per_image_q.png" alt="그림마다 q 를 따로 맞추던 옛 방식을 이 장의 VAE 디코더 위에서 흉내 내면, 시험 그림 200장이 인코더가 한 번에 내놓는 q 만큼 좋아지는 데 절반이 205스텝을 쓰고 600스텝 뒤에도 13%는 엉뚱한 숫자 쪽 극대점에 갇히며(왼쪽, 1 nat 안을 닿음으로 침), 오른쪽은 숫자 7 한 장의 μ 가 사전분포의 중심에서 출발해 옮겨 간 길이다(옛 방식의 손 유도 업데이트 대신 Adam 경사 상승을 씀, 직접 계산. 그림 자료: MNIST(CC BY-SA 3.0))." loading="lazy"><figcaption>그림마다 q 를 따로 맞추던 옛 방식을 이 장의 VAE 디코더 위에서 흉내 내면, 시험 그림 200장이 인코더가 한 번에 내놓는 q 만큼 좋아지는 데 절반이 205스텝을 쓰고 600스텝 뒤에도 13%는 엉뚱한 숫자 쪽 극대점에 갇히며(왼쪽, 1 nat 안을 닿음으로 침), 오른쪽은 숫자 7 한 장의 μ 가 사전분포의 중심에서 출발해 옮겨 간 길이다(옛 방식의 손 유도 업데이트 대신 Adam 경사 상승을 씀, 직접 계산. 그림 자료: MNIST(CC BY-SA 3.0)).</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>인코더가 분포를 내놓게 신경망을 하나 더 붙인 거잖아요. 두 팀이 한 달 차이로 닿을 만큼 자연스러운 생각인데, 왜 2013년까지 아무도 안 했어요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>사후분포를 흉내 내는 q 를 구하는 방법은 그 전에도 있었어요. 다만 모델이 바뀔 때마다 q 를 고치는 업데이트 식을 손으로 새로 유도했고, 데이터 하나하나마다 그 업데이트를 따로 돌려 q 를 구했어요. MNIST 학습 그림이 6만 장이면 몇 번을 풀어야 하죠?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>6만 번이요… 학습하면서 디코더가 바뀌면 사후분포도 바뀌니까, 한 바퀴 돌 때마다 또 풀어야겠네요.</p></div></div>
@@ -732,7 +749,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h3 id="지도가-원-안으로-들어온다">지도가 원 안으로 들어온다</h3>
 <p>오토인코더와 같은 몸통(784-128-64, 잠재 변수 2칸)으로 VAE를 학습했다. 시험 그림 만 장에서 재구성 항은 평균 −130.75, KL은 6.81이다(단위 nat. 자연로그로 잰 정보의 양). 인코더 분포의 중심은 원점에서 평균 1.34만큼 떨어져 있고, 표준편차는 평균 0.039다. 오토인코더의 잠재 변수가 원점에서 평균 5.1만큼, 멀리는 25까지 흩어졌던 것과 비교하면 잠재 변수 전체가 반지름 2 남짓한 원 안으로 들어왔다.</p>
 <p>이제 두 한계가 함께 풀렸다. 뽑을 곳은 N(0, I) 하나로 정해졌고(②), 그 안을 그림마다의 인코더 분포가 겹쳐 덮는다(①). N(0, I)에서 잠재 변수를 1만 개 뽑아 디코더에 넣으면, 분류기가 90% 넘게 확신하는 그림이 74.9%이고 분류된 숫자는 0부터 9까지 6.5% ~ 11.9%로 고르게 나온다. 데이터를 보지 않고 새 손글씨 숫자를 만들어 낸다. 뽑기 성적만 보면 점을 모은 오토인코더(78.9%)와 비슷하고, VAE 와 점을 모은 오토인코더의 차이는 앞에서 본 대로 학습 그림의 잠재 변수 둘레에 있다.</p>
-<figure class="widget-embed" id="widget-autoencoder-vae-w4"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">VAE 의 잠재 변수 지도</span><a class="widget-open" href="widgets/autoencoder-vae.html?v=647ed26e#w4" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/autoencoder-vae.html?w=w4&embed=1&v=647ed26e" title="VAE 의 잠재 변수 지도" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-autoencoder-vae-w4"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">VAE 의 잠재 변수 지도</span><a class="widget-open" href="widgets/autoencoder-vae.html?v=99219893#w4">크게 열기</a></div><iframe data-src="widgets/autoencoder-vae.html?w=w4&embed=1&v=99219893" title="VAE 의 잠재 변수 지도" loading="lazy"></iframe></figure>
 <h3 id="ml에서-생성-모델을-이루는-세-가지">ML에서: 생성 모델을 이루는 세 가지</h3>
 <p>VAE 에서 그림이 지나가는 경로는 둘이다. 하나는 <span class="sym" style="color:#ff5a78">p</span>(<span class="sym" style="color:#8c564b">z</span>)에서 잠재 변수를 뽑고, 디코더 <span class="sym" style="color:#ff5a78">p<sub>θ</sub></span>(<span class="sym" style="color:#1b9e77">x</span> ∣ <span class="sym" style="color:#8c564b">z</span>)로 그림을 얻는 생성 경로다. 다른 하나는 실제 그림을 인코더 <span class="sym" style="color:#ff5a78">q<sub>φ</sub></span>(<span class="sym" style="color:#8c564b">z</span> ∣ <span class="sym" style="color:#1b9e77">x</span>)로 줄였다가 디코더로 되살리는 학습 경로이고, 학습은 이 경로로 한다. 앞으로 이 책의 생성 모델은 모두 세 가지, 곧 뽑기 쉬운 출발 분포(VAE 의 사전분포), 출발 분포에서 그림으로 가는 생성 경로(디코더), 생성 경로를 배우게 해 주는 거꾸로 가는 경로(인코더)의 변주로 읽을 수 있다.</p>
 <div class="dialogue"><h3 id="prob-autoencoder-lunch-guess">문제 7. 점심 메뉴 짐작<span id="문제-7-점심-메뉴-짐작" class="anchor-alias"></span></h3>

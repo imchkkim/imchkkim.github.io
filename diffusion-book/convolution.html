@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: MLP에서 디퓨전 트랜스포머까지</a></li>
 <li class="toc-part">기본기</li>
 <li><a href="conditional-prob.html">조건부 확률분포: p(a∣b) 와 p(b∣a)</a></li>
@@ -660,7 +676,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="condition-elbo.html">조건과 ELBO</a></li>
 <li class="toc-part">신호와 스펙트럼</li>
 <li><a href="spectrum.html">그림을 나누는 축: 스펙트럼</a></li>
-<li><a href="convolution.html" class="active">합성곱: 이웃만 보는 MLP</a><ul class="sidebar-toc"><li><a href="convolution.html" class="current">합성곱: 이웃에 같은 비율을 곱해 더하기</a></li><li><a href="convolution-sec-weight-sharing-kernel.html">가중치 공유: 모든 자리에서 같은 커널을 쓴다</a></li><li><a href="convolution-sec-receptive-field-depth.html">수용 영역: 층을 쌓아야 멀리 본다</a></li><li><a href="convolution-sec-feature-channels.html">채널: 한 칸에 여러 특징을 함께 담는다</a></li><li><a href="convolution-sec-convolution-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="convolution.html" class="active">합성곱: 이웃만 보는 MLP</a><ul class="sidebar-toc"><li><a href="convolution.html" class="current">합성곱: 이웃에 같은 비율을 곱해 더하기</a></li><li><a href="convolution-sec-weight-sharing-kernel.html">가중치 공유: 모든 자리에서 같은 커널을 쓴다</a></li><li><a href="convolution-sec-receptive-field-depth.html">수용 영역: 층을 쌓아야 멀리 본다</a></li><li><a href="convolution-sec-feature-channels.html">채널: 한 칸에 여러 특징을 함께 담는다</a></li><li><a href="convolution-sec-convolution-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="noising.html">퍼짐: 그림에 노이즈를 섞으면</a></li>
 <li><a href="unet.html">U-Net: 여러 해상도로 노이즈를 읽는다</a></li>
 <li class="toc-part">직관을 합치기</li>
@@ -715,7 +731,7 @@ i,\ j,\ a,\ b &amp; \text{칸의 번호와 가운데에서 떨어진 칸 수 (�
 <p>커널이 어떤 모양인지는 점 하나에 걸어 보면 바로 보인다. 가운데 칸에만 1이 있는 줄 0, 0, 0, 1, 0, 0, 0에 이웃 평균을 걸면 0, 0, ¼, ½, ¼, 0, 0이 나온다. 점 하나가 커널 모양으로 번진 것이다. 처음 줄이 여러 점의 합이라면 출력은 점마다 번진 커널을 그 점의 값만큼 키워 더한 것이 된다. 블러를 건 그림도 칸마다 종 모양을 그 칸의 밝기만큼 키워 씌워 더한 것이다.</p>
 <p>출력이 두 칸 짧아지는 것도 눈여겨보자. 양 끝 칸에는 이웃이 한쪽뿐이라 계산을 빼면 길이가 8에서 6이 된다. 그림 크기를 그대로 지키려면 바깥에 0을 채우거나 가장자리 값을 늘여 채운 뒤 계산한다. 이렇게 바깥을 채우는 것을 패딩(padding)이라 부른다.</p>
 <p>아래 위젯에서 3 × 3 커널의 아홉 수를 바꿔 같은 그림에 걸어 보자. 이웃 평균, 윤곽, 선명하게가 모두 아홉 수의 차이일 뿐이다. 노이즈를 섞은 뒤 이웃 평균을 걸면 노이즈는 줄지만 가는 선도 함께 뭉개지는 것도 보인다.</p>
-<figure class="widget-embed" id="widget-convolution-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">커널 놀이터</span><a class="widget-open" href="widgets/convolution.html?v=7c7e4313#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/convolution.html?w=w1&embed=1&v=7c7e4313" title="커널 놀이터" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-convolution-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">커널 놀이터</span><a class="widget-open" href="widgets/convolution.html?v=272eddee#w1">크게 열기</a></div><iframe data-src="widgets/convolution.html?w=w1&embed=1&v=272eddee" title="커널 놀이터" loading="lazy"></iframe></figure>
 <h3 id="ml에서-커널을-사람이-고르지-않고-배우게-하면">ML에서: 커널을 사람이 고르지 않고 배우게 하면</h3>
 <p>커널의 아홉 수를 신경망의 가중치로 두고 학습으로 정하게 할 수 있다. 2012년 크리젭스키(Alex Krizhevsky), 수츠케버(Ilya Sutskever), 힌턴(Geoffrey Hinton)의 신경망은 ImageNet 대회(ILSVRC-2012)에서 상위 5개 답 오류율 15.3%로 2위(26.2%)를 크게 앞서 우승했다. 이 신경망은 학습 사진 약 120만 장으로 1,000가지 범주를 가르도록 배우면서 첫 층에서 11 × 11칸(칸마다 빨강·초록·파랑 3개의 수) 커널 96개를 배웠다. 논문은 배운 커널들이 「여러 촘촘함과 방향을 고르는 커널과 여러 색 얼룩」이 되었다고 적었다. 사람이 손으로 만들던 윤곽 커널과 닮은 것들이 학습만으로 나왔다.</p>
 <p>디노이징에서도 해 보자. 깨끗한 신호(무작위 수열을 폭 3칸 종 모양으로 흐려 표준편차 1로 맞춘 줄) 2,000개에 크기 <span class="sym" style="color:#4c5d80">σ</span>(시그마) = 0.5인 노이즈를 섞고, 노이즈 섞인 줄에 걸었을 때 깨끗한 줄과의 평균 제곱 차이가 가장 작아지는 5칸 커널을 구했다. 커널에서 출력까지가 곱하고 더하기뿐이라 최소 제곱으로 한 번에 풀린다(경사 하강으로 배워도 같은 답에 간다). 배운 커널은 [0.168, 0.213, 0.229, 0.213, 0.168]로, 이웃 평균 [¼, ½, ¼]보다 넓고 납작하다. 새로 뽑은 신호로 재면 평균 제곱 차이가 아무것도 하지 않을 때 0.252, 이웃 평균 0.094, 배운 커널 0.057이다. 합성곱 한 층짜리 「노이즈를 걷는 신경망」이다.</p>
@@ -762,7 +778,7 @@ i,\ j,\ a,\ b &amp; \text{칸의 번호와 가운데에서 떨어진 칸 수 (�
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조교님이 보고서를 고칠 때 초안이면 크게 뜯어고치고 최종본이면 맞춤법만 보는 거랑 같네요. 얼마나 엉망인지 알아야 손대는 정도를 정하죠.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="spectrum-sec-spectrum-mistakes-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="convolution-sec-weight-sharing-kernel.html">가중치 공유: 모든 자리에서 같은 커널을 쓴다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="spectrum-sec-spectrum-mistakes-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="convolution-sec-weight-sharing-kernel.html">가중치 공유: 모든 자리에서 같은 커널을 쓴다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

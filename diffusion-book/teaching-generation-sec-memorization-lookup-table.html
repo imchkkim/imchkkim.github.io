@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,11 +664,12 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: MLP에서 디퓨전 트랜스포머까지</a></li>
 <li class="toc-part">기본기</li>
 <li><a href="conditional-prob.html">조건부 확률분포: p(a∣b) 와 p(b∣a)</a></li>
 <li class="toc-part">오토인코더와 VAE</li>
-<li><a href="teaching-generation.html" class="active">생성을 가르치는 법: 분류기를 뒤집으면</a><ul class="sidebar-toc"><li><a href="teaching-generation.html">조건부 평균: 분류기를 뒤집으면 평균 그림이 나온다</a></li><li><a href="teaching-generation-sec-intrinsic-label-variance.html">내재적 확률성: 라벨을 알아도 남는 분산</a></li><li><a href="teaching-generation-sec-memorization-lookup-table.html" class="current">암기: 같은 입력에 같은 답이면 룩업 테이블이다</a></li><li><a href="teaching-generation-sec-teaching-generation-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="teaching-generation.html" class="active">생성을 가르치는 법: 분류기를 뒤집으면</a><ul class="sidebar-toc"><li><a href="teaching-generation.html">조건부 평균: 분류기를 뒤집으면 평균 그림이 나온다</a></li><li><a href="teaching-generation-sec-intrinsic-label-variance.html">내재적 확률성: 라벨을 알아도 남는 분산</a></li><li><a href="teaching-generation-sec-memorization-lookup-table.html" class="current">암기: 같은 입력에 같은 답이면 룩업 테이블이다</a></li><li><a href="teaching-generation-sec-teaching-generation-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="autoencoder-vae.html">오토인코더에서 VAE 로</a></li>
 <li class="toc-part">조건을 붙여가기</li>
 <li><a href="denoising.html">디노이징과 조건부 디노이징: 고치다 보면 만들게 된다</a></li>
@@ -753,7 +769,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>무작위 찾아보기는 다양하고 선명하지만, 내놓는 그림 하나하나가 학습 그림과 똑같아서 새로움이 0이다. 실제로 새로 쓰인 3은 그렇지 않다. 시험 그림의 3 1,010장은 가장 가까운 학습 그림에서도 평균 24.2, 가장 가까운 것도 9.2 떨어져 있고, 시험 그림 10,000장 가운데 학습 그림과 똑같은 것은 한 장도 없다. 평균 MLP는 거꾸로 새로움이 22.8로 기준과 비슷한데 회색 칸이 네 배이므로, 새로움 하나만 보면 흐린 평균 그림도 새 그림으로 통과한다.</p>
 <p>이렇게 생성기가 학습 그림을 그대로, 또는 거의 그대로 다시 내놓는 것을 <strong>암기</strong> (학습 그림을 그대로 꺼내 주기 / memorization)라 한다. 대표 그림 찾아보기와 무작위 찾아보기는 암기만 하는 생성기다. 늘 같은 것을 꺼내든 무작위로 꺼내든, 학습 데이터를 꺼내 주는 데 머물면 데이터베이스다. 우리가 바라는 생성기는 표의 맨 아래 줄처럼 다양하고, 선명하고, 새로워야 한다.</p>
 <h3 id="ml에서-디퓨전-모델에서-학습-그림-꺼내기">ML에서: 디퓨전 모델에서 학습 그림 꺼내기</h3>
-<p>큰 그림 생성 모델도 암기를 한다. 칼리니(Nicholas Carlini)와 동료들은 2023년, 글을 받아 그림을 그리는 Stable Diffusion v1.4 의 학습 데이터에서 가장 많이 겹쳐 실린 그림 35만 장의 설명 글을 골라, 글마다 500장씩 모두 1억 7,500만 장을 그렸다. 같은 글로 그린 500장 가운데 서로 거의 같은 그림이 여럿 나오면 암기를 의심했고, 학습 그림과의 거리로 확인해 94장이 학습 그림을 거의 그대로 되살린 것임을 보였다(눈으로 더 찾은 13장을 더하면 109장). 다양성이 무너져 같은 글에 같은 그림이 거듭 나오는 것이 암기의 단서였다.</p>
+<p>큰 그림 생성 모델도 암기를 한다. 칼리니(Nicholas Carlini)와 동료들은 2023년, 글을 받아 그림을 그리는 Stable Diffusion v1.4 의 학습 데이터에서 가장 많이 겹쳐 실린 그림 수십만 장의 설명 글을 골라, 글마다 수백 장씩 모두 1억 장이 넘게 그렸다. 같은 글로 그린 그림들 가운데 서로 거의 같은 그림이 여럿 나오면 암기를 의심했고, 학습 그림과의 거리로 확인해 학습 그림을 거의 그대로 되살린 그림을 백 장 남짓 찾아냈다. 다양성이 무너져 같은 글에 같은 그림이 거듭 나오는 것이 암기의 단서였다.</p>
 <div class="dialogue"><h3 id="prob-teaching-lunch-recommender">문제 7. 점심 메뉴 추천 앱<span id="문제-7-점심-메뉴-추천-앱" class="anchor-alias"></span></h3>
 <blockquote>
 <p>학교 식당 메뉴판에 메뉴가 30개 있다. 앱 A는 기분(좋음, 보통, 피곤, 우울, 신남) 가운데 하나를 받아 정해진 규칙대로 메뉴 하나를 추천한다. 앱 B는 기분과 상관없이 메뉴판에서 하나를 무작위로 고른다. (가) 앱 A가 평생 추천할 수 있는 메뉴는 많아야 몇 가지인가? (나) 앱 B를 30일 동안 하루 한 번 쓰면 서로 다른 메뉴를 평균 몇 가지 받는가? (다) 두 앱 가운데 메뉴판에 없는 새 메뉴를 추천할 수 있는 것은?</p>
@@ -802,7 +818,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>과제 두 개를 반씩 베껴 붙이면 표절 검사는 피해도 글이 앞뒤가 안 맞는 거랑 같네요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="teaching-generation-sec-intrinsic-label-variance.html">&larr; 내재적 확률성: 라벨을 알아도 남는 분산</a><span class="page-count">3 / 4</span><a class="chapter-nav-next" href="teaching-generation-sec-teaching-generation-summary.html">자주 하는 실수와 요약 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="teaching-generation-sec-intrinsic-label-variance.html">&larr; 내재적 확률성: 라벨을 알아도 남는 분산</a><span class="page-count">3 / 4</span><a class="chapter-nav-next" href="teaching-generation-sec-teaching-generation-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

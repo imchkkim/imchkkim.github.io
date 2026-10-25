@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: MLP에서 디퓨전 트랜스포머까지</a></li>
 <li class="toc-part">기본기</li>
 <li><a href="conditional-prob.html">조건부 확률분포: p(a∣b) 와 p(b∣a)</a></li>
@@ -668,7 +684,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="ddpm.html">노이즈를 맞히는 신경망: DDPM과 디노이징 스코어 매칭</a></li>
 <li><a href="reverse-sde.html">랑주뱅과 역방향 미분방정식: 샘플을 뽑는 길</a></li>
 <li><a href="flow-matching.html">플로우 매칭: 길을 통째로 배우기</a></li>
-<li><a href="prediction-target.html" class="active">예측의 대상: 노이즈·속도장·이미지</a><ul class="sidebar-toc"><li><a href="prediction-target.html">원래 그림 예측: 같은 답, 다른 배점</a></li><li><a href="prediction-target-sec-manifold-hypothesis.html" class="current">매니폴드 가설: 그림은 좁은 면 위에, 노이즈는 모든 방향에</a></li><li><a href="prediction-target-sec-output-parameterization.html">출력 꼴 고르기: 노이즈에서 출발해 그림으로 돌아온 길</a></li><li><a href="prediction-target-sec-prediction-target-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="prediction-target.html" class="active">예측의 대상: 노이즈·속도장·이미지</a><ul class="sidebar-toc"><li><a href="prediction-target.html">원래 그림 예측: 같은 답, 다른 배점</a></li><li><a href="prediction-target-sec-manifold-hypothesis.html" class="current">매니폴드 가설: 그림은 좁은 면 위에, 노이즈는 모든 방향에</a></li><li><a href="prediction-target-sec-output-parameterization.html">출력 꼴 고르기: 노이즈에서 출발해 그림으로 돌아온 길</a></li><li><a href="prediction-target-sec-prediction-target-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="samplers.html">샘플러: 같은 길을 걷는 여러 솔버</a></li>
 <li class="toc-part">구조와 조건, 영상</li>
 <li><a href="transformer.html">어텐션과 트랜스포머: 멀리 떨어진 칸끼리 읽기</a></li>
@@ -750,7 +766,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p><span class="sym" style="color:#3c4bff">D</span> = 16까지는 셋이 비슷하다. 노이즈 예측은 <span class="sym" style="color:#3c4bff">D</span> = 64부터, 속도 예측은 폭과 같은 256부터 손실이 <span class="sym" style="color:#3c4bff">D</span>를 따라 치솟고, 노이즈 예측은 샘플링이 터져 점이 화면 밖으로 날아갔다. 원래 그림 예측은 <span class="sym" style="color:#3c4bff">D</span> = 2048에서도 손실 35, 평면 밖 거리 0.08이다. 속도 예측의 점을 평면으로 되돌려 찍으면 나선 모양은 흐릿하게나마 남는다(조각 바서슈타인 0.15~0.18, 원래 그림 예측 0.11~0.17). 무너진 곳은 평면 위가 아니라 노이즈가 퍼져 있던 평면 밖이다.</p>
 <p>예상과 다른 결과도 둘 있었다. <span class="sym" style="color:#3c4bff">D</span>가 작을 때 평면 위 모양은 속도 예측이 가장 좋았다(<span class="sym" style="color:#3c4bff">D</span> = 2에서 0.07, 원래 그림 예측 0.18). 또 <span class="sym" style="color:#3c4bff">D</span> = 512에서 폭을 1024로 넓혀도 속도 예측의 손실은 382에서 174로 줄었을 뿐이다. 폭을 64로 좁혀도 원래 그림 예측의 손실은 11.5에서 변하지 않았다.</p>
 <p>그림처럼 높은 차원의 수로 적히는 데이터가 실제로는 차원이 훨씬 낮은 매끈한 면 근처에 모여 있다는 경험적 주장을 <strong>매니폴드 가설</strong> (데이터는 좁은 면 근처에 모인다 / manifold hypothesis)이라 한다. 장난감은 그 면이 정확히 평면 하나인 경우다. 같은 정보라던 세 꼴이 왜 이렇게 갈라지는지, 신경망의 어느 자리가 막히는지는 아래 문제에서 따져 보자.</p>
-<figure class="widget-embed" id="widget-prediction-target-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">나선을 높은 차원에 묻기</span><a class="widget-open" href="widgets/prediction-target.html?v=4871fb46#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/prediction-target.html?w=w2&embed=1&v=4871fb46" title="나선을 높은 차원에 묻기" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-prediction-target-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">나선을 높은 차원에 묻기</span><a class="widget-open" href="widgets/prediction-target.html?v=67621ec0#w2">크게 열기</a></div><iframe data-src="widgets/prediction-target.html?w=w2&embed=1&v=67621ec0" title="나선을 높은 차원에 묻기" loading="lazy"></iframe></figure>
 <h3 id="ml에서-실제-그림의-면은-몇-차원인가">ML에서: 실제 그림의 면은 몇 차원인가</h3>
 <p>포프(Phillip Pope)와 동료들은 2021년, 이웃한 그림 사이의 거리로 데이터가 실제로 움직이는 차원을 추정하는 방법을 흔히 쓰는 그림 자료에 적용했다. CIFAR-10 그림 한 장은 수 3,072개이지만 추정한 차원은 13~26이었고, ImageNet 그림은 26~43이었다(이웃을 몇 개 쓰느냐에 따라 달라진다). 같은 논문은 차원이 낮은 자료일수록 신경망이 적은 예로 배우고 시험 자료에도 잘 들어맞는다고 보고했다. 그림 생성 신경망이 한 번에 내놓는 수는 대개 이 차원보다 훨씬 많다.</p>
 <div class="dialogue"><h3 id="prob-prediction-wet-invoice-memo">문제 4. 젖은 송장을 메모 한 장으로<span id="문제-4-젖은-송장을-메모-한-장으로" class="anchor-alias"></span></h3>
@@ -788,7 +804,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>하나 더 짚어 두죠. 이 벽은 손실이 내려갈 수 있는 하한일 뿐이에요. 벽이 없다고 다 배운다는 뜻은 아니에요. 폭을 1024로 넓혀 벽을 없애도 속도 예측이 174에 머문 것이 그거예요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>선형대수 시간에 배운 「상의 차원은 계수를 넘지 못한다」네요. 행렬이 아무리 커도 열이 256개면 그 행렬로 갈 수 있는 곳은 256차원이에요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>위젯 2에서 문제 5 설정을 불러와, 속도 예측의 손실이 그 벽 바로 위에 붙어 있는지 확인해 보세요.</p></div></div>
-<figure class="preset-card"><a href="widgets/prediction-target.html?p=prob-prediction-width-bottleneck&v=4871fb46#w2" target="_blank" rel="noopener"><img src="images/prediction-target/preset-prob-prediction-width-bottleneck.png" alt="위젯 2 · 문제 5 설정" loading="lazy"></a><figcaption><a href="widgets/prediction-target.html?p=prob-prediction-width-bottleneck&v=4871fb46#w2" target="_blank" rel="noopener">위젯에서 열기: 위젯 2 · 문제 5 설정 ↗</a></figcaption></figure>
+<figure class="preset-card"><a href="widgets/prediction-target.html?p=prob-prediction-width-bottleneck&v=67621ec0#w2"><img src="images/prediction-target/preset-prob-prediction-width-bottleneck.png" alt="위젯 2 · 문제 5 설정" loading="lazy"></a><figcaption><a href="widgets/prediction-target.html?p=prob-prediction-width-bottleneck&v=67621ec0#w2">위젯에서 열기: 위젯 2 · 문제 5 설정</a></figcaption></figure>
 </div><div class="dialogue"><h3 id="prob-prediction-clean-weak-end">문제 6. 원래 그림 예측의 약한 끝<span id="문제-6-원래-그림-예측의-약한-끝" class="anchor-alias"></span></h3>
 <blockquote>
 <p>위 장난감에서 <span class="sym" style="color:#3c4bff">D</span> = 512, 폭 256인 신경망의 시험 속도 손실을 시간 구간 넷 [0, 0.25), [0.25, 0.5), [0.5, 0.75), [0.75, 1)로 나누면 원래 그림 예측은 35.9, 3.60, 3.22, 2.09이고, 속도 예측은 437, 357, 357, 376이다. (가) 원래 그림 예측의 손실을 끌어올린 구간은 어디이고, 왜 하필 그 구간인가? (나) 원래 그림 오차 ‖<span class="sym" style="color:#1b9e77">x̂₀</span> − <span class="sym" style="color:#1b9e77">x₀</span>‖² 가 0.01일 때 <span class="sym" style="color:#a67a63">t</span> = 0.02와 0.5에서 속도 오차는 각각 얼마인가? (다) 그 큰 속도 오차는 만든 그림을 망치는가? 오일러 샘플러의 마지막 스텝(스텝 크기가 남은 시간 <span class="sym" style="color:#a67a63">t</span> 와 같은 스텝)을 따져 보라. (라) 리·허는 학습 때 속도로 바꾸는 식의 분모(<span class="sym" style="color:#a67a63">t</span> 자리)를 0.05 아래로 내려가지 않게 자른다. 왜 자를까?</p>
@@ -808,7 +824,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 원래 그림 예측에도 약한 끝이 있어요. 노이즈 예측의 약한 끝이 t 가 1 근처인 노이즈 끝이라면, 원래 그림 예측의 약한 끝은 t 가 0 근처인 데이터 끝이에요. 다만 원래 그림 예측의 약점은 오차를 속도로 바꿔 재면서 생긴 문제라, 분모를 자르는 정도로 다스릴 수 있어요. 노이즈 예측이 높은 차원에서 부딪힌 벽은 그렇게 지워지지 않고요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>마감 1분 전에 남은 분량을 시간당 쪽수로 바꾸면 엄청난 숫자가 나오지만, 실제로 남은 건 한 줄뿐인 거랑 같네요. 남은 1분이 t, 시간당 쪽수가 속도고요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>위젯 2에서 문제 6 설정을 불러와, 구간별 손실이 어느 구간에서 치솟는지와 만든 점의 평면 밖 거리를 나란히 보세요.</p></div></div>
-<figure class="preset-card"><a href="widgets/prediction-target.html?p=prob-prediction-clean-weak-end&v=4871fb46#w2" target="_blank" rel="noopener"><img src="images/prediction-target/preset-prob-prediction-clean-weak-end.png" alt="위젯 2 · 문제 6 설정" loading="lazy"></a><figcaption><a href="widgets/prediction-target.html?p=prob-prediction-clean-weak-end&v=4871fb46#w2" target="_blank" rel="noopener">위젯에서 열기: 위젯 2 · 문제 6 설정 ↗</a></figcaption></figure>
+<figure class="preset-card"><a href="widgets/prediction-target.html?p=prob-prediction-clean-weak-end&v=67621ec0#w2"><img src="images/prediction-target/preset-prob-prediction-clean-weak-end.png" alt="위젯 2 · 문제 6 설정" loading="lazy"></a><figcaption><a href="widgets/prediction-target.html?p=prob-prediction-clean-weak-end&v=67621ec0#w2">위젯에서 열기: 위젯 2 · 문제 6 설정</a></figcaption></figure>
 </div>
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="prediction-target.html">&larr; 원래 그림 예측: 같은 답, 다른 배점</a><span class="page-count">2 / 4</span><a class="chapter-nav-next" href="prediction-target-sec-output-parameterization.html">출력 꼴 고르기: 노이즈에서 출발해 그림으로 돌아온 길 &rarr;</a></nav>

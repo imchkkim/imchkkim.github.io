@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: MLP에서 디퓨전 트랜스포머까지</a></li>
 <li class="toc-part">기본기</li>
 <li><a href="conditional-prob.html">조건부 확률분포: p(a∣b) 와 p(b∣a)</a></li>
@@ -660,7 +676,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="condition-elbo.html">조건과 ELBO</a></li>
 <li class="toc-part">신호와 스펙트럼</li>
 <li><a href="spectrum.html">그림을 나누는 축: 스펙트럼</a></li>
-<li><a href="convolution.html" class="active">합성곱: 이웃만 보는 MLP</a><ul class="sidebar-toc"><li><a href="convolution.html">합성곱: 이웃에 같은 비율을 곱해 더하기</a></li><li><a href="convolution-sec-weight-sharing-kernel.html">가중치 공유: 모든 자리에서 같은 커널을 쓴다</a></li><li><a href="convolution-sec-receptive-field-depth.html" class="current">수용 영역: 층을 쌓아야 멀리 본다</a></li><li><a href="convolution-sec-feature-channels.html">채널: 한 칸에 여러 특징을 함께 담는다</a></li><li><a href="convolution-sec-convolution-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="convolution.html" class="active">합성곱: 이웃만 보는 MLP</a><ul class="sidebar-toc"><li><a href="convolution.html">합성곱: 이웃에 같은 비율을 곱해 더하기</a></li><li><a href="convolution-sec-weight-sharing-kernel.html">가중치 공유: 모든 자리에서 같은 커널을 쓴다</a></li><li><a href="convolution-sec-receptive-field-depth.html" class="current">수용 영역: 층을 쌓아야 멀리 본다</a></li><li><a href="convolution-sec-feature-channels.html">채널: 한 칸에 여러 특징을 함께 담는다</a></li><li><a href="convolution-sec-convolution-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="noising.html">퍼짐: 그림에 노이즈를 섞으면</a></li>
 <li><a href="unet.html">U-Net: 여러 해상도로 노이즈를 읽는다</a></li>
 <li class="toc-part">직관을 합치기</li>
@@ -689,6 +705,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>3 × 3 커널 하나는 바로 옆 칸까지만 본다. 윤곽을 찾기에는 충분하지만, 그림 속 동그라미가 얼굴인지 접시인지 알려면 눈, 코, 입이 함께 놓인 넓은 구역을 봐야 한다. 디노이징도 마찬가지여서, 문제 3에서 노이즈가 짙을수록 커널을 넓게 펴야 했다. 커널을 키우는 대신 작은 커널을 여러 층 쌓으면 출력 한 칸은 입력의 얼마나 넓은 곳을 보게 될까?</p>
 <h3 id="hist-visual-cortex-receptive-fields" class="history" data-people="hubel-david wiesel-torsten">역사: 유리 슬라이드의 그림자<span id="역사-유리-슬라이드의-그림자" class="anchor-alias"></span></h3>
 <p>1950년대 말 존스홉킨스 대학에서 함께 연구하던 허블(David Hubel)과 비셀(Torsten Wiesel)은 마취한 고양이의 시각 피질에 가는 전극을 꽂고, 눈앞 화면에 빛을 비춰 신경세포 하나의 반응을 기록했다. 세포마다 망막의 어느 좁은 구역에 빛이 닿을 때만 반응이 바뀌었는데, 이 구역을 그 세포의 「받는 영역」이라 부른다. 처음에는 검은 점과 흰 점을 비췄는데 피질 세포는 좀처럼 반응하지 않았다. 허블의 노벨상 강연에 따르면, 점을 그린 유리 슬라이드를 장치에 넣고 빼던 중에 세포가 기관총처럼 반응했다. 점이 아니라 슬라이드 가장자리가 망막에 드리운 희미하지만 또렷한 그림자, 곧 밝은 바탕 위의 곧은 선이 세포가 원하던 것이었다. 두 사람은 1959년 논문 「고양이 줄무늬 피질 신경세포 하나하나의 받는 영역」을 시작으로, 피질 세포들이 저마다 특정한 방향의 선과 윤곽에 반응한다는 것을 보였고 1981년 노벨 생리의학상을 받았다.</p>
+<figure class="fig "><img src="images/convolution/h_slide_edge.png" alt="같은 받는 영역에 검은 점을 비추면 세포가 거의 반응하지 않고, 슬라이드 가장자리 같은 곧은 그림자가 맞는 방향으로 지나가면 반응이 쏟아진다. 반응 막대는 일화를 보이려고 지어낸 값이다. 출처: 허블 노벨상 강연(1981)의 일화를 직접 그림" loading="lazy"><figcaption>같은 받는 영역에 검은 점을 비추면 세포가 거의 반응하지 않고, 슬라이드 가장자리 같은 곧은 그림자가 맞는 방향으로 지나가면 반응이 쏟아진다. 반응 막대는 일화를 보이려고 지어낸 값이다. 출처: 허블 노벨상 강연(1981)의 일화를 직접 그림</figcaption></figure>
 <p>이 이야기는 합성곱 신경망과 두 번 만나는데, 하나는 윤곽 커널이다. 르쿤과 동료들의 1989년 논문은 학습으로 얻은 커널 일부가 허블과 비셀이 생물의 시각 체계에서 찾은 특징 검출기와 놀랍도록 닮았다고 적었다. 다른 하나가 이 절의 주제인 받는 영역이다.</p>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>오늘 같으면 학습한 커널의 아홉 수를 출력해 보면 무엇을 고르는지 바로 보이잖아요. 위젯에서 수를 바꿔 보듯이요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>고양이의 신경세포에는 출력해 볼 가중치가 없어요. 전극으로 잴 수 있는 것은 세포 하나의 반응뿐이었고요. 그러면 그 세포가 무엇을 고르는지는 어떻게 찾아야 했을까요?</p></div></div>
@@ -712,7 +729,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h3 id="닿는-것과-기대는-것은-다르다">닿는 것과 기대는 것은 다르다</h3>
 <p>그런데 수용 영역에 든 칸들이 똑같이 중요할까? 이웃 평균을 여러 번 쌓은 경우를 보자. 입력 칸마다 출력 한 칸의 값에 기여하는 비율(기여도)은, 가운데 칸에 둔 1에 이웃 평균을 <span class="sym" style="color:#783c78">L</span>번 걸어 번진 모양과 같다. 이웃 평균 한 번은 기여도를 왼쪽으로 ¼, 제자리에 ½, 오른쪽으로 ¼씩 나눠 옮기니, 기여도가 옮겨 간 거리의 분산은 ¼ + ¼ = ½이다. <span class="sym" style="color:#783c78">L</span>번 거는 것은 무작위 걷기의 서로 상관없는 스텝을 <span class="sym" style="color:#783c78">L</span>번 잇는 것과 같고, 서로 상관없는 스텝을 이으면 분산이 더해진다. 그래서 <span class="sym" style="color:#783c78">L</span>번 뒤의 분산은 <span class="sym" style="color:#783c78">L</span>/2, 표준편차는 √(<span class="sym" style="color:#783c78">L</span>/2)로 횟수의 제곱근으로만 자란다. 16층이면 수용 영역은 33칸인데 기여도 분포의 표준편차는 2.83칸이고, 한 줄에서 기여도의 95%가 가운데에서 ±5.7칸 안에 몰려 있다. 수용 영역 끝 칸의 기여도는 (¼)¹⁶ ≈ 2.3 × 10⁻¹⁰이어서, 출력 한 칸은 끝 칸에 닿기는 하지만 거의 기대지 않는다.</p>
 <p>이론상 폭은 <span class="sym" style="color:#783c78">L</span>에 비례하고 실제로 기대는 폭은 √<span class="sym" style="color:#783c78">L</span>에 비례하므로, 층을 쌓을수록 둘의 차이는 벌어진다. 위젯에서 층 수를 바꿔 이론상 네모와 진한 구역을 견줘 보자.</p>
-<figure class="widget-embed" id="widget-convolution-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">수용 영역</span><a class="widget-open" href="widgets/convolution.html?v=7c7e4313#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/convolution.html?w=w2&embed=1&v=7c7e4313" title="수용 영역" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-convolution-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">수용 영역</span><a class="widget-open" href="widgets/convolution.html?v=272eddee#w2">크게 열기</a></div><iframe data-src="widgets/convolution.html?w=w2&embed=1&v=272eddee" title="수용 영역" loading="lazy"></iframe></figure>
 <aside class="guide"><p class="guide-title">길잡이 · 『ML 입문자를 위한 동역학』 「이웃 평균: 퍼진 거리는 횟수의 제곱근」</p><p>이웃에게 나눠 주기를 되풀이하면 왜 퍼진 거리가 횟수의 제곱근으로 자라는지, 분산이 한 번에 일정하게 더해지는 구조에서 보인다. <a href="https://lameproof.com/dynamics-book/heat-diffusion.html">이어 읽기</a></p>
 </aside>
 <h3 id="ml에서-작은-커널을-깊이-쌓는다">ML에서: 작은 커널을 깊이 쌓는다</h3>
@@ -757,7 +774,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>맞아요. 층을 쌓는 것만으로는 멀리 보기 어렵다는 것, 이 장이 남기는 물음이에요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>전화 연락망으로 전교생에게 알리려면 단계가 너무 많아서, 결국 방송실에서 한 번에 알리는 게 빠른 거랑 같네요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>위젯 2에서 문제 9 설정을 불러와 이론상 네모와 진홍 원의 크기를 견줘 보세요.</p></div></div>
-<figure class="preset-card"><a href="widgets/convolution.html?p=prob-convolution-full-image-coverage&v=7c7e4313#w2" target="_blank" rel="noopener"><img src="images/convolution/preset-prob-convolution-full-image-coverage.png" alt="위젯 2 · 문제 9 설정" loading="lazy"></a><figcaption><a href="widgets/convolution.html?p=prob-convolution-full-image-coverage&v=7c7e4313#w2" target="_blank" rel="noopener">위젯에서 열기: 위젯 2 · 문제 9 설정 ↗</a></figcaption></figure>
+<figure class="preset-card"><a href="widgets/convolution.html?p=prob-convolution-full-image-coverage&v=272eddee#w2"><img src="images/convolution/preset-prob-convolution-full-image-coverage.png" alt="위젯 2 · 문제 9 설정" loading="lazy"></a><figcaption><a href="widgets/convolution.html?p=prob-convolution-full-image-coverage&v=272eddee#w2">위젯에서 열기: 위젯 2 · 문제 9 설정</a></figcaption></figure>
 </div>
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="convolution-sec-weight-sharing-kernel.html">&larr; 가중치 공유: 모든 자리에서 같은 커널을 쓴다</a><span class="page-count">3 / 5</span><a class="chapter-nav-next" href="convolution-sec-feature-channels.html">채널: 한 칸에 여러 특징을 함께 담는다 &rarr;</a></nav>

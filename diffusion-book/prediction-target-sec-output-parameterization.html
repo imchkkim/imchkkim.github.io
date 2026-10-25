@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: MLP에서 디퓨전 트랜스포머까지</a></li>
 <li class="toc-part">기본기</li>
 <li><a href="conditional-prob.html">조건부 확률분포: p(a∣b) 와 p(b∣a)</a></li>
@@ -668,7 +684,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="ddpm.html">노이즈를 맞히는 신경망: DDPM과 디노이징 스코어 매칭</a></li>
 <li><a href="reverse-sde.html">랑주뱅과 역방향 미분방정식: 샘플을 뽑는 길</a></li>
 <li><a href="flow-matching.html">플로우 매칭: 길을 통째로 배우기</a></li>
-<li><a href="prediction-target.html" class="active">예측의 대상: 노이즈·속도장·이미지</a><ul class="sidebar-toc"><li><a href="prediction-target.html">원래 그림 예측: 같은 답, 다른 배점</a></li><li><a href="prediction-target-sec-manifold-hypothesis.html">매니폴드 가설: 그림은 좁은 면 위에, 노이즈는 모든 방향에</a></li><li><a href="prediction-target-sec-output-parameterization.html" class="current">출력 꼴 고르기: 노이즈에서 출발해 그림으로 돌아온 길</a></li><li><a href="prediction-target-sec-prediction-target-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="prediction-target.html" class="active">예측의 대상: 노이즈·속도장·이미지</a><ul class="sidebar-toc"><li><a href="prediction-target.html">원래 그림 예측: 같은 답, 다른 배점</a></li><li><a href="prediction-target-sec-manifold-hypothesis.html">매니폴드 가설: 그림은 좁은 면 위에, 노이즈는 모든 방향에</a></li><li><a href="prediction-target-sec-output-parameterization.html" class="current">출력 꼴 고르기: 노이즈에서 출발해 그림으로 돌아온 길</a></li><li><a href="prediction-target-sec-prediction-target-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="samplers.html">샘플러: 같은 길을 걷는 여러 솔버</a></li>
 <li class="toc-part">구조와 조건, 영상</li>
 <li><a href="transformer.html">어텐션과 트랜스포머: 멀리 떨어진 칸끼리 읽기</a></li>
@@ -689,11 +705,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>나선 장난감에서는 한 번에 내놓는 수가 폭에 가까워지자 원래 그림 예측만 버텼고, 그림이 좁은 면 근처에 모여 있다는 생각도 새로운 것이 아니다. 그런데 2020년의 DDPM 은 노이즈를 맞혔고, 그 뒤의 잠재 디퓨전은 노이즈 맞히기를 VAE 로 줄인 공간으로 옮겼으며, 그 뒤의 큰 모델들은 줄인 공간에서 속도를 맞혔다. 큰 모델이 원래 그림으로 돌아온 것은 2025년의 일인데, 원래 그림이 더 쉬운 과녁이라면 왜 이렇게 멀리 돌아왔을까?</p>
 <h3 id="hist-noise-latent-pixel" class="history" data-people="rombach-robin salimans-tim">역사: 노이즈에서 잠재로, 다시 그림으로<span id="역사-노이즈에서-잠재로-다시-그림으로" class="anchor-alias"></span></h3>
 <p>2021년 말 롬바흐(Robin Rombach)와 동료들은 픽셀에서 일하는 디퓨전 모델이 「눈에 띄지 않는 세부를 모델링하는 데 지나친 용량을 쓴다」고 보았다. 앞선 보고대로라면 가장 강한 디퓨전 모델은 학습에 V100 그래픽 카드 150~1000일이 들었다. 그들은 미리 학습해 둔 오토인코더로 그림을 가로세로 몇 분의 1로 줄인 잠재 공간에서 디퓨전을 돌렸고, 손실은 노이즈 맞히기 그대로 두었다. 이 방법이 Stable Diffusion 이 되었다.</p>
-<p>2022년 2월에는 v 가 나왔다. 샐리먼스와 호는 스텝 수를 줄이는 증류(여러 스텝 모델이 간 곳을 적은 스텝 모델이 흉내 내도록 배우기)에서도 무너지지 않는 출력 꼴을 찾다가, 노이즈와 원래 그림을 섞은 v 를 내놓았다. 그리고 출력 꼴과 손실의 가중치를 따로 떼어 비교했다. 신경망이 내놓는 것 넷(원래 그림, 노이즈, 둘을 함께, 둘을 섞은 v)에, 원래 그림 오차에 곱하는 가중치 셋을 짝지은 열두 칸이다. 가중치의 이름에 붙은 SNR 은 신호 대 잡음비 α²/σ²(남은 그림의 크기 제곱을 섞인 노이즈의 크기 제곱으로 나눈 값)다. 노이즈 예측에 「잘린 SNR」 가중치를 짝지은 칸만 학습이 발산했고, 나머지 열한 칸은 FID 2.45~2.65로 고만고만했다. 논문은 「출력 꼴과 가중치를 바꿔도 결과가 꽤 비슷하고, v 가 가장 안정하며, 이 실험에서는 원래 그림 예측이 조금 더 좋았다」고 적었다. 이 표의 세 가중치 가운데 어느 것도 DDPM 코드처럼 원래 그림 오차를 모든 노이즈 레벨에서 그대로 재지는 않았다.</p>
+<p>2022년에는 v 가 나왔다. 샐리먼스와 호는 스텝 수를 줄이는 증류(여러 스텝 모델이 간 곳을 적은 스텝 모델이 흉내 내도록 배우기)에서도 무너지지 않는 출력 꼴을 찾다가, 노이즈와 원래 그림을 섞은 v 를 내놓았다. 그리고 출력 꼴과 손실의 가중치를 따로 떼어 비교했다. 신경망이 내놓는 것 넷(원래 그림, 노이즈, 둘을 함께, 둘을 섞은 v)에, 원래 그림 오차에 곱하는 가중치 셋을 짝지은 열두 칸이다. 가중치의 이름에 붙은 SNR 은 신호 대 잡음비 α²/σ²(남은 그림의 크기 제곱을 섞인 노이즈의 크기 제곱으로 나눈 값)다. 노이즈 예측에 「잘린 SNR」 가중치를 짝지은 칸만 학습이 발산했고, 나머지 열한 칸은 FID 2.45~2.65로 고만고만했다. 논문은 「출력 꼴과 가중치를 바꿔도 결과가 꽤 비슷하고, v 가 가장 안정하며, 이 실험에서는 원래 그림 예측이 조금 더 좋았다」고 적었다. 이 표의 세 가중치 가운데 어느 것도 DDPM 코드처럼 원래 그림 오차를 모든 노이즈 레벨에서 그대로 재지는 않았다.</p>
 <figure class="fig "><img src="images/prediction-target/sh_table1.png" alt="샐리먼스·호 2022 표 1 의 열두 칸(조건 없는 CIFAR-10, 처음부터 학습, 확률적 샘플러의 FID, 시드 셋 평균). 가로 묶음은 원래 그림 오차에 곱한 가중치, 막대 색은 신경망이 내놓는 것. 빗금 칸은 학습이 발산했다. 논문 숫자를 다시 그렸다. 스크립트 sources/prediction-target/figs.py" loading="lazy"><figcaption>샐리먼스·호 2022 표 1 의 열두 칸(조건 없는 CIFAR-10, 처음부터 학습, 확률적 샘플러의 FID, 시드 셋 평균). 가로 묶음은 원래 그림 오차에 곱한 가중치, 막대 색은 신경망이 내놓는 것. 빗금 칸은 학습이 발산했다. 논문 숫자를 다시 그렸다. 스크립트 sources/prediction-target/figs.py</figcaption></figure>
 <p>2023년 바이트댄스의 린(Shanchuan Lin)과 동료들은 Stable Diffusion 2.1-base 의 노이즈 스케줄을 마지막 스텝에서 그림을 하나도 남기지 않도록 고치면서(제로 터미널 SNR), 출력도 노이즈에서 v 로 바꿨다. 마지막 스텝에서는 신경망이 받는 입력이 섞은 노이즈 그 자체라, 노이즈를 맞히는 신경망은 받은 것을 그대로 내놓기만 하면 되고 그림에 대해서는 아무것도 배우지 못하기 때문이다. 논문은 「언제나 v 예측을 쓰라」고 권했다.</p>
 <p>2024년의 SD3 와 FLUX.1 도 줄인 공간에서 일하되, 맞히는 것을 직선 길의 속도로 바꿨다. ComfyUI 는 두 모델의 출력을 모두 속도로 읽는다(코드의 <code>CONST</code>).</p>
-<p>2025년 11월 리(Tianhong Li)와 허(Kaiming He)는 압축기 없이 픽셀 그림을 큰 조각으로 잘라 넣는 신경망에서 원래 그림을 내놓는 쪽만 버틴다는 것을 보였다(DiT 장 「다시 그림으로」).</p>
+<p>2025년 리(Tianhong Li)와 허(Kaiming He)는 압축기 없이 픽셀 그림을 큰 조각으로 잘라 넣는 신경망에서 원래 그림을 내놓는 쪽만 버틴다는 것을 보였다(DiT 장 「다시 그림으로」).</p>
 <figure class="fig "><img src="images/prediction-target/timeline.png" alt="신경망이 무엇을 맞혔고 어느 공간에서 일했나. 동그라미는 픽셀에서, 네모는 VAE 로 줄인 잠재에서 일한 모델, 색은 맞힌 것. 날짜는 논문이 arXiv 에 처음 오른 달(FLUX.1 은 모델 저장소를 만든 날). 스크립트 sources/prediction-target/figs.py" loading="lazy"><figcaption>신경망이 무엇을 맞혔고 어느 공간에서 일했나. 동그라미는 픽셀에서, 네모는 VAE 로 줄인 잠재에서 일한 모델, 색은 맞힌 것. 날짜는 논문이 arXiv 에 처음 오른 달(FLUX.1 은 모델 저장소를 만든 날). 스크립트 sources/prediction-target/figs.py</figcaption></figure>
 <p>그림의 왼쪽 끝(DDPM)과 오른쪽 끝(리·허)은 둘 다 픽셀에서 일하는데도, 하나는 노이즈를, 하나는 원래 그림을 골랐다. 나선 장난감이 맞다면 DDPM 은 왜 원래 그림의 이점을 보지 못했고, 그 사이의 잠재 모델들은 원래 그림으로 바꿨어야 했을까?</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>결국 원래 그림으로 돌아올 거였으면, 처음부터 큰 그림에서 출력 꼴을 다 돌려 보고 골랐으면 됐잖아요.</p></div></div>
@@ -755,7 +771,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 무엇을 맞히게 할지는 「무엇이 더 쉬운가」 한 줄로 정해지지 않아요. 한 번에 내놓는 수와 폭의 비가 벽을 정하고, 손실을 재는 공간이 배점을 정해요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="prediction-target-sec-manifold-hypothesis.html">&larr; 매니폴드 가설: 그림은 좁은 면 위에, 노이즈는 모든 방향에</a><span class="page-count">3 / 4</span><a class="chapter-nav-next" href="prediction-target-sec-prediction-target-summary.html">자주 하는 실수와 요약 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="prediction-target-sec-manifold-hypothesis.html">&larr; 매니폴드 가설: 그림은 좁은 면 위에, 노이즈는 모든 방향에</a><span class="page-count">3 / 4</span><a class="chapter-nav-next" href="prediction-target-sec-prediction-target-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');
