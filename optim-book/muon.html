@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -670,7 +671,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="momentum.html">모멘텀: 무거운 공과 네스테로프 가속</a></li>
 <li><a href="adaptive.html">적응 학습률: AdaGrad 에서 AdamW 까지</a></li>
 <li><a href="curvature-approx.html">곡률 근사: 준뉴턴에서 K-FAC·Shampoo 까지</a></li>
-<li><a href="muon.html" class="active">Muon: 노름을 바꾸면 가장 가파른 방향이 바뀐다</a><ul class="sidebar-toc"><li><a href="muon.html" class="current">가장 가파른 방향: 노름이 「같은 크기」를 정한다</a></li><li><a href="muon-2.html">직교화: 스펙트럼 노름 아래 가장 가파른 스텝</a></li><li><a href="muon-3.html">뉴턴–슐츠 반복: 행렬 곱만으로 직교화한다</a></li><li><a href="muon-4.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="muon.html" class="active">Muon: 노름을 바꾸면 가장 가파른 방향이 바뀐다</a><ul class="sidebar-toc"><li><a href="muon.html" class="current">가장 가파른 방향: 노름이 「같은 크기」를 정한다</a></li><li><a href="muon-sec-orthogonalized-spectral-step.html">직교화: 스펙트럼 노름 아래 가장 가파른 스텝</a></li><li><a href="muon-sec-newton-schulz-iteration.html">뉴턴–슐츠 반복: 행렬 곱만으로 직교화한다</a></li><li><a href="muon-sec-muon-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="mup.html">μP: 폭이 달라져도 같은 학습률로</a></li>
 <li class="toc-part">분포를 옮기는 최적화</li>
 <li><a href="optimal-transport.html">최적 수송: 흙을 가장 적게 나르는 짝짓기</a></li>
@@ -684,7 +685,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter chapter-paged">
 <h1>Muon: 노름을 바꾸면 가장 가파른 방향이 바뀐다</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-muon">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>Adam 으로 큰 언어 모델을 학습시키는 설정 파일을 열면, 학습률과 가중치 감쇠 몇 줄 말고는 옵티마이저에 대해 고칠 것이 별로 없다. 그래디언트 제곱의 평균으로 파라미터 한 칸 한 칸의 스텝을 나눠 주는 Adam 은 「그래디언트가 큰 칸은 덜, 작은 칸은 더」 움직여서, 칸마다 크기가 수천 배씩 다른 그래디언트를 고르게 다듬어 준다. 그래서 오랫동안 「옵티마이저는 AdamW 로 두면 된다」가 상식이었다.</p>
 <p>그런데 신경망의 가중치는 숫자를 한 줄로 늘어놓은 것이 아니다. 한 층의 가중치는 입력 벡터를 받아 출력 벡터를 내놓는 행렬이고, 그 층의 그래디언트도 같은 모양의 행렬이다. 그런데 그래디언트 행렬이 입력을 늘이는 배율은 입력의 방향에 따라 수십, 수백 배씩 차이 날 수 있다. 어떤 입력 방향으로는 그래디언트가 거대하고 어떤 방향으로는 거의 없을 때, 칸 하나하나를 고르게 다듬는 Adam 은 이 「방향마다의 불균형」을 볼 수 있을까?</p>
 <p>2024년 가을, 작은 언어 모델을 정해진 성능까지 누가 가장 빨리 학습시키나를 겨루는 공개 경주에서, 옵티마이저 하나를 AdamW 에서 다른 것으로 바꾼 기록이 학습 속도를 35% 끌어올렸다. 바뀐 것은 그래디언트 행렬을 어떻게 다듬어 스텝으로 바꾸느냐 하나였고, 이듬해에는 파라미터 1조 개짜리 모델이 같은 계열의 옵티마이저로 학습되었다.</p>
@@ -695,9 +696,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>행렬인 스텝의 크기를 행렬답게 재면, 가장 가파른 스텝은 어떤 모양일까?</li>
 <li>행렬다운 가장 가파른 스텝을 학습 스텝마다, 층마다 구하는 데 드는 계산을 감당할 수 있을까?</li>
 </ul>
-<h2 id="가장-가파른-방향-노름이-같은-크기-를-정한다">가장 가파른 방향: 노름이 「같은 크기」를 정한다</h2>
+<h2 id="sec-norm-steepest-direction">가장 가파른 방향: 노름이 「같은 크기」를 정한다<span id="가장-가파른-방향-노름이-같은-크기-를-정한다" class="anchor-alias"></span></h2>
 <p>경사하강의 한 스텝은 그래디언트의 반대쪽이었는데, 「짧은 거리 안에서 손실이 가장 빨리 줄어드는 방향이 그래디언트의 반대쪽」이기 때문이었다. 그런데 「짧은 거리」의 거리는 무엇으로 쟀던가? 지도 위에서 자로 재는 길이와 같은, 스텝 벡터의 칸을 제곱해 더한 뒤 제곱근을 씌운 유클리드 길이였다. 그렇다면 다른 자로 거리를 재면 어떨까? 예를 들어 「한 칸이라도 0.1 넘게 움직이면 안 된다」는 규칙은 어떤가. 파라미터마다 따로 움직일 수 있는 폭이 정해져 있는 셈이라, 실제 하드웨어나 학습 안정성을 생각하면 그리 이상한 규칙도 아니다. 이 규칙 아래에서도 가장 가파른 스텝은 여전히 그래디언트의 반대쪽일까?</p>
-<h3 id="역사-그래디언트의-크기를-버리고-부호만-쓴-사람들">역사: 그래디언트의 크기를 버리고 부호만 쓴 사람들</h3>
+<h3 id="hist-sign-only-gradients" class="history" data-people="riedmiller-martin bernstein-jeremy">역사: 그래디언트의 크기를 버리고 부호만 쓴 사람들<span id="역사-그래디언트의-크기를-버리고-부호만-쓴-사람들" class="anchor-alias"></span></h3>
 <p>그래디언트의 크기를 아예 버리고 부호만 쓰자는 생각은 신경망 학습에서 여러 번 나왔다. 독일 카를스루에 대학의 마르틴 리트밀러(Martin Riedmiller)와 하인리히 브라운(Heinrich Braun)은 1992년 무렵 RPROP(탄력적 역전파, resilient backpropagation)이라는 방법을 만들어, 1993년 신경망 학회(IEEE ICNN) 논문으로 널리 알렸다. RPROP 이 겨눈 문제는 층마다, 가중치마다 그래디언트의 크기가 너무 달라서 학습률 하나로는 어떤 가중치는 너무 크게, 어떤 가중치는 너무 작게 움직인다는 것이었다. RPROP 은 그래디언트의 크기는 보지 않고 부호만 보아 가중치를 움직이고, 움직이는 폭은 가중치마다 따로 두어, 부호가 연달아 같으면 키우고 뒤집히면 줄였다.</p>
 <p>25년쯤 뒤에는 부호가 전혀 다른 필요에서 다시 나왔다. 여러 대의 컴퓨터가 나눠 학습할 때는 스텝마다 그래디언트를 주고받아야 하는데, 파라미터가 수억 개면 이 통신이 계산보다 느려진다. 제러미 번스타인(Jeremy Bernstein)과 동료들은 2018년 국제 기계학습 학회(ICML)에 낸 「signSGD: 비볼록 문제를 위한 압축 최적화」에서 그래디언트의 부호, 곧 칸마다 1비트만 보내자고 했다. 부호만 써도 확률적 경사하강과 같은 수렴 속도를 낸다는 것을 보였고, 부호에 모멘텀을 더한 판(Signum)은 이미지넷 학습에서 Adam 과 비슷한 정확도와 학습 속도를 냈다고 보고했다. 왜 크기를 버려도 되는지, 버리면 무엇을 얻는지는 숫자로 보는 것이 빠르다.</p>
 <h3 id="그래디언트-2-1-에서-크기-0-1-의-스텝-고르기">그래디언트 (2, 1) 에서 크기 0.1 의 스텝 고르기</h3>
@@ -758,9 +759,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>유클리드 노름 아래에서는 그래디언트의 방향을 그대로 두고 길이만 맞추지만, 최대 노름 아래에서는 크기를 모두 버리고 부호만 남긴다. 칸마다 부호를 따라 똑같은 폭으로 움직이는 이 스텝을 <strong>부호 하강</strong> (그래디언트의 부호만 따라 칸마다 같은 폭으로 걷기 / sign descent)이라 한다. 줄어드는 손실도 노름마다 다른 꼴로 나온다. 유클리드 노름이면 <span class="sym" style="color:#006600">η</span>‖<span class="sym" style="color:#b0892a">g</span>‖₂ = 0.1 × 2.2361이고, 최대 노름이면 칸 절댓값의 합 <span class="sym" style="color:#006600">η</span>(|<span class="sym" style="color:#b0892a">g</span>₁| + |<span class="sym" style="color:#b0892a">g</span>₂|) = 0.1 × 3이다. 스텝을 재는 노름과 그래디언트를 재는 노름이 짝을 이룬다. 이 짝을 쌍대 노름(dual norm)이라 부르는데, 이 장에서는 이름만 알아 두면 된다.</p>
 <p>왜 그런지는 그림으로 보면 한눈에 보인다. 크기가 0.1 이하인 스텝 전체는 유클리드 노름으로는 원, 최대 노름으로는 정사각형이다. 손실이 같은 만큼 바뀌는 스텝들은 그래디언트에 수직인 직선이고, 그 직선을 그래디언트 반대쪽으로 밀어 가다가 도형에서 마지막으로 닿는 점이 가장 가파른 스텝이다. 원에서는 그 점이 그래디언트 반대쪽 끝이고 정사각형에서는 모서리이며, 모서리는 칸마다 ±0.1, 곧 부호다.</p>
 <figure class="fig "><img src="images/muon/a1_norm_balls.png" alt="그래디언트 g = (2, 1)일 때 크기 0.1 안의 스텝(파란 도형)과, 1차 어림으로 손실이 같은 만큼 바뀌는 스텝들(황토색 직선). 유클리드 노름(원)에서는 그래디언트 반대쪽 끝, 최대 노름(정사각형)에서는 모서리 (−0.1, −0.1), 합 노름(마름모, 칸 절댓값의 합)에서는 꼭짓점 (−0.1, 0)이 손실을 가장 많이 줄인다(sources/muon/figs.py)" loading="lazy"><figcaption>그래디언트 g = (2, 1)일 때 크기 0.1 안의 스텝(파란 도형)과, 1차 어림으로 손실이 같은 만큼 바뀌는 스텝들(황토색 직선). 유클리드 노름(원)에서는 그래디언트 반대쪽 끝, 최대 노름(정사각형)에서는 모서리 (−0.1, −0.1), 합 노름(마름모, 칸 절댓값의 합)에서는 꼭짓점 (−0.1, 0)이 손실을 가장 많이 줄인다(sources/muon/figs.py)</figcaption></figure>
-<figure class="widget-embed" id="widget-muon-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 1: 노름마다 다른 가장 가파른 스텝</span><a class="widget-open" href="widgets/muon.html?v=564d585d#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/muon.html?w=w1&embed=1&v=564d585d" title="위젯 1: 노름마다 다른 가장 가파른 스텝" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-muon-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 1: 노름마다 다른 가장 가파른 스텝</span><a class="widget-open" href="widgets/muon.html?v=1c1882f4#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/muon.html?w=w1&embed=1&v=1c1882f4" title="위젯 1: 노름마다 다른 가장 가파른 스텝" loading="lazy"></iframe></figure>
 <p>표의 비교는 스텝 한 번, 그것도 1차 어림에 대한 것이었는데, 부호 하강을 여러 스텝 되풀이해도 손실의 최솟값에 닿을까? 아래 문제 2에서 먼저 손으로 따라가 본 뒤 위젯 2로 확인해 보자.</p>
-<figure class="widget-embed" id="widget-muon-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 부호 하강은 손실의 바닥에 닿는가</span><a class="widget-open" href="widgets/muon.html?v=564d585d#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/muon.html?w=w2&embed=1&v=564d585d" title="위젯 2: 부호 하강은 손실의 바닥에 닿는가" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-muon-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 부호 하강은 손실의 바닥에 닿는가</span><a class="widget-open" href="widgets/muon.html?v=1c1882f4#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/muon.html?w=w2&embed=1&v=1c1882f4" title="위젯 2: 부호 하강은 손실의 바닥에 닿는가" loading="lazy"></iframe></figure>
 <h3 id="ml에서-이동-평균을-끈-adam-은-부호-하강이다">ML에서: 이동 평균을 끈 Adam 은 부호 하강이다</h3>
 <p>Adam 의 한 스텝은 그래디언트의 이동 평균 <span class="sym" style="color:#ff1eff">m̂</span>을 그래디언트 제곱의 이동 평균의 제곱근 √<span class="sym" style="color:#8787ff">v̂</span>로 칸마다 나눈 것이었다. 두 이동 평균의 계수 <span class="sym" style="color:#f0694b">β</span>₁, <span class="sym" style="color:#f0694b">β</span>₂를 0으로 두어 평균을 끄면, <span class="sym" style="color:#ff1eff">m̂</span>은 지금 그래디언트 <span class="sym" style="color:#b0892a">g</span>이고 √<span class="sym" style="color:#8787ff">v̂</span>는 |<span class="sym" style="color:#b0892a">g</span>|다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#0078e1"><mi mathvariant="normal">Δ</mi><mi>θ</mi></mstyle><mo>=</mo><mo>−</mo><mstyle mathcolor="#006600"><mi>η</mi></mstyle><mtext> </mtext><mfrac><mstyle mathcolor="#ff1eff"><mover accent="true"><mi>m</mi><mo>^</mo></mover></mstyle><mrow><msqrt><mstyle mathcolor="#8787ff"><mover accent="true"><mi>v</mi><mo>^</mo></mover></mstyle></msqrt><mo>+</mo><mstyle mathcolor="#008787"><mi>ϵ</mi></mstyle></mrow></mfrac><mtext>  </mtext><mtext>  </mtext><mover><mo stretchy="true" minsize="3.0em">→</mo><mpadded width="+0.6em" lspace="0.3em"><mrow><mtext> </mtext><msub><mstyle mathcolor="#f0694b"><mi>β</mi></mstyle><mn>1</mn></msub><mo>=</mo><msub><mstyle mathcolor="#f0694b"><mi>β</mi></mstyle><mn>2</mn></msub><mo>=</mo><mn>0</mn><mtext> </mtext></mrow></mpadded></mover><mtext>  </mtext><mtext>  </mtext><mo>−</mo><mstyle mathcolor="#006600"><mi>η</mi></mstyle><mtext> </mtext><mfrac><mstyle mathcolor="#b0892a"><mi>g</mi></mstyle><mrow><mo stretchy="false">∣</mo><mstyle mathcolor="#b0892a"><mi>g</mi></mstyle><mo stretchy="false">∣</mo><mo>+</mo><mstyle mathcolor="#008787"><mi>ϵ</mi></mstyle></mrow></mfrac><mtext>  </mtext><mo>≈</mo><mtext>  </mtext><mo>−</mo><mstyle mathcolor="#006600"><mi>η</mi></mstyle><mtext> </mtext><mi mathvariant="normal">sign</mi><mo>⁡</mo><mo stretchy="false">(</mo><mstyle mathcolor="#b0892a"><mi>g</mi></mstyle><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\textcolor{#0078e1}{\Delta\theta} = -\textcolor{#006600}{\eta}\,\frac{\textcolor{#ff1eff}{\hat m}}{\sqrt{\textcolor{#8787ff}{\hat v}} + \textcolor{#008787}{\epsilon}}
@@ -795,7 +796,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <p>번스타인과 래커 뉴하우스(Laker Newhouse)는 2024년 글 「옛 옵티마이저, 새 노름(Old Optimizer, New Norm: An Anthology)」에서 이 관찰을 출발점으로 삼았다. 이동 평균을 끈 Adam 은 최대 노름 아래의 가장 가파른 스텝이고, 다른 몇몇 옵티마이저도 저마다 어떤 노름 아래의 가장 가파른 스텝으로 읽힌다는 것이다. 이렇게 보면 「어느 옵티마이저가 좋은가」라는 물음은 「파라미터의 스텝을 어떤 노름으로 재는 것이 맞는가」라는 물음으로 바뀐다. 최대 노름은 칸마다 따로 상한을 두니 그래디언트가 아주 작은 칸도 큰 칸과 같은 폭으로 움직이고, Adam 이 칸마다 크기가 다른 그래디언트를 잘 다루는 것도 이 때문이다. 이동 평균을 켜면 스텝이 부호에서 조금씩 벗어나는데, 이동 평균이 스텝을 어떻게 바꾸는지는 아래 문제 3에서 계산한다.</p>
 <aside class="guide"><p class="guide-title">길잡이 · 『미분기하학의 언어들』 「자연 그래디언트: 좌표를 바꿔도 같은 방향」</p><p>스텝의 크기를 재는 노름을 바꾸면 가장 가파른 방향이 바뀐다는 생각을 끝까지 밀면, 크기를 재는 기준을 파라미터 공간이 아니라 모델이 내놓는 분포의 차이에서 가져올 수 있다. 그 기준을 정하는 행렬이 피셔 행렬이고, 그 아래의 가장 가파른 방향이 자연 그래디언트다. <a href="https://lameproof.com/diffgeo-book/12-%EB%A7%A4%EA%B0%9C%EB%B3%80%EC%88%98%EA%B3%B5%EA%B0%84%EC%9D%98%ED%92%8D%EA%B2%BD%EC%9D%84%EA%B1%B7%EB%8B%A4-2.html">이어 읽기</a></p>
 </aside>
-<div class="dialogue"><h3 id="문제-1-보너스-점수-나누기">문제 1. 보너스 점수 나누기</h3>
+<div class="dialogue"><h3 id="prob-muon-bonus-points-split">문제 1. 보너스 점수 나누기<span id="문제-1-보너스-점수-나누기" class="anchor-alias"></span></h3>
 <blockquote>
 <p>조원 셋의 기여도가 3, 1, 0.5다. 조장이 보너스 <span class="sym" style="color:#0078e1">b</span>₁, <span class="sym" style="color:#0078e1">b</span>₂, <span class="sym" style="color:#0078e1">b</span>₃를 나눠 주고, 조의 평가 점수는 기여도와 보너스를 곱해 더한 3<span class="sym" style="color:#0078e1">b</span>₁ + <span class="sym" style="color:#0078e1">b</span>₂ + 0.5<span class="sym" style="color:#0078e1">b</span>₃로 매겨진다. (가) 규칙이 「한 사람에게 최대 1점」이면 어떻게 나눠야 평가 점수가 가장 큰가? (나) 규칙이 「보너스 제곱의 합이 1 이하」면? (다) 규칙이 「보너스를 모두 더해 1 이하」면? 세 규칙 모두에서 「가장 많이 기여한 사람에게 1점 몰아주기」와 비교하라.</p>
 </blockquote>
@@ -811,7 +812,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>기여도를 그래디언트로, 보너스를 스텝으로 읽으면요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>아까 표에서 최대 노름은 부호, 유클리드 노름은 그래디언트 방향이었던 거랑 똑같아요. 셋째 규칙은 마름모 모양의 합 노름이고요. 최선일 때 점수가 4.5 = 3 + 1 + 0.5, 3.20 = 길이, 3 = 가장 큰 기여도로 나오는 것도, 함수해석 시간에 ℓ∞의 쌍대 노름은 ℓ₁, ℓ₂의 쌍대 노름은 ℓ₂라고 외웠던 거네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조별 과제 발표 시간을 「한 사람 최대 5분」으로 주면 다 5분씩 쓰는데, 「합쳐서 10분」으로 주면 제일 말 잘하는 사람한테 몰아주게 되는 거랑 같네요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-부호-하강은-손실의-바닥에-닿는가">문제 2. 부호 하강은 손실의 바닥에 닿는가</h3>
+</div><div class="dialogue"><h3 id="prob-muon-sign-descent-convergence">문제 2. 부호 하강은 손실의 바닥에 닿는가<span id="문제-2-부호-하강은-손실의-바닥에-닿는가" class="anchor-alias"></span></h3>
 <blockquote>
 <p>손실 <span class="sym" style="color:#d62728">f</span>(<span class="sym" style="color:#665522">θ</span>) = ½<span class="sym" style="color:#665522">θ</span>²를 <span class="sym" style="color:#665522">θ</span>₀ = 1에서 내려간다. (가) 부호 하강 <span class="sym" style="color:#665522">θ</span> ← <span class="sym" style="color:#665522">θ</span> − <span class="sym" style="color:#006600">η</span>·sign(<span class="sym" style="color:#665522">θ</span>)를 <span class="sym" style="color:#006600">η</span> = 0.3으로 열 스텝 계산하라. 같은 학습률의 경사하강과 비교하면? (나) <span class="sym" style="color:#006600">η</span> = 0.25로 바꾸면 무슨 일이 생기는가? 바닥에 멈춘 것은 좋은 소식인가? (다) 부호 하강을 손실의 바닥 θ = 0으로 데려가려면 학습률을 어떻게 해야 하는가? (풀어 본 뒤 위젯 2의 「문제 2 불러오기」로 확인해 보자.)</p>
 </blockquote>
@@ -828,7 +829,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>경사하강에서는 스텝을 줄이는 일을 누가 했죠?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그래디언트가 저절로 줄여 줬어요. 부호 하강에서는 그 일을 학습률 스케줄이 떠맡는 거네요. 수열이 수렴하려면 항이 0으로 가야 한다는 조건을 학습률이 채워 주는 셈이에요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>Adam 으로 학습할 때 학습률을 끝에서 줄이지 않으면 손실이 어느 높이에서 더 안 내려가던 게 이거였구나. 샤워기 물을 「남은 차이와 상관없이 3도씩」 바꾸면 목표 온도 둘레를 오가기만 하는 것과 같아요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-3-adam-의-첫-스텝은-부호-하강인가">문제 3. Adam 의 첫 스텝은 부호 하강인가</h3>
+</div><div class="dialogue"><h3 id="prob-muon-adam-first-step-sign">문제 3. Adam 의 첫 스텝은 부호 하강인가<span id="문제-3-adam-의-첫-스텝은-부호-하강인가" class="anchor-alias"></span></h3>
 <blockquote>
 <p>Adam(<span class="sym" style="color:#f0694b">β</span>₁ = 0.9, <span class="sym" style="color:#f0694b">β</span>₂ = 0.999, <span class="sym" style="color:#008787">ε</span> = 10⁻⁸, <span class="sym" style="color:#006600">η</span> = 10⁻³, 편향 보정 켬)으로 파라미터 넷을 학습시키는데, 첫 스텝의 그래디언트가 <span class="sym" style="color:#b0892a">g</span> = (3, −0.02, 10⁻⁹, 0)이다. (가) 편향 보정 뒤의 <span class="sym" style="color:#ff1eff">m̂</span>, <span class="sym" style="color:#8787ff">v̂</span>와 첫 스텝 <span class="sym" style="color:#0078e1">Δθ</span>/<span class="sym" style="color:#006600">η</span>를 구하라. 부호 하강과 같은가? (나) 이번에는 첫 칸의 그래디언트가 첫 스텝에 −3이었다가 둘째 스텝에 +3으로 뒤집혔다고 하자(다른 칸은 그대로). 둘째 스텝의 첫 칸은 얼마인가?</p>
 </blockquote>
@@ -846,7 +847,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>학습 첫 스텝에 모든 파라미터가 똑같이 학습률만큼 움직인다니, 워밍업이 왜 필요한지 하나 더 알겠어요. 첫 주에 모든 과목에 같은 시간을 쏟고 나서야 어느 과목이 급한지 보이는 거랑 비슷하네요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="curvature-approx-6.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="muon-2.html">직교화: 스펙트럼 노름 아래 가장 가파른 스텝 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="curvature-approx-sec-curvature-approx-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="muon-sec-orthogonalized-spectral-step.html">직교화: 스펙트럼 노름 아래 가장 가파른 스텝 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -671,7 +672,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="adaptive.html">적응 학습률: AdaGrad 에서 AdamW 까지</a></li>
 <li><a href="curvature-approx.html">곡률 근사: 준뉴턴에서 K-FAC·Shampoo 까지</a></li>
 <li><a href="muon.html">Muon: 노름을 바꾸면 가장 가파른 방향이 바뀐다</a></li>
-<li><a href="mup.html" class="active">μP: 폭이 달라져도 같은 학습률로</a><ul class="sidebar-toc"><li><a href="mup.html" class="current">폭과 학습률: 넓을수록 같은 스텝이 출력을 더 크게 바꾼다</a></li><li><a href="mup-2.html">신경 탄젠트 커널: 폭이 무한하면 특징이 움직이지 않는다</a></li><li><a href="mup-3.html">μP: 특징이 폭과 상관없이 같은 크기로 움직이게</a></li><li><a href="mup-4.html">μTransfer: 좁은 망에서 고른 학습률을 넓은 망에 옮기기</a></li><li><a href="mup-5.html">스케일링 법칙: 계산량이 정해지면 모델과 데이터를 얼마나</a></li><li><a href="mup-6.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="mup.html" class="active">μP: 폭이 달라져도 같은 학습률로</a><ul class="sidebar-toc"><li><a href="mup.html" class="current">폭과 학습률: 넓을수록 같은 스텝이 출력을 더 크게 바꾼다</a></li><li><a href="mup-sec-neural-tangent-kernel.html">신경 탄젠트 커널: 폭이 무한하면 특징이 움직이지 않는다</a></li><li><a href="mup-sec-maximal-update-parametrization.html">μP: 특징이 폭과 상관없이 같은 크기로 움직이게</a></li><li><a href="mup-sec-mutransfer-learning-rate.html">μTransfer: 좁은 망에서 고른 학습률을 넓은 망에 옮기기</a></li><li><a href="mup-sec-compute-optimal-scaling.html">스케일링 법칙: 계산량이 정해지면 모델과 데이터를 얼마나</a></li><li><a href="mup-sec-mup-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li class="toc-part">분포를 옮기는 최적화</li>
 <li><a href="optimal-transport.html">최적 수송: 흙을 가장 적게 나르는 짝짓기</a></li>
 <li><a href="wgan.html">WGAN: 최소최대와 1-립시츠 판별기</a></li>
@@ -684,7 +685,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter chapter-paged">
 <h1>μP: 폭이 달라져도 같은 학습률로</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-mup">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>학습률은 보통 짧은 학습 몇 번으로 고르는데, 후보 몇 개로 몇백 스텝씩 돌려 보고 손실이 가장 잘 내려간 값을 쓴다. 모델이 작을 때는 이 일이 싸지만, 한 번 학습하는 데 몇 주가 걸리는 큰 모델에서는 후보마다 처음부터 돌려 볼 수가 없다. 그래서 작은 모델에서 고른 학습률을 큰 모델에 그대로 옮겨 쓰고 싶어진다.</p>
 <p>그런데 실제 큰 모델들의 학습률은 크기마다 다르게 잡혀 있다. GPT-3 논문(브라운 외, 2020)은 크기가 다른 모델 여덟 개를 학습하며 그 설정을 표로 밝혔다. 그 가운데 넷을 아래 표에 옮겼는데, 표의 폭은 한 층에서 토큰 하나를 나타내는 벡터의 길이(논문의 d_model)다.</p>
 <div class="table-wrap"><table>
@@ -738,9 +739,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>그렇게 하면 좁은 망에서 찾은 학습률을 넓은 망에 정말 그대로 쓸 수 있을까?</li>
 <li>계산량이 정해졌을 때 모델 크기와 데이터 양은 어떻게 나눠야 할까?</li>
 </ul>
-<h2 id="폭과-학습률-넓을수록-같은-스텝이-출력을-더-크게-바꾼다">폭과 학습률: 넓을수록 같은 스텝이 출력을 더 크게 바꾼다</h2>
+<h2 id="sec-width-learning-rate">폭과 학습률: 넓을수록 같은 스텝이 출력을 더 크게 바꾼다<span id="폭과-학습률-넓을수록-같은-스텝이-출력을-더-크게-바꾼다" class="anchor-alias"></span></h2>
 <p>GPT-3 표에서 폭이 768 에서 12,288 로 16배가 될 때 학습률은 6.0 × 10⁻⁴ 에서 0.6 × 10⁻⁴ 로 10분의 1이 되었다. 연구팀이 크기마다 학습률을 따로 정했다는 뜻이다. 그러나 표만 봐서는 학습률을 폭 때문에 줄였는지, 층 수 때문인지, 그저 큰 모델이라 조심한 것인지 가릴 수 없다. 폭 하나만 바꾸고 나머지는 그대로 둔 실험이 있다면 가려낼 수 있을 텐데, 폭이 정말 학습률을 움직인다면 왜 그럴까?</p>
-<h3 id="역사-폭만-바꾼-트랜스포머">역사: 폭만 바꾼 트랜스포머</h3>
+<h3 id="hist-width-only-transformer" class="history" data-people="yang-greg hu-edward">역사: 폭만 바꾼 트랜스포머<span id="역사-폭만-바꾼-트랜스포머" class="anchor-alias"></span></h3>
 <p>바로 그 실험을 보인 것은 마이크로소프트와 OpenAI 의 연구자 열 명이 2022년에 낸 논문의 첫 그림이다. 논문 제목은 「Tensor Programs V: 영점 하이퍼파라미터 옮기기로 큰 신경망 조율하기(Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer)」(양 외, 2022)다. 첫 두 저자는 그레그 양(Greg Yang)과 에드워드 휴(Edward J. Hu)다. 그들은 트랜스포머의 폭(d_model)만 128 부터 8,192 까지 바꾸고, 흔히 쓰는 초기화와 학습률 규칙을 그대로 둔 채 Adam 으로 학습하며 학습률을 훑었다. 폭마다 손실이 가장 낮은 학습률이 달랐고, 넓을수록 그 최적 학습률이 더 작은 값으로 밀려났다. 그림 설명에는 넓은 망이 좁은 망보다 늘 낫지도 않았다는 말이 붙어 있으니, 모델을 키우면 좋아진다는 믿음이 학습률 하나 때문에 흔들린 것이다.</p>
 <figure class="fig "><img src="images/mup/a1_sp_shift.png" alt="표준 설정에서 폭 32·128·512·2048 의 학습률–손실 곡선. 은닉층이 둘인 작은 다층 퍼셉트론을 Adam 으로 300스텝 학습한 이 책의 실험이고 논문의 숫자가 아니다. 빈 동그라미는 폭마다 손실이 가장 낮은 학습률이고, 넓을수록 왼쪽(작은 학습률)에 있다(sources/mup/s4_transfer.py)" loading="lazy"><figcaption>표준 설정에서 폭 32·128·512·2048 의 학습률–손실 곡선. 은닉층이 둘인 작은 다층 퍼셉트론을 Adam 으로 300스텝 학습한 이 책의 실험이고 논문의 숫자가 아니다. 빈 동그라미는 폭마다 손실이 가장 낮은 학습률이고, 넓을수록 왼쪽(작은 학습률)에 있다(sources/mup/s4_transfer.py)</figcaption></figure>
 <h3 id="폭-n-층-하나에서-한-스텝">폭 <span class="sym" style="color:#3c4bff">n</span> 층 하나에서 한 스텝</h3>
@@ -808,10 +809,10 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>같은 숫자의 학습률이 폭에 따라 다른 크기의 변화를 만든다는 관찰을 밀고 가면, 파라미터 공간의 거리를 「출력이 얼마나 바뀌었나」로 재자는 생각에 닿는다. 그렇게 잰 거리가 피셔 정보로 잰 길이이고, 위의 스텝은 유클리드 길이로는 √<span class="sym" style="color:#3c4bff">n</span>에, 피셔 길이로는 <span class="sym" style="color:#3c4bff">n</span>에 비례한다. 두 자가 폭에 따라 다른 속도로 벌어지는 것이다.</p>
 <aside class="guide"><p class="guide-title">길잡이 · 『정보기하학』 「자연 그래디언트: 피셔 계량을 따라 걷기」</p><p>파라미터의 스텝을 좌표의 칸 수가 아니라 출력 분포가 바뀐 정도로 재는 자(피셔 계량)와, 그 자로 잰 가장 가파른 방향. 피셔 행렬이 왜 분포 공간의 자가 되는지. <a href="https://lameproof.com/infogeo-book/17-%EC%9E%90%EC%97%B0%EA%B8%B0%EC%9A%B8%EA%B8%B0.html">이어 읽기</a></p>
 </aside>
-<figure class="widget-embed" id="widget-mup-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 1: 폭 n 층 하나</span><a class="widget-open" href="widgets/mup.html?v=08497797#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/mup.html?w=w1&embed=1&v=08497797" title="위젯 1: 폭 n 층 하나" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-mup-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 1: 폭 n 층 하나</span><a class="widget-open" href="widgets/mup.html?v=feeb98f5#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/mup.html?w=w1&embed=1&v=feeb98f5" title="위젯 1: 폭 n 층 하나" loading="lazy"></iframe></figure>
 <h3 id="ml에서-adam-이어도-폭을-탄다">ML에서: Adam 이어도 폭을 탄다</h3>
 <p>Adam 은 좌표마다 그래디언트를 그 크기의 이동 평균으로 나눠, 칸마다 스텝이 학습률 정도가 되게 맞추는 옵티마이저다. 그래디언트의 크기를 지우니 폭의 영향도 지워질 것 같다. 그러나 첫 스텝에서 Adam 의 스텝은 그래디언트의 부호, 곧 −<span class="sym" style="color:#006600">η</span> × sign(<span class="sym" style="color:#008787">ŷ</span> − <span class="sym" style="color:#1b9e77">y</span>) × <span class="sym" style="color:#1b9e77">x</span>이다. 칸마다 ±<span class="sym" style="color:#006600">η</span>만큼 움직이고, 그 칸들이 모두 입력과 같은 쪽을 향한다. 위의 층에 <span class="sym" style="color:#006600">η</span> = 0.001 로 Adam 으로 첫 스텝을 가면 출력은 폭 64 에서 0.064, 256 에서 0.256, 1,024 에서 1.024, 4,096 에서 4.096 만큼 움직인다. 여전히 폭에 비례한다. Adam 은 칸 하나의 크기를 맞출 뿐, 칸들이 같은 쪽으로 줄을 서는 것은 막지 못한다. 「Tensor Programs V」의 트랜스포머가 Adam 으로 학습했는데도 가장 좋은 학습률이 밀려난 것은 이 때문이다.</p>
-<div class="dialogue"><h3 id="문제-1-조원이-많아지면">문제 1. 조원이 많아지면</h3>
+<div class="dialogue"><h3 id="prob-mup-larger-team">문제 1. 조원이 많아지면<span id="문제-1-조원이-많아지면" class="anchor-alias"></span></h3>
 <blockquote>
 <p>조원들이 공유 문서에 적힌 행사 예산을 한 사람씩 고친다. 다들 「조금 모자라다」는 같은 판단이 있어서 각자 +1만 원을 더하고, 그 위에 자기 생각을 얹어 +2만 원이나 −2만 원(반반의 확률)을 더 고친다. (가) 조원이 4명, 25명, 100명일 때 예산 전체는 대략 얼마나 바뀌는가? 같은 판단에서 온 변화량과 제각각인 생각에서 온 변화량을 따로 구해 비교하라. (나) 조장이 한 바퀴에 예산이 5만 원쯤만 움직이길 바란다면, 100명에게 각자 얼마씩 고치라고 해야 하는가?</p>
 </blockquote>
@@ -823,7 +824,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>√100 = 10 이니까 각자 5천 원씩… 그러면 같은 판단의 수정만으로도 50만 원이 움직여요. 열 배나 넘어가네요. 같은 판단의 수정이 거의 전부니까 사람 수 그대로 나눠서 각자 500원이어야 해요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>제각각인 것을 더할 때는 √<span class="sym" style="color:#3c4bff">n</span>으로 나누고, 같은 쪽으로 미는 것을 더할 때는 <span class="sym" style="color:#3c4bff">n</span>으로 나누는 거네. 폭 <span class="sym" style="color:#3c4bff">n</span> 층에서 그래디언트 스텝이 같은 쪽으로 미는 쪽이었으니까 학습률을 1/<span class="sym" style="color:#3c4bff">n</span>로 줄여야 했던 거고.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>단톡방에서 「다들 한마디씩만」 하라고 했는데 백 명이 똑같이 「찬성」이라고 하면 그게 백 마디가 되네요. 같은 쪽으로 미는 한마디가 사람 수만큼 쌓이는 거예요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-같은-학습률로-세-스텝">문제 2. 같은 학습률로 세 스텝</h3>
+</div><div class="dialogue"><h3 id="prob-mup-same-rate-three-steps">문제 2. 같은 학습률로 세 스텝<span id="문제-2-같은-학습률로-세-스텝" class="anchor-alias"></span></h3>
 <blockquote>
 <p>위의 층(폭 <span class="sym" style="color:#3c4bff">n</span>, 입력 좌표 ±1, <span class="sym" style="color:#008787">ŷ</span> = <span class="sym" style="color:#665522">w</span>·<span class="sym" style="color:#1b9e77">x</span>, 손실 ½(<span class="sym" style="color:#008787">ŷ</span> − <span class="sym" style="color:#1b9e77">y</span>)²)에 같은 입력으로 경사하강을 여러 번 건다. (가) 폭 256 층은 처음 오차가 <span class="sym" style="color:#008787">ŷ</span> − <span class="sym" style="color:#1b9e77">y</span> = −0.855 다. <span class="sym" style="color:#006600">η</span> = 0.01 로 세 스텝을 가면 오차는 어떻게 되는가? (나) 오차가 끝없이 커지지 않는 <span class="sym" style="color:#006600">η</span>의 범위와, 오차가 정답을 넘어가지 않고(부호가 바뀌지 않고) 줄어드는 <span class="sym" style="color:#006600">η</span>의 범위를 <span class="sym" style="color:#3c4bff">n</span>으로 나타내라. (다) 폭 64 에서 알맞던 <span class="sym" style="color:#006600">η</span> = 0.01 을 그대로 쓰면, 폭이 얼마를 넘을 때부터 오차가 끝없이 커지는가? (풀어 본 뒤 위젯 1 의 「문제 2 불러오기」로 확인해 보자.)</p>
 </blockquote>
@@ -842,7 +843,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M03"><img src="images/cast/M03.webp" alt="김민준 M03" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>곡률이 어디 있어? 이 층은 그냥 내적인데.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>손실을 <span class="sym" style="color:#665522">w</span>로 두 번 미분하면 ‖<span class="sym" style="color:#1b9e77">x</span>‖² = <span class="sym" style="color:#3c4bff">n</span>이잖아. 폭이 그대로 곡률이고, 폭을 넓히면 그릇이 그만큼 가팔라지는 거지. 해석학 시간에 등비수열 (−½)ᵏ 이 진동하며 0 으로 가는 걸 그렸던 것도 생각나.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>같은 레시피에 소금을 「한 숟갈」이라고 적어 두면 숟가락이 커질 때마다 음식이 짜지는 거네요. 숟가락 크기를 같이 적어 둬야 해요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-3-gpt-3-의-학습률은-폭에-반비례하는가">문제 3. GPT-3 의 학습률은 폭에 반비례하는가</h3>
+</div><div class="dialogue"><h3 id="prob-mup-gpt3-width-learning-rate">문제 3. GPT-3 의 학습률은 폭에 반비례하는가<span id="문제-3-gpt-3-의-학습률은-폭에-반비례하는가" class="anchor-alias"></span></h3>
 <blockquote>
 <p>GPT-3 논문의 표에는 모델 여덟 개의 폭과 학습률이 있는데, 작은 넷은 768(6.0 × 10⁻⁴), 1,024(3.0 × 10⁻⁴), 1,536(2.5 × 10⁻⁴), 2,048(2.0 × 10⁻⁴)이다. 큰 넷은 2,560(1.6 × 10⁻⁴), 4,096(1.2 × 10⁻⁴), 5,140(1.0 × 10⁻⁴), 12,288(0.6 × 10⁻⁴)이다. (가) 학습률이 폭에 반비례한다면 가장 작은 모델의 값에서 출발해 가장 큰 모델의 학습률은 얼마여야 하는가? (나) 모델마다 학습률 × 폭을 구하라. 일정한가? (다) 학습률이 반비례에서 벗어난 것은 무엇 때문일 수 있는가?</p>
 </blockquote>
@@ -855,7 +856,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조별 과제에서 역할이 다른 다섯 명에게 똑같이 「분량을 반으로」라고 하니까 발표 맡은 애만 할 게 없어진 적이 있어요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="muon-4.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="mup-2.html">신경 탄젠트 커널: 폭이 무한하면 특징이 움직이지 않는다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="muon-sec-muon-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="mup-sec-neural-tangent-kernel.html">신경 탄젠트 커널: 폭이 무한하면 특징이 움직이지 않는다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

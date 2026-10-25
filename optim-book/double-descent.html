@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -677,14 +678,14 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="wgan.html">WGAN: 최소최대와 1-립시츠 판별기</a></li>
 <li class="toc-part">최적화가 일반화를 만든다</li>
 <li><a href="implicit-bias.html">암묵적 편향: 옵티마이저가 고르는 해</a></li>
-<li><a href="double-descent.html" class="active">이중 하강: 외우고 나서도 나아진다</a><ul class="sidebar-toc"><li><a href="double-descent.html" class="current">편향–분산: 너무 단순해도, 너무 흔들려도 틀린다</a></li><li><a href="double-descent-2.html">이중 하강: 문턱을 넘으면 시험 오차가 다시 내려간다</a></li><li><a href="double-descent-3.html">보간 문턱: 가장 작은 특잇값이 노이즈를 키운다</a></li><li><a href="double-descent-4.html">그로킹: 다 외운 뒤 한참 지나 규칙을 찾는다</a></li><li><a href="double-descent-5.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="double-descent.html" class="active">이중 하강: 외우고 나서도 나아진다</a><ul class="sidebar-toc"><li><a href="double-descent.html" class="current">편향–분산: 너무 단순해도, 너무 흔들려도 틀린다</a></li><li><a href="double-descent-sec-double-descent.html">이중 하강: 문턱을 넘으면 시험 오차가 다시 내려간다</a></li><li><a href="double-descent-sec-interpolation-threshold.html">보간 문턱: 가장 작은 특잇값이 노이즈를 키운다</a></li><li><a href="double-descent-sec-grokking.html">그로킹: 다 외운 뒤 한참 지나 규칙을 찾는다</a></li><li><a href="double-descent-sec-double-descent-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="epilogue.html">맺음: 남은 물음</a></li></ol>
 </nav>
 <button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
 <main>
 <article class="chapter chapter-paged">
 <h1>이중 하강: 외우고 나서도 나아진다</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-double-descent">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>머신러닝 수업에서 가장 먼저 배우는 경고 가운데 하나가 오버피팅이다. 모델이 너무 크면 학습 데이터의 노이즈까지 외워 버려서, 처음 보는 데이터에서는 오히려 틀린다고 배운다. 그래서 학습 손실은 계속 내려가는데 검증 손실이 올라가기 시작하면 멈추라고 배운다. 그런데 실제로 쓰는 신경망을 보면 이 경고와 맞지 않는 일이 많다. 작은 컬러 사진을 열 종류로 나눈 데이터 CIFAR-10의 학습 이미지는 5만 장인데, 이 데이터에 흔히 쓰는 ResNet-18의 파라미터(학습으로 고치는 숫자)는 1,100만 개쯤이다. 숫자 하나로 이미지 한 장씩을 외우고도 남는다. 실제로 2016년의 한 연구는 CIFAR-10에 쓰는 신경망들이 라벨을 무작위로 바꿔 놓은 이미지까지 학습 데이터를 완벽하게 외울 수 있음을 보였다. 그런데도 제대로 된 라벨로 학습하면 처음 보는 이미지를 잘 맞히니, 외울 수 있는 만큼 큰 모델이 왜 외우지 않고 일반화하는 것일까?</p>
 <p>모델의 크기를 조금씩 키워 가며 시험 오차를 재 보면 이상한 일이 하나 더 보인다. 시험 오차가 내려가다가 어느 크기에서 갑자기 치솟고, 그 크기를 넘어서면 다시 내려간다. 「작은 모델은 모자라고, 큰 모델은 오버피팅한다」는 이야기로는 두 번째 내리막을 설명할 수 없다.</p>
 <p>학습 시간에도 비슷한 일이 있다. 2022년에 발표된 한 실험에서는 작은 신경망이 학습 데이터를 다 맞힌 뒤에도 학습을 계속 돌렸더니, 처음 보는 문제의 정답률이 한참 동안 낮은 채로 머물다가 어느 순간 100% 가까이 뛰어올랐다. 학습 손실은 이미 0에 가까웠는데 무엇이 계속 바뀌고 있었을까?</p>
@@ -695,9 +696,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>그 봉우리는 왜 생기고, 무엇으로 없앨 수 있을까?</li>
 <li>학습 데이터를 다 외운 뒤에도 학습을 계속하면 왜 일반화가 좋아질 수 있을까?</li>
 </ul>
-<h2 id="편향-분산-너무-단순해도-너무-흔들려도-틀린다">편향–분산: 너무 단순해도, 너무 흔들려도 틀린다</h2>
+<h2 id="sec-bias-variance">편향–분산: 너무 단순해도, 너무 흔들려도 틀린다<span id="편향-분산-너무-단순해도-너무-흔들려도-틀린다" class="anchor-alias"></span></h2>
 <p>곡선 맞추기를 해 본 사람은 차수를 고르는 데서 망설여 본 적이 있을 것이다. 1차 직선으로는 점들의 굽이를 따라가지 못하고, 차수를 크게 올리면 점은 다 지나는데 점 사이에서 곡선이 출렁인다. 그 사이 어딘가에 알맞은 크기가 있을 것 같지만, 학습한 기록에서 틀린 정도는 모델을 키울수록 줄기만 하니 그것으로는 고를 수 없다. 그렇다면 「알맞다」는 무엇을 재서 정할까?</p>
-<h3 id="역사-게만-비넨스톡-두르사의-딜레마">역사: 게만, 비넨스톡, 두르사의 「딜레마」</h3>
+<h3 id="hist-bias-variance-dilemma" class="history" data-people="geman-stuart bienenstock-elie doursat-rene">역사: 게만, 비넨스톡, 두르사의 「딜레마」<span id="역사-게만-비넨스톡-두르사의-딜레마" class="anchor-alias"></span></h3>
 <p>1992년 『뉴럴 컴퓨테이션(Neural Computation)』 4권 1호에 58쪽짜리 긴 논문 「신경망과 편향/분산 딜레마(Neural Networks and the Bias/Variance Dilemma)」가 실렸다. 지은이는 스튜어트 게만(Stuart Geman), 엘리 비넨스톡(Elie Bienenstock), 르네 두르사(René Doursat)다. 역전파가 다시 주목받으며 신경망이 한창 유행하던 때였다. 세 사람은 역전파로 학습한 신경망을 통계학이 오래 다뤄 온 회귀 추정기, 그것도 미리 정한 꼴 없이 데이터에서 함수의 모양까지 배우는 추정기로 보자고 했다. 그렇게 보면 통계학이 이미 아는 어려움이 그대로 신경망의 어려움이 된다. 오차는 「평균적으로 빗나가는 정도」와 「데이터가 바뀔 때마다 흔들리는 정도」 두 항으로 나뉘고, 하나를 줄이면 다른 하나가 커지기 쉽다. 그들은 인공 데이터와 손글씨 숫자로 실험한 뒤, 당시의 앞먹임 신경망은 기계 지각과 학습의 어려운 문제에 대체로 모자라며 진짜 어려움은 학습보다 표현에 있다고 결론지었다. 「모델을 키우면 평균의 빗나감(편향)은 줄고 데이터마다의 흔들림(분산)은 커진다」는 생각은 통계학에서 먼저 나왔지만, 이 논문이 그것을 신경망 연구자들에게 널리 퍼뜨렸고 그 뒤 교과서마다 실리는 U자 곡선이 되었다.</p>
 <h3 id="기록-40개를-언덕으로-맞추기">기록 40개를 언덕으로 맞추기</h3>
 <p>평균의 빗나감과 데이터마다의 흔들림을 숫자로 갈라 보려면, 정답을 아는 문제에서 같은 실험을 여러 번 되풀이할 수 있어야 한다. 그래서 정답 곡선을 우리가 정해 두고 거기서 기록을 뽑는다. 정답 곡선은 y*(t) = sin(πt) + 0.5 cos(3πt)이고, 시각 t = −1부터 1까지 같은 간격으로 40번 잰다. 잴 때마다 표준편차 0.1인 노이즈가 섞여서, 기록 y는 정답 곡선에서 조금씩 벗어나 있다.</p>
@@ -773,7 +774,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <figure class="fig "><img src="images/double-descent/a1_bias_variance.png" alt="왼쪽: 언덕 5개로 기록 20벌을 맞춘 곡선(얇은 선)과 2,000벌 평균(굵은 선). 어느 기록을 받아도 같은 자리에서 같은 쪽으로 빗나간다. 가운데: 언덕 35개. 평균은 정답 곡선(점선)에 붙지만 기록마다 곡선이 달라지고 오른쪽 끝에서 크게 흔들린다. 오른쪽: 언덕 수에 따른 편향², 분산, 그 합(로그 눈금). 합은 p = 29에서 가장 작다(sources/double-descent/s1_bias_variance.py)" loading="lazy"><figcaption>왼쪽: 언덕 5개로 기록 20벌을 맞춘 곡선(얇은 선)과 2,000벌 평균(굵은 선). 어느 기록을 받아도 같은 자리에서 같은 쪽으로 빗나간다. 가운데: 언덕 35개. 평균은 정답 곡선(점선)에 붙지만 기록마다 곡선이 달라지고 오른쪽 끝에서 크게 흔들린다. 오른쪽: 언덕 수에 따른 편향², 분산, 그 합(로그 눈금). 합은 p = 29에서 가장 작다(sources/double-descent/s1_bias_variance.py)</figcaption></figure>
 <h3 id="ml에서-검증-손실로-크기와-멈출-때를-고른다">ML에서: 검증 손실로 크기와 멈출 때를 고른다</h3>
 <p>실제 학습에서는 정답 곡선을 모르니 기록을 2,000벌 뽑을 수도 없다. 그래서 데이터 일부를 학습에 쓰지 않고 떼어 둔 검증 세트에서 오차를 재어 편향과 분산의 합을 어림한다. 모델의 크기, 정규화(가중치 감쇠나 드롭아웃처럼 모델이 데이터를 너무 따라가지 못하게 막는 장치)의 세기, 학습을 멈출 스텝 수를 검증 오차가 가장 낮은 곳에서 고른다. 검증 손실이 다시 오르기 시작하면 학습을 멈추는 조기 종료(early stopping)도 같은 생각에서 나왔고, 이 절의 U자 곡선이 이런 습관의 근거다. 다만 이 곡선은 언덕 수를 35까지만 그려서, 언덕을 기록 수 40에 가깝게 또는 그보다 많이 쓰면 어떻게 될지는 아직 보지 않았다.</p>
-<div class="dialogue"><h3 id="문제-1-두-사람의-화살">문제 1. 두 사람의 화살</h3>
+<div class="dialogue"><h3 id="prob-double-archers-bias-variance">문제 1. 두 사람의 화살<span id="문제-1-두-사람의-화살" class="anchor-alias"></span></h3>
 <blockquote>
 <p>과녁 한가운데를 (0, 0)으로 두고(단위 cm) 민준과 서연이 화살을 다섯 발씩 쐈다. 민준: (3.1, 2.0), (2.8, 2.4), (3.3, 1.7), (2.9, 2.2), (3.4, 2.1). 서연: (−2.0, 1.0), (1.5, −2.5), (2.5, 2.0), (−1.5, −1.5), (0.0, 1.5). (가) 화살이 한가운데에서 떨어진 거리의 제곱을 평균하면 각각 얼마인가? (나) 그 제곱 평균을 「평균 자리가 한가운데에서 떨어진 거리의 제곱」과 「화살이 평균 자리 둘레로 흩어진 정도」로 쪼개라. (다) 다음 시합까지 한 사람은 조준기를 고칠 시간이, 다른 한 사람은 손떨림을 줄일 연습 시간이 있다. 누가 무엇을 해야 하는가?</p>
 </blockquote>
@@ -784,7 +785,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>편향²과 흩어짐(분산)을 더하면 왜 맞아떨어질까요? 화살 하나가 한가운데에서 벗어난 벡터를 「평균 자리까지」와 「평균 자리에서 화살까지」 두 토막으로 나눠 제곱해 보세요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>제곱하면 두 토막의 곱이 남는데, 「평균 자리에서 화살까지」를 다섯 발에 걸쳐 더하면 0이 돼요. 평균 자리의 정의가 그거니까요. 그래서 곱하는 항이 사라지고 두 제곱만 남아요. 본문의 편향–분산 분해에서 교차항이 사라지는 것과 같은 계산이에요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 저는 조준기를 고쳐야 하고, 서연이는 손떨림 연습이네요. 연습을 아무리 해도 제 평균 자리는 안 움직이니까요. 과제 채점에서 늘 똑같이 2점씩 깎이는 학생은 실수가 아니라 개념을 잘못 안 거라던 조교님 말이 생각나요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-일부러-줄여-말하기">문제 2. 일부러 줄여 말하기</h3>
+</div><div class="dialogue"><h3 id="prob-double-shrinkage-estimate">문제 2. 일부러 줄여 말하기<span id="문제-2-일부러-줄여-말하기" class="anchor-alias"></span></h3>
 <blockquote>
 <p>측정 한 번에 표준편차 1인 노이즈가 섞이는 어떤 양의 참값 μ를 네 번 재서 평균 ȳ를 냈다. 어림값으로는 ȳ 그대로 대신 a·ȳ(0 &lt; a ≤ 1)을 쓰기로 한다. (가) μ = 1일 때 a = 1과 a = 0.8의 평균 제곱 오차를 편향²과 분산으로 쪼개어 구하라. (나) 오차가 가장 작은 a를 μ로 나타내라. (다) μ = 0.3이나 μ = 3이라면 a = 0.8은 여전히 좋은가?</p>
 </blockquote>
@@ -801,7 +802,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>a = 0.8을 μ = 3에 쓰면 오차가 0.52로 a = 1의 0.25보다 훨씬 나빠지네요. 얼마나 줄여야 좋은지는 모르는 참값에 달려 있어요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 편향을 조금 받아들이고 분산을 크게 줄이는 거래는 이득일 수 있지만, 얼마나 줄일지는 그 문제에 달렸어요. 그래서 실제로는 그 세기를 검증 오차로 골라요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>편향이 0인 추정량이 가장 좋다는 건 분산이 같을 때만 맞는 말이었네요. 통계 수업에서 불편 추정량을 「좋은 성질」로만 배웠는데, 오차 전체로 보면 반쪽짜리 기준이었어요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-3-모델-스무-개의-평균">문제 3. 모델 스무 개의 평균</h3>
+</div><div class="dialogue"><h3 id="prob-double-model-averaging">문제 3. 모델 스무 개의 평균<span id="문제-3-모델-스무-개의-평균" class="anchor-alias"></span></h3>
 <blockquote>
 <p>기록 40개(이 절의 기록 한 벌)는 그대로 두고, 언덕 자리만 다르게 뽑은 모델 20개를 맞춘 뒤 예측을 평균한다(앙상블). (가) 언덕 수 <span class="sym" style="color:#3c4bff">p</span> = 20일 때 모델 하나의 시험 오차는 평균 0.0814인데, 20개 평균의 시험 오차는 얼마일까? (나) <span class="sym" style="color:#3c4bff">p</span> = 8이면 모델 하나의 시험 오차 평균이 0.2837인데, 평균을 내면 얼마나 좋아질까? (다) 앙상블이 줄여 주는 것은 편향과 분산 가운데 무엇인가?</p>
 </blockquote>
@@ -815,7 +816,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>캐글에서 다들 큰 모델을 시드만 바꿔 여러 개 학습해서 평균 내는 이유를 알겠어요. 편향이 큰 작은 모델을 여러 개 모으는 건 조별 과제에서 같은 오해를 한 사람 넷이 모이는 거랑 같네요. 모두가 같은 쪽으로 틀린 오해는 머릿수를 늘려도 평균에서 안 지워져요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="implicit-bias-5.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="double-descent-2.html">이중 하강: 문턱을 넘으면 시험 오차가 다시 내려간다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="implicit-bias-sec-implicit-bias-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="double-descent-sec-double-descent.html">이중 하강: 문턱을 넘으면 시험 오차가 다시 내려간다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

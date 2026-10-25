@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -660,7 +661,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="evolution.html">진화 알고리즘: 개체군으로 하는 탐색</a></li>
 <li class="toc-part">1차 최적화</li>
 <li><a href="backprop.html">역전파: 자코비안 곱을 거꾸로</a></li>
-<li><a href="initialization.html" class="active">가중치 초기화: 신호가 커지지도 사라지지도 않게</a><ul class="sidebar-toc"><li><a href="initialization.html" class="current">분산 보존: 층을 지나도 신호의 크기를 지키기</a></li><li><a href="initialization-2.html">그래디언트 소실: 거꾸로 가는 신호는 자코비안을 곱한다</a></li><li><a href="initialization-3.html">게인: 활성화 함수가 깎은 분산을 되돌린다</a></li><li><a href="initialization-4.html">직교 초기화: 모든 방향의 길이를 지키기</a></li><li><a href="initialization-5.html">잔차 연결: 그대로 지나가는 길 위에 고침을 더하기</a></li><li><a href="initialization-6.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="initialization.html" class="active">가중치 초기화: 신호가 커지지도 사라지지도 않게</a><ul class="sidebar-toc"><li><a href="initialization.html" class="current">분산 보존: 층을 지나도 신호의 크기를 지키기</a></li><li><a href="initialization-sec-vanishing-gradients.html">그래디언트 소실: 거꾸로 가는 신호는 자코비안을 곱한다</a></li><li><a href="initialization-sec-activation-gain.html">게인: 활성화 함수가 깎은 분산을 되돌린다</a></li><li><a href="initialization-sec-orthogonal-initialization.html">직교 초기화: 모든 방향의 길이를 지키기</a></li><li><a href="initialization-sec-residual-connections.html">잔차 연결: 그대로 지나가는 길 위에 고침을 더하기</a></li><li><a href="initialization-sec-initialization-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="gradient-descent.html">경사하강: 학습률은 어디까지 키울 수 있나</a></li>
 <li><a href="sgd.html">확률적 경사하강: 노이즈 섞인 그래디언트로 걷기</a></li>
 <li class="toc-part">2차 최적화</li>
@@ -684,7 +685,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter chapter-paged">
 <h1>가중치 초기화: 신호가 커지지도 사라지지도 않게</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-initialization">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>파이토치로 층이 스무 개인 신경망을 처음부터 직접 짜 본다고 하자. 층마다 512 × 512 가중치 행렬을 <code>torch.randn(512, 512)</code>로 만들어 입력을 넣었더니, 학습을 시작하기도 전에 출력이 <code>inf</code>(무한대)로 넘친다. 값이 너무 크다 싶어 가중치에 0.01을 곱해 다시 넣으면 이번에는 출력이 모두 0에 가까운 값이 되고, 손실은 몇천 스텝이 지나도 꿈쩍하지 않는다. 같은 망인데 가중치의 크기만 바꿨을 뿐이다. 그런데 층이 서너 개인 망에서는 두 경우 모두 그럭저럭 학습이 되니, 층이 많아지면 무엇이 달라지는 걸까?</p>
 <p>이 일은 한 사람의 실수담이 아니다. 신경망 연구자들은 오랫동안 층을 깊게 쌓은 망을 무작위 가중치에서 출발해 경사하강으로 학습시키는 데 애를 먹었다. 2010년의 한 논문은 첫 문장을 「2006년 이전에는 깊은 다층 신경망을 학습시키는 데 성공하지 못했던 것으로 보인다」로 시작한다. 역전파가 있었고 컴퓨터도 있었는데, 왜 깊은 망은 배우지 못했을까?</p>
 <p>이 장은 다음 물음에 차례로 답한다.</p>
@@ -695,9 +696,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>신호의 평균 크기만 맞추면 충분할까, 아니면 더 지켜야 할 것이 있을까?</li>
 <li>층이 백 개, 천 개로 늘어나도 통하는 방법이 있을까?</li>
 </ul>
-<h2 id="분산-보존-층을-지나도-신호의-크기를-지키기">분산 보존: 층을 지나도 신호의 크기를 지키기</h2>
+<h2 id="sec-variance-preservation">분산 보존: 층을 지나도 신호의 크기를 지키기<span id="분산-보존-층을-지나도-신호의-크기를-지키기" class="anchor-alias"></span></h2>
 <p>역전파를 배울 때 신경망의 그래디언트는 층마다의 자코비안(벡터 함수의 편미분을 모은 행렬)을 차례로 곱해서 얻는다는 것을 보았다. 앞으로 가는 계산도 마찬가지로 곱셈의 사슬이다. 입력 벡터에 첫 층의 가중치 행렬을 곱하고, 활성화 함수를 거치고, 다시 다음 층의 행렬을 곱한다. 곱셈을 스무 번 되풀이하면, 한 번에 조금씩 커지거나 작아지는 것도 스무 번 쌓인다. 학습을 시작하기 전의 가중치는 무작위로 뽑으니, 무작위 행렬 하나를 지날 때 신호는 몇 배가 되고, 그 배율을 1로 맞추려면 가중치를 어떤 크기로 뽑아야 할까?</p>
-<h3 id="역사-르쿤의-학습-요령-모음">역사: 르쿤의 학습 요령 모음</h3>
+<h3 id="hist-lecun-efficient-backprop" class="history" data-people="lecun-yann">역사: 르쿤의 학습 요령 모음<span id="역사-르쿤의-학습-요령-모음" class="anchor-alias"></span></h3>
 <figure class="fig "><img src="images/initialization/h1_lecun_sigmoid.png" alt="르쿤 외(1998)가 권한 활성화 함수 f(x) = 1.7159·tanh(2x/3)(진홍)와 로지스틱 시그모이드(회색 점선). 권한 함수는 f(±1) = ±1 이 되도록 맞춘 것이라, 입력의 표준편차가 1이면 대부분의 값이 거의 곧은 구간(청록 띠)에 들어간다(이 책이 다시 그린 그림, sources/initialization/figs.py)" loading="lazy"><figcaption>르쿤 외(1998)가 권한 활성화 함수 f(x) = 1.7159·tanh(2x/3)(진홍)와 로지스틱 시그모이드(회색 점선). 권한 함수는 f(±1) = ±1 이 되도록 맞춘 것이라, 입력의 표준편차가 1이면 대부분의 값이 거의 곧은 구간(청록 띠)에 들어간다(이 책이 다시 그린 그림, sources/initialization/figs.py)</figcaption></figure>
 <p>1998년 얀 르쿤(Yann LeCun), 레옹 보투(Léon Bottou), 제네비브 오르(Genevieve Orr), 클라우스로베르트 뮐러(Klaus-Robert Müller)는 「효율적인 역전파(Efficient BackProp)」라는 글을 썼다. 이 글은 『신경망: 학습의 요령(Neural Networks: Tricks of the Trade)』이라는 책에 실렸다. 이 글의 서문은 역전파를 쓰는 사람들이 흔히 겪는 문제들이 「진지한 기술 논문에는 좀처럼 드러나지 않는 요령」으로 피해진다고 적고, 그 요령들을 모아 왜 듣는지를 설명한다. 입력의 평균을 빼고 분산을 맞추라는 전처리, 활성화 함수로 1.7159·tanh(2x/3)을 쓰라는 권고와 함께 가중치를 어떻게 뽑을지도 이 글에 있다.</p>
 <p>그들의 걱정은 활성화 함수였다. 가중치가 모두 크면 시그모이드(S자 모양의 활성화 함수)가 납작한 양 끝에 머물러 그래디언트가 작아지고, 가중치가 모두 작으면 그래디언트도 작아진다. 그래서 뉴런에 들어가는 합이 활성화 함수의 거의 곧은 구간에 머물게 하자는 것이다. 입력이 표준편차 1로 정규화되어 있다고 할 때 뉴런의 합의 표준편차도 1이 되려면, 가중치를 평균 0, 표준편차 m^(−1/2)인 분포에서 뽑으면 된다고 적었다. m은 그 뉴런으로 들어오는 연결의 수(팬인, fan-in)다. 이 글은 뉴런 하나, 층 하나의 크기를 맞추는 데서 멈췄으니, 이 처방을 스무 층에 그대로 쌓으면 어떻게 되는지 직접 보자.</p>
@@ -772,10 +773,10 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <aside class="guide"><p class="guide-title">길잡이 · 『ML 입문자를 위한 동역학』 「중심극한정리: 무엇을 더해도 종 모양」</p><p>서로 독립인 항 n개를 더한 합이 왜 √n배로만 흔들리고 왜 종 모양이 되는지, 그리고 그 절의 문제 「입력이 네 배면 가중치는 절반」이 뉴런 하나에서 1/√n을 끌어내는 과정. 여기서는 그 1/√n을 여러 층으로 쌓은 경우를 본다. <a href="https://lameproof.com/dynamics-book/01-%EB%AF%B8%EC%8B%9C%EC%83%81%ED%83%9C%EC%99%80-%EA%B1%B0%EC%8B%9C%EC%83%81%ED%83%9C-7.html">이어 읽기</a></p>
 </aside>
 <figure class="fig "><img src="images/initialization/a1_forward.png" alt="폭 512, 층 20 의 선형 망에서 층마다 합 z 의 표준편차(로그 눈금). 표준편차 1(c = 22.6)은 층마다 스물두 배씩 커지고, 0.01(c = 0.226)은 층마다 0.22배씩 줄고, 1/√512(c = 1)는 청록 띠(0.5~2) 안에 머문다(sources/initialization/s1_forward.py)" loading="lazy"><figcaption>폭 512, 층 20 의 선형 망에서 층마다 합 z 의 표준편차(로그 눈금). 표준편차 1(c = 22.6)은 층마다 스물두 배씩 커지고, 0.01(c = 0.226)은 층마다 0.22배씩 줄고, 1/√512(c = 1)는 청록 띠(0.5~2) 안에 머문다(sources/initialization/s1_forward.py)</figcaption></figure>
-<figure class="widget-embed" id="widget-initialization-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 1: 층마다 신호의 크기</span><a class="widget-open" href="widgets/initialization.html?v=7363ec18#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/initialization.html?w=w1&embed=1&v=7363ec18" title="위젯 1: 층마다 신호의 크기" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-initialization-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 1: 층마다 신호의 크기</span><a class="widget-open" href="widgets/initialization.html?v=119d42c4#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/initialization.html?w=w1&embed=1&v=119d42c4" title="위젯 1: 층마다 신호의 크기" loading="lazy"></iframe></figure>
 <h3 id="ml에서-torch-randn-대신-nn-init">ML에서: torch.randn 대신 nn.init</h3>
 <p>파이토치의 <code>torch.randn(512, 512)</code>는 표준편차 1, 곧 <span class="sym" style="color:#008787">c</span> = 22.6인 가중치다. 층 하나짜리 실험에서는 출력이 스물두 배 커질 뿐이라 눈치채기 어렵지만, 층을 쌓으면 위 표의 첫 줄이 된다. 그래서 파이토치에는 가중치를 정해진 크기로 다시 뽑는 함수들이 <code>torch.nn.init</code>에 모여 있다. 이 장에서 볼 이름들, 곧 르쿤, 글로로, 허카이밍의 이름이 붙은 초기화가 모두 이 <span class="sym" style="color:#008787">c</span>를 어떻게 고르느냐의 차이다. <code>nn.Linear</code>가 아무 말 없이 쓰는 기본값의 <span class="sym" style="color:#008787">c</span>는 얼마인지는 아래 문제 3에서 직접 계산한다.</p>
-<div class="dialogue"><h3 id="문제-1-복사기-배율">문제 1. 복사기 배율</h3>
+<div class="dialogue"><h3 id="prob-initialization-copier-scale">문제 1. 복사기 배율<span id="문제-1-복사기-배율" class="anchor-alias"></span></h3>
 <blockquote>
 <p>복사기로 사진을 복사하고, 그 복사본을 다시 복사하기를 20번 되풀이하는데, 복사기의 배율 설정이 조금 어긋나 있다. (가) 배율이 101%, 110%, 90%이면 20번 뒤 사진의 크기는 처음의 몇 배인가? (나) 20번 뒤 크기를 처음의 0.5배와 2배 사이에 두려면 배율이 어느 범위에 있어야 하는가? (다) 100번 복사한다면?</p>
 </blockquote>
@@ -786,7 +787,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>100번이면요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>0.9931과 1.0070 사이요. 0.7%도 안 어긋나야 해요. 횟수가 다섯 배가 되니까 허용 오차가 다섯 배쯤 좁아졌어요. 층이 깊을수록 한 층의 배율을 1에 더 바짝 붙여야 한다는 거네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조별 과제 보고서를 다섯 명이 차례로 「조금만 줄여서」 넘기면 마지막엔 반쪽짜리가 되는 거랑 같네요. 한 사람한테는 별것 아닌 10%가 다섯 번이면 0.59배예요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-폭을-바꾸면">문제 2. 폭을 바꾸면</h3>
+</div><div class="dialogue"><h3 id="prob-initialization-changing-width">문제 2. 폭을 바꾸면<span id="문제-2-폭을-바꾸면" class="anchor-alias"></span></h3>
 <blockquote>
 <p>가중치의 표준편차를 폭과 상관없이 0.05로 고정한 선형 망(층 20)이 있다. (가) 폭이 128, 512, 2048일 때 층 하나를 지나며 신호의 표준편차는 몇 배가 되는가? 20층 뒤에는? (나) 폭 512에서 표준편차를 「항이 512개니까 512로 나눈다」는 생각으로 1/512로 잡으면 어떻게 되는가? (풀어 본 뒤 위젯 1의 「문제 2」 단추로 확인해 보자.)</p>
 </blockquote>
@@ -809,7 +810,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>전부 1.655로 똑같아요… 그럼 칸이 512개 있어도 하나 있는 거나 마찬가지네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>학습하다 보면 달라지지 않아?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그래디언트도 칸마다 똑같을 테니 계속 똑같이 움직일 거야. 무작위로 뽑는 데는 크기를 맞추는 것 말고 칸들을 서로 다르게 만드는 구실도 있었네. 선형대수 시간에 열이 모두 같은 행렬은 계수가 1이라고 배운 게 이거야.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-3-nn-linear-의-기본값">문제 3. nn.Linear 의 기본값</h3>
+</div><div class="dialogue"><h3 id="prob-initialization-linear-default">문제 3. nn.Linear 의 기본값<span id="문제-3-nn-linear-의-기본값" class="anchor-alias"></span></h3>
 <blockquote>
 <p>파이토치의 <code>nn.Linear(512, 512)</code>는 따로 정하지 않으면 가중치를 균등분포 U(−1/√<span class="sym" style="color:#3c4bff">n</span>, 1/√<span class="sym" style="color:#3c4bff">n</span>)에서 뽑는다(<span class="sym" style="color:#3c4bff">n</span>은 입력의 수). (가) 이 분포의 표준편차와 배율 <span class="sym" style="color:#008787">c</span>는? (나) 이 기본값으로 선형 층 20개를 쌓으면 20층 뒤 신호는 처음의 몇 배인가? (풀어 본 뒤 위젯 1의 「문제 3 불러오기」로 확인해 보자.)</p>
 </blockquote>
@@ -824,7 +825,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>남이 쓴 깊은 망 코드에 <code>nn.init.kaiming_normal_</code> 같은 줄이 꼭 들어가 있던 게 이래서였구나. 저는 지우고 돌려도 되는 줄 알았어요. 리포트 분량 제한이 「A4 열 장」인데 글자 크기를 안 정해 주면 다들 다르게 맞추는 거랑 같아요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="backprop-5.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="initialization-2.html">그래디언트 소실: 거꾸로 가는 신호는 자코비안을 곱한다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="backprop-sec-backprop-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="initialization-sec-vanishing-gradients.html">그래디언트 소실: 거꾸로 가는 신호는 자코비안을 곱한다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

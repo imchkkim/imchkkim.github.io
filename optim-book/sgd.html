@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -662,7 +663,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="backprop.html">역전파: 자코비안 곱을 거꾸로</a></li>
 <li><a href="initialization.html">가중치 초기화: 신호가 커지지도 사라지지도 않게</a></li>
 <li><a href="gradient-descent.html">경사하강: 학습률은 어디까지 키울 수 있나</a></li>
-<li><a href="sgd.html" class="active">확률적 경사하강: 노이즈 섞인 그래디언트로 걷기</a><ul class="sidebar-toc"><li><a href="sgd.html" class="current">확률적 경사하강: 몇 건만 보고 그래디언트를 어림한다</a></li><li><a href="sgd-2.html">노이즈 플로어: 학습률을 고정하면 손실의 바닥 근처에서 맴돈다</a></li><li><a href="sgd-3.html">로빈스–먼로 조건: 학습률을 줄여 가야 손실의 바닥에 닿는다</a></li><li><a href="sgd-4.html">학습률 스케줄: 정해 둔 스텝 수 안에서 줄인다</a></li><li><a href="sgd-5.html">워밍업: 처음 몇 스텝은 학습률을 천천히 올린다</a></li><li><a href="sgd-6.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="sgd.html" class="active">확률적 경사하강: 노이즈 섞인 그래디언트로 걷기</a><ul class="sidebar-toc"><li><a href="sgd.html" class="current">확률적 경사하강: 몇 건만 보고 그래디언트를 어림한다</a></li><li><a href="sgd-sec-sgd-noise-floor.html">노이즈 플로어: 학습률을 고정하면 손실의 바닥 근처에서 맴돈다</a></li><li><a href="sgd-sec-robbins-monro-conditions.html">로빈스–먼로 조건: 학습률을 줄여 가야 손실의 바닥에 닿는다</a></li><li><a href="sgd-sec-learning-rate-schedules.html">학습률 스케줄: 정해 둔 스텝 수 안에서 줄인다</a></li><li><a href="sgd-sec-learning-rate-warmup.html">워밍업: 처음 몇 스텝은 학습률을 천천히 올린다</a></li><li><a href="sgd-sec-sgd-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li class="toc-part">2차 최적화</li>
 <li><a href="newton.html">뉴턴법과 헤시안: 곡률을 알면 한 번에</a></li>
 <li><a href="sharpness.html">샤프니스: 안정성의 가장자리</a></li>
@@ -684,7 +685,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter chapter-paged">
 <h1>확률적 경사하강: 노이즈 섞인 그래디언트로 걷기</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-sgd">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>경사하강은 지금 자리에서 손실의 그래디언트를 재고, 학습률을 곱한 만큼 반대쪽으로 옮기기를 되풀이하는 방법이다. 학습률을 곡률의 상한 L에 맞춰 2/L보다 작게 잡으면 손실은 스텝마다 줄고, 손실의 바닥에 가까워질수록 그래디언트가 작아져서 스텝도 저절로 짧아진다. 그런데 이 약속에는 그래디언트를 정확히 안다는 조건이 하나 붙어 있었다.</p>
 <p>이미지 백만 장으로 신경망을 학습시킨다고 하자. 정확한 그래디언트를 얻으려면 한 스텝마다 백만 장을 모두 모델에 넣고 역전파를 해야 한다. 그래서 실제 학습 코드는 데이터에서 몇십, 몇백 장만 뽑아 그래디언트를 어림하고 곧바로 한 스텝을 옮긴다. 그렇게 학습시킨 손실 곡선을 그려 보면 매끈하게 내려가지 않고 톱니처럼 오르내리며 내려간다. 한참 학습한 뒤에도 손실은 한 값에 멈추지 않고 그 언저리를 맴도는데, 학습률을 중간에 열 분의 일로 줄이면 손실이 계단처럼 한 번 더 뚝 떨어진다. 그리고 학습 코드에는 처음 몇백, 몇천 스텝 동안 학습률을 0에서부터 천천히 올리는 설정이 거의 늘 들어 있다.</p>
 <p>이 장은 다음 물음에 차례로 답한다.</p>
@@ -695,9 +696,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>학습할 스텝 수가 정해져 있을 때 학습률은 어떤 모양으로 줄이는 것이 좋을까?</li>
 <li>처음 몇 스텝의 학습률을 낮추는 것은 무엇을 막으려는 것일까?</li>
 </ul>
-<h2 id="확률적-경사하강-몇-건만-보고-그래디언트를-어림한다">확률적 경사하강: 몇 건만 보고 그래디언트를 어림한다</h2>
+<h2 id="sec-stochastic-gradient-estimate">확률적 경사하강: 몇 건만 보고 그래디언트를 어림한다<span id="확률적-경사하강-몇-건만-보고-그래디언트를-어림한다" class="anchor-alias"></span></h2>
 <p>학습 데이터가 백만 건이면 손실은 백만 건 각각의 손실을 평균 낸 것이고, 그 그래디언트도 백만 건 각각의 그래디언트를 평균 낸 것이다. 한 스텝에 데이터 백만 건의 계산이 들지만, 평균은 전부를 세지 않아도 어림할 수 있다. 선거 여론조사는 유권자 수천만 명 가운데 천 명쯤에게 묻고, 급식 맛을 알고 싶은 영양사는 학생 몇 명에게만 물어본다. 그래디언트도 몇 건만 뽑아 평균 내면 되지 않을까? 다만 그렇게 어림한 그래디언트는 뽑을 때마다 다르고, 참 그래디언트와도 조금씩 어긋난다. 틀린 방향으로 걷는 스텝이 섞여도 바닥에 닿을 수 있을까?</p>
-<h3 id="역사-로빈스와-먼로-반응만-보고-용량-찾기">역사: 로빈스와 먼로, 반응만 보고 용량 찾기</h3>
+<h3 id="hist-robbins-monro-dosage" class="history" data-people="robbins-herbert monro-sutton">역사: 로빈스와 먼로, 반응만 보고 용량 찾기<span id="역사-로빈스와-먼로-반응만-보고-용량-찾기" class="anchor-alias"></span></h3>
 <figure class="fig "><img src="images/sgd/h1_robbins_monro.png" alt="로빈스와 먼로(1951)의 4절이 다룬 문제를 이 책에서 숫자를 정해 다시 그린 예. 왼쪽: 용량 x에서 반응할 확률(회색 점선)은 실험자가 모르고, 한 번 실험하면 반응(1)인지 무반응(0)인지만 안다. 오른쪽: 결과를 볼 때마다 다음 용량을 (4/n)(0.5 − 결과)만큼 옮기면, 반응 확률이 0.5인 용량 3 근처로 다가간다(200번째 실험 뒤 2.85). 반응 확률 곡선과 4/n, 출발점 0.5는 그림을 위해 고른 값이다(sources/sgd/figs.py)" loading="lazy"><figcaption>로빈스와 먼로(1951)의 4절이 다룬 문제를 이 책에서 숫자를 정해 다시 그린 예. 왼쪽: 용량 x에서 반응할 확률(회색 점선)은 실험자가 모르고, 한 번 실험하면 반응(1)인지 무반응(0)인지만 안다. 오른쪽: 결과를 볼 때마다 다음 용량을 (4/n)(0.5 − 결과)만큼 옮기면, 반응 확률이 0.5인 용량 3 근처로 다가간다(200번째 실험 뒤 2.85). 반응 확률 곡선과 4/n, 출발점 0.5는 그림을 위해 고른 값이다(sources/sgd/figs.py)</figcaption></figure>
 <p>어림한 값으로도 답에 다가갈 수 있음을 처음 정리로 보인 것은 미국 노스캐롤라이나 대학교의 통계학자 허버트 로빈스(Herbert Robbins)와 서턴 먼로(Sutton Monro)였다. 두 사람은 1951년 『수리통계 연보(Annals of Mathematical Statistics)』에 여덟 쪽짜리 논문 「확률적 근사 방법(A Stochastic Approximation Method)」을 실었다. 미국 해군 연구청(Office of Naval Research)의 지원을 일부 받았다고 적혀 있다.</p>
 <p>그들이 푼 문제는 이렇다. 실험의 조건 x(약의 용량 같은 것)를 정하면 결과 Y가 나오는데, 결과는 같은 x에서도 실험할 때마다 다르다. 실험자는 결과의 평균 M(x)가 어떤 함수인지 모르고, 오른쪽으로 갈수록 커진다는 것만 안다. 이때 평균 결과가 정해진 값 α가 되는 조건 x, 곧 M(x) = α의 해를 찾고 싶다. 논문 4절의 예를 보면 실감이 나는데, 생물 검정(bioassay)이나 감도 시험(sensitivity test) 자료에서는 실험 대상이 반응했는지(1) 안 했는지(0)만 알 수 있다. 반응 확률이 50%가 되는 용량을 찾으려면 어떻게 할까?</p>
@@ -763,7 +764,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h3 id="ml에서-한-스텝을-싸게-스텝을-많이">ML에서: 한 스텝을 싸게, 스텝을 많이</h3>
 <p>파이토치에서 <code>DataLoader(dataset, batch_size=64, shuffle=True)</code>로 데이터를 읽어 <code>loss.backward()</code>와 <code>optimizer.step()</code>을 부르면, 그것이 배치 크기 64의 확률적 경사하강이다. 옵티마이저 이름이 <code>torch.optim.SGD</code>인 것도 이 때문이다. 다만 실제 코드는 한 스텝마다 따로 뽑지 않고, 데이터를 한 번 섞은 뒤 앞에서부터 64건씩 잘라 쓰다가 데이터를 다 훑으면 다시 섞는다. 데이터 전체를 한 번 훑는 단위를 에포크(epoch)라 한다.</p>
 <p>레옹 보투(Léon Bottou)는 2010년 계산 통계 학회(COMPSTAT)에 낸 글 「확률적 경사하강으로 하는 대규모 기계학습(Large-Scale Machine Learning with Stochastic Gradient Descent)」에서 이 방법이 왜 큰 데이터에서 이기는지를 정리했다. 그의 출발점은 데이터의 크기가 프로세서의 계산 속도보다 빨리 늘어서, 이제는 학습을 묶는 것이 데이터의 양이 아니라 계산 시간이라는 것이었다. 정해진 시간 안에서는 한 스텝을 정확히 하는 것보다 값싼 스텝을 많이 하는 쪽이 낫고, 그래서 겉보기에는 거친 확률적 경사하강이 큰 문제에서 좋은 성능을 낸다는 것이다. 그는 스텝들을 평균 낸 확률적 경사하강이 학습 데이터를 한 번만 훑고도 통계적으로 가장 효율적인 수준에 닿는다는 결과도 함께 소개했다.</p>
-<div class="dialogue"><h3 id="문제-1-급식-만족도-조사">문제 1. 급식 만족도 조사</h3>
+<div class="dialogue"><h3 id="prob-sgd-lunch-survey">문제 1. 급식 만족도 조사<span id="문제-1-급식-만족도-조사" class="anchor-alias"></span></h3>
 <blockquote>
 <p>학생 1000명이 다니는 학교의 영양사가 오늘 급식의 만족도(10점 만점)를 알고 싶다. 학생들의 점수는 표준편차가 2점쯤 흩어져 있다. (가) 한 명에게만 물으면 그 답은 전체 평균에서 얼마나 벗어나기 쉬운가? 열 명, 백 명에게 물어 평균 내면? (나) 열 명에게 물을 때보다 두 배 정확하게(표준편차를 절반으로) 알려면 몇 명에게 물어야 하는가? (다) 매일 한 명에게만 묻는 영양사와 매일 백 명에게 묻는 영양사 가운데 누가 메뉴를 더 잘 고치겠는가?</p>
 </blockquote>
@@ -778,7 +779,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>한 번 한 번이 부정확한데도 괜찮을까요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>음… 틀린 방향이 평균적으로는 맞는 방향 둘레에 고르게 흩어져 있다면, 여러 번 고치는 동안 서로 지워질 것 같아요. 표본 평균의 분산이 1/n로 준다는 걸 통계 수업에서 배울 때는 정확도 얘기로만 들었는데, 품과 정확도를 맞바꾸는 비율이기도 하네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조교님이 과제 채점할 때 몇 명 것만 먼저 보고 「이번에 다들 3번을 틀렸네」 하고 설명을 고치던 게 그거였구나. 다 보고 고치면 정확하지만 다음 수업에 늦고요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-1000건을-모두-뽑았는데-노이즈가-남는다">문제 2. 1000건을 모두 뽑았는데 노이즈가 남는다</h3>
+</div><div class="dialogue"><h3 id="prob-sgd-full-sample-noise">문제 2. 1000건을 모두 뽑았는데 노이즈가 남는다<span id="문제-2-1000건을-모두-뽑았는데-노이즈가-남는다" class="anchor-alias"></span></h3>
 <blockquote>
 <p>배달 1000건 회귀의 바닥 <span class="sym" style="color:#665522">w</span>*에서 참 그래디언트는 0이고, 한 건짜리 그래디언트의 표준편차는 <span class="sym" style="color:#87965a">σ</span> = 4.761이다. (가) 배치 크기 <span class="sym" style="color:#3c4bff">B</span> = 1000으로 뽑으면 어림한 그래디언트의 표준편차는 <span class="sym" style="color:#87965a">σ</span>/√<span class="sym" style="color:#3c4bff">B</span>로 얼마인가? (나) 그런데 1000건을 모두 쓰면 참 그래디언트 그 자체라 노이즈가 없어야 한다. 무엇이 어긋났는가? (다) 겹치지 않게 뽑을 때의 표준편차가 <span class="sym" style="color:#87965a">σ</span>/√<span class="sym" style="color:#3c4bff">B</span> × √((1000 − <span class="sym" style="color:#3c4bff">B</span>)/(1000 − 1))임을 받아들이고, <span class="sym" style="color:#3c4bff">B</span> = 100, 500, 1000에서 두 방식을 비교하라.</p>
 </blockquote>
@@ -794,7 +795,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p><span class="sym" style="color:#3c4bff">B</span> = 500이면 0.2129와 0.1506이야.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>0.1506? 어, 겹치지 않게 500건 뽑은 노이즈가 되돌려 넣으며 1000건 뽑은 노이즈와 같네요. 모집단이 유한할 때 샘플조사에서 쓰는 유한 모집단 보정이 이거였네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>실제 학습은 에포크마다 섞어서 겹치지 않게 자르니까, 데이터가 백만 건이고 배치가 수백 건이면 보정 인자가 거의 1이라 <span class="sym" style="color:#87965a">σ</span>²/<span class="sym" style="color:#3c4bff">B</span>로 생각하면 되겠어요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-3-배치를-키워도-소용없는-지점">문제 3. 배치를 키워도 소용없는 지점</h3>
+</div><div class="dialogue"><h3 id="prob-sgd-batch-size-limit">문제 3. 배치를 키워도 소용없는 지점<span id="문제-3-배치를-키워도-소용없는-지점" class="anchor-alias"></span></h3>
 <blockquote>
 <p>샘 매캔들리시(Sam McCandlish)와 동료들은 2018년 논문 「대규모 배치 학습의 경험적 모델(An Empirical Model of Large-Batch Training)」에서 「그래디언트 노이즈 크기」를 재면 배치를 어디까지 키우는 것이 이득인지를 어림할 수 있다고 보고했다. 파라미터가 하나이면 그래디언트 노이즈 크기는 B_simple = <span class="sym" style="color:#87965a">σ</span>²/(참 그래디언트)²이다. 배달 1000건 회귀에서 <span class="sym" style="color:#665522">w</span> = 0, 3, 3.9, 3.98일 때 그래디언트 노이즈 크기를 구하고, 학습이 진행될수록 쓸 만한 배치 크기가 어떻게 바뀌는지 말하라. (<span class="sym" style="color:#665522">w</span> = 0에서 참 그래디언트 −41.32, <span class="sym" style="color:#87965a">σ</span>² = 763.7, <span class="sym" style="color:#665522">w</span> = 3에서 −10.22, 69.64, <span class="sym" style="color:#665522">w</span> = 3.9에서 −0.886, 23.20, <span class="sym" style="color:#665522">w</span> = 3.98에서 −0.0563, 22.68이다.)</p>
 </blockquote>
@@ -809,7 +810,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>큰 언어 모델 학습 설정에 배치 크기를 학습 초반에 점점 키운다는 줄이 있던 게 생각나요. 그게 이 얘기였구나.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="gradient-descent-5.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="sgd-2.html">노이즈 플로어: 학습률을 고정하면 손실의 바닥 근처에서 맴돈다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="gradient-descent-sec-gradient-descent-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="sgd-sec-sgd-noise-floor.html">노이즈 플로어: 학습률을 고정하면 손실의 바닥 근처에서 맴돈다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');
