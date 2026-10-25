@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,13 +684,14 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
 <li><a href="reinforce.html">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a></li>
 <li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다</a></li>
 <li><a href="bellman.html">5. 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</a></li>
-<li><a href="td.html" class="active">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a><ul class="sidebar-toc"><li><a href="td.html">시간차 학습: 다음 예측을 목표로 삼는다</a></li><li><a href="td-sec-bootstrap-bias-variance.html" class="current">부트스트랩의 값: 편향과 분산</a></li><li><a href="td-sec-td-error-brain.html">TD 오차: 뇌도 쓰는 예측 오차</a></li><li><a href="td-sec-n-step-td.html">n스텝 시간차: 한 스텝과 끝까지 사이</a></li><li><a href="td-sec-td-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="td.html" class="active">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a><ul class="sidebar-toc"><li><a href="td.html">시간차 학습: 다음 예측을 목표로 삼는다</a></li><li><a href="td-sec-bootstrap-bias-variance.html" class="current">부트스트랩의 값: 편향과 분산</a></li><li><a href="td-sec-td-error-brain.html">TD 오차: 뇌도 쓰는 예측 오차</a></li><li><a href="td-sec-n-step-td.html">n스텝 시간차: 한 스텝과 끝까지 사이</a></li><li><a href="td-sec-td-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="q-learning.html">7. Q-러닝: 남이 둔 수로 최선의 수를 배운다</a></li>
 <li><a href="dqn.html">8. DQN: 표를 신경망으로 바꾸면 무엇이 흔들리나</a></li>
 <li><a href="actor-critic.html">9. Actor-Critic: 비평가를 곁에 두다</a></li>
@@ -710,6 +726,22 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p>일곱 칸 랜덤 워크에서 시간차 학습은 몬테카를로보다 빨리 참값에 다가갔지만, 시간차 학습의 목표에는 아직 배우는 중인 예측이 들어 있다. 틀린 예측을 목표로 삼고도 어떻게 더 빨리 맞힐 수 있었으며, 예측이 크게 틀려 있다면 예측을 목표로 삼은 대가는 무엇일까?</p>
 <h5 id="hist-sutton-novel-position" class="history" data-people="sutton-richard">역사: 서튼의 「처음 보는 판면」<span id="역사-서튼의-처음-보는-판면" class="anchor-alias"></span></h5>
 <p>서튼은 1988년 논문에서 「다음 예측이 결과보다 나은 목표일 수 있는가」를 게임으로 풀었다. 게임을 하다가 처음 보는 판면에 이르렀고, 그다음 판면은 지금까지 열에 아홉은 졌던 「나쁜 판면」이었다. 그런데 이번 판은 우연히 이겼으므로, 결과를 목표로 삼는 방법은 처음 보는 판면을 「이기는 판면」으로 배운다. 시간차 방법은 처음 보는 판면을 바로 뒤의 나쁜 판면과 맞춰 「나쁜 판면」으로 배운다. 서튼은 「나쁜 판면」을 제대로 알고 있다면 시간차 방법의 결론이 옳다고 봤다. 처음 보는 판면은 대개 진다고 알려진 판면으로 이어졌고, 그 뒤에 일어난 일은 상관이 없기 때문이다. 나중 판면의 평가는 그 뒤에 결과를 흔드는 운에 오염되지 않았기 때문에 실제 결과보다 나은 잣대라고 그는 적었다.</p>
+<svg class="fig" viewBox="0 0 560 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="처음 보는 판면에서 나쁜 판면으로 갔다. 나쁜 판면 뒤로는 지금까지 90% 졌고 10% 이겼는데, 이번 판은 이겼다. 결과를 목표로 삼으면 처음 보는 판면의 목표는 승(1), 시간차 방법은 나쁜 판면의 평가(0.1)를 목표로 삼는다">
+<defs><marker id="td-h3-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="f4" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
+<rect class="fa1" x="20" y="88" width="120" height="50" rx="8"/><text x="80" y="118" text-anchor="middle" style="font-size:14px">처음 보는 판면</text>
+<rect class="fa2" x="210" y="88" width="120" height="50" rx="8"/><text x="270" y="118" text-anchor="middle" style="font-size:14px">나쁜 판면</text>
+<line class="sink" x1="140" y1="113" x2="207" y2="113" stroke-width="1.6" marker-end="url(#td-h3-arr)"/>
+<rect class="fneutral" x="420" y="38" width="120" height="44" rx="8"/><text x="480" y="65" text-anchor="middle" style="font-size:14px">패 90%</text>
+<rect class="fa3" x="420" y="144" width="120" height="44" rx="8"/><text x="480" y="171" text-anchor="middle" style="font-size:14px">승 10%</text>
+<line class="saxis" x1="330" y1="105" x2="417" y2="62" stroke-width="1.4" marker-end="url(#td-h3-arr)"/>
+<line class="sink" x1="330" y1="121" x2="417" y2="164" stroke-width="2.4" marker-end="url(#td-h3-arr)"/>
+<text class="t-strong" x="352" y="168" text-anchor="middle" style="font-size:12px">이번 판</text>
+<text class="t-muted" x="270" y="160" text-anchor="middle" style="font-size:12px">지금까지의 기록</text>
+<text x="20" y="214" style="font-size:13px">결과가 목표: 처음 보는 판면 ← 승 <tspan style="fill:var(--sym-d9670b, #d9670b)">1</tspan></text>
+<text x="290" y="214" style="font-size:13px">시간차가 목표: 처음 보는 판면 ← 나쁜 판면 0.1</text>
+<text class="t-muted" x="280" y="234" text-anchor="middle" style="font-size:12px">Sutton(1988) 그림 1을 이 책에서 다시 그림</text>
+<text class="t-strong" x="280" y="22" text-anchor="middle" style="font-size:14px">처음 보는 판면에서 나쁜 판면을 거쳐 운 좋게 이긴 판</text>
+</svg>
 <p>서튼은 같은 예로 시간차 방법이 실패하는 경우도 적었다. 나쁜 판면이 대개 지는 판면이지만, 처음 보는 판면을 거쳐 왔을 때만은 늘 이긴다고 하자. 이 이상한 경우에는 시간차 방법이 결과를 목표로 삼는 방법보다 나을 수 없고 더 못할 수도 있다고 그는 인정했다. 시간차 방법은 상태가 이어지는 순서에 담긴 정보를 쓰는데, 그 정보가 잘못 이끌 수도 있다는 것이다. 다만 그는 그 정보가 더 흔하게는 도움이 된다고 덧붙였다.</p>
 <div class="dlg">
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">처음 보는 판면이 나쁜 판면으로 이어졌으니 나쁜 판면이라는 건, 지금 들으면 당연한 말 같아요.</div></div>

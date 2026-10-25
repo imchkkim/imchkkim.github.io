@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,6 +684,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
@@ -678,7 +694,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="td.html">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a></li>
 <li><a href="q-learning.html">7. Q-러닝: 남이 둔 수로 최선의 수를 배운다</a></li>
 <li><a href="dqn.html">8. DQN: 표를 신경망으로 바꾸면 무엇이 흔들리나</a></li>
-<li><a href="actor-critic.html" class="active">9. Actor-Critic: 비평가를 곁에 두다</a><ul class="sidebar-toc"><li><a href="actor-critic.html">어드밴티지: 가치가 얼마나 바뀌었나</a></li><li><a href="actor-critic-sec-td-critic.html" class="current">시간차: 한 스텝만 가고 비평가를 믿는다</a></li><li><a href="actor-critic-sec-gae-lambda.html">GAE: 둘 사이를 λ로 잇는다</a></li><li><a href="actor-critic-sec-critic-cost.html">비평가의 청구서: 두 번째 모델이 드는 비용</a></li><li><a href="actor-critic-sec-actor-critic-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="actor-critic.html" class="active">9. Actor-Critic: 비평가를 곁에 두다</a><ul class="sidebar-toc"><li><a href="actor-critic.html">어드밴티지: 가치가 얼마나 바뀌었나</a></li><li><a href="actor-critic-sec-td-critic.html" class="current">시간차: 한 스텝만 가고 비평가를 믿는다</a></li><li><a href="actor-critic-sec-gae-lambda.html">GAE: 둘 사이를 λ로 잇는다</a></li><li><a href="actor-critic-sec-critic-cost.html">비평가의 청구서: 두 번째 모델이 드는 비용</a></li><li><a href="actor-critic-sec-actor-critic-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="ppo-rlhf.html">10. PPO와 RLHF: 멀리 가지 않게 묶다</a></li>
 <li><a href="dpo-reappear.html">11. DPO의 재등장: 보상 모델을 수식으로 지우다</a></li>
 <li><a href="preference-pairs.html">12. 선호 쌍의 조건: 어떤 데이터가 DPO를 움직이는가</a></li>
@@ -711,12 +727,99 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <h5 id="hist-cart-pole-critic" class="history" data-people="barto-andrew sutton-richard">역사: 막대가 넘어진 뒤에야 오는 신호<span id="역사-막대가-넘어진-뒤에야-오는-신호" class="anchor-alias"></span></h5>
 <p>비평가는 이 장과 똑같은 고민에서 나왔다. 1983년 매사추세츠 대학교의 배로(Andrew Barto), 서튼(Richard Sutton), 앤더슨(Charles Anderson)은 수레 위에 경첩으로 세운 막대를, 수레를 좌우로 밀어 쓰러지지 않게 하는 일을 기계에게 배우게 했다. 기계는 수레와 막대의 운동 방정식을 모르고, 받는 신호는 막대가 일정한 각도 넘게 기울거나 수레가 선로 끝에 닿았을 때 오는 「실패」 하나뿐이었다. 여러 번 민 끝에 온 실패를 어느 밀기 탓으로 돌릴 것인가? 그들은 신경 세포를 흉내 낸 소자 둘을 나란히 두었다. 하나는 밀 방향을 고르고, 다른 하나는 실패 신호만으로는 얻을 수 없는 더 촘촘한 평가를 스스로 만들었다. 둘째 소자의 이름이 적응 비평 소자(adaptive critic element)였다.</p>
 <p>그 평가를 고치는 방법, 곧 결과를 기다리지 않고 다음 예측을 목표로 삼아 지금 예측을 고치는 방법이 시간차 학습이다. 비평가는 시간차 학습으로 배우는 가치함수다.</p>
+<svg class="fig" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="왼쪽: 수레 위에 경첩으로 세운 막대. 막대가 12도 넘게 기울거나 수레가 선로 끝 2.4미터에 닿으면 실패. 오른쪽: 동전 던지기로 좌우를 고른 한 판. 44번 민 끝에 막대가 12.6도로 기울어 실패했고, 그 앞의 43번에는 신호가 0이었다" style="background:#fff;border:1px solid #ccc;border-radius:4px;--w-1:#2a78d6;--w-2:#eb6834;--w-3:#1baf7a;--w-4:#4a3aa7;--w-ink:#0b0b0b;--w-ink-2:#222222;--w-muted:#6b6a65;--w-grid:#e1e0d9;--w-axis:#c3c2b7;--w-surface:#ffffff;--w-fill-1:rgba(42,120,214,0.14);--w-fill-2:rgba(235,104,52,0.14);--w-fill-3:rgba(27,175,122,0.16);--w-neutral:#f0efec;--sym-0093b8:#0093b8;--sym-1c9c60:#1c9c60;--sym-d9670b:#d9670b;--sym-1565c0:#1565c0;--sym-00897b:#00897b;--sym-8e44ad:#8e44ad;--sym-7a1f5a:#7a1f5a;--sym-993600:#993600;">
+  <defs><marker id="hac1-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path style="fill:var(--w-ink-2)" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
+  <text class="t-strong" x="95" y="26" text-anchor="middle" style="font-size:15px">수레 위의 막대</text>
+  <line class="sink" x1="30" y1="200" x2="162" y2="200" stroke-width="2"/>
+  <line class="sink" x1="30" y1="192" x2="30" y2="208" stroke-width="2"/>
+  <line class="sink" x1="162" y1="192" x2="162" y2="208" stroke-width="2"/>
+  <text class="t-muted" x="30" y="222" text-anchor="middle" style="font-size:12px">−2.4 m</text>
+  <text class="t-muted" x="162" y="222" text-anchor="middle" style="font-size:12px">+2.4 m</text>
+  <rect class="fa1" x="66" y="168" width="60" height="26" rx="4"/>
+  <rect class="sink" x="66" y="168" width="60" height="26" rx="4" stroke-width="1.4"/>
+  <circle class="sink" cx="80" cy="197" r="4" stroke-width="1.4" style="fill:#fff"/>
+  <circle class="sink" cx="112" cy="197" r="4" stroke-width="1.4" style="fill:#fff"/>
+  <line class="sink" x1="96" y1="168" x2="111" y2="59" stroke-width="5"/>
+  <line class="saxis" x1="96" y1="168" x2="71" y2="53" stroke-width="1.2" stroke-dasharray="5 4"/>
+  <line class="saxis" x1="96" y1="168" x2="121" y2="53" stroke-width="1.2" stroke-dasharray="5 4"/>
+  <text class="t-muted" x="126" y="48" style="font-size:12px">12°</text>
+  <line class="sink" x1="62" y1="181" x2="40" y2="181" stroke-width="1.6" marker-end="url(#hac1-arr)"/>
+  <line class="sink" x1="130" y1="181" x2="152" y2="181" stroke-width="1.6" marker-end="url(#hac1-arr)"/>
+  <text x="46" y="165" text-anchor="middle" style="font-size:12px">10 N</text>
+  <text x="146" y="165" text-anchor="middle" style="font-size:12px">10 N</text>
+  <text class="t-muted" x="95" y="252" text-anchor="middle" style="font-size:13px">운동 방정식은 모른다</text>
+  <text class="t-muted" x="95" y="270" text-anchor="middle" style="font-size:13px">받는 신호는 실패 하나</text>
+  <text class="t-strong" x="398" y="26" text-anchor="middle" style="font-size:15px">동전 던지기로 민 한 판 (44번, 0.88초)</text>
+  <line class="saxis" x1="250" y1="140" x2="545" y2="140" stroke-width="1" stroke-dasharray="5 4"/>
+  <text x="244" y="144" text-anchor="end" style="font-size:12px">-12°</text>
+  <line class="sgrid" x1="250" y1="100" x2="545" y2="100" stroke-width="1"/>
+  <text x="244" y="104" text-anchor="end" style="font-size:12px">0°</text>
+  <line class="saxis" x1="250" y1="60" x2="545" y2="60" stroke-width="1" stroke-dasharray="5 4"/>
+  <text x="244" y="64" text-anchor="end" style="font-size:12px">+12°</text>
+  <text class="t-muted" x="210" y="40" style="font-size:12px">막대 각도</text>
+  <polyline class="s1" stroke-width="2.2" points="250.0,100.0 256.7,100.0 263.4,98.9 270.1,96.6 276.8,95.5 283.5,93.3 290.2,92.1 296.9,92.0 303.6,92.9 310.3,95.0 317.0,95.9 323.8,95.6 330.5,96.4 337.2,96.1 343.9,96.8 350.6,98.7 357.3,99.4 364.0,101.2 370.7,104.2 377.4,106.0 384.1,106.7 390.8,108.6 397.5,109.5 404.2,109.2 410.9,107.9 417.6,105.6 424.3,104.4 431.0,102.1 437.7,101.0 444.4,98.7 451.1,95.4 457.8,93.2 464.5,92.0 471.2,89.7 478.0,88.5 484.7,86.1 491.4,82.5 498.1,79.9 504.8,78.3 511.5,75.5 518.2,73.6 524.9,70.5 531.6,66.2 538.3,62.7 545.0,58.0"/>
+  <circle cx="545.0" cy="58.0" r="4" style="fill:var(--w-bad)"/>
+  <text x="244" y="190" text-anchor="end" style="font-size:12px">민 쪽</text>
+  <line class="s4" x1="253" y1="186" x2="253" y2="194" stroke-width="2.2"/>
+  <line class="s4" x1="260" y1="186" x2="260" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="267" y1="186" x2="267" y2="178" stroke-width="2.2"/>
+  <line class="s4" x1="273" y1="186" x2="273" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="280" y1="186" x2="280" y2="178" stroke-width="2.2"/>
+  <line class="s2" x1="287" y1="186" x2="287" y2="178" stroke-width="2.2"/>
+  <line class="s2" x1="294" y1="186" x2="294" y2="178" stroke-width="2.2"/>
+  <line class="s2" x1="300" y1="186" x2="300" y2="178" stroke-width="2.2"/>
+  <line class="s4" x1="307" y1="186" x2="307" y2="194" stroke-width="2.2"/>
+  <line class="s4" x1="314" y1="186" x2="314" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="320" y1="186" x2="320" y2="178" stroke-width="2.2"/>
+  <line class="s4" x1="327" y1="186" x2="327" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="334" y1="186" x2="334" y2="178" stroke-width="2.2"/>
+  <line class="s2" x1="341" y1="186" x2="341" y2="178" stroke-width="2.2"/>
+  <line class="s4" x1="347" y1="186" x2="347" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="354" y1="186" x2="354" y2="178" stroke-width="2.2"/>
+  <line class="s2" x1="361" y1="186" x2="361" y2="178" stroke-width="2.2"/>
+  <line class="s4" x1="367" y1="186" x2="367" y2="194" stroke-width="2.2"/>
+  <line class="s4" x1="374" y1="186" x2="374" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="381" y1="186" x2="381" y2="178" stroke-width="2.2"/>
+  <line class="s4" x1="387" y1="186" x2="387" y2="194" stroke-width="2.2"/>
+  <line class="s4" x1="394" y1="186" x2="394" y2="194" stroke-width="2.2"/>
+  <line class="s4" x1="401" y1="186" x2="401" y2="194" stroke-width="2.2"/>
+  <line class="s4" x1="408" y1="186" x2="408" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="414" y1="186" x2="414" y2="178" stroke-width="2.2"/>
+  <line class="s4" x1="421" y1="186" x2="421" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="428" y1="186" x2="428" y2="178" stroke-width="2.2"/>
+  <line class="s4" x1="434" y1="186" x2="434" y2="194" stroke-width="2.2"/>
+  <line class="s4" x1="441" y1="186" x2="441" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="448" y1="186" x2="448" y2="178" stroke-width="2.2"/>
+  <line class="s2" x1="454" y1="186" x2="454" y2="178" stroke-width="2.2"/>
+  <line class="s4" x1="461" y1="186" x2="461" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="468" y1="186" x2="468" y2="178" stroke-width="2.2"/>
+  <line class="s4" x1="475" y1="186" x2="475" y2="194" stroke-width="2.2"/>
+  <line class="s4" x1="481" y1="186" x2="481" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="488" y1="186" x2="488" y2="178" stroke-width="2.2"/>
+  <line class="s2" x1="495" y1="186" x2="495" y2="178" stroke-width="2.2"/>
+  <line class="s4" x1="501" y1="186" x2="501" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="508" y1="186" x2="508" y2="178" stroke-width="2.2"/>
+  <line class="s4" x1="515" y1="186" x2="515" y2="194" stroke-width="2.2"/>
+  <line class="s4" x1="522" y1="186" x2="522" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="528" y1="186" x2="528" y2="178" stroke-width="2.2"/>
+  <line class="s4" x1="535" y1="186" x2="535" y2="194" stroke-width="2.2"/>
+  <line class="s2" x1="542" y1="186" x2="542" y2="178" stroke-width="2.2"/>
+  <text class="t-muted" x="545" y="208" text-anchor="end" style="font-size:11px">위 = 오른쪽, 아래 = 왼쪽</text>
+  <text x="244" y="242" text-anchor="end" style="font-size:12px">신호</text>
+  <line class="sink" x1="250" y1="238" x2="545" y2="238" stroke-width="1.4"/>
+  <line class="sink" x1="545" y1="238" x2="545" y2="264" stroke-width="2.4"/>
+  <circle cx="545.0" cy="264" r="4" style="fill:var(--w-bad)"/>
+  <text class="tbad" x="537" y="268" text-anchor="end" style="font-size:13px">−1 (실패)</text>
+  <text class="t-muted" x="254" y="230" style="font-size:12px">앞의 43번은 모두 0</text>
+  <text class="t-muted" x="398" y="292" text-anchor="middle" style="font-size:12px">밀기 횟수 →</text>
+</svg>
+<p>그림은 1983년 논문의 설정(막대 12°, 선로 끝 ±2.4 m, 수레에 주는 힘 10 N)으로, 아직 배운 것이 없는 기계가 동전 던지기로 좌우를 골라 44번 민 한 판을 다시 계산한 것이다. 앞의 43번에는 신호가 0이었고, 막대가 12°를 넘은 마지막 한 번에만 −1이 왔다.</p>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">막대 세우기는 지금은 강화학습 첫 실습 과제잖아요. 수레를 미는 방향만 고르면 되는데, 뭐가 그렇게 어려웠어요?</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">실패 신호가 언제 오는지 봐요. 수레를 수십 번 민 다음, 막대가 넘어진 순간에 딱 한 번 와요. 그 앞의 밀기 가운데 어느 것이 잘못이었죠?</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S04.webp" alt="이서연 (난처함)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">음… 넘어지기 직전의 밀기일 수도 있고, 훨씬 전에 막대를 살짝 기울게 만든 밀기일 수도 있어요. 신호 하나로는 못 가르겠는데요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">오늘이라면 막대의 상태를 신경망에 넣고 오차역전파로 평가를 배우게 하겠죠. 그런데 여러 층 신경망을 오차역전파로 학습하는 방법이 널리 알려진 건 1986년이에요.</div></div>
-<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">1983년의 두 소자는 수레의 위치·속도와 막대의 각도·각속도를 162칸으로 나눈 표를 쓰고, 칸마다 값을 따로 고쳤어요. 고치는 규칙에 「시간차 학습」이라는 이름이 붙은 것도 서튼의 1988년 논문에서였고요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">1983년의 두 소자는 수레의 위치·속도와 막대의 각도·각속도를 162칸으로 나눈 표를 쓰고, 칸마다 값을 따로 고쳤어요. 고치는 규칙을 「시간차 학습」이라는 이름으로 따로 떼어 정리한 것도 서튼의 1988년 논문이었고요.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M07.webp" alt="김민준 (아하)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">그럼 그 표의 칸마다 적힌 값이 「이 칸에 들어오면 곧 넘어지겠다」는 예상이네요. 이름도 없던 걸 손으로 만들어 쓴 거고요.</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S02.webp" alt="이서연 (호기심)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그런데 예상을 고칠 때, 넘어질 때까지 기다린 결과를 쓰는 것과 바로 다음 순간의 예상을 믿는 것 가운데 어느 쪽이 더 나아요?</div></div>
 </div><h5 id="몬테카를로-대-시간차">몬테카를로 대 시간차</h5>

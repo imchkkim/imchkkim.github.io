@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,12 +684,13 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
 <li><a href="reinforce.html">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a></li>
 <li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다</a></li>
-<li><a href="bellman.html" class="active">5. 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</a><ul class="sidebar-toc"><li><a href="bellman.html">벨먼 기대 방정식: 지금 보상 + 다음 상태 가치</a></li><li><a href="bellman-sec-bellman-optimality-equation.html">벨먼 최적 방정식: 최선을 고르는 가치</a></li><li><a href="bellman-sec-contraction-value-iteration.html" class="current">축약 사상: 가치 반복은 왜 한 점에 모이나</a></li><li><a href="bellman-sec-policy-iteration.html">정책 반복: 평가하고, 고치고, 다시 평가한다</a></li><li><a href="bellman-sec-bellman-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="bellman.html" class="active">5. 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</a><ul class="sidebar-toc"><li><a href="bellman.html">벨먼 기대 방정식: 지금 보상 + 다음 상태 가치</a></li><li><a href="bellman-sec-bellman-optimality-equation.html">벨먼 최적 방정식: 최선을 고르는 가치</a></li><li><a href="bellman-sec-contraction-value-iteration.html" class="current">축약 사상: 가치 반복은 왜 한 점에 모이나</a></li><li><a href="bellman-sec-policy-iteration.html">정책 반복: 평가하고, 고치고, 다시 평가한다</a></li><li><a href="bellman-sec-bellman-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="td.html">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a></li>
 <li><a href="q-learning.html">7. Q-러닝: 남이 둔 수로 최선의 수를 배운다</a></li>
 <li><a href="dqn.html">8. DQN: 표를 신경망으로 바꾸면 무엇이 흔들리나</a></li>
@@ -710,6 +726,51 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p>벨먼 기대 방정식은 연립일차방정식이라 역행렬로 풀었지만, 벨먼 최적 방정식에는 max가 들어 있어 일차식이 아니고, 역행렬로 풀 수 없다. 택시는 정책이 여덟뿐이라 모두 풀어 비교했지만, 정책을 모두 푸는 방법이 늘 통하지는 않는다. 그렇다면 아무 표에서 시작해 식의 오른쪽을 계산하고, 나온 값을 다시 오른쪽에 넣는 일을 되풀이하면 어떨까? 그 되풀이가 정말 답에 닿을까, 처음에 넣은 표가 다르면 다른 곳에 닿지는 않을까?</p>
 <h5 id="hist-value-iteration-sears-catalog" class="history" data-people="howard-ronald">역사: 진공관으로 돌린 되풀이<span id="역사-진공관으로-돌린-되풀이" class="anchor-alias"></span></h5>
 <p>이 되풀이를 실제 장사에 처음 쓴 사람 가운데 하나로 로널드 하워드(Ronald Howard)가 꼽힌다. MIT에서 박사 과정을 밟던 무렵, 그는 컨설팅 회사 아서 D. 리틀(Arthur D. Little)과 함께 백화점 시어스 로벅(Sears, Roebuck and Company)의 우편 주문 카탈로그 일을 했다. 손님에게 카탈로그를 어떻게 보낼지가 행동이었고, 손님을 50개쯤의 상태로 나누어 철마다 상태가 옮겨 간다고 보았다. 한 번 옮겨 갈 때의 보상은 그 옮김에서 나는 이익에서 보낸 카탈로그의 비용을 뺀 값이었다. 옮겨 갈 확률은 손님 주소판을 다루던 주소 인쇄 장치(Addressograph)의 기록을 특별히 돌려 셈했다. 하워드는 그 기록이 있었기에 이 방법 전체가 가능했다고 적었다.</p>
+<svg class="fig" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="하워드의 시어스 카탈로그 일의 흐름. 주소 인쇄 장치의 기록에서 옮겨 갈 확률표(손님 상태 50쯤 × 50쯤, 칸 2,500쯤, 발송 방법마다)를 셈하고, 보상은 옮김의 이익에서 카탈로그 비용을 뺀 값. 진공관 컴퓨터로 표를 되풀이해 고쳐 발송 정책을 얻었다. 정책은 이번 철 수익과 다음 철 상태 사이의 균형을 잡았다" style="background:#fff;border:1px solid #ccc;border-radius:4px;--w-1:#2a78d6;--w-2:#eb6834;--w-3:#1baf7a;--w-4:#4a3aa7;--w-ink:#0b0b0b;--w-ink-2:#222222;--w-muted:#6b6a65;--w-grid:#e1e0d9;--w-axis:#c3c2b7;--w-surface:#ffffff;--w-fill-1:rgba(42,120,214,0.14);--w-fill-2:rgba(235,104,52,0.14);--w-fill-3:rgba(27,175,122,0.16);--w-neutral:#f0efec;--sym-0093b8:#0093b8;--sym-1c9c60:#1c9c60;--sym-d9670b:#d9670b;--sym-1565c0:#1565c0;--sym-00897b:#00897b;--sym-8877ff:#8877ff;--sym-5d4037:#5d4037;--sym-7a1f5a:#7a1f5a;--sym-915a08:#915a08;--sym-5f970c:#5f970c;">
+  <defs><marker id="h4-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" markerUnits="strokeWidth" orient="auto"><path class="sink" style="fill:var(--w-ink-2)" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
+  <rect class="fa2" x="14" y="30" width="160" height="70" rx="8"/>
+  <text class="t-strong" x="94" y="61" text-anchor="middle" style="font-size:13px">주소 인쇄 장치</text>
+  <text x="94" y="79" text-anchor="middle" style="font-size:13px">(Addressograph) 기록</text>
+  <rect class="fsurface" x="222" y="18" width="96" height="96" style="stroke:var(--w-ink-2);stroke-width:1.2"/>
+  <line class="sgrid" x1="231.6" y1="18" x2="231.6" y2="114" stroke-width="1"/>
+  <line class="sgrid" x1="222" y1="27.6" x2="318" y2="27.6" stroke-width="1"/>
+  <line class="sgrid" x1="241.2" y1="18" x2="241.2" y2="114" stroke-width="1"/>
+  <line class="sgrid" x1="222" y1="37.2" x2="318" y2="37.2" stroke-width="1"/>
+  <line class="sgrid" x1="250.8" y1="18" x2="250.8" y2="114" stroke-width="1"/>
+  <line class="sgrid" x1="222" y1="46.8" x2="318" y2="46.8" stroke-width="1"/>
+  <line class="sgrid" x1="260.4" y1="18" x2="260.4" y2="114" stroke-width="1"/>
+  <line class="sgrid" x1="222" y1="56.4" x2="318" y2="56.4" stroke-width="1"/>
+  <line class="sgrid" x1="270.0" y1="18" x2="270.0" y2="114" stroke-width="1"/>
+  <line class="sgrid" x1="222" y1="66.0" x2="318" y2="66.0" stroke-width="1"/>
+  <line class="sgrid" x1="279.6" y1="18" x2="279.6" y2="114" stroke-width="1"/>
+  <line class="sgrid" x1="222" y1="75.6" x2="318" y2="75.6" stroke-width="1"/>
+  <line class="sgrid" x1="289.2" y1="18" x2="289.2" y2="114" stroke-width="1"/>
+  <line class="sgrid" x1="222" y1="85.2" x2="318" y2="85.2" stroke-width="1"/>
+  <line class="sgrid" x1="298.8" y1="18" x2="298.8" y2="114" stroke-width="1"/>
+  <line class="sgrid" x1="222" y1="94.8" x2="318" y2="94.8" stroke-width="1"/>
+  <line class="sgrid" x1="308.4" y1="18" x2="308.4" y2="114" stroke-width="1"/>
+  <line class="sgrid" x1="222" y1="104.4" x2="318" y2="104.4" stroke-width="1"/>
+  <text class="t-strong" x="328" y="40" style="font-size:13px">옮겨 갈 <tspan style="fill:var(--sym-8877ff, #8877ff)">확률표</tspan></text>
+  <text x="328" y="58" style="font-size:13px"><tspan style="fill:var(--sym-0093b8, #0093b8)">손님 상태</tspan> 50쯤 × 50쯤</text>
+  <text x="328" y="76" style="font-size:13px">= 칸 2,500쯤</text>
+  <text x="328" y="94" style="font-size:13px"><tspan style="fill:var(--sym-1c9c60, #1c9c60)">발송 방법</tspan>마다 한 장</text>
+  <line class="sink" x1="176" y1="65" x2="216" y2="65" stroke-width="1.6" marker-end="url(#h4-arr)"/>
+  <text class="t-muted" x="196" y="132" text-anchor="middle" style="font-size:12px">특별히 돌려 셈함</text>
+  <rect class="fa1" x="14" y="150" width="200" height="64" rx="8"/>
+  <text x="114" y="178" text-anchor="middle" style="font-size:13px"><tspan style="fill:var(--sym-d9670b, #d9670b)">보상</tspan> = 옮김의 이익</text>
+  <text x="114" y="196" text-anchor="middle" style="font-size:13px">− 보낸 카탈로그 비용</text>
+  <rect class="fa1" x="260" y="150" width="150" height="64" rx="8"/>
+  <text class="t-strong" x="335" y="178" text-anchor="middle" style="font-size:13px">표를 되풀이해 고치기</text>
+  <text class="t-muted" x="335" y="196" text-anchor="middle" style="font-size:13px">진공관 컴퓨터</text>
+  <path class="sink" d="M380,148 C400,120 430,120 412,150" stroke-width="1.4" marker-end="url(#h4-arr)"/>
+  <line class="sink" x1="270" y1="118" x2="300" y2="146" stroke-width="1.6" marker-end="url(#h4-arr)"/>
+  <line class="sink" x1="216" y1="182" x2="256" y2="182" stroke-width="1.6" marker-end="url(#h4-arr)"/>
+  <line class="sink" x1="335" y1="216" x2="335" y2="236" stroke-width="1.6" marker-end="url(#h4-arr)"/>
+  <rect class="fa3" x="60" y="240" width="440" height="50" rx="8"/>
+  <text class="t-strong" x="280" y="261" text-anchor="middle" style="font-size:13px"><tspan style="fill:var(--sym-1c9c60, #1c9c60)">발송</tspan> 정책: 이번 철 수익만이 아니라</text>
+  <text x="280" y="279" text-anchor="middle" style="font-size:13px">다음 철에 손님이 옮겨 갈 <tspan style="fill:var(--sym-0093b8, #0093b8)">상태</tspan>까지 따져 균형을 잡는다</text>
+</svg>
+<p>그림은 하워드가 회고한 시어스 일의 흐름, 곧 장치 기록에서 셈한 확률표와 보상으로 표를 되풀이해 고쳐 발송 정책을 얻는 과정을 한 장에 그린 것이다(본문의 회고만 옮김, 이 책이 직접 그림).</p>
 <p>최적의 발송 정책은 표를 되풀이해 고치는 방법으로 구했다. 컴퓨터가 아직 진공관으로 돌던 때라 한 번 돌리는 데 시간이 꽤 걸렸지만 비용은 감당할 만했다고 한다. 나온 정책은 이번 철의 수익을 가장 크게 하는 정책이 아니라, 그 수익과 손님이 다음 철에 옮겨 갈 상태 사이에서 균형을 잡는 정책이었다. 예측된 수익 개선은 몇 퍼센트였지만 금액으로는 해마다 수백만 달러였고, 전체 손님에게 적용한 결과도 예측과 가깝게 맞았다고 하워드는 회고했다(『Operations Research』 2002년 50주년 특집호에 다시 실린 글. 처음 실린 곳은 1978년 퍼터먼(Martin Puterman)이 엮은 책).</p>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">상태 50개짜리 표를 되풀이로 고치는 거면 제 노트북으로 1초도 안 걸릴 텐데요.</div></div>

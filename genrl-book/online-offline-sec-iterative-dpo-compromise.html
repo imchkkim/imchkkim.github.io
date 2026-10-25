@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,6 +684,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
@@ -688,7 +704,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="bradley-terry.html">16. Bradley-Terry 모델: 시그모이드는 왜 거기 있는가?</a></li>
 <li><a href="multi-reward.html">17. 다차원 보상: 스칼라를 넘어서</a></li>
 <li><a href="dpo-family.html">18. DPO의 진화: 하나의 알고리즘이 낳은 가계도</a></li>
-<li><a href="online-offline.html" class="active">19. 온라인과 오프라인: 이상과 현실 사이에서</a><ul class="sidebar-toc"><li><a href="online-offline.html">온라인 학습: 지금의 모델로 매 배치 새로 배운다</a></li><li><a href="online-offline-sec-offline-data-filtering.html">오프라인 데이터 정제: 시간 제약 없이 여러 번 거른다</a></li><li><a href="online-offline-sec-distribution-shift-old-policy.html">분포 이동: 데이터는 옛 정책에서 나왔다</a></li><li><a href="online-offline-sec-iterative-dpo-compromise.html" class="current">반복 DPO: 온라인과 오프라인 사이의 절충</a></li><li><a href="online-offline-sec-on-policy-distillation.html">온폴리시 증류: 상태는 학생이, 채점은 교사가</a></li><li><a href="online-offline-sec-online-offline-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="online-offline.html" class="active">19. 온라인과 오프라인: 이상과 현실 사이에서</a><ul class="sidebar-toc"><li><a href="online-offline.html">온라인 학습: 지금의 모델로 매 배치 새로 배운다</a></li><li><a href="online-offline-sec-offline-data-filtering.html">오프라인 데이터 정제: 시간 제약 없이 여러 번 거른다</a></li><li><a href="online-offline-sec-distribution-shift-old-policy.html">분포 이동: 데이터는 옛 정책에서 나왔다</a></li><li><a href="online-offline-sec-iterative-dpo-compromise.html" class="current">반복 DPO: 온라인과 오프라인 사이의 절충</a></li><li><a href="online-offline-sec-on-policy-distillation.html">온폴리시 증류: 상태는 학생이, 채점은 교사가</a></li><li><a href="online-offline-sec-online-offline-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="joycaption-case.html">20. 실전사례: 현장의 목소리, JoyCaption의 DPO 실전기</a></li>
 <li><a href="rlvr-grpo.html">21. RLVR과 GRPO: 비평가를 내려놓다</a></li>
 <li><a href="rl-conditions.html">22. RL이 작동하는 조건: 스펙트럼, 적정 난이도, 그리고 한계</a></li>
@@ -734,9 +750,113 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </pre><h5 id="hist-llama-iterative-rounds" class="history">역사: Llama의 반복 학습과 여러 절충안<span id="역사-llama의-반복-학습과-여러-절충안" class="anchor-alias"></span></h5>
 <p>한 번 만든 데이터가 낡는다면 가장 쉬운 처방은 학습을 몇 토막으로 나누고 토막마다 데이터를 새로 만드는 것이다. 메타의 Llama 2(2023)가 이 방식을 썼다. 그때까지 가장 나은 모델로 응답을 새로 뽑아 다시 학습하는 일을 다섯 번 되풀이했고, 판마다 RLHF-V1부터 V5까지 이름을 붙였다. 넷째 판까지는 거절 샘플링(여러 응답을 뽑아 보상 모델 점수가 가장 좋은 것만 남겨 따라 쓰게 하기)만 썼고, 그 뒤에야 거절 샘플링 위에 PPO를 얹었다.</p>
 <p>Llama 3(2024)는 같은 반복 구조를 여섯 라운드로 돌리되 PPO 자리에 DPO를 넣었다. 한 라운드는 거절 샘플링 + SFT(좋은 응답을 그대로 따라 쓰게 하는 지도 학습) + DPO였다. DPO에는 앞 라운드에서 가장 나았던 모델들로 새로 모은 선호 데이터를 주로 썼는데, 논문은 그렇게 하면 학습 데이터가 각 라운드에서 최적화되는 정책의 분포에 더 가까워지기 때문이라고 적었다. 그래서 Llama 3의 방식은 반쯤 온라인이다. 데이터는 라운드마다 정책을 따라가고, 라운드 안에서는 오프라인의 안정성을 누린다. PPO 같은 온폴리시 알고리즘도 시도했지만, 큰 모델에서는 DPO가 연산을 덜 쓰고 지시 따르기 평가(IFEval)에서 더 나았다고 한다. 라운드 사이에 모델을 검수하고 방향을 고칠 수 있다는 것도 실무적 이점이다. JoyCaption도 이 방식을 써서, 2라운드 반복으로 결함률(엉터리 출력 비율)을 9.6%에서 1.5%로 낮췄다.</p>
+<svg class="fig" viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="위: Llama 2 의 다섯 판 RLHF-V1~V5. 판 사이마다 사람 선호 데이터를 새로 모아 보상 모델을 다시 학습했고, V4 까지는 거절 샘플링만, V5 에서 거절 샘플링 위에 PPO 를 얹었다. 아래: Llama 3 의 여섯 라운드, 라운드마다 거절 샘플링, SFT, DPO" style="background:#fff;border:1px solid #ccc;border-radius:4px;--w-1:#2a78d6;--w-2:#eb6834;--w-3:#1baf7a;--w-4:#4a3aa7;--w-ink:#0b0b0b;--w-ink-2:#222222;--w-muted:#6b6a65;--w-grid:#e1e0d9;--w-axis:#c3c2b7;--w-surface:#ffffff;--w-fill-1:rgba(42,120,214,0.14);--w-fill-2:rgba(235,104,52,0.14);--w-fill-3:rgba(27,175,122,0.16);--w-neutral:#f0efec;">
+  <defs><marker id="h19-1-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path style="fill:var(--w-ink-2)" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
+  <text class="t-strong" x="280" y="24" text-anchor="middle" style="font-size:15px">데이터를 토막마다 새로 만든 두 번의 반복</text>
+  <text class="t-strong" x="20" y="56" style="font-size:14px">Llama 2 (2023): 다섯 판</text>
+  <rect class="fa1" x="20" y="70" width="84" height="58" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
+  <text class="t-strong" x="62" y="90" text-anchor="middle" style="font-size:13px">RLHF-V1</text>
+  <text x="62" y="108" text-anchor="middle" style="font-size:12px">거절 샘플링</text>
+  <line class="sink" x1="106" y1="99" x2="122" y2="99" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
+  <text class="t-muted" x="114" y="146" text-anchor="middle" style="font-size:11px">사람</text>
+  <rect class="fa1" x="124" y="70" width="84" height="58" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
+  <text class="t-strong" x="166" y="90" text-anchor="middle" style="font-size:13px">RLHF-V2</text>
+  <text x="166" y="108" text-anchor="middle" style="font-size:12px">거절 샘플링</text>
+  <line class="sink" x1="210" y1="99" x2="226" y2="99" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
+  <text class="t-muted" x="218" y="146" text-anchor="middle" style="font-size:11px">사람</text>
+  <rect class="fa1" x="228" y="70" width="84" height="58" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
+  <text class="t-strong" x="270" y="90" text-anchor="middle" style="font-size:13px">RLHF-V3</text>
+  <text x="270" y="108" text-anchor="middle" style="font-size:12px">거절 샘플링</text>
+  <line class="sink" x1="314" y1="99" x2="330" y2="99" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
+  <text class="t-muted" x="322" y="146" text-anchor="middle" style="font-size:11px">사람</text>
+  <rect class="fa1" x="332" y="70" width="84" height="58" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
+  <text class="t-strong" x="374" y="90" text-anchor="middle" style="font-size:13px">RLHF-V4</text>
+  <text x="374" y="108" text-anchor="middle" style="font-size:12px">거절 샘플링</text>
+  <line class="sink" x1="418" y1="99" x2="434" y2="99" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
+  <text class="t-muted" x="426" y="146" text-anchor="middle" style="font-size:11px">사람</text>
+  <rect class="fa2" x="436" y="70" width="84" height="58" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
+  <text class="t-strong" x="478" y="90" text-anchor="middle" style="font-size:13px">RLHF-V5</text>
+  <text x="478" y="108" text-anchor="middle" style="font-size:12px">거절 샘플링</text>
+  <text class="t2" x="478" y="123" text-anchor="middle" style="font-size:12px">+ PPO</text>
+  <text class="t-muted" x="280" y="166" text-anchor="middle" style="font-size:12px">판과 판 사이: 주마다 모은 사람 선호 데이터로 보상 모델을 다시 학습</text>
+  <text x="280" y="183" text-anchor="middle" style="font-size:12px">넷째 판까지는 거절 샘플링만, 다섯째 판에서 그 위에 PPO</text>
+  <line class="sgrid" x1="20" y1="188" x2="540" y2="188" stroke-width="1"/>
+  <text class="t-strong" x="20" y="210" style="font-size:14px">Llama 3 (2024): 여섯 라운드</text>
+  <rect class="fa3" x="20" y="222" width="72" height="66" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
+  <text class="t-strong" x="56" y="239" text-anchor="middle" style="font-size:12px">라운드 1</text>
+  <text x="56" y="256" text-anchor="middle" style="font-size:11px">거절 샘플링</text>
+  <text x="56" y="270" text-anchor="middle" style="font-size:11px">+ SFT</text>
+  <text class="t3" x="56" y="284" text-anchor="middle" style="font-size:11px">+ DPO</text>
+  <line class="sink" x1="94" y1="255" x2="108" y2="255" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
+  <rect class="fa3" x="110" y="222" width="72" height="66" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
+  <text class="t-strong" x="146" y="239" text-anchor="middle" style="font-size:12px">라운드 2</text>
+  <text x="146" y="256" text-anchor="middle" style="font-size:11px">거절 샘플링</text>
+  <text x="146" y="270" text-anchor="middle" style="font-size:11px">+ SFT</text>
+  <text class="t3" x="146" y="284" text-anchor="middle" style="font-size:11px">+ DPO</text>
+  <line class="sink" x1="184" y1="255" x2="197" y2="255" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
+  <rect class="fa3" x="199" y="222" width="72" height="66" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
+  <text class="t-strong" x="235" y="239" text-anchor="middle" style="font-size:12px">라운드 3</text>
+  <text x="235" y="256" text-anchor="middle" style="font-size:11px">거절 샘플링</text>
+  <text x="235" y="270" text-anchor="middle" style="font-size:11px">+ SFT</text>
+  <text class="t3" x="235" y="284" text-anchor="middle" style="font-size:11px">+ DPO</text>
+  <line class="sink" x1="273" y1="255" x2="287" y2="255" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
+  <rect class="fa3" x="289" y="222" width="72" height="66" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
+  <text class="t-strong" x="325" y="239" text-anchor="middle" style="font-size:12px">라운드 4</text>
+  <text x="325" y="256" text-anchor="middle" style="font-size:11px">거절 샘플링</text>
+  <text x="325" y="270" text-anchor="middle" style="font-size:11px">+ SFT</text>
+  <text class="t3" x="325" y="284" text-anchor="middle" style="font-size:11px">+ DPO</text>
+  <line class="sink" x1="363" y1="255" x2="376" y2="255" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
+  <rect class="fa3" x="378" y="222" width="72" height="66" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
+  <text class="t-strong" x="414" y="239" text-anchor="middle" style="font-size:12px">라운드 5</text>
+  <text x="414" y="256" text-anchor="middle" style="font-size:11px">거절 샘플링</text>
+  <text x="414" y="270" text-anchor="middle" style="font-size:11px">+ SFT</text>
+  <text class="t3" x="414" y="284" text-anchor="middle" style="font-size:11px">+ DPO</text>
+  <line class="sink" x1="452" y1="255" x2="466" y2="255" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
+  <rect class="fa3" x="468" y="222" width="72" height="66" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
+  <text class="t-strong" x="504" y="239" text-anchor="middle" style="font-size:12px">라운드 6</text>
+  <text x="504" y="256" text-anchor="middle" style="font-size:11px">거절 샘플링</text>
+  <text x="504" y="270" text-anchor="middle" style="font-size:11px">+ SFT</text>
+  <text class="t3" x="504" y="284" text-anchor="middle" style="font-size:11px">+ DPO</text>
+  <text class="t-muted" x="280" y="310" text-anchor="middle" style="font-size:12px">DPO 데이터는 주로 앞 라운드에서 가장 나았던 모델들로 새로 모은 선호 데이터</text>
+</svg>
+<p>그림은 Llama 2의 다섯 판과 Llama 3의 여섯 라운드를 한 줄씩 놓아, 두 모델 모두 학습을 토막으로 나누고 토막마다 데이터를 새로 만들었으며 Llama 2는 마지막 판에서야 PPO를 얹었음을 보여 준다(Llama 2·3 논문의 서술을 옮김, 이 책이 직접 그림).</p>
 <p>라운드를 끝까지 잘게 나누면 스텝마다 데이터를 새로 만드는 Online DPO가 된다. 구글 딥마인드의 궈(Shangmin Guo)와 동료들(2024)은 학습 스텝마다 지금 모델로 응답 두 개를 뽑고, 언어 모델 심사자가 곧바로 어느 쪽이 나은지 판정하게 했다(온라인 AI 피드백, OAIF). 온폴리시 데이터와 실시간 평가로 분포 이동은 없어졌고, 사람 평가자들은 이렇게 온라인으로 학습한 모델을 같은 방법의 오프라인판보다 평균 약 66%의 비율로 더 낫다고 골랐다. 하지만 온라인 학습의 세 가지 비용(모델을 계속 업데이트하는 비용, 데이터셋을 계속 만들어 내는 어려움, 드리프트 위험)을 모두 감수한다.</p>
 <p>온라인으로 가면서 되살아난 드리프트를 겨냥한 시도도 나왔다. 바이(Chenjia Bai)와 동료들의 COPO(2025, 카운트 기반 온라인 선호 최적화)는 지금까지 모은 데이터에서 드물게 나온 응답일수록 탐색 보너스를 얹는다. 데이터가 모델이 이미 잘 내는 응답으로만 채워지지 않고 처음 데이터셋 밖까지 나가 보게 해서, 온라인 학습의 자기 붕괴형 드리프트에 직접 대응한다.</p>
 <p>판정자를 아예 없앤 방법도 있다. 천(Zixiang Chen)과 동료들의 SPIN(2024, 자기 대국 파인튜닝)은 사람이 쓴 SFT 답을 좋은 응답으로, 앞 라운드의 자기 모델이 쓴 답을 나쁜 응답으로 짝지어, 자기 자신과 대국하듯 데이터를 자동으로 만든다. 데이터셋을 계속 만들어 내는 비용 문제는 해결된다. 다만 맞수가 언제나 &quot;사람이 쓴 답 대 지난번의 내 답&quot;이라, 내 답이 사람이 쓴 답과 구별되지 않게 되면 거기서 멈춘다. 논문은 그 지점이 학습 목표의 최적점임을 보였다.</p>
+<svg class="fig" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="데이터를 새로 만드는 횟수의 축. 왼쪽부터 오프라인 DPO 한 번, Llama 2 판 다섯, Llama 3 라운드 여섯, Online DPO 스텝마다. 아래에 선호 판정이 어디서 오는지. SPIN 은 판정자 없이 사람이 쓴 답과 지난 라운드 자기 답을 짝짓는다" style="background:#fff;border:1px solid #ccc;border-radius:4px;--w-1:#2a78d6;--w-2:#eb6834;--w-3:#1baf7a;--w-4:#4a3aa7;--w-ink:#0b0b0b;--w-ink-2:#222222;--w-muted:#6b6a65;--w-grid:#e1e0d9;--w-axis:#c3c2b7;--w-surface:#ffffff;--w-fill-1:rgba(42,120,214,0.14);--w-fill-2:rgba(235,104,52,0.14);--w-fill-3:rgba(27,175,122,0.16);--w-neutral:#f0efec;">
+  <defs><marker id="h19-2-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path style="fill:var(--w-ink-2)" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
+  <text class="t-strong" x="280" y="24" text-anchor="middle" style="font-size:15px">데이터를 얼마나 자주 새로 만드나</text>
+  <line class="sink" x1="30" y1="96" x2="538" y2="96" stroke-width="2" marker-end="url(#h19-2-arr)"/>
+  <text class="t-muted" x="30" y="82" style="font-size:12px">오프라인 쪽</text>
+  <text class="t-muted" x="536" y="82" text-anchor="end" style="font-size:12px">온라인 쪽</text>
+  <circle class="f1" cx="80" cy="96" r="7"/>
+  <text class="t-strong" x="80" y="124" text-anchor="middle" style="font-size:14px">오프라인 DPO</text>
+  <text class="t1" x="80" y="142" text-anchor="middle" style="font-size:13px">한 번</text>
+  <text x="80" y="172" text-anchor="middle" style="font-size:12px">처음 모은</text>
+  <text x="80" y="188" text-anchor="middle" style="font-size:12px">선호 데이터</text>
+  <circle class="f2" cx="210" cy="96" r="7"/>
+  <text class="t-strong" x="210" y="124" text-anchor="middle" style="font-size:14px">Llama 2</text>
+  <text class="t2" x="210" y="142" text-anchor="middle" style="font-size:13px">판 다섯</text>
+  <text x="210" y="172" text-anchor="middle" style="font-size:12px">사람 선호 →</text>
+  <text x="210" y="188" text-anchor="middle" style="font-size:12px">보상 모델</text>
+  <circle class="f3" cx="340" cy="96" r="7"/>
+  <text class="t-strong" x="340" y="124" text-anchor="middle" style="font-size:14px">Llama 3</text>
+  <text class="t3" x="340" y="142" text-anchor="middle" style="font-size:13px">라운드 여섯</text>
+  <text x="340" y="172" text-anchor="middle" style="font-size:12px">앞 라운드 모델로</text>
+  <text x="340" y="188" text-anchor="middle" style="font-size:12px">새 선호 데이터</text>
+  <circle class="f4" cx="470" cy="96" r="7"/>
+  <text class="t-strong" x="470" y="124" text-anchor="middle" style="font-size:14px">Online DPO</text>
+  <text class="t4" x="470" y="142" text-anchor="middle" style="font-size:13px">스텝마다</text>
+  <text x="470" y="172" text-anchor="middle" style="font-size:12px">언어 모델</text>
+  <text x="470" y="188" text-anchor="middle" style="font-size:12px">심사자가 곧바로</text>
+  <text class="t-muted" x="20" y="172" style="font-size:12px">선호</text>
+  <line class="sgrid" x1="20" y1="206" x2="540" y2="206" stroke-width="1"/>
+  <rect class="fneutral" x="110" y="224" width="340" height="50" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
+  <text class="t-strong" x="280" y="244" text-anchor="middle" style="font-size:13px">SPIN (2024): 판정자 없음</text>
+  <text x="280" y="263" text-anchor="middle" style="font-size:12px">좋은 쪽 = 사람이 쓴 SFT 답, 나쁜 쪽 = 지난 라운드의 내 답</text>
+  <text class="t-muted" x="280" y="294" text-anchor="middle" style="font-size:11px">축의 간격은 순서만 나타낸다</text>
+</svg>
+<p>그림은 이 소절의 방법들을 데이터를 새로 만드는 횟수 순서로 한 축에 놓고 선호 판정이 어디서 오는지를 아래에 적은 것이다(축의 간격은 순서만 뜻함, 이 책이 직접 그림).</p>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">데이터가 낡으면 스텝마다 새로 뽑으면 되잖아요. 메타 정도면 GPU도 넉넉했을 텐데, 왜 다섯 판, 여섯 라운드에서 끊었어요?</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">새로 뽑은 응답은 누가 채점하죠? Llama 2 때 판마다 새 응답의 선호를 매긴 쪽을 떠올려 봐요.</div></div>

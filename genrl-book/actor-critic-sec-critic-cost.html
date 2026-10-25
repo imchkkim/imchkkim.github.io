@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,6 +684,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
@@ -678,7 +694,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="td.html">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a></li>
 <li><a href="q-learning.html">7. Q-러닝: 남이 둔 수로 최선의 수를 배운다</a></li>
 <li><a href="dqn.html">8. DQN: 표를 신경망으로 바꾸면 무엇이 흔들리나</a></li>
-<li><a href="actor-critic.html" class="active">9. Actor-Critic: 비평가를 곁에 두다</a><ul class="sidebar-toc"><li><a href="actor-critic.html">어드밴티지: 가치가 얼마나 바뀌었나</a></li><li><a href="actor-critic-sec-td-critic.html">시간차: 한 스텝만 가고 비평가를 믿는다</a></li><li><a href="actor-critic-sec-gae-lambda.html">GAE: 둘 사이를 λ로 잇는다</a></li><li><a href="actor-critic-sec-critic-cost.html" class="current">비평가의 청구서: 두 번째 모델이 드는 비용</a></li><li><a href="actor-critic-sec-actor-critic-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="actor-critic.html" class="active">9. Actor-Critic: 비평가를 곁에 두다</a><ul class="sidebar-toc"><li><a href="actor-critic.html">어드밴티지: 가치가 얼마나 바뀌었나</a></li><li><a href="actor-critic-sec-td-critic.html">시간차: 한 스텝만 가고 비평가를 믿는다</a></li><li><a href="actor-critic-sec-gae-lambda.html">GAE: 둘 사이를 λ로 잇는다</a></li><li><a href="actor-critic-sec-critic-cost.html" class="current">비평가의 청구서: 두 번째 모델이 드는 비용</a></li><li><a href="actor-critic-sec-actor-critic-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="ppo-rlhf.html">10. PPO와 RLHF: 멀리 가지 않게 묶다</a></li>
 <li><a href="dpo-reappear.html">11. DPO의 재등장: 보상 모델을 수식으로 지우다</a></li>
 <li><a href="preference-pairs.html">12. 선호 쌍의 조건: 어떤 데이터가 DPO를 움직이는가</a></li>
@@ -711,6 +727,60 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <h5 id="hist-a3c-parallel-workers" class="history" data-people="mnih-volodymyr">역사: 기억 창고 대신 여러 일꾼<span id="역사-기억-창고-대신-여러-일꾼" class="anchor-alias"></span></h5>
 <p>딥러닝으로 게임을 배우던 2010년대 중반, 딥마인드의 앞선 방법 DQN은 지나간 경험을 커다란 기억 창고(리플레이 버퍼)에 쌓아 두고 무작위로 꺼내 학습했다. 바로 이어진 장면끼리는 너무 비슷해서 학습이 불안정해지기 때문이다. 대신 창고는 메모리와 계산을 많이 먹었고, 예전 정책이 만든 데이터로도 배울 수 있는 방법에만 쓸 수 있었다. 지금 정책이 뽑은 데이터로만 배우는 Actor-Critic은 창고를 쓸 수 없었다.</p>
 <p>2016년 므니(Volodymyr Mnih)와 딥마인드 동료들은 창고 대신 일꾼 여럿을 두었다(ICML 2016). 여러 작업자가 각자 게임을 동시에 돌리면 한순간에도 서로 다른 장면을 겪으므로, 창고 없이도 데이터가 고르게 섞인다. 이렇게 어드밴티지로 액터와 비평가를 함께 업데이트한 방법이 A3C(Asynchronous Advantage Actor-Critic, 서로 기다리지 않고 따로 도는 어드밴티지 Actor-Critic)다. A3C는 GPU 없이 16코어 CPU 한 대로 나흘을 학습해, GPU로 8~10일 학습한 방법들보다 아타리(Atari 2600) 게임 57개의 평균 점수를 높였다. 작업자들이 발맞춰 도는 버전인 A2C와 함께, 이 구조가 딥러닝 시대 Actor-Critic의 표준 틀이 되었다.</p>
+<svg class="fig" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="아타리 57게임에서 사람 기준으로 맞춘 점수의 평균. GPU 로 8일 학습한 DQN 121.9%, Double DQN 332.9%, Dueling 343.8%, Prioritized 463.6%, 100대로 4일 학습한 Gorila 215.2%. A3C 는 16코어 CPU 한 대로 1일에 344.1%, 4일에 496.8%, LSTM 을 단 A3C 는 4일에 623.0%" style="background:#fff;border:1px solid #ccc;border-radius:4px;--w-1:#2a78d6;--w-2:#eb6834;--w-3:#1baf7a;--w-4:#4a3aa7;--w-ink:#0b0b0b;--w-ink-2:#222222;--w-muted:#6b6a65;--w-grid:#e1e0d9;--w-axis:#c3c2b7;--w-surface:#ffffff;--w-fill-1:rgba(42,120,214,0.14);--w-fill-2:rgba(235,104,52,0.14);--w-fill-3:rgba(27,175,122,0.16);--w-neutral:#f0efec;--sym-0093b8:#0093b8;--sym-1c9c60:#1c9c60;--sym-d9670b:#d9670b;--sym-1565c0:#1565c0;--sym-00897b:#00897b;--sym-8e44ad:#8e44ad;--sym-7a1f5a:#7a1f5a;--sym-993600:#993600;">
+  <defs><marker id="hac3-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path style="fill:var(--w-ink-2)" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
+  <text class="t-strong" x="280" y="26" text-anchor="middle" style="font-size:15px">아타리 57게임 평균 점수 (사람 = 100%)</text>
+  <line class="sgrid" x1="150" y1="42" x2="150" y2="254" stroke-width="1"/>
+  <text x="150" y="270" text-anchor="middle" style="font-size:11px">0%</text>
+  <line class="sgrid" x1="200" y1="42" x2="200" y2="254" stroke-width="1"/>
+  <text x="200" y="270" text-anchor="middle" style="font-size:11px">100%</text>
+  <line class="sgrid" x1="250" y1="42" x2="250" y2="254" stroke-width="1"/>
+  <text x="250" y="270" text-anchor="middle" style="font-size:11px">200%</text>
+  <line class="sgrid" x1="300" y1="42" x2="300" y2="254" stroke-width="1"/>
+  <text x="300" y="270" text-anchor="middle" style="font-size:11px">300%</text>
+  <line class="sgrid" x1="350" y1="42" x2="350" y2="254" stroke-width="1"/>
+  <text x="350" y="270" text-anchor="middle" style="font-size:11px">400%</text>
+  <line class="sgrid" x1="400" y1="42" x2="400" y2="254" stroke-width="1"/>
+  <text x="400" y="270" text-anchor="middle" style="font-size:11px">500%</text>
+  <line class="sgrid" x1="450" y1="42" x2="450" y2="254" stroke-width="1"/>
+  <text x="450" y="270" text-anchor="middle" style="font-size:11px">600%</text>
+  <line class="sgrid" x1="500" y1="42" x2="500" y2="254" stroke-width="1"/>
+  <text x="500" y="270" text-anchor="middle" style="font-size:11px">700%</text>
+  <rect class="fneutral" x="150" y="46" width="60.9" height="20" rx="3" style="stroke:var(--w-axis)"/>
+  <text x="142" y="61" text-anchor="end" style="font-size:13px">DQN</text>
+  <text x="156" y="61" style="font-size:12px">GPU 8일</text>
+  <text x="217" y="61" style="font-size:12px">121.9%</text>
+  <rect class="fneutral" x="150" y="72" width="107.6" height="20" rx="3" style="stroke:var(--w-axis)"/>
+  <text x="142" y="87" text-anchor="end" style="font-size:13px">Gorila</text>
+  <text x="156" y="87" style="font-size:12px">100대 4일</text>
+  <text x="264" y="87" style="font-size:12px">215.2%</text>
+  <rect class="fneutral" x="150" y="98" width="166.4" height="20" rx="3" style="stroke:var(--w-axis)"/>
+  <text x="142" y="113" text-anchor="end" style="font-size:13px">Double DQN</text>
+  <text x="156" y="113" style="font-size:12px">GPU 8일</text>
+  <text x="322" y="113" style="font-size:12px">332.9%</text>
+  <rect class="fneutral" x="150" y="124" width="171.9" height="20" rx="3" style="stroke:var(--w-axis)"/>
+  <text x="142" y="139" text-anchor="end" style="font-size:13px">Dueling DQN</text>
+  <text x="156" y="139" style="font-size:12px">GPU 8일</text>
+  <text x="328" y="139" style="font-size:12px">343.8%</text>
+  <rect class="fneutral" x="150" y="150" width="231.8" height="20" rx="3" style="stroke:var(--w-axis)"/>
+  <text x="142" y="165" text-anchor="end" style="font-size:13px">Prioritized DQN</text>
+  <text x="156" y="165" style="font-size:12px">GPU 8일</text>
+  <text x="388" y="165" style="font-size:12px">463.6%</text>
+  <rect class="f1" x="150" y="176" width="172.1" height="20" rx="3"/>
+  <text class="t-strong" x="142" y="191" text-anchor="end" style="font-size:13px">A3C (FF)</text>
+  <text class="t-on-fill" x="156" y="191" style="font-size:12px">CPU 1일</text>
+  <text x="328" y="191" style="font-size:12px">344.1%</text>
+  <rect class="f1" x="150" y="202" width="248.4" height="20" rx="3"/>
+  <text class="t-strong" x="142" y="217" text-anchor="end" style="font-size:13px">A3C (FF)</text>
+  <text class="t-on-fill" x="156" y="217" style="font-size:12px">CPU 4일</text>
+  <text x="404" y="217" style="font-size:12px">496.8%</text>
+  <rect class="f1" x="150" y="228" width="311.5" height="20" rx="3"/>
+  <text class="t-strong" x="142" y="243" text-anchor="end" style="font-size:13px">A3C (LSTM)</text>
+  <text class="t-on-fill" x="156" y="243" style="font-size:12px">CPU 4일</text>
+  <text x="468" y="243" style="font-size:12px">623.0%</text>
+  <text class="t-muted" x="280" y="292" text-anchor="middle" style="font-size:12px">GPU 는 Nvidia K40 한 장, CPU 는 16코어 한 대. 원 논문 표 1을 다시 그림</text>
+</svg>
+<p>그림은 A3C 논문의 표 1을 다시 그린 것이다. 16코어 CPU 한 대로 나흘 배운 A3C가 GPU로 8일 배운 DQN 계열보다 평균 점수가 높고, 하루만 배운 A3C도 Dueling DQN과 비슷하다.</p>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">게임을 여러 개 동시에 돌린다는 건 지금 보면 누구나 떠올릴 생각 같은데요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그때는 리플레이 버퍼가 DQN을 안정시킨 비결로 통했어요. 이어진 장면끼리 너무 비슷하다는 문제를 버퍼 없이 풀 수 있다고 믿기가 쉬웠을까요?</div></div>
@@ -929,7 +999,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </blockquote>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="actor-critic-sec-gae-lambda.html">&larr; GAE: 둘 사이를 λ로 잇는다</a><span class="page-count">4 / 5</span><a class="chapter-nav-next" href="actor-critic-sec-actor-critic-summary.html">자주 하는 실수와 요약 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="actor-critic-sec-gae-lambda.html">&larr; GAE: 둘 사이를 λ로 잇는다</a><span class="page-count">4 / 5</span><a class="chapter-nav-next" href="actor-critic-sec-actor-critic-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
 </main>
 
 <script type="module">

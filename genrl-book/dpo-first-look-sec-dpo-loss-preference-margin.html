@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,8 +684,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
-<li><a href="dpo-first-look.html" class="active">1. DPO 맛보기: 한 줄 수식이 하는 일</a><ul class="sidebar-toc"><li><a href="dpo-first-look.html">KL의 방향: SFT는 남의 답에서, RL은 내 답에서 배운다</a></li><li><a href="dpo-first-look-sec-dpo-loss-preference-margin.html" class="current">DPO 손실: 레퍼런스 대비 선호 마진을 벌린다</a></li><li><a href="dpo-first-look-sec-dpo-first-look-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="dpo-first-look.html" class="active">1. DPO 맛보기: 한 줄 수식이 하는 일</a><ul class="sidebar-toc"><li><a href="dpo-first-look.html">KL의 방향: SFT는 남의 답에서, RL은 내 답에서 배운다</a></li><li><a href="dpo-first-look-sec-dpo-loss-preference-margin.html" class="current">DPO 손실: 레퍼런스 대비 선호 마진을 벌린다</a></li><li><a href="dpo-first-look-sec-dpo-first-look-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
 <li><a href="reinforce.html">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a></li>
 <li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다</a></li>
@@ -710,6 +726,44 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p>나쁜 예로는 나쁜 답에서 멀어지고 KL 페널티로는 레퍼런스 근처에 머무는데, 나쁜 예와 KL 페널티라는 두 걸음을 손실 하나에 어떻게 담을까? 두 걸음을 합치는 세 번째 걸음이 DPO다.</p>
 <h5 id="hist-dpo-skip-reward-model" class="history">역사: 2023년의 지름길<span id="역사-2023년의-지름길" class="anchor-alias"></span></h5>
 <p>DPO는 2023년 스탠퍼드 대학의 라파일로프(Rafael Rafailov), 샤르마(Archit Sharma), 미첼(Eric Mitchell), 에르몬(Stefano Ermon), 매닝(Christopher Manning), 핀(Chelsea Finn)이 발표했다. 논문 서론에 적힌 고민은 이렇다. 사람이 쓴 방대한 글로 학습한 언어 모델은 사람들의 절반이 믿는 흔한 오해까지 배운다. 모델이 그 오해를 아는 것은 괜찮지만, 그 오해를 묻는 질문의 절반에서 오해가 옳다고 답해서는 안 된다. 모델이 이미 가진 넓은 지식 가운데 바라는 답과 행동을 골라내야 하는데, 데이터를 그대로 흉내 내는 학습만으로는 이 골라내기가 되지 않는다는 것이다. 당시 골라내는 방법은 여러 단계를 거쳤고, 논문은 그 절차를 「복잡하고 자주 불안정하다」고 적었다. 연구진은 같은 목표를 분류 문제처럼 간단한 손실 하나로 풀 수 있음을 보였다. 논문은 그해 NeurIPS에 실렸고, 학회가 뽑은 우수 논문 준우승(Outstanding Main Track Runner-Up) 두 편 가운데 하나가 되었다. 이름의 &quot;직접(Direct)&quot;은 보상 모델을 따로 학습하는 단계를 거치지 않는다는 뜻이다. 그 단계가 무엇이었는지는 이 장 끝에서 다시 묻는다.</p>
+<svg class="fig" viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RLHF는 선호 데이터로 보상 모델을 먼저 학습하고, 학습 도중 모델이 계속 답을 뽑아 보상을 받는 RL 단계를 거친다. DPO는 같은 선호 데이터에서 손실 하나로 바로 모델을 학습한다">
+  <rect x="0" y="0" width="560" height="330" rx="6" fill="#fff" stroke="#ccc"/>
+  <defs><marker id="arrH01" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#444"/></marker></defs>
+  <text x="14" y="30" text-anchor="start" style="font-size:15px;fill:#111;font-weight:700">(가) RLHF: 단계가 셋</text>
+  <rect x="14" y="50" width="118" height="64" rx="8" fill="#fff" stroke="#444" stroke-width="1.5"/>
+  <text x="73.0" y="77" text-anchor="middle" style="font-size:14px;fill:#444">선호 데이터</text>
+  <text x="73.0" y="98" text-anchor="middle" style="font-size:13px;fill:#444"><tspan style="fill:#0093b8">x</tspan>, <tspan style="fill:#e000a5">y<tspan baseline-shift="sub" style="font-size:10px">w</tspan></tspan>, <tspan style="fill:#e000a5">y<tspan baseline-shift="sub" style="font-size:10px">l</tspan></tspan></text>
+  <rect x="154" y="50" width="118" height="64" rx="8" fill="#fff" stroke="#d9670b" stroke-width="1.5"/>
+  <text x="213.0" y="77" text-anchor="middle" style="font-size:14px;fill:#444">보상 모델 학습</text>
+  <text x="213.0" y="98" text-anchor="middle" style="font-size:14px;fill:#444"><tspan style="fill:#d9670b">r<tspan baseline-shift="sub" style="font-size:10px">ψ</tspan></tspan></text>
+  <rect x="294" y="50" width="118" height="64" rx="8" fill="#fff" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="353.0" y="77" text-anchor="middle" style="font-size:14px;fill:#444">RL 단계</text>
+  <text x="353.0" y="98" text-anchor="middle" style="font-size:13px;fill:#444">보상을 최대로</text>
+  <rect x="434" y="50" width="118" height="64" rx="8" fill="#fff" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="493.0" y="77" text-anchor="middle" style="font-size:14px;fill:#444">학습된 모델</text>
+  <text x="493.0" y="98" text-anchor="middle" style="font-size:14px;fill:#444"><tspan style="fill:#1565c0">π<tspan baseline-shift="sub" style="font-size:10px">θ</tspan></tspan></text>
+  <line x1="134" y1="82.0" x2="151" y2="82.0" stroke="#444" stroke-width="1.5" marker-end="url(#arrH01)"/>
+  <line x1="274" y1="82.0" x2="291" y2="82.0" stroke="#444" stroke-width="1.5" marker-end="url(#arrH01)"/>
+  <line x1="414" y1="82.0" x2="431" y2="82.0" stroke="#444" stroke-width="1.5" marker-end="url(#arrH01)"/>
+  <path d="M323.0,116 C293.0,174 413.0,174 383.0,118" fill="none" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrH01)"/>
+  <text x="353.0" y="180" text-anchor="middle" style="font-size:12px;fill:#1565c0">학습 도중 계속</text>
+  <text x="353.0" y="196" text-anchor="middle" style="font-size:12px;fill:#1565c0">답을 뽑아 보상을 받는다</text>
+  <text x="213.0" y="136" text-anchor="middle" style="font-size:12px;fill:#888">모델 하나 더 학습</text>
+  <text x="14" y="196" text-anchor="start" style="font-size:15px;fill:#111;font-weight:700">(나) DPO: 손실 하나</text>
+  <rect x="14" y="210" width="118" height="64" rx="8" fill="#fff" stroke="#444" stroke-width="1.5"/>
+  <text x="73.0" y="237" text-anchor="middle" style="font-size:14px;fill:#444">선호 데이터</text>
+  <text x="73.0" y="258" text-anchor="middle" style="font-size:13px;fill:#444"><tspan style="fill:#0093b8">x</tspan>, <tspan style="fill:#e000a5">y<tspan baseline-shift="sub" style="font-size:10px">w</tspan></tspan>, <tspan style="fill:#e000a5">y<tspan baseline-shift="sub" style="font-size:10px">l</tspan></tspan></text>
+  <rect x="154" y="210" width="258" height="64" rx="8" fill="#fff" stroke="#d62728" stroke-width="1.5"/>
+  <text x="283.0" y="237" text-anchor="middle" style="font-size:14px;fill:#444">손실 <tspan style="fill:#d62728">L<tspan baseline-shift="sub" style="font-size:10px">DPO</tspan></tspan> 를 줄인다</text>
+  <text x="283.0" y="258" text-anchor="middle" style="font-size:13px;fill:#444">데이터 속 두 답의 로그확률만 (<tspan style="fill:#1565c0">π<tspan baseline-shift="sub" style="font-size:10px">θ</tspan></tspan>, <tspan style="fill:#6f6f78">π<tspan baseline-shift="sub" style="font-size:10px">ref</tspan></tspan>)</text>
+  <rect x="434" y="210" width="118" height="64" rx="8" fill="#fff" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="493.0" y="237" text-anchor="middle" style="font-size:14px;fill:#444">학습된 모델</text>
+  <text x="493.0" y="258" text-anchor="middle" style="font-size:14px;fill:#444"><tspan style="fill:#1565c0">π<tspan baseline-shift="sub" style="font-size:10px">θ</tspan></tspan></text>
+  <line x1="134" y1="242.0" x2="151" y2="242.0" stroke="#444" stroke-width="1.5" marker-end="url(#arrH01)"/>
+  <line x1="414" y1="242.0" x2="431" y2="242.0" stroke="#444" stroke-width="1.5" marker-end="url(#arrH01)"/>
+  <text x="14" y="318" text-anchor="start" style="font-size:12px;fill:#888">Rafailov 외 2023 그림 1을 이 책에서 다시 그림 (arXiv 2305.18290, CC BY 4.0)</text>
+</svg>
+<p>당시 절차는 보상 모델을 먼저 학습하고 학습 도중 계속 답을 뽑는 RL 단계를 거쳤고, DPO는 같은 선호 데이터에서 손실 하나로 바로 모델을 학습한다(Rafailov 외 2023, arXiv 2305.18290 그림 1을 이 책의 낱말과 색으로 다시 그림, CC BY 4.0).</p>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">손실 하나로 풀었다는 게 그렇게 대단한 일이에요? 좋은 답 확률은 올리고 나쁜 답은 내리는 손실이면 과제로 짜 볼 만한데요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 그때 목표는 KL로 묶은 RL이었어요. 앞 절에서 본 대로 RL은 기댓값을 누구의 답에서 취하죠?</div></div>
@@ -969,7 +1023,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </blockquote>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="dpo-first-look.html">&larr; KL의 방향: SFT는 남의 답에서, RL은 내 답에서 배운다</a><span class="page-count">2 / 3</span><a class="chapter-nav-next" href="dpo-first-look-sec-dpo-first-look-summary.html">자주 하는 실수와 요약 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="dpo-first-look.html">&larr; KL의 방향: SFT는 남의 답에서, RL은 내 답에서 배운다</a><span class="page-count">2 / 3</span><a class="chapter-nav-next" href="dpo-first-look-sec-dpo-first-look-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
 </main>
 
 <script type="module">

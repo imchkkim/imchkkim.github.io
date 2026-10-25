@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,6 +684,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
@@ -693,7 +709,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="rlvr-grpo.html">21. RLVR과 GRPO: 비평가를 내려놓다</a></li>
 <li><a href="rl-conditions.html">22. RL이 작동하는 조건: 스펙트럼, 적정 난이도, 그리고 한계</a></li>
 <li><a href="grpo-variants.html">23. GRPO의 변종들: 설계 선택을 하나씩 의심하다</a></li>
-<li><a href="diffusion-dpo.html" class="active">24. 디퓨전에서 DPO를 쓰려면: 로그확률의 벽</a><ul class="sidebar-toc"><li><a href="diffusion-dpo.html">디퓨전의 로그확률: 이미지는 못 재도 한 스텝은 잰다</a></li><li><a href="diffusion-dpo-sec-diffusion-dpo-denoising-loss.html" class="current">Diffusion-DPO: 노이즈 복원 오차를 로그확률 대신 쓴다</a></li><li><a href="diffusion-dpo-sec-gradient-interference.html">그래디언트 간섭: 비선호 오차를 키우면 선호 오차도 커진다</a></li><li><a href="diffusion-dpo-sec-diffusion-dpo-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="diffusion-dpo.html" class="active">24. 디퓨전에서 DPO를 쓰려면: 로그확률의 벽</a><ul class="sidebar-toc"><li><a href="diffusion-dpo.html">디퓨전의 로그확률: 이미지는 못 재도 한 스텝은 잰다</a></li><li><a href="diffusion-dpo-sec-diffusion-dpo-denoising-loss.html" class="current">Diffusion-DPO: 노이즈 복원 오차를 로그확률 대신 쓴다</a></li><li><a href="diffusion-dpo-sec-gradient-interference.html">그래디언트 간섭: 비선호 오차를 키우면 선호 오차도 커진다</a></li><li><a href="diffusion-dpo-sec-diffusion-dpo-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="ddpo.html">25. DDPO: 디퓨전의 정책 그래디언트</a></li>
 <li><a href="image-robotics.html">26. 이미지·로보틱스의 강화학습: GRPO가 시각 생성을 만났을 때</a></li>
 <li><a href="video-models.html">27. 영상 생성 모델의 학습: 시퀀스와 디퓨전 사이에서 무엇을 "강제"하는가</a></li>
@@ -710,8 +726,104 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p>스텝별 로그확률은 경로가 있어야 계산되는데, 사람들이 모아 둔 선호 데이터셋에 있는 것은 완성된 이미지 쌍뿐이고 그 이미지를 만든 디노이징 경로는 어디에도 없다. 경로 없이 DPO를 할 수 있을까?</p>
 <h5 id="hist-diffusion-dpo-d3po" class="history" data-people="wallace-bram yang-kai">역사: 같은 달에 나온 두 논문<span id="역사-같은-달에-나온-두-논문" class="anchor-alias"></span></h5>
 <p>2023년 11월, 디퓨전용 DPO 논문 두 편이 같은 달 arXiv에 올라왔고 둘 다 2024년 CVPR에 실렸다. 둘은 서로 다른 고민에서 출발했다.</p>
+<svg class="fig" viewBox="0 0 560 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2023년 5월부터 2024년 6월까지의 날짜 줄. 5월 Pick-a-Pic 과 DPO, 7월 SDXL 이 나오고, 11월 21일 Diffusion-DPO 와 하루 뒤 D3PO 가 arXiv 에 올라왔으며, 2024년 6월 CVPR 에서 둘 다 발표되었다">
+  <rect x="0" y="0" width="560" height="280" rx="6" fill="#fff" stroke="#ccc"/>
+  <text x="280.0" y="30.0" text-anchor="middle" style="font-size:16px;fill:#111;font-weight:700">디퓨전용 DPO 두 편이 나오기까지 (arXiv 첫 제출일)</text>
+  <line x1="40.0" y1="160.0" x2="520.0" y2="160.0" stroke="#999" stroke-width="2.5"/>
+  <line x1="56.8" y1="155.0" x2="56.8" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="89.4" y1="155.0" x2="89.4" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="120.9" y1="155.0" x2="120.9" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="153.4" y1="155.0" x2="153.4" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="186.0" y1="155.0" x2="186.0" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="217.5" y1="155.0" x2="217.5" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="250.1" y1="155.0" x2="250.1" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="281.6" y1="155.0" x2="281.6" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="314.1" y1="155.0" x2="314.1" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="346.7" y1="155.0" x2="346.7" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="377.2" y1="155.0" x2="377.2" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="409.7" y1="155.0" x2="409.7" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="441.2" y1="155.0" x2="441.2" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="473.8" y1="155.0" x2="473.8" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <line x1="505.3" y1="155.0" x2="505.3" y2="165.0" stroke="#999" stroke-width="1.5"/>
+  <text x="56.8" y="184.0" text-anchor="middle" style="font-size:13px;fill:#888">2023.5</text>
+  <text x="186.0" y="184.0" text-anchor="middle" style="font-size:13px;fill:#888">9</text>
+  <text x="314.1" y="184.0" text-anchor="middle" style="font-size:13px;fill:#888">2024.1</text>
+  <text x="441.2" y="184.0" text-anchor="middle" style="font-size:13px;fill:#888">5</text>
+  <line x1="57.9" y1="160.0" x2="57.9" y2="78.0" stroke="#888" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <circle cx="57.9" cy="160" r="6" fill="#888"/>
+  <text x="39.9" y="60.0" text-anchor="start" style="font-size:15px;fill:#888;font-weight:700">Pick-a-Pic</text>
+  <text x="39.9" y="78.0" text-anchor="start" style="font-size:13px;fill:#888">선호 쌍 데이터</text>
+  <line x1="86.2" y1="160.0" x2="86.2" y2="204.0" stroke="#888" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <circle cx="86.2" cy="160" r="6" fill="#888"/>
+  <text x="86.2" y="226.0" text-anchor="middle" style="font-size:15px;fill:#888;font-weight:700">DPO</text>
+  <text x="86.2" y="244.0" text-anchor="middle" style="font-size:13px;fill:#888">텍스트용</text>
+  <line x1="124.0" y1="160.0" x2="124.0" y2="120.0" stroke="#888" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <circle cx="124.0" cy="160" r="6" fill="#888"/>
+  <text x="116.0" y="102.0" text-anchor="start" style="font-size:15px;fill:#888;font-weight:700">SDXL</text>
+  <text x="116.0" y="120.0" text-anchor="start" style="font-size:13px;fill:#888">이미지 모델</text>
+  <line x1="271.1" y1="160.0" x2="271.1" y2="120.0" stroke="#2a78d6" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <circle cx="271.1" cy="160" r="6" fill="#2a78d6"/>
+  <text x="265.1" y="102.0" text-anchor="end" style="font-size:15px;fill:#2a78d6;font-weight:700">Diffusion-DPO</text>
+  <text x="265.1" y="120.0" text-anchor="end" style="font-size:13px;fill:#888">11월 21일</text>
+  <line x1="272.1" y1="160.0" x2="272.1" y2="204.0" stroke="#eb6834" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <circle cx="272.1" cy="160" r="6" fill="#eb6834"/>
+  <text x="278.1" y="226.0" text-anchor="start" style="font-size:15px;fill:#eb6834;font-weight:700">D3PO</text>
+  <text x="278.1" y="244.0" text-anchor="start" style="font-size:13px;fill:#888">11월 22일</text>
+  <line x1="490.6" y1="160.0" x2="490.6" y2="120.0" stroke="#111" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <circle cx="490.6" cy="160" r="6" fill="#111"/>
+  <text x="490.6" y="102.0" text-anchor="middle" style="font-size:15px;fill:#111;font-weight:700">CVPR 2024</text>
+  <text x="490.6" y="120.0" text-anchor="middle" style="font-size:13px;fill:#888">둘 다 발표</text>
+</svg>
+<p>Pick-a-Pic 데이터셋, 텍스트용 DPO, SDXL이 2023년 봄과 여름에 차례로 나왔고, 반년 뒤 디퓨전용 DPO 두 편이 하루 차이로 arXiv에 올라왔다. 출처: 각 논문의 arXiv 첫 제출일(2305.01569, 2305.18290, 2307.01952, 2311.12908, 2311.13231).</p>
 <p>Salesforce와 스탠퍼드의 브램 월리스(Bram Wallace) 등이 낸 Diffusion-DPO에는 DPO 저자 중 한 명인 라파엘 라파일로프(Rafael Rafailov)도 참여했다. 이들의 고민은 이미 쌓인 데이터였다. Pick-a-Pic은 웹 앱 사용자들이 같은 프롬프트로 만든 두 그림 가운데 하나를 고른 기록으로, 비긴 쌍을 빼고도 85만 1,293쌍(프롬프트 5만 8,960개)이었다. 이 쌍만으로 SDXL(Stability AI가 2023년에 공개한 텍스트-이미지 디퓨전 모델 Stable Diffusion XL)을 다듬었더니, 사람 평가자들은 다듬은 모델의 그림을 원래 모델의 그림보다 70.0%의 비교에서 더 낫다고 골랐다(PartiPrompts 프롬프트 기준).</p>
+<svg class="fig" viewBox="0 0 560 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diffusion-DPO 로 다듬은 SDXL 과 원래 SDXL 의 그림을 사람이 비교했을 때 다듬은 쪽을 고른 비율. PartiPrompts 프롬프트에서 70.0%, HPSv2 프롬프트에서 64.7% 로, 둘 다 반반인 50% 선을 넘는다">
+  <rect x="0" y="0" width="560" height="250" rx="6" fill="#fff" stroke="#ccc"/>
+  <text x="280.0" y="30.0" text-anchor="middle" style="font-size:16px;fill:#111;font-weight:700">사람 평가자가 다듬은 SDXL 쪽을 고른 비율</text>
+  <line x1="150.0" y1="52.0" x2="150.0" y2="190.0" stroke="#e3e3e3" stroke-width="1"/>
+  <text x="150.0" y="210.0" text-anchor="middle" style="font-size:13px;fill:#888">0%</text>
+  <line x1="242.5" y1="52.0" x2="242.5" y2="190.0" stroke="#e3e3e3" stroke-width="1"/>
+  <text x="242.5" y="210.0" text-anchor="middle" style="font-size:13px;fill:#888">25%</text>
+  <line x1="335.0" y1="52.0" x2="335.0" y2="190.0" stroke="#e3e3e3" stroke-width="1"/>
+  <text x="335.0" y="210.0" text-anchor="middle" style="font-size:13px;fill:#888">50%</text>
+  <line x1="427.5" y1="52.0" x2="427.5" y2="190.0" stroke="#e3e3e3" stroke-width="1"/>
+  <text x="427.5" y="210.0" text-anchor="middle" style="font-size:13px;fill:#888">75%</text>
+  <line x1="520.0" y1="52.0" x2="520.0" y2="190.0" stroke="#e3e3e3" stroke-width="1"/>
+  <text x="520.0" y="210.0" text-anchor="middle" style="font-size:13px;fill:#888">100%</text>
+  <rect x="150" y="70" width="259.0" height="36" fill="#2a78d6"/>
+  <rect x="409.0" y="70" width="111.0" height="36" fill="#d5d5d5"/>
+  <text x="140.0" y="94.0" text-anchor="end" style="font-size:15px;fill:#111">PartiPrompts</text>
+  <text x="417.0" y="94.0" text-anchor="start" style="font-size:15px;fill:#111;font-weight:700">70.0%</text>
+  <rect x="150" y="130" width="239.4" height="36" fill="#2a78d6"/>
+  <rect x="389.4" y="130" width="130.6" height="36" fill="#d5d5d5"/>
+  <text x="140.0" y="154.0" text-anchor="end" style="font-size:15px;fill:#111">HPSv2</text>
+  <text x="397.4" y="154.0" text-anchor="start" style="font-size:15px;fill:#111;font-weight:700">64.7%</text>
+  <line x1="335.0" y1="58.0" x2="335.0" y2="196.0" stroke="#111" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="335.0" y="236.0" text-anchor="middle" style="font-size:13px;fill:#888">점선 = 반반(50%)  ·  파랑 = 다듬은 쪽, 회색 = 원래 SDXL</text>
+</svg>
+<p>다듬은 SDXL의 그림은 PartiPrompts 프롬프트에서 70.0%, HPSv2 프롬프트에서 64.7%의 비교에서 더 낫다고 뽑혀, 두 프롬프트 모음 모두에서 반반 선을 넘었다. 출처: Wallace et al.(2024) Diffusion-DPO 논문 5절의 사람 평가(「전반적으로 어느 쪽이 나은가」 물음)를 다시 그림.</p>
 <p>칭화대의 양카이(Kai Yang) 등이 낸 D3PO의 고민은 반대로 데이터가 없는 문제였다. 디퓨전 모델은 손가락 개수가 틀린 손을 자주 그린다. 손가락 오류를 보상 모델로 고치려면 같은 프롬프트로 만든 정상 그림과 일그러진 그림을 많이 모아 판별기를 따로 학습해야 하고, 손이 정상인지 믿고 맡길 심사 모델(사람 대신 출력을 채점하는 모델)도 없었다. 그래서 「1 hand」라는 프롬프트로 한 번에 1,000장을 만들어 사람이 일그러진 것을 직접 골라내고, 그 표시로 모델을 곧바로 다듬기를 다섯 번 되풀이했다. 보상 모델 없이도 정상인 손의 비율이 올라갔다.</p>
+<svg class="fig" viewBox="0 0 560 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="D3PO 손 실험의 순서. 「1 hand」 프롬프트로 1,000장을 만들고, 사람이 일그러진 손을 골라 표시하고, 그 표시로 모델을 바로 다듬는다. 이 고리를 다섯 번 돈다. 보상 모델을 학습하는 칸은 없다">
+  <rect x="0" y="0" width="560" height="250" rx="6" fill="#fff" stroke="#ccc"/>
+  <text x="280.0" y="30.0" text-anchor="middle" style="font-size:16px;fill:#111;font-weight:700">D3PO 의 손 실험: 보상 모델 없이 도는 고리</text>
+  <rect x="30.0" y="70.0" width="140.0" height="70.0" rx="8" fill="#fff" stroke="#444" stroke-width="1.8"/>
+  <text x="100.0" y="100.0" text-anchor="middle" style="font-size:15px;fill:#111">「1 hand」로</text>
+  <text x="100.0" y="122.0" text-anchor="middle" style="font-size:15px;fill:#111">1,000장 생성</text>
+  <rect x="210.0" y="70.0" width="140.0" height="70.0" rx="8" fill="#fff" stroke="#444" stroke-width="1.8"/>
+  <text x="280.0" y="100.0" text-anchor="middle" style="font-size:15px;fill:#111">사람이 일그러진</text>
+  <text x="280.0" y="122.0" text-anchor="middle" style="font-size:15px;fill:#111">손을 골라 표시</text>
+  <rect x="390.0" y="70.0" width="140.0" height="70.0" rx="8" fill="#fff" stroke="#444" stroke-width="1.8"/>
+  <text x="460.0" y="100.0" text-anchor="middle" style="font-size:15px;fill:#111">그 표시로</text>
+  <text x="460.0" y="122.0" text-anchor="middle" style="font-size:15px;fill:#111">모델을 바로 다듬기</text>
+  <line x1="172.0" y1="105.0" x2="197.2" y2="105.0" stroke="#444" stroke-width="2.5"/>
+  <path d="M206.0,105.0 L195.9,109.3 L195.9,100.7 Z" fill="#444"/>
+  <line x1="352.0" y1="105.0" x2="377.2" y2="105.0" stroke="#444" stroke-width="2.5"/>
+  <path d="M386.0,105.0 L375.9,109.3 L375.9,100.7 Z" fill="#444"/>
+  <path d="M460,142 C460,200 100,200 100,148" fill="none" stroke="#eb6834" stroke-width="2.5"/>
+  <path d="M100,142 L94.5,153 L105.5,153 Z" fill="#eb6834"/>
+  <text x="280.0" y="214.0" text-anchor="middle" style="font-size:15px;fill:#eb6834;font-weight:700">다섯 번 되풀이</text>
+  <text x="280.0" y="238.0" text-anchor="middle" style="font-size:13px;fill:#888">모델이 직접 만든 그림이라 디노이징 경로가 남아 있다</text>
+</svg>
+<p>D3PO는 보상 모델을 학습하는 단계 없이, 만들고 고르고 다듬는 고리를 다섯 번 돌았다. 출처: Yang et al.(2024) D3PO 논문 5.2.1절의 실험 설정을 그린 그림(정상인 손의 비율은 논문 본문에 숫자가 없어 넣지 않았다).</p>
 <p>완성된 그림 쌍만 가진 Diffusion-DPO 팀과, 그림을 만드는 과정을 지켜볼 수 있는 D3PO 팀. 두 논문의 차이는 결국 <strong>디노이징 경로를 어디서 얻는가</strong>다.</p>
 <div class="table-scroll"><table>
 <thead>

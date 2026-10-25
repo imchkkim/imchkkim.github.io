@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,6 +684,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
@@ -683,7 +699,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="dpo-reappear.html">11. DPO의 재등장: 보상 모델을 수식으로 지우다</a></li>
 <li><a href="preference-pairs.html">12. 선호 쌍의 조건: 어떤 데이터가 DPO를 움직이는가</a></li>
 <li><a href="log-probability.html">13. 로그확률: 문장의 확률은 어떻게 매기나</a></li>
-<li><a href="length-bias.html" class="active">14. 길이 편향: 합이 공정한가?</a><ul class="sidebar-toc"><li><a href="length-bias.html">합의 잣대: 긴 응답은 길다는 이유만으로 진다</a></li><li><a href="length-bias-sec-length-normalization.html" class="current">길이 정규화: 토큰당 평균으로 비교한다</a></li><li><a href="length-bias-sec-odds-magnifier.html">오즈: 확신이 높은 영역을 늘려 보는 돋보기</a></li><li><a href="length-bias-sec-length-bias-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="length-bias.html" class="active">14. 길이 편향: 합이 공정한가?</a><ul class="sidebar-toc"><li><a href="length-bias.html">합의 잣대: 긴 응답은 길다는 이유만으로 진다</a></li><li><a href="length-bias-sec-length-normalization.html" class="current">길이 정규화: 토큰당 평균으로 비교한다</a></li><li><a href="length-bias-sec-odds-magnifier.html">오즈: 확신이 높은 영역을 늘려 보는 돋보기</a></li><li><a href="length-bias-sec-length-bias-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="reference-model.html">15. 레퍼런스 모델: 학습을 왜 원래 모델에 묶어 두나?</a></li>
 <li><a href="bradley-terry.html">16. Bradley-Terry 모델: 시그모이드는 왜 거기 있는가?</a></li>
 <li><a href="multi-reward.html">17. 다차원 보상: 스칼라를 넘어서</a></li>
@@ -710,6 +726,36 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p>앞 절의 표에서 정답이 이긴 잣대는 토큰당 평균 하나뿐이었는데, 그렇다면 합을 아예 평균으로 바꾸면 길이 편향은 사라질까? 합을 평균으로 바꾸자는 생각은 선호 학습보다 먼저, 여러 후보 문장 가운데 하나를 골라 내놓아야 하는 기계번역에서 나왔다.</p>
 <h5 id="hist-empty-translation-beam-search" class="history" data-people="koehn-philipp stahlberg-felix">역사: 빈 번역이 가장 그럴듯한 번역이었다<span id="역사-빈-번역이-가장-그럴듯한-번역이었다" class="anchor-alias"></span></h5>
 <p>신경망 번역기는 문장을 옮길 때 빔 서치(beam search, 후보 번역 몇 개만 남겨 가며 한 토큰씩 늘려 가는 탐색이며 남기는 후보 수를 빔 크기라 한다)로 답을 고른다. 후보의 점수는 토큰 로그확률의 합이었다. 2016년 구글 번역 팀은 새 신경망 번역기를 내놓으며, 이 점수로는 한 단계마다 음수 로그확률이 더해져 긴 문장일수록 점수가 낮아지므로 평균적으로 짧은 번역을 편애하게 된다고 적었다. 그들은 처음에 점수를 길이로 그냥 나눴다가, 길이의 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi></mrow><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span></span></span></span></eq> 제곱(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>&lt;</mo><mi>α</mi><mo>&lt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0 &lt; \alpha &lt; 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6835em;vertical-align:-0.0391em;"></span><span class="mord">0</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></eq>)으로 나누는 편이 낫다는 것을 찾았다. 평가용 데이터에서 맞춘 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi></mrow><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span></span></span></span></eq> 는 대개 0.6~0.7이었다.</p>
+<svg class="fig" viewBox="0 0 560 370" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="빈 번역은 α 와 상관없이 −2.0 이고 20토큰 번역은 α 가 0.37 을 넘으면 빈 번역보다 점수가 높아진다">
+  <text class="t-strong" x="20.0" y="28.0" style="font-size:17px">후보 점수 = 로그확률 합 ÷ (길이의 α 제곱)</text>
+  <rect class="fa1" x="350.0" y="60" width="45.0" height="240"/>
+  <line class="sgrid" x1="80" y1="60.0" x2="530" y2="60.0" stroke-width="1"/>
+  <text class="t-muted" x="72.0" y="65.0" text-anchor="end" style="font-size:14px">0</text>
+  <line class="sgrid" x1="80" y1="133.8" x2="530" y2="133.8" stroke-width="1"/>
+  <text class="t-muted" x="72.0" y="138.8" text-anchor="end" style="font-size:14px">−2</text>
+  <line class="sgrid" x1="80" y1="207.7" x2="530" y2="207.7" stroke-width="1"/>
+  <text class="t-muted" x="72.0" y="212.7" text-anchor="end" style="font-size:14px">−4</text>
+  <line class="sgrid" x1="80" y1="281.5" x2="530" y2="281.5" stroke-width="1"/>
+  <text class="t-muted" x="72.0" y="286.5" text-anchor="end" style="font-size:14px">−6</text>
+  <text class="t-muted" x="80.0" y="322.0" text-anchor="middle" style="font-size:14px">0</text>
+  <text class="t-muted" x="170.0" y="322.0" text-anchor="middle" style="font-size:14px">0.2</text>
+  <text class="t-muted" x="260.0" y="322.0" text-anchor="middle" style="font-size:14px">0.4</text>
+  <text class="t-muted" x="350.0" y="322.0" text-anchor="middle" style="font-size:14px">0.6</text>
+  <text class="t-muted" x="440.0" y="322.0" text-anchor="middle" style="font-size:14px">0.8</text>
+  <text class="t-muted" x="530.0" y="322.0" text-anchor="middle" style="font-size:14px">1</text>
+  <line class="saxis" x1="80" y1="300" x2="530" y2="300" stroke-width="1"/>
+  <line class="saxis" x1="80" y1="60" x2="80" y2="300" stroke-width="1"/>
+  <text x="305.0" y="346.0" text-anchor="middle" style="font-size:15px">길이를 몇 제곱해서 나누나 (α)</text>
+  <line class="s2" x1="80" y1="133.8" x2="530" y2="133.8" stroke-width="2.5"/>
+  <text class="t2" x="530.0" y="155.8" text-anchor="end" style="font-size:15px">빈 번역 (토큰 1개)</text>
+  <polyline class="s1" points="80.0,281.5 84.5,275.0 89.0,268.7 93.5,262.5 98.0,256.5 102.5,250.7 107.0,245.1 111.5,239.6 116.0,234.3 120.5,229.2 125.0,224.2 129.5,219.3 134.0,214.6 138.5,210.1 143.0,205.6 147.5,201.3 152.0,197.2 156.5,193.1 161.0,189.2 165.5,185.4 170.0,181.7 174.5,178.1 179.0,174.6 183.5,171.2 188.0,167.9 192.5,164.8 197.0,161.7 201.5,158.7 206.0,155.8 210.5,152.9 215.0,150.2 219.5,147.5 224.0,144.9 228.5,142.4 233.0,140.0 237.5,137.6 242.0,135.3 246.5,133.1 251.0,131.0 255.5,128.9 260.0,126.8 264.5,124.9 269.0,123.0 273.5,121.1 278.0,119.3 282.5,117.5 287.0,115.8 291.5,114.2 296.0,112.6 300.5,111.0 305.0,109.5 309.5,108.1 314.0,106.7 318.5,105.3 323.0,103.9 327.5,102.6 332.0,101.4 336.5,100.2 341.0,99.0 345.5,97.8 350.0,96.7 354.5,95.6 359.0,94.6 363.5,93.6 368.0,92.6 372.5,91.6 377.0,90.7 381.5,89.8 386.0,88.9 390.5,88.0 395.0,87.2 399.5,86.4 404.0,85.6 408.5,84.9 413.0,84.1 417.5,83.4 422.0,82.7 426.5,82.1 431.0,81.4 435.5,80.8 440.0,80.2 444.5,79.6 449.0,79.0 453.5,78.4 458.0,77.9 462.5,77.4 467.0,76.8 471.5,76.4 476.0,75.9 480.5,75.4 485.0,74.9 489.5,74.5 494.0,74.1 498.5,73.7 503.0,73.3 507.5,72.9 512.0,72.5 516.5,72.1 521.0,71.8 525.5,71.4 530.0,71.1" stroke-width="2.5"/>
+  <text class="t1" x="179.0" y="205.8" style="font-size:15px">20토큰 번역</text>
+  <circle class="sink" cx="245.0" cy="133.8" r="4" fill="none" stroke-width="1.5"/>
+  <text class="t-strong" x="245.0" y="121.8" text-anchor="middle" style="font-size:14px">α ≈ 0.37</text>
+  <text class="t-muted" x="372.5" y="52.0" text-anchor="middle" style="font-size:13px">구글 팀이 고른 0.6~0.7</text>
+  <text class="t-muted" x="526.0" y="61.1" text-anchor="end" style="font-size:13px">−0.30</text>
+</svg>
+<p>로그확률 합이 −2.0 인 빈 번역과 −6.0 인 20토큰 번역의 점수를 길이의 α 제곱으로 나눠 비교하면, α 가 0.37을 넘을 때부터 20토큰 번역이 이긴다. 두 후보의 로그확률은 설명을 위해 정한 값이고, 0.6~0.7 띠는 구글 번역 팀(Wu 외, 2016)이 보고한 범위다.</p>
 <p>2017년 존스 홉킨스 대학의 코엔(Philipp Koehn)과 놀스(Rebecca Knowles)는 이상한 일을 보고했다. 빔을 넓혀 후보를 더 많이 살펴보면 번역이 좋아져야 할 텐데, 여덟 언어 쌍 거의 모두에서 알맞은 빔 크기를 넘기면 오히려 번역이 나빠졌다. 주된 원인은 넓은 빔이 더 짧은 번역을 찾아낸다는 것이었고, 점수를 길이로 나누면 증상이 조금 덜했다.</p>
 <p>2019년 케임브리지 대학의 슈탈베르크(Felix Stahlberg)와 번(Bill Byrne)은 끝까지 가 보았다. 후보를 추리지 않고 모델이 매기는 점수가 가장 높은 번역을 빠짐없이 찾아내는 탐색을 만들어, 영어→독일어 트랜스포머(요즘 언어 모델의 뼈대가 된 신경망 구조) 번역기의 시험 문장 2,169개에 돌렸다. 문장의 51.8%에서 점수가 가장 높은 번역은 빈 문장(끝을 알리는 토큰 하나)이었다. 원문이 40토큰보다 길면 거의 모든 문장에서 빈 번역이 최고점이었으니, 빔 서치가 그럭저럭 쓸 만한 번역을 내놓은 것은 최고점을 찾는 데 실패한 덕분이었다.</p>
 <svg class="fig" viewBox="0 0 560 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="점수가 가장 높은 번역을 빠짐없이 찾으면 번역 길이가 정답의 0.06배로 줄고 문장의 51.8%가 빈 번역이 된다">

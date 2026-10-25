@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,13 +684,14 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
 <li><a href="reinforce.html">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a></li>
 <li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다</a></li>
 <li><a href="bellman.html">5. 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</a></li>
-<li><a href="td.html" class="active">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a><ul class="sidebar-toc"><li><a href="td.html" class="current">시간차 학습: 다음 예측을 목표로 삼는다</a></li><li><a href="td-sec-bootstrap-bias-variance.html">부트스트랩의 값: 편향과 분산</a></li><li><a href="td-sec-td-error-brain.html">TD 오차: 뇌도 쓰는 예측 오차</a></li><li><a href="td-sec-n-step-td.html">n스텝 시간차: 한 스텝과 끝까지 사이</a></li><li><a href="td-sec-td-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="td.html" class="active">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a><ul class="sidebar-toc"><li><a href="td.html" class="current">시간차 학습: 다음 예측을 목표로 삼는다</a></li><li><a href="td-sec-bootstrap-bias-variance.html">부트스트랩의 값: 편향과 분산</a></li><li><a href="td-sec-td-error-brain.html">TD 오차: 뇌도 쓰는 예측 오차</a></li><li><a href="td-sec-n-step-td.html">n스텝 시간차: 한 스텝과 끝까지 사이</a></li><li><a href="td-sec-td-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="q-learning.html">7. Q-러닝: 남이 둔 수로 최선의 수를 배운다</a></li>
 <li><a href="dqn.html">8. DQN: 표를 신경망으로 바꾸면 무엇이 흔들리나</a></li>
 <li><a href="actor-critic.html">9. Actor-Critic: 비평가를 곁에 두다</a></li>
@@ -718,7 +734,105 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p>토요일에 비가 올지를 월요일부터 날마다 예보하는 사람을 떠올려 보자. 월요일 예보가 잘 맞았는지는 토요일이 되어야 안다. 그런데 화요일에 새 구름 사진을 보고 예보를 크게 올렸다면, 토요일을 기다리지 않아도 「월요일의 예보가 너무 낮았던 것 같다」는 것은 화요일에 이미 알 수 있다. 결과가 아니라 다음 날의 예보와 견줘서 오늘의 예보를 고칠 수 있을까, 고친다면 무엇을 얻고 무엇을 잃을까?</p>
 <h5 id="hist-checkers-delta-rain-forecast" class="history" data-people="samuel-arthur sutton-richard">역사: 체커 프로그램의 「델타」에서 토요일 비 예보까지<span id="역사-체커-프로그램의-델타-에서-토요일-비-예보까지" class="anchor-alias"></span></h5>
 <p>나중의 예측으로 지금의 예측을 고친 프로그램 가운데 가장 이른 예로 꼽히는 것은 IBM 의 아서 새뮤얼(Arthur Samuel)이 만든 체커(서양 장기의 한 가지) 프로그램이다. 새뮤얼은 1959년 『IBM 연구개발 저널(IBM Journal of Research and Development)』에 「Some Studies in Machine Learning Using the Game of Checkers」를 실었다. 프로그램은 판면마다 점수를 매기는 다항식을 갖고 있었고, 그 다항식의 계수를 스스로 고쳤다. 새뮤얼은 프로그램을 두 선수로 나눠 맞붙였다. 수마다 계수를 고쳐 가는 선수를 알파(Alpha), 한 판 동안 같은 다항식을 쓰는 선수를 베타(Beta)라 불렀고, 알파가 이기면 알파의 다항식을 베타에게 넘겼다. 알파는 수를 둘 때마다 앞 차례에 매겼던 판면 점수와, 지금 판면에서 몇 수 앞을 읽어 끌어올린 점수를 견줬다. 새뮤얼은 두 점수의 차이를 「델타(delta)」라 불렀다. 델타가 양수면 앞 판면을 너무 낮게 봤다는 뜻이므로, 앞 판면 점수를 올리는 데 기여한 항의 무게를 늘렸다.</p>
+<svg class="fig" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="새뮤얼의 델타. 앞 차례 판면을 다항식이 2점으로 매겼고, 지금 판면에서 두 수 앞을 읽어 끌어올린 점수는 5점이다. 차이 델타 = +3 이므로 앞 판면 점수를 올리는 쪽으로 다항식의 계수를 고친다">
+<defs><marker id="td-h1-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="f4" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
+<text class="t-strong" x="280" y="22" text-anchor="middle" style="font-size:14px">알파가 한 수 둘 때마다 하는 일</text>
+<rect class="fa2" x="20" y="110" width="130" height="60" rx="8"/>
+<text x="85" y="134" text-anchor="middle" style="font-size:14px">앞 차례 판면</text>
+<text class="t-strong" x="85" y="158" text-anchor="middle" style="font-size:14px">다항식 점수 2</text>
+<line class="sink" x1="150" y1="140" x2="232" y2="140" stroke-width="1.6" marker-end="url(#td-h1-arr)"/>
+<text class="t-muted" x="191" y="130" text-anchor="middle" style="font-size:12px">두 차례 뒤</text>
+<rect class="fa1" x="235" y="110" width="110" height="60" rx="8"/>
+<text x="290" y="134" text-anchor="middle" style="font-size:14px">지금 판면</text>
+<text class="t-strong" x="290" y="158" text-anchor="middle" style="font-size:14px">끌어올린 점수 5</text>
+<line class="saxis" x1="345" y1="140" x2="382" y2="85" stroke-width="1.4"/>
+<circle class="fneutral" cx="400" cy="85" r="18"/>
+<text x="400" y="90" text-anchor="middle" style="font-size:14px">5</text>
+<line class="saxis" x1="418" y1="85" x2="490" y2="60" stroke-width="1.2"/>
+<rect class="fa3" x="490" y="47" width="44" height="26" rx="4"/>
+<text x="512" y="65" text-anchor="middle" style="font-size:13px">5</text>
+<line class="saxis" x1="418" y1="85" x2="490" y2="110" stroke-width="1.2"/>
+<rect class="fa3" x="490" y="97" width="44" height="26" rx="4"/>
+<text x="512" y="115" text-anchor="middle" style="font-size:13px">8</text>
+<line class="saxis" x1="345" y1="140" x2="382" y2="195" stroke-width="1.4"/>
+<circle class="fneutral" cx="400" cy="195" r="18"/>
+<text x="400" y="200" text-anchor="middle" style="font-size:14px">3</text>
+<line class="saxis" x1="418" y1="195" x2="490" y2="170" stroke-width="1.2"/>
+<rect class="fa3" x="490" y="157" width="44" height="26" rx="4"/>
+<text x="512" y="175" text-anchor="middle" style="font-size:13px">3</text>
+<line class="saxis" x1="418" y1="195" x2="490" y2="220" stroke-width="1.2"/>
+<rect class="fa3" x="490" y="207" width="44" height="26" rx="4"/>
+<text x="512" y="225" text-anchor="middle" style="font-size:13px">9</text>
+<text class="t-muted" x="400" y="40" text-anchor="middle" style="font-size:12px">상대 차례: 낮은 쪽</text>
+<text class="t-muted" x="512" y="40" text-anchor="middle" style="font-size:12px">다항식 점수</text>
+<text class="t-muted" x="290" y="188" text-anchor="middle" style="font-size:12px">내 차례: 높은 쪽</text>
+<text class="t-strong" x="280" y="258" text-anchor="middle" style="font-size:15px">델타 = 5 − 2 = <tspan style="fill:var(--sym-8e44ad, #8e44ad)">+3</tspan> → 앞 판면 점수를 올린 항의 계수를 키운다</text>
+<text class="t-muted" x="280" y="288" text-anchor="middle" style="font-size:12px">새뮤얼(1959)의 델타를 이 책에서 그린 모식도. 점수는 설명을 위해 지어낸 값</text>
+</svg>
 <p>이 생각을 일반적인 예측 문제로 정리한 사람이 리처드 서튼(Richard Sutton)이다. 1988년 『머신러닝(Machine Learning)』 3권에 실린 「Learning to Predict by the Methods of Temporal Differences」의 서론에 토요일 비 예보가 나온다. 흔한 방법은 날마다의 예보를 토요일의 실제 날씨와 견주고, 서튼의 방법은 날마다의 예보를 다음 날의 예보와 견준다. 월요일에 50%, 화요일에 75%를 예보했다면 서튼의 방법은 월요일 같은 날의 예보를 올리고, 흔한 방법은 토요일의 실제 날씨에 따라 올릴 수도 내릴 수도 있다. 서튼은 시간적으로 잇따르는 두 예측의 차이로 배우는 이런 방법들을 시간차(temporal difference, TD) 방법이라 부르고, 새뮤얼의 체커 프로그램을 가장 이르고 가장 잘 알려진 쓰임으로 꼽았다. 논문 요약에서 그는 실제 예측 문제 대부분에서 시간차 방법이 기억과 한 번에 드는 계산이 적으면서 더 정확한 예측을 낸다고 적었다.</p>
+<svg class="fig" viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="월요일부터 금요일까지 토요일 비 확률 예보 50, 75, 70, 80, 90 퍼센트와 토요일의 실제 날씨(비 안 옴). 흔한 방법은 날마다의 예보를 토요일의 실제 날씨와 견줘 모두 내리고, 시간차 방법은 다음 날의 예보와 견줘 월요일 예보는 올린다">
+<defs><marker id="td-h2-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="f4" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
+<text class="t-strong" x="280" y="22" text-anchor="middle" style="font-size:14px">토요일에 비가 올 확률, 날마다의 예보</text>
+<text class="t-strong" x="20" y="48" style="font-size:13px">흔한 방법: 날마다의 예보를 토요일의 실제 날씨와 견준다</text>
+<rect class="fa1" x="20" y="60" width="60" height="44" rx="6"/>
+<text class="t-muted" x="50" y="77" text-anchor="middle" style="font-size:12px">월</text>
+<text class="t-strong" x="50" y="96" text-anchor="middle" style="font-size:14px">50%</text>
+<rect class="fa1" x="102" y="60" width="60" height="44" rx="6"/>
+<text class="t-muted" x="132" y="77" text-anchor="middle" style="font-size:12px">화</text>
+<text class="t-strong" x="132" y="96" text-anchor="middle" style="font-size:14px">75%</text>
+<rect class="fa1" x="184" y="60" width="60" height="44" rx="6"/>
+<text class="t-muted" x="214" y="77" text-anchor="middle" style="font-size:12px">수</text>
+<text class="t-strong" x="214" y="96" text-anchor="middle" style="font-size:14px">70%</text>
+<rect class="fa1" x="266" y="60" width="60" height="44" rx="6"/>
+<text class="t-muted" x="296" y="77" text-anchor="middle" style="font-size:12px">목</text>
+<text class="t-strong" x="296" y="96" text-anchor="middle" style="font-size:14px">80%</text>
+<rect class="fa1" x="348" y="60" width="60" height="44" rx="6"/>
+<text class="t-muted" x="378" y="77" text-anchor="middle" style="font-size:12px">금</text>
+<text class="t-strong" x="378" y="96" text-anchor="middle" style="font-size:14px">90%</text>
+<rect class="fa2" x="426" y="60" width="76" height="44" rx="6"/>
+<text class="t-muted" x="464" y="77" text-anchor="middle" style="font-size:12px">토 (실제)</text>
+<text class="t-strong" x="464" y="96" text-anchor="middle" style="font-size:14px">비 안 옴</text>
+<text x="50" y="120" text-anchor="middle" style="font-size:12px"><tspan style="fill:var(--sym-8e44ad, #8e44ad)">−0.50</tspan></text>
+<path class="sink" d="M50,126 Q255.0,163 464,107" stroke-width="1.1" marker-end="url(#td-h2-arr)"/>
+<text x="132" y="120" text-anchor="middle" style="font-size:12px"><tspan style="fill:var(--sym-8e44ad, #8e44ad)">−0.75</tspan></text>
+<path class="sink" d="M132,126 Q296.0,158 464,107" stroke-width="1.1" marker-end="url(#td-h2-arr)"/>
+<text x="214" y="120" text-anchor="middle" style="font-size:12px"><tspan style="fill:var(--sym-8e44ad, #8e44ad)">−0.70</tspan></text>
+<path class="sink" d="M214,126 Q337.0,153 464,107" stroke-width="1.1" marker-end="url(#td-h2-arr)"/>
+<text x="296" y="120" text-anchor="middle" style="font-size:12px"><tspan style="fill:var(--sym-8e44ad, #8e44ad)">−0.80</tspan></text>
+<path class="sink" d="M296,126 Q378.0,148 464,107" stroke-width="1.1" marker-end="url(#td-h2-arr)"/>
+<text x="378" y="120" text-anchor="middle" style="font-size:12px"><tspan style="fill:var(--sym-8e44ad, #8e44ad)">−0.90</tspan></text>
+<path class="sink" d="M378,126 Q419.0,143 464,107" stroke-width="1.1" marker-end="url(#td-h2-arr)"/>
+<text class="t-strong" x="20" y="184" style="font-size:13px">시간차 방법: 날마다의 예보를 다음 날의 예보와 견준다</text>
+<rect class="fa1" x="20" y="196" width="60" height="44" rx="6"/>
+<text class="t-muted" x="50" y="213" text-anchor="middle" style="font-size:12px">월</text>
+<text class="t-strong" x="50" y="232" text-anchor="middle" style="font-size:14px">50%</text>
+<rect class="fa1" x="102" y="196" width="60" height="44" rx="6"/>
+<text class="t-muted" x="132" y="213" text-anchor="middle" style="font-size:12px">화</text>
+<text class="t-strong" x="132" y="232" text-anchor="middle" style="font-size:14px">75%</text>
+<rect class="fa1" x="184" y="196" width="60" height="44" rx="6"/>
+<text class="t-muted" x="214" y="213" text-anchor="middle" style="font-size:12px">수</text>
+<text class="t-strong" x="214" y="232" text-anchor="middle" style="font-size:14px">70%</text>
+<rect class="fa1" x="266" y="196" width="60" height="44" rx="6"/>
+<text class="t-muted" x="296" y="213" text-anchor="middle" style="font-size:12px">목</text>
+<text class="t-strong" x="296" y="232" text-anchor="middle" style="font-size:14px">80%</text>
+<rect class="fa1" x="348" y="196" width="60" height="44" rx="6"/>
+<text class="t-muted" x="378" y="213" text-anchor="middle" style="font-size:12px">금</text>
+<text class="t-strong" x="378" y="232" text-anchor="middle" style="font-size:14px">90%</text>
+<rect class="fa2" x="426" y="196" width="76" height="44" rx="6"/>
+<text class="t-muted" x="464" y="213" text-anchor="middle" style="font-size:12px">토 (실제)</text>
+<text class="t-strong" x="464" y="232" text-anchor="middle" style="font-size:14px">비 안 옴</text>
+<path class="sink" d="M58,240 Q91.0,270 124,243" stroke-width="1.1" marker-end="url(#td-h2-arr)"/>
+<text x="91.0" y="278" text-anchor="middle" style="font-size:12px"><tspan style="fill:var(--sym-8e44ad, #8e44ad)">+0.25</tspan></text>
+<path class="sink" d="M140,240 Q173.0,270 206,243" stroke-width="1.1" marker-end="url(#td-h2-arr)"/>
+<text x="173.0" y="278" text-anchor="middle" style="font-size:12px"><tspan style="fill:var(--sym-8e44ad, #8e44ad)">−0.05</tspan></text>
+<path class="sink" d="M222,240 Q255.0,270 288,243" stroke-width="1.1" marker-end="url(#td-h2-arr)"/>
+<text x="255.0" y="278" text-anchor="middle" style="font-size:12px"><tspan style="fill:var(--sym-8e44ad, #8e44ad)">+0.10</tspan></text>
+<path class="sink" d="M304,240 Q337.0,270 370,243" stroke-width="1.1" marker-end="url(#td-h2-arr)"/>
+<text x="337.0" y="278" text-anchor="middle" style="font-size:12px"><tspan style="fill:var(--sym-8e44ad, #8e44ad)">+0.10</tspan></text>
+<path class="sink" d="M386,240 Q421.0,270 456,243" stroke-width="1.1" marker-end="url(#td-h2-arr)"/>
+<text x="421.0" y="278" text-anchor="middle" style="font-size:12px"><tspan style="fill:var(--sym-8e44ad, #8e44ad)">−0.90</tspan></text>
+<text class="t-muted" x="280" y="318" text-anchor="middle" style="font-size:12px">보라색 수 = 견준 상대 − 그날 예보. 서튼(1988) 서론의 예, 수요일부터의 예보는 지어낸 값</text>
+</svg>
 <p>서튼이 그 주장을 보이려고 고른 예가 가장 단순한 움직이는 세계, 양 끝이 막힌 랜덤 워크(무작위로 한 칸씩 걷는 길)다. 서튼의 랜덤 워크는 칸이 A부터 G까지 일곱 개였다. 말은 늘 가운데 D에서 출발해 반반의 확률로 왼쪽이나 오른쪽으로 한 칸 가고, 양 끝 A나 G에 닿으면 끝난다. G에서 끝나면 결과가 1, A에서 끝나면 0이다. 안쪽 다섯 칸 B~F의 참값(오른쪽 끝에서 끝날 확률)은 1/6, 2/6, …, 5/6이다.</p>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">앞 판면 점수랑 지금 판면 점수를 빼서 고친다는 거면, 지금 보면 TD 오차 한 줄이네요. 그게 1959년에서 1988년까지 걸린 거예요?</div></div>
@@ -1067,7 +1181,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </blockquote>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="bellman-sec-bellman-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="td-sec-bootstrap-bias-variance.html">부트스트랩의 값: 편향과 분산 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="bellman-sec-bellman-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="td-sec-bootstrap-bias-variance.html">부트스트랩의 값: 편향과 분산 &rarr;</a></nav>
 </main>
 
 <script type="module">

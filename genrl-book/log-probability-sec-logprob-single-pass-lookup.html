@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,6 +684,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
@@ -682,7 +698,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="ppo-rlhf.html">10. PPO와 RLHF: 멀리 가지 않게 묶다</a></li>
 <li><a href="dpo-reappear.html">11. DPO의 재등장: 보상 모델을 수식으로 지우다</a></li>
 <li><a href="preference-pairs.html">12. 선호 쌍의 조건: 어떤 데이터가 DPO를 움직이는가</a></li>
-<li><a href="log-probability.html" class="active">13. 로그확률: 문장의 확률은 어떻게 매기나</a><ul class="sidebar-toc"><li><a href="log-probability.html">문장 로그확률: 토큰 로그확률의 합</a></li><li><a href="log-probability-sec-logprob-single-pass-lookup.html" class="current">조회: 이미 있는 응답의 확률은 한 번에 읽는다</a></li><li><a href="log-probability-sec-sampling-temperature.html">샘플링 온도: 뽑을 때만 쓰는 설정</a></li><li><a href="log-probability-sec-log-probability-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="log-probability.html" class="active">13. 로그확률: 문장의 확률은 어떻게 매기나</a><ul class="sidebar-toc"><li><a href="log-probability.html">문장 로그확률: 토큰 로그확률의 합</a></li><li><a href="log-probability-sec-logprob-single-pass-lookup.html" class="current">조회: 이미 있는 응답의 확률은 한 번에 읽는다</a></li><li><a href="log-probability-sec-sampling-temperature.html">샘플링 온도: 뽑을 때만 쓰는 설정</a></li><li><a href="log-probability-sec-log-probability-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="length-bias.html">14. 길이 편향: 합이 공정한가?</a></li>
 <li><a href="reference-model.html">15. 레퍼런스 모델: 학습을 왜 원래 모델에 묶어 두나?</a></li>
 <li><a href="bradley-terry.html">16. Bradley-Terry 모델: 시그모이드는 왜 거기 있는가?</a></li>
@@ -783,6 +799,83 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <h5 id="hist-teacher-forcing" class="history" data-people="williams-ronald zipser-david">역사: 티처 포싱<span id="역사-티처-포싱" class="anchor-alias"></span></h5>
 <p>정답을 입력으로 밀어 넣는 방식은 순환 신경망(자리를 하나씩 지나며 내부 상태를 이어 가는 신경망) 시절에 이름을 얻었다. 1989년 로널드 윌리엄스(Ronald J. Williams)와 데이비드 집서(David Zipser)는 순환망을 멈추지 않고 돌리면서 그때그때 학습시키는 알고리즘을 <em>Neural Computation</em>에 내놓으며, 망이 제 출력 대신 정답(선생님 신호)을 다음 계산에 쓰게 하는 변형에 티처 포싱이라는 이름을 붙였다. 그들은 이 방식이 조던(Michael I. Jordan, 1986)과 피네다(Fernando Pineda, 1988)의 연구에서 이미 자주 쓰이고 있었다고 적었다.</p>
 <p>왜 이 변형이 필요했는지는 두 사람이 같은 해 <em>Connection Science</em>에 실은 실험 보고에 드러난다. 그들은 순환망에게 0과 1을 번갈아 내게 하거나, 0, 0, 1, 1을 되풀이하게 하려 했다. 파라미터를 작은 무작위 값으로 시작한 망은 한 값에 가라앉아 멈춰 있었고, 제 출력을 그대로 다시 받는 원래 방식은 이 상태를 벗어나지 못했다. 0, 0, 1, 1 태스크는 사실상 끝내 배우지 못했다. 정답을 밀어 넣은 쪽은 단위 하나짜리 태스크를 10번이 안 되는 되풀이로, 단위 둘짜리 태스크를 약 100번 만에 배웠다. 두 사람은 정답이 매 스텝 망의 상태를 제자리로 되돌려 주기 때문이라고 보았다. 박자가 반 박 어긋난 정답을 보여 주는 실험에서도, 원래 방식은 파라미터를 0과 1 사이의 어중간한 값 0.5 쪽으로 끌고 갔지만 정답을 밀어 넣은 쪽은 한 스텝 만에 박자를 맞췄다. 그들은 대가도 적었다. 정답을 밀어 넣고 찾은 답은, 오차를 0까지 줄이지 못하면 망이 제 출력으로 달릴 때 가장 좋은 답이라는 보장이 없다.</p>
+<svg class="fig" viewBox="0 0 560 448" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="단위 하나짜리 순환망에게 0과 1을 번갈아 내게 하는 장난감 시뮬레이션. 위: 스텝에 따른 오차. 제 출력을 다시 받는 망은 오차 0.5 근처에서 내려오지 않고, 정답을 밀어 넣은 망은 오차가 꾸준히 줄어든다. 아래: 학습을 마친 두 망을 혼자 달리게 한 출력. 앞쪽은 0.5 근처 한 값에 머물고 뒤쪽은 0과 1 근처를 번갈아 낸다">
+<rect x="0" y="0" width="560" height="448" rx="6" style="fill:#fff;stroke:#ccc;stroke-width:1"/>
+<text x="280" y="24" text-anchor="middle" style="font-size:15px;fill:#111;font-weight:700">0, 1, 0, 1 … 을 배우는 단위 하나짜리 순환망</text>
+<line x1="62" y1="222.0" x2="540" y2="222.0" style="stroke:#ddd;stroke-width:1"/>
+<text x="56" y="226" text-anchor="end" style="font-size:12px;fill:#555">0.0</text>
+<line x1="62" y1="165.3" x2="540" y2="165.3" style="stroke:#ddd;stroke-width:1"/>
+<text x="56" y="169.333" text-anchor="end" style="font-size:12px;fill:#555">0.2</text>
+<line x1="62" y1="108.7" x2="540" y2="108.7" style="stroke:#ddd;stroke-width:1"/>
+<text x="56" y="112.667" text-anchor="end" style="font-size:12px;fill:#555">0.4</text>
+<line x1="62" y1="52.0" x2="540" y2="52.0" style="stroke:#ddd;stroke-width:1"/>
+<text x="56" y="56" text-anchor="end" style="font-size:12px;fill:#555">0.6</text>
+<text x="62" y="240" text-anchor="middle" style="font-size:12px;fill:#555">0</text>
+<text x="221.333" y="240" text-anchor="middle" style="font-size:12px;fill:#555">200</text>
+<text x="380.667" y="240" text-anchor="middle" style="font-size:12px;fill:#555">400</text>
+<text x="540" y="240" text-anchor="middle" style="font-size:12px;fill:#555">600</text>
+<text x="301" y="258" text-anchor="middle" style="font-size:12px;fill:#555">학습 스텝</text>
+<text x="18" y="137" text-anchor="middle" transform="rotate(-90 18 137)" style="font-size:12px;fill:#555">|정답 − 출력| (20스텝 평균)</text>
+<line x1="62" y1="52" x2="62" y2="222" style="stroke:#888;stroke-width:1"/>
+<line x1="62" y1="222" x2="540" y2="222" style="stroke:#888;stroke-width:1"/>
+<polyline points="70.0,74.6 77.9,74.6 85.9,74.6 93.9,74.6 101.8,74.6 109.8,74.6 117.8,74.6 125.7,74.6 133.7,74.6 141.7,74.6 149.6,74.6 157.6,74.6 165.6,74.6 173.5,74.6 181.5,74.6 189.5,74.6 197.4,74.6 205.4,74.6 213.4,74.5 221.3,74.5 229.3,74.5 237.3,74.5 245.2,74.5 253.2,74.5 261.2,74.5 269.1,74.5 277.1,74.5 285.1,74.5 293.0,74.5 301.0,74.5 309.0,74.5 316.9,74.5 324.9,74.5 332.9,74.4 340.8,74.4 348.8,74.4 356.8,74.4 364.7,74.4 372.7,74.4 380.7,74.4 388.6,74.4 396.6,74.4 404.6,74.4 412.5,74.3 420.5,74.3 428.5,74.3 436.4,74.3 444.4,74.3 452.4,74.3 460.3,74.3 468.3,74.2 476.3,74.2 484.2,74.2 492.2,74.2 500.2,74.2 508.1,74.2 516.1,74.2 524.1,74.1 532.0,74.1" style="fill:none;stroke:#555;stroke-width:2.4;stroke-dasharray:6 4"/>
+<polyline points="70.0,96.1 77.9,111.5 85.9,123.3 93.9,132.8 101.8,140.5 109.8,146.9 117.8,152.3 125.7,156.9 133.7,160.8 141.7,164.2 149.6,167.1 157.6,169.7 165.6,172.0 173.5,174.0 181.5,175.9 189.5,177.6 197.4,179.1 205.4,180.5 213.4,181.7 221.3,182.9 229.3,184.0 237.3,185.0 245.2,186.0 253.2,186.8 261.2,187.7 269.1,188.4 277.1,189.1 285.1,189.8 293.0,190.5 301.0,191.1 309.0,191.7 316.9,192.2 324.9,192.7 332.9,193.2 340.8,193.7 348.8,194.2 356.8,194.6 364.7,195.0 372.7,195.4 380.7,195.8 388.6,196.2 396.6,196.5 404.6,196.9 412.5,197.2 420.5,197.5 428.5,197.8 436.4,198.1 444.4,198.4 452.4,198.7 460.3,198.9 468.3,199.2 476.3,199.4 484.2,199.7 492.2,199.9 500.2,200.1 508.1,200.4 516.1,200.6 524.1,200.8 532.0,201.0" style="fill:none;stroke:#2e7d32;stroke-width:2.4"/>
+<text x="540" y="65.1276" text-anchor="end" style="font-size:13px;fill:#555;font-weight:700">제 출력을 다시 받는 망</text>
+<text x="540" y="190.989" text-anchor="end" style="font-size:13px;fill:#2e7d32;font-weight:700">정답을 밀어 넣은 망</text>
+<text x="280" y="278" text-anchor="middle" style="font-size:13px;fill:#111;font-weight:700">학습을 마친 뒤 둘 다 제 출력을 받으며 혼자 달리게 하면</text>
+<text x="20" y="316" text-anchor="start" style="font-size:12px;fill:#555;font-weight:700">제 출력을 받던 망</text>
+<circle cx="196" cy="312" r="7.5" style="fill:#555;fill-opacity:0.48;stroke:#555;stroke-width:1"/>
+<text x="196" y="338" text-anchor="middle" style="font-size:11px;fill:#555">0.4</text>
+<circle cx="225" cy="312" r="8.4" style="fill:#555;fill-opacity:0.55;stroke:#555;stroke-width:1"/>
+<text x="225" y="338" text-anchor="middle" style="font-size:11px;fill:#555">0.5</text>
+<circle cx="254" cy="312" r="8.7" style="fill:#555;fill-opacity:0.56;stroke:#555;stroke-width:1"/>
+<text x="254" y="338" text-anchor="middle" style="font-size:11px;fill:#555">0.5</text>
+<circle cx="283" cy="312" r="8.8" style="fill:#555;fill-opacity:0.57;stroke:#555;stroke-width:1"/>
+<text x="283" y="338" text-anchor="middle" style="font-size:11px;fill:#555">0.5</text>
+<circle cx="312" cy="312" r="8.8" style="fill:#555;fill-opacity:0.57;stroke:#555;stroke-width:1"/>
+<text x="312" y="338" text-anchor="middle" style="font-size:11px;fill:#555">0.5</text>
+<circle cx="341" cy="312" r="8.8" style="fill:#555;fill-opacity:0.57;stroke:#555;stroke-width:1"/>
+<text x="341" y="338" text-anchor="middle" style="font-size:11px;fill:#555">0.5</text>
+<circle cx="370" cy="312" r="8.8" style="fill:#555;fill-opacity:0.57;stroke:#555;stroke-width:1"/>
+<text x="370" y="338" text-anchor="middle" style="font-size:11px;fill:#555">0.5</text>
+<circle cx="399" cy="312" r="8.8" style="fill:#555;fill-opacity:0.57;stroke:#555;stroke-width:1"/>
+<text x="399" y="338" text-anchor="middle" style="font-size:11px;fill:#555">0.5</text>
+<circle cx="428" cy="312" r="8.8" style="fill:#555;fill-opacity:0.57;stroke:#555;stroke-width:1"/>
+<text x="428" y="338" text-anchor="middle" style="font-size:11px;fill:#555">0.5</text>
+<circle cx="457" cy="312" r="8.8" style="fill:#555;fill-opacity:0.57;stroke:#555;stroke-width:1"/>
+<text x="457" y="338" text-anchor="middle" style="font-size:11px;fill:#555">0.5</text>
+<circle cx="486" cy="312" r="8.8" style="fill:#555;fill-opacity:0.57;stroke:#555;stroke-width:1"/>
+<text x="486" y="338" text-anchor="middle" style="font-size:11px;fill:#555">0.5</text>
+<circle cx="515" cy="312" r="8.8" style="fill:#555;fill-opacity:0.57;stroke:#555;stroke-width:1"/>
+<text x="515" y="338" text-anchor="middle" style="font-size:11px;fill:#555">0.5</text>
+<text x="20" y="376" text-anchor="start" style="font-size:12px;fill:#2e7d32;font-weight:700">정답을 받던 망</text>
+<circle cx="196" cy="372" r="12.3" style="fill:#2e7d32;fill-opacity:0.80;stroke:#2e7d32;stroke-width:1"/>
+<text x="196" y="398" text-anchor="middle" style="font-size:11px;fill:#555">0.9</text>
+<circle cx="225" cy="372" r="4.9" style="fill:#2e7d32;fill-opacity:0.31;stroke:#2e7d32;stroke-width:1"/>
+<text x="225" y="398" text-anchor="middle" style="font-size:11px;fill:#555">0.1</text>
+<circle cx="254" cy="372" r="11.9" style="fill:#2e7d32;fill-opacity:0.77;stroke:#2e7d32;stroke-width:1"/>
+<text x="254" y="398" text-anchor="middle" style="font-size:11px;fill:#555">0.9</text>
+<circle cx="283" cy="372" r="5.1" style="fill:#2e7d32;fill-opacity:0.32;stroke:#2e7d32;stroke-width:1"/>
+<text x="283" y="398" text-anchor="middle" style="font-size:11px;fill:#555">0.1</text>
+<circle cx="312" cy="372" r="11.8" style="fill:#2e7d32;fill-opacity:0.77;stroke:#2e7d32;stroke-width:1"/>
+<text x="312" y="398" text-anchor="middle" style="font-size:11px;fill:#555">0.9</text>
+<circle cx="341" cy="372" r="5.1" style="fill:#2e7d32;fill-opacity:0.32;stroke:#2e7d32;stroke-width:1"/>
+<text x="341" y="398" text-anchor="middle" style="font-size:11px;fill:#555">0.1</text>
+<circle cx="370" cy="372" r="11.7" style="fill:#2e7d32;fill-opacity:0.76;stroke:#2e7d32;stroke-width:1"/>
+<text x="370" y="398" text-anchor="middle" style="font-size:11px;fill:#555">0.9</text>
+<circle cx="399" cy="372" r="5.1" style="fill:#2e7d32;fill-opacity:0.33;stroke:#2e7d32;stroke-width:1"/>
+<text x="399" y="398" text-anchor="middle" style="font-size:11px;fill:#555">0.1</text>
+<circle cx="428" cy="372" r="11.7" style="fill:#2e7d32;fill-opacity:0.76;stroke:#2e7d32;stroke-width:1"/>
+<text x="428" y="398" text-anchor="middle" style="font-size:11px;fill:#555">0.9</text>
+<circle cx="457" cy="372" r="5.1" style="fill:#2e7d32;fill-opacity:0.33;stroke:#2e7d32;stroke-width:1"/>
+<text x="457" y="398" text-anchor="middle" style="font-size:11px;fill:#555">0.1</text>
+<circle cx="486" cy="372" r="11.7" style="fill:#2e7d32;fill-opacity:0.76;stroke:#2e7d32;stroke-width:1"/>
+<text x="486" y="398" text-anchor="middle" style="font-size:11px;fill:#555">0.9</text>
+<circle cx="515" cy="372" r="5.1" style="fill:#2e7d32;fill-opacity:0.33;stroke:#2e7d32;stroke-width:1"/>
+<text x="515" y="398" text-anchor="middle" style="font-size:11px;fill:#555">0.1</text>
+<text x="280" y="416" text-anchor="middle" style="font-size:11px;fill:#555">동그라미가 클수록 출력이 1에 가깝다(숫자는 출력값).</text>
+<text x="280" y="434" text-anchor="middle" style="font-size:11px;fill:#555">책이 정한 장난감 시뮬레이션(씨앗 1)이며, 두 사람 논문의 숫자가 아니다</text>
+</svg>
 <p>순환망은 앞 자리의 내부 상태가 있어야 다음 자리를 계산할 수 있기 때문에, 정답을 넣어도 자리를 하나씩 차례로 계산해야 했다. 2017년 트랜스포머 논문은 순환망의 이 차례 계산이 한 예제 안에서 병렬로 계산하는 것을 막는다고 짚었고, 가리개(causal mask)를 쓴 트랜스포머는 모든 자리를 한꺼번에 계산한다.</p>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M02.webp" alt="김민준 (호기심)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">정답을 입력으로 넣어 주는 게 이름까지 붙일 일이었어요? 지금 보면 당연한 요령 같은데요.</div></div>

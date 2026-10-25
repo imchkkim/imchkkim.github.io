@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,6 +684,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
@@ -689,7 +705,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="multi-reward.html">17. 다차원 보상: 스칼라를 넘어서</a></li>
 <li><a href="dpo-family.html">18. DPO의 진화: 하나의 알고리즘이 낳은 가계도</a></li>
 <li><a href="online-offline.html">19. 온라인과 오프라인: 이상과 현실 사이에서</a></li>
-<li><a href="joycaption-case.html" class="active">20. 실전사례: 현장의 목소리, JoyCaption의 DPO 실전기</a><ul class="sidebar-toc"><li><a href="joycaption-case.html" class="current">좋은 선호쌍: 모델이 실제로 저지르는 실수를 담는다</a></li><li><a href="joycaption-case-sec-margin-filtering.html">마진 기반 필터링: 양 끝을 골라 쌍을 만든다</a></li><li><a href="joycaption-case-sec-disposable-dataset.html">일회용 데이터셋: DPO 데이터는 그 모델에만 유효하다</a></li><li><a href="joycaption-case-sec-joycaption-case-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="joycaption-case.html" class="active">20. 실전사례: 현장의 목소리, JoyCaption의 DPO 실전기</a><ul class="sidebar-toc"><li><a href="joycaption-case.html" class="current">좋은 선호쌍: 모델이 실제로 저지르는 실수를 담는다</a></li><li><a href="joycaption-case-sec-margin-filtering.html">마진 기반 필터링: 양 끝을 골라 쌍을 만든다</a></li><li><a href="joycaption-case-sec-disposable-dataset.html">일회용 데이터셋: DPO 데이터는 그 모델에만 유효하다</a></li><li><a href="joycaption-case-sec-joycaption-case-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="rlvr-grpo.html">21. RLVR과 GRPO: 비평가를 내려놓다</a></li>
 <li><a href="rl-conditions.html">22. RL이 작동하는 조건: 스펙트럼, 적정 난이도, 그리고 한계</a></li>
 <li><a href="grpo-variants.html">23. GRPO의 변종들: 설계 선택을 하나씩 의심하다</a></li>
@@ -719,6 +735,36 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <h5 id="hist-joycaption-dpo-choice" class="history" data-people="fpgaminer">역사: JoyCaption이 DPO를 고른 이유<span id="역사-joycaption이-dpo를-고른-이유" class="anchor-alias"></span></h5>
 <p>JoyCaption은 메타가 공개한 언어 모델 Llama 3.1 8B(파라미터 80억 개)에 구글의 이미지 인코더 SigLIP2를 붙인 VLM(Visual Language Model, 시각 언어 모델: 이미지를 보고 글을 쓰는 언어 모델)이다. 이미지 생성 모델(디퓨전 모델)을 학습시킬 캡션을 쓰려고 만들었고, 상용 모델이 거절하는 성인용(NSFW) 이미지까지 고르게 다루도록 검열 없이 학습했다. 누구나 생성 모델 학습에 쓰라고 학습된 파라미터를 무료로 공개했고, fpgaminer는 이것을 취미로 만든다.</p>
 <p>앞 공개판(Alpha Two)까지는 SFT만 썼고, Beta One이 강화학습을 쓴 첫 공개판이다. 강화학습이 처음이었던 그는 가장 단순한 방법을 골랐다. 오프라인 DPO(선호 응답과 비선호 응답의 쌍으로, 보상 모델 없이 정책(응답을 뽑는 모델)을 직접 학습하는 방법)를 여러 라운드 돌리는 것이다. 학습 코드에서 바꿀 것은 두 가지뿐이었다. 한 예제가 「프롬프트 + 응답 하나」에서 「프롬프트 + 응답 둘」이 되고, 학습 전 모델을 얼려 둔 레퍼런스의 로그확률을 함께 계산한다. 남은 일은 데이터셋이었다.</p>
+<svg class="fig" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="왼쪽 Alpha Two까지의 SFT 한 예제는 이미지와 프롬프트, 응답 하나, 학습하는 모델의 로그확률로 이루어진다. 오른쪽 Beta One의 DPO 한 예제는 응답이 선호와 비선호 둘이 되고, 얼려 둔 레퍼런스의 로그확률이 더해진다. 바뀐 곳 두 군데에 번호를 붙였다">
+  <text class="t-strong" x="10.0" y="24.0" text-anchor="start" style="font-size:16px">Alpha Two까지: SFT 한 예제</text>
+  <rect x="30.0" y="40.0" width="215.0" height="40.0" rx="5" style="fill:none;stroke:var(--sym-0093b8, #0093b8);stroke-width:2"/>
+  <text x="137.5" y="66.0" text-anchor="middle" style="font-size:15px">이미지 + 프롬프트 <tspan style="fill:var(--sym-0093b8, #0093b8)"><tspan font-style="italic">x</tspan></tspan></text>
+  <line class="sink" x1="137.5" y1="80.0" x2="137.5" y2="110.0" stroke-width="1.5"/><path class="sink" d="M134.5,103.7 L137.5,110.0 L140.5,103.7" stroke-width="1.5"/>
+  <rect x="30.0" y="112.0" width="215.0" height="40.0" rx="5" style="fill:none;stroke:var(--sym-1c9c60, #1c9c60);stroke-width:2"/>
+  <text x="137.5" y="138.0" text-anchor="middle" style="font-size:15px">응답 하나 <tspan style="fill:var(--sym-1c9c60, #1c9c60)"><tspan font-style="italic">y</tspan></tspan></text>
+  <line class="sink" x1="137.5" y1="152.0" x2="137.5" y2="182.0" stroke-width="1.5"/><path class="sink" d="M134.5,175.7 L137.5,182.0 L140.5,175.7" stroke-width="1.5"/>
+  <rect x="30.0" y="184.0" width="215.0" height="40.0" rx="5" style="fill:none;stroke:var(--sym-1565c0, #1565c0);stroke-width:2"/>
+  <text x="137.5" y="210.0" text-anchor="middle" style="font-size:15px">학습하는 모델 log <tspan style="fill:var(--sym-1565c0, #1565c0)">π</tspan><tspan style="fill:var(--sym-1565c0, #1565c0);font-size:11px" dy="4">θ</tspan><tspan dy="-4"> </tspan></text>
+  <text class="t-strong" x="295.0" y="24.0" text-anchor="start" style="font-size:16px">Beta One: DPO 한 예제</text>
+  <rect x="315.0" y="40.0" width="215.0" height="40.0" rx="5" style="fill:none;stroke:var(--sym-0093b8, #0093b8);stroke-width:2"/>
+  <text x="422.5" y="66.0" text-anchor="middle" style="font-size:15px">이미지 + 프롬프트 <tspan style="fill:var(--sym-0093b8, #0093b8)"><tspan font-style="italic">x</tspan></tspan></text>
+  <line class="sink" x1="392.5" y1="80.0" x2="366.2" y2="110.0" stroke-width="1.5"/><path class="sink" d="M368.1,103.3 L366.2,110.0 L372.7,107.3" stroke-width="1.5"/>
+  <line class="sink" x1="452.5" y1="80.0" x2="478.8" y2="110.0" stroke-width="1.5"/><path class="sink" d="M472.3,107.3 L478.8,110.0 L476.9,103.3" stroke-width="1.5"/>
+  <rect x="315.0" y="112.0" width="102.5" height="40.0" rx="5" style="fill:none;stroke:var(--sym-e000a5, #e000a5);stroke-width:2;stroke-dasharray:5 3"/>
+  <rect x="427.5" y="112.0" width="102.5" height="40.0" rx="5" style="fill:none;stroke:var(--sym-e000a5, #e000a5);stroke-width:2;stroke-dasharray:5 3"/>
+  <text x="366.2" y="138.0" text-anchor="middle" style="font-size:15px">선호 <tspan style="fill:var(--sym-e000a5, #e000a5)"><tspan font-style="italic">y</tspan></tspan><tspan style="fill:var(--sym-e000a5, #e000a5);font-size:11px" dy="4">w</tspan><tspan dy="-4"> </tspan></text>
+  <text x="478.8" y="138.0" text-anchor="middle" style="font-size:15px">비선호 <tspan style="fill:var(--sym-e000a5, #e000a5)"><tspan font-style="italic">y</tspan></tspan><tspan style="fill:var(--sym-e000a5, #e000a5);font-size:11px" dy="4">l</tspan><tspan dy="-4"> </tspan></text>
+  <circle class="f2" cx="309.0" cy="112.0" r="10"/><text class="t-on-fill" x="309.0" y="117.0" text-anchor="middle" style="font-size:13px;font-weight:700">1</text>
+  <line class="sink" x1="422.5" y1="152.0" x2="422.5" y2="182.0" stroke-width="1.5"/><path class="sink" d="M419.5,175.7 L422.5,182.0 L425.5,175.7" stroke-width="1.5"/>
+  <rect x="315.0" y="184.0" width="215.0" height="40.0" rx="5" style="fill:none;stroke:var(--sym-1565c0, #1565c0);stroke-width:2"/>
+  <text x="422.5" y="210.0" text-anchor="middle" style="font-size:15px">학습하는 모델 log <tspan style="fill:var(--sym-1565c0, #1565c0)">π</tspan><tspan style="fill:var(--sym-1565c0, #1565c0);font-size:11px" dy="4">θ</tspan><tspan dy="-4"> </tspan></text>
+  <rect x="315.0" y="234.0" width="215.0" height="40.0" rx="5" style="fill:none;stroke:var(--sym-6f6f78, #6f6f78);stroke-width:2;stroke-dasharray:5 3"/>
+  <text x="422.5" y="260.0" text-anchor="middle" style="font-size:15px">얼린 레퍼런스 log <tspan style="fill:var(--sym-6f6f78, #6f6f78)">π</tspan><tspan style="fill:var(--sym-6f6f78, #6f6f78);font-size:11px" dy="4">ref</tspan><tspan dy="-4"> </tspan></text>
+  <circle class="f2" cx="309.0" cy="234.0" r="10"/><text class="t-on-fill" x="309.0" y="239.0" text-anchor="middle" style="font-size:13px;font-weight:700">2</text>
+  <line class="sgrid" x1="275" y1="10" x2="275" y2="290" stroke-width="1"/>
+  <text class="t-muted" x="140.0" y="262.0" text-anchor="middle" style="font-size:13px">(점선 상자와 번호 = DPO에서 바뀐 곳)</text>
+</svg>
+<p>Alpha Two까지 쓰던 SFT 한 예제와 Beta One의 DPO 한 예제를 나란히 놓으면, 바뀐 곳은 응답이 둘이 된 것과 얼린 레퍼런스의 로그확률이 더해진 것 두 군데다. 제작자의 학습 기록을 바탕으로 직접 그렸다.</p>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">강화학습이 처음이면 남들이 한 걸 그대로 따라 하면 되잖아요. InstructGPT처럼 RLHF를 돌리면 되는 거 아니에요?</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">InstructGPT를 만들 때 OpenAI는 사람 라벨러들에게 응답의 순위를 매기게 하고, 그 순위로 보상 모델을 따로 학습한 다음 PPO를 돌렸어요. 혼자 취미로 만드는 사람에게 그 가운데 무엇이 없었을까요?</div></div>
@@ -944,7 +990,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </blockquote>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="online-offline-sec-online-offline-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="joycaption-case-sec-margin-filtering.html">마진 기반 필터링: 양 끝을 골라 쌍을 만든다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="online-offline-sec-online-offline-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="joycaption-case-sec-margin-filtering.html">마진 기반 필터링: 양 끝을 골라 쌍을 만든다 &rarr;</a></nav>
 </main>
 
 <script type="module">

@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,12 +684,13 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
 <li><a href="reinforce.html">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a></li>
 <li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다</a></li>
-<li><a href="bellman.html" class="active">5. 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</a><ul class="sidebar-toc"><li><a href="bellman.html" class="current">벨먼 기대 방정식: 지금 보상 + 다음 상태 가치</a></li><li><a href="bellman-sec-bellman-optimality-equation.html">벨먼 최적 방정식: 최선을 고르는 가치</a></li><li><a href="bellman-sec-contraction-value-iteration.html">축약 사상: 가치 반복은 왜 한 점에 모이나</a></li><li><a href="bellman-sec-policy-iteration.html">정책 반복: 평가하고, 고치고, 다시 평가한다</a></li><li><a href="bellman-sec-bellman-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="bellman.html" class="active">5. 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</a><ul class="sidebar-toc"><li><a href="bellman.html" class="current">벨먼 기대 방정식: 지금 보상 + 다음 상태 가치</a></li><li><a href="bellman-sec-bellman-optimality-equation.html">벨먼 최적 방정식: 최선을 고르는 가치</a></li><li><a href="bellman-sec-contraction-value-iteration.html">축약 사상: 가치 반복은 왜 한 점에 모이나</a></li><li><a href="bellman-sec-policy-iteration.html">정책 반복: 평가하고, 고치고, 다시 평가한다</a></li><li><a href="bellman-sec-bellman-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="td.html">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a></li>
 <li><a href="q-learning.html">7. Q-러닝: 남이 둔 수로 최선의 수를 배운다</a></li>
 <li><a href="dqn.html">8. DQN: 표를 신경망으로 바꾸면 무엇이 흔들리나</a></li>
@@ -718,8 +734,122 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p>시장에 있는 운전사가 「늘 승차장」 정책을 따른다고 하자. 이번 손님에게서 평균 3.80(천 원)을 받고, 손님을 내려 준 뒤에는 확률 0.36으로 역에, 0.18로 시장에, 0.36으로 대학가에 있고, 0.10으로 퇴근한다. 다음 구역에 닿은 운전사는 거기서 또 같은 정책을 따른다. 그렇다면 시장에서 앞으로 받을 돈은 「이번 3.80」에 「다음 구역에서 앞으로 받을 돈」을 확률로 섞어 더한 것이어야 한다. 다음 구역에서 앞으로 받을 돈은 바로 그 구역의 가치이므로, 가치가 다시 가치로 적힌다. 「가치 = 이번 보상 + 다음 가치의 평균」이라는 관계가 쓸모 있는 식이 될까?</p>
 <h5 id="hist-dynamic-programming-name" class="history" data-people="bellman-richard">역사: 벨먼의 쪼개기<span id="역사-벨먼의-쪼개기" class="anchor-alias"></span></h5>
 <p>1949년 여름, 스탠퍼드 대학교 수학과 부교수였던 리처드 벨먼(Richard Bellman)은 두 번째 여름을 미국 공군의 연구를 맡던 랜드 연구소(RAND)에서 자문으로 보내고 있었다. 해석적 정수론에 마음이 있던 그가 랜드의 에드 팩슨(Ed Paxson)에게 랜드가 무엇에 관심이 있는지 묻자, 팩슨은 여러 단계에 걸쳐 결정을 내리는 문제를 권했다. 한 번의 선택이 다음 선택의 처지를 바꾸므로, 가능한 선택의 줄을 모두 늘어놓고 견주면 단계가 늘 때마다 셈이 불어난다. 벨먼이 붙든 수는 한 단계씩 떼어 보는 것이었다. 한 처지의 가치를 「이번 선택으로 받는 것 + 다음 처지의 가치」로 적으면, 긴 문제가 한 단계짜리 문제의 되풀이로 바뀐다. 1957년 책 『Dynamic Programming』이 이 쪼개기를 여러 단계 결정 문제의 기본 도구로 정리했고, 오늘날 이 꼴의 식을 그의 이름을 따 벨먼 방정식이라 부른다.</p>
+<svg class="fig" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="왼쪽: 단계마다 두 가지 가운데 하나를 고르면 세 단계에 선택의 줄이 8개로 늘어나는 나무. 오른쪽: 처지가 단계마다 3개뿐이면 처지마다 두 선택만 견주는 격자. 단계 30이면 줄은 1,073,741,824개, 한 단계씩 견주면 많아야 180번" style="background:#fff;border:1px solid #ccc;border-radius:4px;--w-1:#2a78d6;--w-2:#eb6834;--w-3:#1baf7a;--w-4:#4a3aa7;--w-ink:#0b0b0b;--w-ink-2:#222222;--w-muted:#6b6a65;--w-grid:#e1e0d9;--w-axis:#c3c2b7;--w-surface:#ffffff;--w-fill-1:rgba(42,120,214,0.14);--w-fill-2:rgba(235,104,52,0.14);--w-fill-3:rgba(27,175,122,0.16);--w-neutral:#f0efec;--sym-0093b8:#0093b8;--sym-1c9c60:#1c9c60;--sym-d9670b:#d9670b;--sym-1565c0:#1565c0;--sym-00897b:#00897b;--sym-8877ff:#8877ff;--sym-5d4037:#5d4037;--sym-7a1f5a:#7a1f5a;--sym-915a08:#915a08;--sym-5f970c:#5f970c;">
+  <defs><marker id="h1-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" markerUnits="strokeWidth" orient="auto"><path class="sink" style="fill:var(--w-ink-2)" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
+  <text class="t-strong" x="140" y="22" text-anchor="middle" style="font-size:14px">선택의 줄을 모두 늘어놓기</text>
+  <text class="t-strong" x="420" y="22" text-anchor="middle" style="font-size:14px">한 단계씩 떼어 보기</text>
+  <line class="sink" x1="140.0" y1="48.0" x2="80.0" y2="100.0" stroke-width="1.3"/>
+  <line class="sink" x1="140.0" y1="48.0" x2="200.0" y2="100.0" stroke-width="1.3"/>
+  <line class="sink" x1="80.0" y1="100.0" x2="50.0" y2="152.0" stroke-width="1.3"/>
+  <line class="sink" x1="80.0" y1="100.0" x2="110.0" y2="152.0" stroke-width="1.3"/>
+  <line class="sink" x1="200.0" y1="100.0" x2="170.0" y2="152.0" stroke-width="1.3"/>
+  <line class="sink" x1="200.0" y1="100.0" x2="230.0" y2="152.0" stroke-width="1.3"/>
+  <line class="sink" x1="50.0" y1="152.0" x2="35.0" y2="204.0" stroke-width="1.3"/>
+  <line class="sink" x1="50.0" y1="152.0" x2="65.0" y2="204.0" stroke-width="1.3"/>
+  <line class="sink" x1="110.0" y1="152.0" x2="95.0" y2="204.0" stroke-width="1.3"/>
+  <line class="sink" x1="110.0" y1="152.0" x2="125.0" y2="204.0" stroke-width="1.3"/>
+  <line class="sink" x1="170.0" y1="152.0" x2="155.0" y2="204.0" stroke-width="1.3"/>
+  <line class="sink" x1="170.0" y1="152.0" x2="185.0" y2="204.0" stroke-width="1.3"/>
+  <line class="sink" x1="230.0" y1="152.0" x2="215.0" y2="204.0" stroke-width="1.3"/>
+  <line class="sink" x1="230.0" y1="152.0" x2="245.0" y2="204.0" stroke-width="1.3"/>
+  <circle class="f1" cx="140.0" cy="48.0" r="5"/>
+  <circle class="f1" cx="80.0" cy="100.0" r="5"/>
+  <circle class="f1" cx="200.0" cy="100.0" r="5"/>
+  <circle class="f1" cx="50.0" cy="152.0" r="5"/>
+  <circle class="f1" cx="110.0" cy="152.0" r="5"/>
+  <circle class="f1" cx="170.0" cy="152.0" r="5"/>
+  <circle class="f1" cx="230.0" cy="152.0" r="5"/>
+  <circle class="f2" cx="35.0" cy="204.0" r="5"/>
+  <circle class="f2" cx="65.0" cy="204.0" r="5"/>
+  <circle class="f2" cx="95.0" cy="204.0" r="5"/>
+  <circle class="f2" cx="125.0" cy="204.0" r="5"/>
+  <circle class="f2" cx="155.0" cy="204.0" r="5"/>
+  <circle class="f2" cx="185.0" cy="204.0" r="5"/>
+  <circle class="f2" cx="215.0" cy="204.0" r="5"/>
+  <circle class="f2" cx="245.0" cy="204.0" r="5"/>
+  <text x="140" y="230" text-anchor="middle" style="font-size:13px">단계 3: 줄 2 × 2 × 2 = 8개</text>
+  <line class="sink" x1="320" y1="126" x2="375" y2="74" stroke-width="1.3"/>
+  <line class="sink" x1="320" y1="126" x2="375" y2="178" stroke-width="1.3"/>
+  <line class="sink" x1="375" y1="74" x2="430" y2="74" stroke-width="1.3"/>
+  <line class="sink" x1="375" y1="74" x2="430" y2="178" stroke-width="1.3"/>
+  <line class="sink" x1="375" y1="126" x2="430" y2="74" stroke-width="1.3"/>
+  <line class="sink" x1="375" y1="126" x2="430" y2="126" stroke-width="1.3"/>
+  <line class="sink" x1="375" y1="178" x2="430" y2="126" stroke-width="1.3"/>
+  <line class="sink" x1="375" y1="178" x2="430" y2="178" stroke-width="1.3"/>
+  <line class="sink" x1="430" y1="74" x2="485" y2="74" stroke-width="1.3"/>
+  <line class="sink" x1="430" y1="74" x2="485" y2="178" stroke-width="1.3"/>
+  <line class="sink" x1="430" y1="126" x2="485" y2="74" stroke-width="1.3"/>
+  <line class="sink" x1="430" y1="126" x2="485" y2="126" stroke-width="1.3"/>
+  <line class="sink" x1="430" y1="178" x2="485" y2="126" stroke-width="1.3"/>
+  <line class="sink" x1="430" y1="178" x2="485" y2="178" stroke-width="1.3"/>
+  <circle class="fsurface" cx="320" cy="126" r="11"/>
+  <circle class="fa1" cx="320" cy="126" r="11" style="stroke:var(--w-1);stroke-width:1.5"/>
+  <circle class="fsurface" cx="375" cy="74" r="11"/>
+  <circle class="fa1" cx="375" cy="74" r="11" style="stroke:var(--w-1);stroke-width:1.5"/>
+  <circle class="fsurface" cx="375" cy="126" r="11"/>
+  <circle class="fa1" cx="375" cy="126" r="11" style="stroke:var(--w-1);stroke-width:1.5"/>
+  <circle class="fsurface" cx="375" cy="178" r="11"/>
+  <circle class="fa1" cx="375" cy="178" r="11" style="stroke:var(--w-1);stroke-width:1.5"/>
+  <circle class="fsurface" cx="430" cy="74" r="11"/>
+  <circle class="fa1" cx="430" cy="74" r="11" style="stroke:var(--w-1);stroke-width:1.5"/>
+  <circle class="fsurface" cx="430" cy="126" r="11"/>
+  <circle class="fa1" cx="430" cy="126" r="11" style="stroke:var(--w-1);stroke-width:1.5"/>
+  <circle class="fsurface" cx="430" cy="178" r="11"/>
+  <circle class="fa1" cx="430" cy="178" r="11" style="stroke:var(--w-1);stroke-width:1.5"/>
+  <circle class="fsurface" cx="485" cy="74" r="11"/>
+  <circle class="fa1" cx="485" cy="74" r="11" style="stroke:var(--w-1);stroke-width:1.5"/>
+  <circle class="fsurface" cx="485" cy="126" r="11"/>
+  <circle class="fa1" cx="485" cy="126" r="11" style="stroke:var(--w-1);stroke-width:1.5"/>
+  <circle class="fsurface" cx="485" cy="178" r="11"/>
+  <circle class="fa1" cx="485" cy="178" r="11" style="stroke:var(--w-1);stroke-width:1.5"/>
+  <text class="t-muted" x="320" y="214" text-anchor="middle" style="font-size:12px">단계 0</text>
+  <text class="t-muted" x="375" y="214" text-anchor="middle" style="font-size:12px">단계 1</text>
+  <text class="t-muted" x="430" y="214" text-anchor="middle" style="font-size:12px">단계 2</text>
+  <text class="t-muted" x="485" y="214" text-anchor="middle" style="font-size:12px">단계 3</text>
+  <text x="546" y="79" text-anchor="end" style="font-size:12px"><tspan style="fill:var(--sym-0093b8, #0093b8)">처지 1</tspan></text>
+  <text x="546" y="131" text-anchor="end" style="font-size:12px"><tspan style="fill:var(--sym-0093b8, #0093b8)">처지 2</tspan></text>
+  <text x="546" y="183" text-anchor="end" style="font-size:12px"><tspan style="fill:var(--sym-0093b8, #0093b8)">처지 3</tspan></text>
+  <text x="420" y="240" text-anchor="middle" style="font-size:13px">처지마다 두 선택만 견준다</text>
+  <line class="sgrid" x1="20" y1="256" x2="540" y2="256" stroke-width="1"/>
+  <text class="t-strong" x="280" y="278" text-anchor="middle" style="font-size:14px">단계 30이면: 줄 2³⁰ = 1,073,741,824개</text>
+  <text x="280" y="296" text-anchor="middle" style="font-size:13px">한 단계씩이면 많아야 처지 3 × 선택 2 × 단계 30 = 180번</text>
+</svg>
+<p>그림은 단계마다 두 가지 가운데 하나를 고를 때 선택의 줄을 모두 늘어놓는 나무와, 처지가 단계마다 셋뿐이라 가정하고 처지마다 두 선택만 견주는 격자를 나란히 놓고 단계 30의 셈 수를 견준 것이다(처지 셋은 설명을 위한 가정, 이 책이 직접 그림).</p>
 <p>이 방법의 이름 「동적 계획법(dynamic programming)」에는 벨먼 자신이 남긴 일화가 있다. 그는 자서전 『Eye of the Hurricane』(1984)에서, 1950년 가을 학기를 랜드에서 보낼 때 첫 일이 여러 단계 결정 문제에 붙일 이름을 찾는 것이었다고 회고했다. 당시 국방장관 윌슨은 「연구(research)」라는 말만 들어도 얼굴이 붉어질 만큼 그 말을 싫어했고, 공군은 사실상 윌슨의 지휘를 받았다. 그래서 랜드 안에서 수학을 한다는 사실을 가릴 이름이 필요했다는 것이다. 계획을 뜻하는 「programming」에, 여러 단계에 걸쳐 시간에 따라 변한다는 뜻을 담아 「dynamic」을 붙였다. 그는 「dynamic」은 나쁜 뜻으로 쓸 수 없는 형용사라서 국회의원도 반대하지 못할 이름이라고 덧붙였다.</p>
 <p>다만 이 회고를 그대로 믿기는 어렵다는 지적이 있다. 러셀(Stuart Russell)과 노빅(Peter Norvig)은 교과서 『Artificial Intelligence: A Modern Approach』에서, 벨먼이 이 말을 쓴 첫 논문(1952)이 윌슨의 국방장관 취임(1953)보다 앞서므로 이야기가 글자 그대로 사실일 수는 없다고 적었다. 해럴드 쿠슈너(Harold Kushner)는 자신이 같은 물음을 했을 때 벨먼이 조지 댄치그의 「선형 계획법(linear programming)」보다 앞서 보이려고 「dynamic」을 붙였다고 답했다는 다른 이야기를 전했다.</p>
+<svg class="fig" viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="연표: 1949년 여름 랜드 자문, 1950년 가을 이름을 찾았다는 자서전의 회고, 1952년 이 이름을 쓴 첫 논문, 1953년 1월 윌슨 국방장관 취임, 1957년 책, 1984년 자서전. 회고는 1950년의 일에 윌슨을 등장시키지만 윌슨의 취임은 첫 논문보다도 뒤다" style="background:#fff;border:1px solid #ccc;border-radius:4px;--w-1:#2a78d6;--w-2:#eb6834;--w-3:#1baf7a;--w-4:#4a3aa7;--w-ink:#0b0b0b;--w-ink-2:#222222;--w-muted:#6b6a65;--w-grid:#e1e0d9;--w-axis:#c3c2b7;--w-surface:#ffffff;--w-fill-1:rgba(42,120,214,0.14);--w-fill-2:rgba(235,104,52,0.14);--w-fill-3:rgba(27,175,122,0.16);--w-neutral:#f0efec;--sym-0093b8:#0093b8;--sym-1c9c60:#1c9c60;--sym-d9670b:#d9670b;--sym-1565c0:#1565c0;--sym-00897b:#00897b;--sym-8877ff:#8877ff;--sym-5d4037:#5d4037;--sym-7a1f5a:#7a1f5a;--sym-915a08:#915a08;--sym-5f970c:#5f970c;">
+  <defs><marker id="h2-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" markerUnits="strokeWidth" orient="auto"><path class="sink" style="fill:var(--w-ink-2)" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
+  <line class="sink" x1="20" y1="120" x2="540" y2="120" stroke-width="2"/>
+  <circle class="f1" cx="50" cy="120" r="6"/>
+  <text class="t-strong" x="50" y="104" text-anchor="middle" style="font-size:14px">1949 여름</text>
+  <text x="50" y="146" text-anchor="middle" style="font-size:12px">랜드 연구소 자문</text>
+  <text x="50" y="162" text-anchor="middle" style="font-size:12px"></text>
+  <circle class="f2" cx="142" cy="120" r="6"/>
+  <text class="t-strong" x="142" y="104" text-anchor="middle" style="font-size:14px">1950 가을</text>
+  <text x="142" y="146" text-anchor="middle" style="font-size:12px">이름을 찾았다고</text>
+  <text class="t-muted" x="142" y="162" text-anchor="middle" style="font-size:12px">자서전의 회고</text>
+  <circle class="f1" cx="234" cy="120" r="6"/>
+  <text class="t-strong" x="234" y="104" text-anchor="middle" style="font-size:14px">1952</text>
+  <text x="234" y="146" text-anchor="middle" style="font-size:12px">이 이름을 쓴</text>
+  <text x="234" y="162" text-anchor="middle" style="font-size:12px">첫 논문</text>
+  <circle class="f2" cx="326" cy="120" r="6"/>
+  <text class="t-strong" x="326" y="104" text-anchor="middle" style="font-size:14px">1953 1월</text>
+  <text x="326" y="146" text-anchor="middle" style="font-size:12px">윌슨, 국방장관</text>
+  <text x="326" y="162" text-anchor="middle" style="font-size:12px">취임</text>
+  <circle class="f1" cx="418" cy="120" r="6"/>
+  <text class="t-strong" x="418" y="104" text-anchor="middle" style="font-size:14px">1957</text>
+  <text x="418" y="146" text-anchor="middle" style="font-size:12px">책 『Dynamic</text>
+  <text x="418" y="162" text-anchor="middle" style="font-size:12px">Programming』</text>
+  <circle class="f1" cx="510" cy="120" r="6"/>
+  <text class="t-strong" x="510" y="104" text-anchor="middle" style="font-size:14px">1984</text>
+  <text x="510" y="146" text-anchor="middle" style="font-size:12px">자서전 『Eye of</text>
+  <text x="510" y="162" text-anchor="middle" style="font-size:12px">the Hurricane』</text>
+  <path class="s2" d="M142,86 C142,36 326,36 326,86" stroke-width="1.8" stroke-dasharray="5 4"/>
+  <text class="t2" x="234" y="46" text-anchor="middle" style="font-size:12px">회고에서는 1950년에 이미 국방장관</text>
+  <text class="t-muted" x="234" y="22" text-anchor="middle" style="font-size:13px">「dynamic programming」이라는 이름을 둘러싼 연도</text>
+  <text x="280" y="200" text-anchor="middle" style="font-size:13px">윌슨의 취임은 이름이 처음 실린 논문보다도 뒤다</text>
+</svg>
+<p>그림은 이름 일화에 나오는 연도를 한 줄에 놓아, 1950년의 일로 회고된 윌슨이 실제로는 1953년 1월에야 국방장관이 되었음을 보여 준다(이 책이 직접 그림).</p>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">「이번 선택 + 다음 처지의 가치」로 쪼개는 건 그냥 점화식 같은데요. 이게 그렇게 큰일이었어요?</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">팩슨이 권한 문제에서는 단계마다 고를 것이 있었어요. 단계마다 두 가지씩, 서른 단계면 선택의 줄이 몇 개죠?</div></div>
@@ -960,7 +1090,7 @@ I &amp; \text{단위행렬: 대각선이 1, 나머지가 0}
 </blockquote>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="mdp-sec-mdp-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="bellman-sec-bellman-optimality-equation.html">벨먼 최적 방정식: 최선을 고르는 가치 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="mdp-sec-mdp-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="bellman-sec-bellman-optimality-equation.html">벨먼 최적 방정식: 최선을 고르는 가치 &rarr;</a></nav>
 </main>
 
 <script type="module">

@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,11 +684,12 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
 <li><a href="reinforce.html">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a></li>
-<li><a href="mdp.html" class="active">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다</a><ul class="sidebar-toc"><li><a href="mdp.html" class="current">마르코프 결정 과정: 마르코프 체인에 고르는 손을 더한다</a></li><li><a href="mdp-sec-markov-property.html">마르코프 성질: 지금에 충분히 담으면 과거를 잊어도 된다</a></li><li><a href="mdp-sec-return-discounting.html">리턴과 할인: 먼 보상을 얼마로 치나</a></li><li><a href="mdp-sec-policy-value-functions.html">정책과 가치함수: 상태의 값, 행동의 값</a></li><li><a href="mdp-sec-mdp-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="mdp.html" class="active">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다</a><ul class="sidebar-toc"><li><a href="mdp.html" class="current">마르코프 결정 과정: 마르코프 체인에 고르는 손을 더한다</a></li><li><a href="mdp-sec-markov-property.html">마르코프 성질: 지금에 충분히 담으면 과거를 잊어도 된다</a></li><li><a href="mdp-sec-return-discounting.html">리턴과 할인: 먼 보상을 얼마로 치나</a></li><li><a href="mdp-sec-policy-value-functions.html">정책과 가치함수: 상태의 값, 행동의 값</a></li><li><a href="mdp-sec-mdp-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="bellman.html">5. 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</a></li>
 <li><a href="td.html">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a></li>
 <li><a href="q-learning.html">7. Q-러닝: 남이 둔 수로 최선의 수를 배운다</a></li>
@@ -721,8 +737,71 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p>택시 운전사를 떠올려 보자. 손님을 내려 준 자리에서 운전사는 다음 손님을 어떻게 찾을지 정해야 한다. 거리를 천천히 돌며 손을 드는 손님을 태울 수도 있고, 가까운 승차장 줄에 설 수도 있다. 어느 쪽을 골라도 다음 손님이 어디로 갈지는 운전사 마음대로 되지 않고, 고른 방식에 따라 「어디로 가자는 손님을 만날 확률」이 달라질 뿐이다. 그리고 그날 번 돈은 손님 한 명의 요금이 아니라 하루 동안의 요금을 모두 더한 것이다. 고를 수 있는 것과 고를 수 없는 것이 섞인 이런 문제는 무엇으로 적을까?</p>
 <h5 id="hist-mdp-stochastic-games-taxi" class="history" data-people="shapley-lloyd bellman-richard howard-ronald">역사: 멈추는 게임에서 택시 운전사까지<span id="역사-멈추는-게임에서-택시-운전사까지" class="anchor-alias"></span></h5>
 <p>이런 문제를 처음 수학으로 적은 쪽은 게임 이론이었다. 로이드 섀플리(Lloyd Shapley)는 1953년 『미국 국립과학원 회보(PNAS)』에 낸 짧은 논문 「Stochastic Games」에서, 두 사람이 판을 거듭하며 겨루는 게임(한 사람이 얻는 만큼 다른 사람이 잃는다)을 다뤘다. 판마다 지금 놓인 처지(상태)가 있고, 두 사람이 고른 수에 따라 이번 판의 보수와 다음 처지의 확률이 정해진다. 게임이 끝나지 않으면 보수의 합이 끝없이 불어날 수 있는데, 섀플리는 판마다 0보다 큰 확률로 게임이 멈춘다고 두었다. 그러면 게임은 확률 1로 유한한 판 안에 끝난다. 그리고 이런 게임에는 값(두 사람이 모두 최선을 다할 때 한쪽이 기대할 수 있는 보수)이 있고, 지금 처지만 보고 수를 정하는 전략만으로 그 게임의 값에 닿는다는 것을 보였다. 과거의 수를 모두 기억하는 복잡한 전략이 필요 없다는 뜻이다.</p>
+<svg class="fig" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="판마다 멈출 확률 s를 두면 n판 뒤에도 게임이 이어질 확률이 (1 − s)의 n제곱으로 줄어든다. s = 0.1이면 평균 10판, s = 0.3이면 평균 3.3판 만에 끝나고, 멈추지 않는 게임은 확률 1로 계속 이어진다">
+  <line class="sgrid" x1="62" y1="250" x2="540" y2="250" stroke-width="1"/>
+  <text x="54" y="255" text-anchor="end" style="font-size:14px">0</text>
+  <line class="sgrid" x1="62" y1="195" x2="540" y2="195" stroke-width="1"/>
+  <text x="54" y="200" text-anchor="end" style="font-size:14px">0.25</text>
+  <line class="sgrid" x1="62" y1="140" x2="540" y2="140" stroke-width="1"/>
+  <text x="54" y="145" text-anchor="end" style="font-size:14px">0.5</text>
+  <line class="sgrid" x1="62" y1="85" x2="540" y2="85" stroke-width="1"/>
+  <text x="54" y="90" text-anchor="end" style="font-size:14px">0.75</text>
+  <line class="sgrid" x1="62" y1="30" x2="540" y2="30" stroke-width="1"/>
+  <text x="54" y="35" text-anchor="end" style="font-size:14px">1</text>
+  <text x="62" y="270" text-anchor="middle" style="font-size:14px">0</text>
+  <text x="182" y="270" text-anchor="middle" style="font-size:14px">10</text>
+  <text x="301" y="270" text-anchor="middle" style="font-size:14px">20</text>
+  <text x="420" y="270" text-anchor="middle" style="font-size:14px">30</text>
+  <text x="540" y="270" text-anchor="middle" style="font-size:14px">40</text>
+  <line class="saxis" x1="62" y1="250" x2="540" y2="250" stroke-width="1"/>
+  <text x="301" y="292" text-anchor="middle" style="font-size:14px">지나간 판 수 n</text>
+  <text x="16" y="140" text-anchor="middle" style="font-size:14px" transform="rotate(-90 16 140)">아직 끝나지 않았을 확률</text>
+  <line class="sink" x1="62" y1="30" x2="540" y2="30" stroke-width="2" stroke-dasharray="6 4"/>
+  <text class="t-muted" x="540" y="22" text-anchor="end" style="font-size:14px">멈추지 않으면: 보수의 합이 끝없이 불어날 수 있다</text>
+  <polyline class="s1" points="62.0,30.0 74.0,52.0 85.9,71.8 97.8,89.6 109.8,105.7 121.8,120.1 133.7,133.1 145.7,144.8 157.6,155.3 169.6,164.8 181.5,173.3 193.4,181.0 205.4,187.9 217.3,194.1 229.3,199.7 241.2,204.7 253.2,209.2 265.1,213.3 277.1,217.0 289.1,220.3 301.0,223.3 312.9,225.9 324.9,228.3 336.9,230.5 348.8,232.5 360.8,234.2 372.7,235.8 384.6,237.2 396.6,238.5 408.6,239.6 420.5,240.7 432.4,241.6 444.4,242.4 456.4,243.2 468.3,243.9 480.2,244.5 492.2,245.0 504.1,245.5 516.1,246.0 528.0,246.4 540.0,246.7" stroke-width="2.5"/>
+  <line class="s1" x1="181.5" y1="173.3" x2="181.5" y2="250" stroke-width="1" stroke-dasharray="3 3"/>
+  <line class="s1" x1="301" y1="69" x2="337" y2="69" stroke-width="2.5"/>
+  <text class="t1" x="349" y="74" style="font-size:14px">s = 0.1 · 평균 10.0판</text>
+  <polyline class="s2" points="62.0,30.0 74.0,96.0 85.9,142.2 97.8,174.5 109.8,197.2 121.8,213.0 133.7,224.1 145.7,231.9 157.6,237.3 169.6,241.1 181.5,243.8 193.4,245.6 205.4,247.0 217.3,247.9 229.3,248.5 241.2,249.0 253.2,249.3 265.1,249.5 277.1,249.6 289.1,249.7 301.0,249.8 312.9,249.9 324.9,249.9 336.9,249.9 348.8,250.0 360.8,250.0 372.7,250.0 384.6,250.0 396.6,250.0 408.6,250.0 420.5,250.0 432.4,250.0 444.4,250.0 456.4,250.0 468.3,250.0 480.2,250.0 492.2,250.0 504.1,250.0 516.1,250.0 528.0,250.0 540.0,250.0" stroke-width="2.5"/>
+  <line class="s2" x1="101.8" y1="183.0" x2="101.8" y2="250" stroke-width="1" stroke-dasharray="3 3"/>
+  <line class="s2" x1="301" y1="95" x2="337" y2="95" stroke-width="2.5"/>
+  <text class="t2" x="349" y="100" style="font-size:14px">s = 0.3 · 평균 3.3판</text>
+</svg>
+<p>판마다 멈출 확률 s를 두면 n판 뒤에도 게임이 이어질 확률은 (1 − s)의 n제곱으로 줄어, 게임은 평균 1/s판 만에 끝난다. 섀플리(1953)의 멈추는 규칙을 이 책이 그린 것이고, s = 0.1과 0.3은 예시 값이다.</p>
 <p>게임에서 상대를 빼고 결정하는 사람 하나만 남긴 틀은 리처드 벨먼(Richard Bellman)이 정리했다. 1957년 『수학·역학 저널(Journal of Mathematics and Mechanics)』 6권에 실린 그의 논문 제목이 「A Markovian Decision Process」다. 오늘날의 이름 「마르코프 결정 과정」을 제목에 단 논문으로 잘 알려진 첫 자리에 이 논문이 꼽힌다(벨먼이 이 이름을 더 일찍 썼다는 기록도 있다). 랜드 연구소 보고서로 먼저 나온 이 논문은 단계마다 결정을 내리는 문제를 되풀이 식으로 적고, 그 되풀이가 오래 가면 어떻게 되는지를 따졌다.</p>
 <p>이 틀을 손에 잡히는 예로 보인 사람은 로널드 하워드(Ronald Howard)다. MIT 박사 논문을 다듬어 1960년에 낸 책 『Dynamic Programming and Markov Processes』에 택시 문제가 나온다. 운전사의 구역은 세 마을이고, 마을마다 거리를 돌거나, 승차장에 줄을 서거나, 무전 호출을 기다릴 수 있다. 한 마을에는 무전 호출 서비스가 없어 고를 수 있는 것이 둘뿐이고, 고른 방식마다 다음 손님이 어느 마을로 갈 확률과 요금이 다르다. 아래 장난감 예제는 이 택시 문제의 짜임을 본떴지만, 고를 수 있는 것을 둘로 줄였고 확률과 요금은 이 책이 정한 숫자다. 하워드의 원래 숫자가 아니다.</p>
+<svg class="fig" viewBox="0 0 560 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="하워드의 택시 문제: 운전사의 구역은 A, B, C 세 마을이고 손님은 어느 마을로든 간다. A와 C에서는 배회, 승차장, 무전 호출 셋 가운데 고르고, 무전 호출이 닿지 않는 B에서는 배회와 승차장 둘 가운데 고른다">
+  <defs><marker id="hw-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="f4" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
+  <line class="sink" x1="191" y1="82" x2="369" y2="82" stroke-width="1.5" marker-start="url(#hw-arr)" marker-end="url(#hw-arr)"/>
+  <line class="sink" x1="183" y1="144" x2="207" y2="165" stroke-width="1.5" marker-start="url(#hw-arr)" marker-end="url(#hw-arr)"/>
+  <line class="sink" x1="377" y1="144" x2="353" y2="165" stroke-width="1.5" marker-start="url(#hw-arr)" marker-end="url(#hw-arr)"/>
+  <text class="t-muted" x="280" y="38" text-anchor="middle" style="font-size:13px">손님이 가자는 곳</text>
+  <rect class="fa1" x="35" y="26" width="150" height="112" rx="10"/>
+  <text class="t-strong" x="110" y="50" text-anchor="middle" style="font-size:16px">마을 A</text>
+  <circle class="f1" cx="59" cy="71" r="4"/>
+  <text x="71" y="76" style="font-size:14px">배회</text>
+  <circle class="f1" cx="59" cy="93" r="4"/>
+  <text x="71" y="98" style="font-size:14px">승차장</text>
+  <circle class="f1" cx="59" cy="115" r="4"/>
+  <text x="71" y="120" style="font-size:14px">무전 호출</text>
+  <rect class="fa1" x="375" y="26" width="150" height="112" rx="10"/>
+  <text class="t-strong" x="450" y="50" text-anchor="middle" style="font-size:16px">마을 B</text>
+  <circle class="f1" cx="399" cy="71" r="4"/>
+  <text x="411" y="76" style="font-size:14px">배회</text>
+  <circle class="f1" cx="399" cy="93" r="4"/>
+  <text x="411" y="98" style="font-size:14px">승차장</text>
+  <text class="t-muted" x="411" y="120" style="font-size:14px">무전 호출 안 닿음</text>
+  <rect class="fa1" x="205" y="171" width="150" height="112" rx="10"/>
+  <text class="t-strong" x="280" y="195" text-anchor="middle" style="font-size:16px">마을 C</text>
+  <circle class="f1" cx="229" cy="216" r="4"/>
+  <text x="241" y="221" style="font-size:14px">배회</text>
+  <circle class="f1" cx="229" cy="238" r="4"/>
+  <text x="241" y="243" style="font-size:14px">승차장</text>
+  <circle class="f1" cx="229" cy="260" r="4"/>
+  <text x="241" y="265" style="font-size:14px">무전 호출</text>
+  <text class="t-muted" x="280" y="311" text-anchor="middle" style="font-size:13px">고른 것마다 다음 손님이 갈 마을의 확률과 요금이 다르다</text>
+</svg>
+<p>하워드의 택시 문제에서 세 마을 가운데 무전 호출이 닿지 않는 B 마을만 고를 수 있는 것이 둘이다. R. A. Howard, 『Dynamic Programming and Markov Processes』(1960)의 택시 문제 짜임을 다시 그렸고, 확률과 요금은 뺐다.</p>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">지금 처지만 보고 수를 정하면 된다는 게 증명까지 할 일이에요? 당연해 보이는데요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">상대가 있는 게임이었어요. 상대가 내 지난 수를 기억해 두고 버릇을 노린다면요?</div></div>
@@ -1033,7 +1112,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </blockquote>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="reinforce-sec-reinforce-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="mdp-sec-markov-property.html">마르코프 성질: 지금에 충분히 담으면 과거를 잊어도 된다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="reinforce-sec-reinforce-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="mdp-sec-markov-property.html">마르코프 성질: 지금에 충분히 담으면 과거를 잊어도 된다 &rarr;</a></nav>
 </main>
 
 <script type="module">

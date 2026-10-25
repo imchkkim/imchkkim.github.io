@@ -653,6 +653,21 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -669,6 +684,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
@@ -676,7 +692,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다</a></li>
 <li><a href="bellman.html">5. 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</a></li>
 <li><a href="td.html">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a></li>
-<li><a href="q-learning.html" class="active">7. Q-러닝: 남이 둔 수로 최선의 수를 배운다</a><ul class="sidebar-toc"><li><a href="q-learning.html">SARSA: 내가 실제로 둘 수로 배운다</a></li><li><a href="q-learning-sec-q-learning-greedy-target.html">Q-러닝: 최선의 수를 가정하고 배운다</a></li><li><a href="q-learning-sec-epsilon-greedy-exploration.html" class="current">탐색과 활용: ε-그리디</a></li><li><a href="q-learning-sec-maximization-bias.html">최대화 편향: 가장 좋아 보이는 값은 부풀어 있다</a></li><li><a href="q-learning-sec-q-learning-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="q-learning.html" class="active">7. Q-러닝: 남이 둔 수로 최선의 수를 배운다</a><ul class="sidebar-toc"><li><a href="q-learning.html">SARSA: 내가 실제로 둘 수로 배운다</a></li><li><a href="q-learning-sec-q-learning-greedy-target.html">Q-러닝: 최선의 수를 가정하고 배운다</a></li><li><a href="q-learning-sec-epsilon-greedy-exploration.html" class="current">탐색과 활용: ε-그리디</a></li><li><a href="q-learning-sec-maximization-bias.html">최대화 편향: 가장 좋아 보이는 값은 부풀어 있다</a></li><li><a href="q-learning-sec-q-learning-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="dqn.html">8. DQN: 표를 신경망으로 바꾸면 무엇이 흔들리나</a></li>
 <li><a href="actor-critic.html">9. Actor-Critic: 비평가를 곁에 두다</a></li>
 <li><a href="ppo-rlhf.html">10. PPO와 RLHF: 멀리 가지 않게 묶다</a></li>
@@ -708,10 +724,61 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p class="chapter-crumb"><a href="q-learning.html">7. Q-러닝: 남이 둔 수로 최선의 수를 배운다</a></p>
 <h4 id="sec-epsilon-greedy-exploration">탐색과 활용: ε-그리디<span id="탐색과-활용-ε-그리디" class="anchor-alias"></span></h4>
 <p>강가 산책로의 두 방법은 모두 열 스텝에 한 번꼴로 아무 쪽으로나 걸었다. 왓킨스와 다얀의 증명도 「모든 상태에서 모든 행동을 거듭 시험한다」는 조건을 붙였다. 그런데 무작위 스텝은 값을 치러서, Q-러닝은 그 무작위 스텝 때문에 에피소드 네 번에 한 번꼴로 강물에 빠졌다. 아예 시험하지 않으면 어떻게 되고, 시험한다면 얼마나 자주 해야 할까?</p>
-<p>같은 고민은 점심시간마다 한다. 회사 근처 식당 다섯 곳을 한 번씩 가 보고 나면, 가장 맛있었던 곳만 계속 가고 싶다. 그런데 그 한 끼가 그 식당의 평소 맛이었을까? 마침 주방장이 쉬는 날이었다면, 가장 좋은 식당을 한 번의 나쁜 기억 때문에 다시는 안 가게 된다.</p>
+<p>같은 고민은 점심시간마다 하게 되는데, 회사 근처 식당 다섯 곳을 한 번씩 가 보고 나면 가장 맛있었던 곳만 계속 가고 싶어진다. 그런데 한 번 먹어 본 그 한 끼가 그 식당의 평소 맛이었을까? 마침 주방장이 쉬는 날이었다면, 가장 좋은 식당을 한 번의 나쁜 기억 때문에 다시는 안 가게 된다.</p>
 <h5 id="hist-clinical-trials-bandits" class="history" data-people="thompson-william robbins-herbert">역사: 환자를 덜 잃는 배정에서 슬롯머신까지<span id="역사-환자를-덜-잃는-배정에서-슬롯머신까지" class="anchor-alias"></span></h5>
 <p>이 고민을 처음 수학으로 다룬 사람으로 흔히 윌리엄 톰프슨(William R. Thompson)이 꼽힌다. 예일 대학 병리학과의 톰프슨은 1933년 『Biometrika』에 「On the likelihood that one unknown probability exceeds another in view of the evidence of two samples」를 냈다. 그는 두 치료법을 비교하는 연구를 어떻게 계획할지를 물었다. 관찰을 많이 모은 뒤에야 판단하는 대신, 지금까지의 적은 자료로도 「첫째 치료가 더 나을 확률 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span></span></span></span></eq>」를 셈해, 다음 환자들 가운데 몇 명에게 어느 치료를 줄지 나누자고 했다. 예를 들어 환자의 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span></span></span></span></eq>만큼에게 첫째 치료를, 나머지에게 둘째 치료를 주면, 한쪽을 일찍 버리지도 않으면서 못한 치료를 받는 환자를 꽤 줄일 수 있다고 적었다. 자료가 천천히 쌓이거나 환자 한 명 한 명이 소중할수록 이 일이 중요하다는 것이다.</p>
+<svg class="fig" viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="지어낸 기록: 첫째 치료는 5명 가운데 4명, 둘째 치료는 5명 가운데 2명이 나았다. 두 치료의 성공률이 얼마일지를 나타내는 두 곡선이 많이 겹치지만, 첫째가 더 나을 확률을 셈하면 0.88">
+  <line class="sgrid" x1="62" y1="256.0" x2="540" y2="256.0" stroke-width="1"/>
+  <text x="56" y="261.0" text-anchor="end" style="font-size:14px">0</text>
+  <line class="sgrid" x1="62" y1="180.7" x2="540" y2="180.7" stroke-width="1"/>
+  <text x="56" y="185.7" text-anchor="end" style="font-size:14px">1</text>
+  <line class="sgrid" x1="62" y1="105.3" x2="540" y2="105.3" stroke-width="1"/>
+  <text x="56" y="110.3" text-anchor="end" style="font-size:14px">2</text>
+  <line class="sgrid" x1="62" y1="30.0" x2="540" y2="30.0" stroke-width="1"/>
+  <text x="56" y="35.0" text-anchor="end" style="font-size:14px">3</text>
+  <line class="saxis" x1="62" y1="256" x2="540" y2="256" stroke-width="1"/>
+  <text x="62.0" y="274" text-anchor="middle" style="font-size:13px">0</text>
+  <text x="181.5" y="274" text-anchor="middle" style="font-size:13px">0.25</text>
+  <text x="301.0" y="274" text-anchor="middle" style="font-size:13px">0.5</text>
+  <text x="420.5" y="274" text-anchor="middle" style="font-size:13px">0.75</text>
+  <text x="540.0" y="274" text-anchor="middle" style="font-size:13px">1</text>
+  <text x="301.0" y="296" text-anchor="middle" style="font-size:14px">치료의 성공률</text>
+  <text x="16" y="143.0" text-anchor="middle" style="font-size:14px" transform="rotate(-90 16 143.0)">그럴듯한 정도</text>
+  <polygon class="fa1" points="62.0,256.0 62.0,256.0 66.8,256.0 71.6,256.0 76.3,256.0 81.1,256.0 85.9,256.0 90.7,256.0 95.5,255.9 100.2,255.9 105.0,255.9 109.8,255.8 114.6,255.7 119.4,255.6 124.1,255.4 128.9,255.3 133.7,255.0 138.5,254.8 143.3,254.4 148.0,254.1 152.8,253.6 157.6,253.1 162.4,252.5 167.2,251.9 171.9,251.1 176.7,250.3 181.5,249.4 186.3,248.4 191.1,247.2 195.8,246.0 200.6,244.7 205.4,243.2 210.2,241.6 215.0,239.9 219.7,238.0 224.5,236.1 229.3,234.0 234.1,231.7 238.9,229.3 243.6,226.8 248.4,224.1 253.2,221.3 258.0,218.3 262.8,215.2 267.5,212.0 272.3,208.6 277.1,205.0 281.9,201.4 286.7,197.6 291.4,193.6 296.2,189.6 301.0,185.4 305.8,181.1 310.6,176.7 315.3,172.2 320.1,167.6 324.9,162.9 329.7,158.2 334.5,153.4 339.2,148.6 344.0,143.7 348.8,138.8 353.6,134.0 358.4,129.1 363.1,124.3 367.9,119.5 372.7,114.8 377.5,110.2 382.3,105.7 387.0,101.4 391.8,97.2 396.6,93.2 401.4,89.5 406.2,85.9 410.9,82.7 415.7,79.8 420.5,77.2 425.3,75.0 430.1,73.3 434.8,72.0 439.6,71.1 444.4,70.9 449.2,71.2 454.0,72.1 458.7,73.7 463.5,76.0 468.3,79.0 473.1,82.9 477.9,87.7 482.6,93.4 487.4,100.0 492.2,107.7 497.0,116.5 501.8,126.5 506.5,137.7 511.3,150.1 516.1,164.0 520.9,179.2 525.7,196.0 530.4,214.3 535.2,234.3 540.0,256.0 540.0,256.0"/>
+  <polyline class="s1" points="62.0,256.0 66.8,256.0 71.6,256.0 76.3,256.0 81.1,256.0 85.9,256.0 90.7,256.0 95.5,255.9 100.2,255.9 105.0,255.9 109.8,255.8 114.6,255.7 119.4,255.6 124.1,255.4 128.9,255.3 133.7,255.0 138.5,254.8 143.3,254.4 148.0,254.1 152.8,253.6 157.6,253.1 162.4,252.5 167.2,251.9 171.9,251.1 176.7,250.3 181.5,249.4 186.3,248.4 191.1,247.2 195.8,246.0 200.6,244.7 205.4,243.2 210.2,241.6 215.0,239.9 219.7,238.0 224.5,236.1 229.3,234.0 234.1,231.7 238.9,229.3 243.6,226.8 248.4,224.1 253.2,221.3 258.0,218.3 262.8,215.2 267.5,212.0 272.3,208.6 277.1,205.0 281.9,201.4 286.7,197.6 291.4,193.6 296.2,189.6 301.0,185.4 305.8,181.1 310.6,176.7 315.3,172.2 320.1,167.6 324.9,162.9 329.7,158.2 334.5,153.4 339.2,148.6 344.0,143.7 348.8,138.8 353.6,134.0 358.4,129.1 363.1,124.3 367.9,119.5 372.7,114.8 377.5,110.2 382.3,105.7 387.0,101.4 391.8,97.2 396.6,93.2 401.4,89.5 406.2,85.9 410.9,82.7 415.7,79.8 420.5,77.2 425.3,75.0 430.1,73.3 434.8,72.0 439.6,71.1 444.4,70.9 449.2,71.2 454.0,72.1 458.7,73.7 463.5,76.0 468.3,79.0 473.1,82.9 477.9,87.7 482.6,93.4 487.4,100.0 492.2,107.7 497.0,116.5 501.8,126.5 506.5,137.7 511.3,150.1 516.1,164.0 520.9,179.2 525.7,196.0 530.4,214.3 535.2,234.3 540.0,256.0" stroke-width="2.5"/>
+  <polygon class="fa2" points="62.0,256.0 62.0,256.0 66.8,255.6 71.6,254.3 76.3,252.3 81.1,249.6 85.9,246.3 90.7,242.5 95.5,238.2 100.2,233.5 105.0,228.4 109.8,223.0 114.6,217.4 119.4,211.6 124.1,205.7 128.9,199.7 133.7,193.5 138.5,187.4 143.3,181.3 148.0,175.3 152.8,169.3 157.6,163.4 162.4,157.7 167.2,152.2 171.9,146.8 176.7,141.7 181.5,136.8 186.3,132.2 191.1,127.8 195.8,123.7 200.6,119.9 205.4,116.5 210.2,113.3 215.0,110.5 219.7,108.0 224.5,105.8 229.3,103.9 234.1,102.4 238.9,101.3 243.6,100.4 248.4,100.0 253.2,99.8 258.0,100.0 262.8,100.4 267.5,101.2 272.3,102.3 277.1,103.7 281.9,105.4 286.7,107.4 291.4,109.6 296.2,112.0 301.0,114.7 305.8,117.7 310.6,120.8 315.3,124.2 320.1,127.7 324.9,131.4 329.7,135.3 334.5,139.2 339.2,143.3 344.0,147.6 348.8,151.9 353.6,156.2 358.4,160.7 363.1,165.1 367.9,169.6 372.7,174.1 377.5,178.6 382.3,183.1 387.0,187.5 391.8,191.9 396.6,196.2 401.4,200.4 406.2,204.6 410.9,208.6 415.7,212.5 420.5,216.3 425.3,219.9 430.1,223.4 434.8,226.7 439.6,229.9 444.4,232.9 449.2,235.7 454.0,238.3 458.7,240.7 463.5,242.9 468.3,245.0 473.1,246.8 477.9,248.5 482.6,250.0 487.4,251.2 492.2,252.3 497.0,253.3 501.8,254.0 506.5,254.7 511.3,255.1 516.1,255.5 520.9,255.7 525.7,255.9 530.4,256.0 535.2,256.0 540.0,256.0 540.0,256.0"/>
+  <polyline class="s2" points="62.0,256.0 66.8,255.6 71.6,254.3 76.3,252.3 81.1,249.6 85.9,246.3 90.7,242.5 95.5,238.2 100.2,233.5 105.0,228.4 109.8,223.0 114.6,217.4 119.4,211.6 124.1,205.7 128.9,199.7 133.7,193.5 138.5,187.4 143.3,181.3 148.0,175.3 152.8,169.3 157.6,163.4 162.4,157.7 167.2,152.2 171.9,146.8 176.7,141.7 181.5,136.8 186.3,132.2 191.1,127.8 195.8,123.7 200.6,119.9 205.4,116.5 210.2,113.3 215.0,110.5 219.7,108.0 224.5,105.8 229.3,103.9 234.1,102.4 238.9,101.3 243.6,100.4 248.4,100.0 253.2,99.8 258.0,100.0 262.8,100.4 267.5,101.2 272.3,102.3 277.1,103.7 281.9,105.4 286.7,107.4 291.4,109.6 296.2,112.0 301.0,114.7 305.8,117.7 310.6,120.8 315.3,124.2 320.1,127.7 324.9,131.4 329.7,135.3 334.5,139.2 339.2,143.3 344.0,147.6 348.8,151.9 353.6,156.2 358.4,160.7 363.1,165.1 367.9,169.6 372.7,174.1 377.5,178.6 382.3,183.1 387.0,187.5 391.8,191.9 396.6,196.2 401.4,200.4 406.2,204.6 410.9,208.6 415.7,212.5 420.5,216.3 425.3,219.9 430.1,223.4 434.8,226.7 439.6,229.9 444.4,232.9 449.2,235.7 454.0,238.3 458.7,240.7 463.5,242.9 468.3,245.0 473.1,246.8 477.9,248.5 482.6,250.0 487.4,251.2 492.2,252.3 497.0,253.3 501.8,254.0 506.5,254.7 511.3,255.1 516.1,255.5 520.9,255.7 525.7,255.9 530.4,256.0 535.2,256.0 540.0,256.0" stroke-width="2.5"/>
+  <text class="t1" x="452.4" y="62.9" text-anchor="middle" style="font-size:14px">첫째 치료 4/5 회복</text>
+  <text class="t2" x="243.2" y="91.8" text-anchor="middle" style="font-size:14px">둘째 치료 2/5 회복</text>
+  <text class="t-strong" x="70" y="42" style="font-size:15px">첫째 치료가 더 나을 확률 P = 0.88</text>
+  <text class="t-muted" x="16" y="322" style="font-size:13px">환자 열 명의 기록만으로 P를 셈한다(기록은 지어낸 값, 직접 그림)</text>
+</svg>
 <p>1952년에는 허버트 로빈스(Herbert Robbins)가 『미국 수학회 회보(Bulletin of the American Mathematical Society)』에 「Some aspects of the sequential design of experiments」를 냈다. 그는 미리 정한 수만큼 샘플을 모은 뒤 분석하던 통계를, 앞의 결과를 보며 다음 샘플을 어디서 뽑을지 고르는 설계로 넓히자고 했다. 그 본보기로 내놓은 것이 두 모집단 가운데 어느 쪽에서 다음 샘플을 뽑을지 고르는 문제다. 이런 문제는 뒤에 슬롯머신에 빗대 불리게 된다. 팔이 하나인 슬롯머신의 별명이 「외팔이 강도(one-armed bandit)」라서, 팔이 여럿인 기계 가운데 어느 팔을 당길지 고르는 문제를 「여러 팔 슬롯머신 문제(multi-armed bandit)」라 부른다. 이 문제가 얼마나 풀기 어려웠는지를 두고는, 2차 대전 때 연합국 과학자들이 이 문제에 머리를 너무 빼앗겨 「지적 사보타주의 궁극 무기로 독일 상공에 떨어뜨리자」는 말까지 나왔다는 이야기가 통계학자 피터 휘틀(Peter Whittle)의 1979년 토론문을 거쳐 전해진다.</p>
+<svg class="fig" viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="지어낸 두 치료, 성공률 0.6 과 0.4. 환자 200명을 반반 나누면 못한 치료를 받는 환자가 100명, 지금까지의 기록으로 셈한 P 만큼 첫째 치료를 주면 27명">
+  <line class="sgrid" x1="62" y1="256.0" x2="540" y2="256.0" stroke-width="1"/>
+  <text x="56" y="261.0" text-anchor="end" style="font-size:14px">0</text>
+  <line class="sgrid" x1="62" y1="197.5" x2="540" y2="197.5" stroke-width="1"/>
+  <text x="56" y="202.5" text-anchor="end" style="font-size:14px">25</text>
+  <line class="sgrid" x1="62" y1="139.0" x2="540" y2="139.0" stroke-width="1"/>
+  <text x="56" y="144.0" text-anchor="end" style="font-size:14px">50</text>
+  <line class="sgrid" x1="62" y1="80.5" x2="540" y2="80.5" stroke-width="1"/>
+  <text x="56" y="85.5" text-anchor="end" style="font-size:14px">75</text>
+  <line class="sgrid" x1="62" y1="22.0" x2="540" y2="22.0" stroke-width="1"/>
+  <text x="56" y="27.0" text-anchor="end" style="font-size:14px">100</text>
+  <line class="saxis" x1="62" y1="256" x2="540" y2="256" stroke-width="1"/>
+  <text x="62.0" y="274" text-anchor="middle" style="font-size:13px">1</text>
+  <text x="179.7" y="274" text-anchor="middle" style="font-size:13px">50</text>
+  <text x="299.8" y="274" text-anchor="middle" style="font-size:13px">100</text>
+  <text x="419.9" y="274" text-anchor="middle" style="font-size:13px">150</text>
+  <text x="540.0" y="274" text-anchor="middle" style="font-size:13px">200</text>
+  <text x="301.0" y="296" text-anchor="middle" style="font-size:14px">치료한 환자 수</text>
+  <text x="16" y="139.0" text-anchor="middle" style="font-size:14px" transform="rotate(-90 16 139.0)">못한 치료를 받은 환자</text>
+  <polyline class="s2" points="62.0,256.0 71.6,251.3 81.2,246.6 90.8,242.0 100.4,237.3 110.0,232.6 119.6,227.9 129.3,223.2 138.9,218.6 148.5,213.9 158.1,209.2 167.7,204.5 177.3,199.8 186.9,195.2 196.5,190.5 206.1,185.8 215.7,181.1 225.3,176.4 234.9,171.8 244.6,167.1 254.2,162.4 263.8,157.7 273.4,153.0 283.0,148.4 292.6,143.7 302.2,139.0 311.8,134.3 321.4,129.6 331.0,125.0 340.6,120.3 350.2,115.6 359.8,110.9 369.5,106.2 379.1,101.6 388.7,96.9 398.3,92.2 407.9,87.5 417.5,82.8 427.1,78.2 436.7,73.5 446.3,68.8 455.9,64.1 465.5,59.4 475.1,54.8 484.8,50.1 494.4,45.4 504.0,40.7 513.6,36.0 523.2,31.4 532.8,26.7 540.0,22.0" stroke-width="2.5"/>
+  <polyline class="s1" points="62.0,254.8 71.6,250.8 81.2,247.3 90.8,244.2 100.4,241.4 110.0,238.8 119.6,236.3 129.3,234.0 138.9,231.9 148.5,229.9 158.1,228.0 167.7,226.3 177.3,224.7 186.9,223.1 196.5,221.5 206.1,220.0 215.7,218.7 225.3,217.3 234.9,216.1 244.6,214.8 254.2,213.7 263.8,212.6 273.4,211.5 283.0,210.5 292.6,209.5 302.2,208.5 311.8,207.5 321.4,206.7 331.0,205.8 340.6,205.0 350.2,204.2 359.8,203.4 369.5,202.7 379.1,202.0 388.7,201.3 398.3,200.6 407.9,199.9 417.5,199.3 427.1,198.7 436.7,198.1 446.3,197.5 455.9,197.0 465.5,196.4 475.1,195.9 484.8,195.4 494.4,194.8 504.0,194.3 513.6,193.8 523.2,193.4 532.8,192.9 540.0,192.6" stroke-width="2.5"/>
+  <text class="t2" x="359.8" y="87.5" text-anchor="end" style="font-size:14px">반반 나누기: 100명</text>
+  <text class="t1" x="536.0" y="214.6" text-anchor="end" style="font-size:14px">P 만큼 첫째 치료: 27명</text>
+  <text class="t-muted" x="16" y="322" style="font-size:13px">성공률 0.6·0.4는 지어낸 값, 4,000번 되풀이한 평균. 직접 그림</text>
+</svg>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">두 치료 가운데 나은 쪽을 고르는 거면, 환자를 반반 나눠 실험하고 좋은 쪽을 쓰면 끝 아닌가요?</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">반반 나눠 실험하는 동안 못한 치료를 받는 환자는 얼마나 될까요?</div></div>
