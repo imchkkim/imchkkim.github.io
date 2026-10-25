@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 경사하강에서 Muon 까지</a></li>
 <li class="toc-part">미분과 근사</li>
 <li><a href="loss-landscape.html">손실 지형: 공을 굴려 손실의 바닥을 찾는 첫 실험</a></li>
@@ -660,7 +676,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="zeroth-order.html">미분 없이: 0차 최적화</a></li>
 <li><a href="evolution.html">진화 알고리즘: 개체군으로 하는 탐색</a></li>
 <li class="toc-part">1차 최적화</li>
-<li><a href="backprop.html" class="active">역전파: 자코비안 곱을 거꾸로</a><ul class="sidebar-toc"><li><a href="backprop.html">순방향 모드: 입력 하나에 대한 방향 미분을 앞으로 실어 나른다</a></li><li><a href="backprop-sec-reverse-mode-backpropagation.html">역전파: 출력 하나의 그래디언트를 뒤로 나눠 준다</a></li><li><a href="backprop-sec-automatic-differentiation-code.html" class="current">자동미분: 식이 아니라 코드를 미분한다</a></li><li><a href="backprop-sec-gradient-checkpointing.html">체크포인팅: 활성값을 다 남기지 않고 다시 계산한다</a></li><li><a href="backprop-sec-backprop-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="backprop.html" class="active">역전파: 자코비안 곱을 거꾸로</a><ul class="sidebar-toc"><li><a href="backprop.html">순방향 모드: 입력 하나에 대한 방향 미분을 앞으로 실어 나른다</a></li><li><a href="backprop-sec-reverse-mode-backpropagation.html">역전파: 출력 하나의 그래디언트를 뒤로 나눠 준다</a></li><li><a href="backprop-sec-automatic-differentiation-code.html" class="current">자동미분: 식이 아니라 코드를 미분한다</a></li><li><a href="backprop-sec-gradient-checkpointing.html">체크포인팅: 활성값을 다 남기지 않고 다시 계산한다</a></li><li><a href="backprop-sec-backprop-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="initialization.html">가중치 초기화: 신호가 커지지도 사라지지도 않게</a></li>
 <li><a href="gradient-descent.html">경사하강: 학습률은 어디까지 키울 수 있나</a></li>
 <li><a href="sgd.html">확률적 경사하강: 노이즈 섞인 그래디언트로 걷기</a></li>
@@ -689,6 +705,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>역전파를 하려면 계산 그래프가 있어야 한다. 뉴런 하나는 손으로 그릴 수 있었지만, 실제 신경망은 반복문으로 층을 쌓고 조건문으로 가지를 나누는 수천 줄짜리 코드다. 그 그래프는 누가 그리나? 컴퓨터에게 미분을 시키는 옛 방법은 둘이었다. 하나는 미분 공식을 써서 도함수 식을 만드는 기호 미분이고, 다른 하나는 손실값만 쓰는 유한 차분이다. 둘 다 코드에 그대로 쓰기에는 무언가 모자랐는데, 무엇이 모자랐고 코드를 그대로 미분하는 방법은 어떻게 생겼을까?</p>
 <h3 id="hist-reverse-mode-compilers" class="history" data-people="speelpenning-bernt griewank-andreas">역사: 컴파일러에서 다시 찾은 역방향<span id="역사-컴파일러에서-다시-찾은-역방향" class="anchor-alias"></span></h3>
 <p>역방향 계산을 사람 손 없이 프로그램이 만들어 주게 한 이른 시도로는 베른트 스페일페닝(Bernt Speelpenning)의 1980년 일리노이 대학교 박사 논문이 있다. 논문 제목은 「알고리즘으로 주어진 함수의 빠른 편미분 컴파일하기(Compiling Fast Partial Derivatives of Functions Given by Algorithms)」다. 그리반크의 글에 따르면 스페일페닝은 빌 기어(Bill Gear)에게서 뻣뻣한 미분방정식(빠른 변화와 느린 변화가 섞인 방정식)의 자코비안을 계산하는 코드를 자동으로 만들라는 과제를 받았고, 컴파일러 최적화를 궁리하다 역방향에 닿았다. 그는 함수를 계산하는 동안 일어난 연산을 하나하나 차례로 쌓아 두고, 그 더미를 거꾸로 꺼내며 미분하는 그림을 그렸다.</p>
+<figure class="fig "><img src="images/backprop/h6_tape.png" alt="연산을 쌓아 두고 거꾸로 꺼내는 기록을 웽거트의 예제 y = x₁x₂ + sin(x₂x₃)에 써 본 것(x = (1, 2, 3)). 앞으로 계산하며 연산 넷을 차례로 쌓고(왼쪽), 맨 위부터 꺼내며 ȳ = 1에서 출발해 그래디언트를 나눠 주면(오른쪽) 한 번 거꾸로 훑는 사이에 ∂y/∂x₁ = 2, ∂y/∂x₂ = 3.881, ∂y/∂x₃ = 1.920이 함께 나온다. 스페일페닝 논문의 그림이 아니라 그 생각을 직접 그린 것이다(sources/backprop/h_history.py)" loading="lazy"><figcaption>연산을 쌓아 두고 거꾸로 꺼내는 기록을 웽거트의 예제 y = x₁x₂ + sin(x₂x₃)에 써 본 것(x = (1, 2, 3)). 앞으로 계산하며 연산 넷을 차례로 쌓고(왼쪽), 맨 위부터 꺼내며 ȳ = 1에서 출발해 그래디언트를 나눠 주면(오른쪽) 한 번 거꾸로 훑는 사이에 ∂y/∂x₁ = 2, ∂y/∂x₂ = 3.881, ∂y/∂x₃ = 1.920이 함께 나온다. 스페일페닝 논문의 그림이 아니라 그 생각을 직접 그린 것이다(sources/backprop/h_history.py)</figcaption></figure>
 <p>그 뒤에도 이 방법은 여러 번 다시 발견되었다. 그리반크 자신도 1987년 여름 미국 아르곤 국립연구소에 막 갔을 때, 호르헤 모레(Jorge Moré)에게서 「그래디언트를 함수와 비슷한 비용으로 계산할 수 없는 목적함수의 예를 하나 들어 보라」는 도전을 받고 역방향을 혼자 다시 찾았다고 적었다. 연산 하나하나에 미분 규칙을 붙이는 방식(연산자 오버로딩)으로 역방향을 처음 구현한 것은 구간 계산을 위해 파스칼을 넓힌 언어 PASCAL-SC였다고 그는 적었다.</p>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>린나인마가 1970년에, 스페일페닝이 1980년에 찾았는데 그리반크가 1987년에 또 혼자 찾았다고요? 이미 있는 방법을 왜 자꾸 다시 찾아요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>모레가 그리반크에게 낸 도전을 다시 읽어 볼까요?</p></div></div>

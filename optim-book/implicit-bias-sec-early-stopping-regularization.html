@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 경사하강에서 Muon 까지</a></li>
 <li class="toc-part">미분과 근사</li>
 <li><a href="loss-landscape.html">손실 지형: 공을 굴려 손실의 바닥을 찾는 첫 실험</a></li>
@@ -677,7 +693,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="optimal-transport.html">최적 수송: 흙을 가장 적게 나르는 짝짓기</a></li>
 <li><a href="wgan.html">WGAN: 최소최대와 1-립시츠 판별기</a></li>
 <li class="toc-part">최적화가 일반화를 만든다</li>
-<li><a href="implicit-bias.html" class="active">암묵적 편향: 옵티마이저가 고르는 해</a><ul class="sidebar-toc"><li><a href="implicit-bias.html">최소 노름 해: 0에서 출발한 경사하강이 고르는 해</a></li><li><a href="implicit-bias-sec-max-margin-logistic.html">가장 큰 마진: 로지스틱 회귀의 방향이 고르는 경계</a></li><li><a href="implicit-bias-sec-early-stopping-regularization.html" class="current">일찍 멈추기: 스텝 수가 정규화의 세기다</a></li><li><a href="implicit-bias-sec-flat-minima-noise.html">평평한 극소: 미니배치 노이즈가 고르는 골짜기</a></li><li><a href="implicit-bias-sec-implicit-bias-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="implicit-bias.html" class="active">암묵적 편향: 옵티마이저가 고르는 해</a><ul class="sidebar-toc"><li><a href="implicit-bias.html">최소 노름 해: 0에서 출발한 경사하강이 고르는 해</a></li><li><a href="implicit-bias-sec-max-margin-logistic.html">가장 큰 마진: 로지스틱 회귀의 방향이 고르는 경계</a></li><li><a href="implicit-bias-sec-early-stopping-regularization.html" class="current">일찍 멈추기: 스텝 수가 정규화의 세기다</a></li><li><a href="implicit-bias-sec-flat-minima-noise.html">평평한 극소: 미니배치 노이즈가 고르는 골짜기</a></li><li><a href="implicit-bias-sec-implicit-bias-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="double-descent.html">이중 하강: 외우고 나서도 나아진다</a></li>
 <li><a href="epilogue.html">맺음: 남은 물음</a></li></ol>
 </nav>
@@ -689,6 +705,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>최소 노름 해와 최대 마진은 「끝까지 학습하면 어디에 닿는가」였지만, 신경망을 학습하는 사람은 끝까지 가지 않는 일이 많다. 검증 오차가 가장 낮았던 스텝의 체크포인트(학습 도중 저장해 둔 파라미터)를 골라 쓰고, 검증 오차가 몇 번 연속 나빠지면 학습을 멈춘다. 데이터에 노이즈가 섞여 있으면 끝까지 간 해는 노이즈까지 외우는데, 학습 손실을 끝까지 줄이지 않고 도중에 멈춘 해는 무엇이 다를까? 그 해는 손실에 정규화 항을 더해 끝까지 학습한 해와 어떤 관계일까?</p>
 <h3 id="hist-early-stopping-origins" class="history" data-people="landweber-louis morgan-nelson bourlard-herve">역사: 적분방정식에서 신경망까지<span id="역사-적분방정식에서-신경망까지" class="anchor-alias"></span></h3>
 <p>일찍 멈추기는 신경망보다 먼저 역문제(관측한 결과에서 원인을 거꾸로 찾는 문제)에서 쓰였다. 미국의 루이스 랜드웨버(Louis Landweber)는 1951년 『미국 수학 저널』에 「제1종 프레드홀름 적분방정식을 위한 반복 공식」을 냈다. 흐릿하게 번진 관측에서 원래 신호를 되살리는 꼴의 방정식인데, 바로 풀면 관측의 작은 노이즈가 엄청나게 부풀어 답이 망가진다. 그가 낸 반복은 지금 말로 하면 제곱 오차의 경사하강이다. 이 반복을 오래 돌리면 처음에는 원래 신호에 다가가다가, 어느 순간부터 노이즈를 되살리며 다시 멀어진다. 그래서 적당한 횟수에서 멈춰야 했고, 역문제를 다루는 사람들은 반복 횟수의 역수를 정규화의 세기처럼 다루게 되었다.</p>
+<figure class="fig "><img src="images/implicit-bias/h3_landweber.png" alt="왼쪽: 원래 신호(점선)를 가우스 꼴로 번지게 하고 노이즈(표준편차 0.01)를 더한 관측(초록)과, 그 관측에 랜드웨버 반복을 434번 돌린 것(갈색), 100,000번 돌린 것(청록). 오른쪽: 반복 횟수에 따른 원래 신호와의 상대 오차. 434번에서 0.18로 가장 작고, 그 뒤로는 노이즈가 되살아나 1,000만 번에서 7.6이 된다. 신호와 번짐은 그림을 위해 지어냈다(sources/implicit-bias/h_history.py)" loading="lazy"><figcaption>왼쪽: 원래 신호(점선)를 가우스 꼴로 번지게 하고 노이즈(표준편차 0.01)를 더한 관측(초록)과, 그 관측에 랜드웨버 반복을 434번 돌린 것(갈색), 100,000번 돌린 것(청록). 오른쪽: 반복 횟수에 따른 원래 신호와의 상대 오차. 434번에서 0.18로 가장 작고, 그 뒤로는 노이즈가 되살아나 1,000만 번에서 7.6이 된다. 신호와 번짐은 그림을 위해 지어냈다(sources/implicit-bias/h_history.py)</figcaption></figure>
 <p>신경망에서는 1989년 신경정보처리학회(NIPS)에서 넬슨 모건(Nelson Morgan)과 에르베 부를라르(Hervé Bourlard)가 발표한 「앞먹임 신경망의 일반화와 파라미터 추정: 몇 가지 실험」이 자주 인용된다. 그들은 신호 대 잡음비를 조절한 모의 데이터와 실제 음성 데이터로 역전파 학습을 하며 가중치 수와 일반화의 관계를 재고, 따로 떼어 둔 데이터로 성능을 보는 교차 검증으로 오버피팅을 막는 법을 보였다. 검증 데이터로 멈출 때를 고르는 지금의 습관이 이런 실험에서 굳어졌다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>일찍 멈추기는 검증 오차가 오르면 학습을 끄는 거잖아요. 그게 1951년 논문까지 거슬러 올라간다니 좀 거창해 보여요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>랜드웨버가 다룬 건 흐릿하게 번진 관측에서 원래 신호를 되살리는 문제였어요. 그 사람 손에 검증 오차가 있었을까요?</p></div></div>

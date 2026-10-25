@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 경사하강에서 Muon 까지</a></li>
 <li class="toc-part">미분과 근사</li>
 <li><a href="loss-landscape.html">손실 지형: 공을 굴려 손실의 바닥을 찾는 첫 실험</a></li>
@@ -662,7 +678,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li class="toc-part">1차 최적화</li>
 <li><a href="backprop.html">역전파: 자코비안 곱을 거꾸로</a></li>
 <li><a href="initialization.html">가중치 초기화: 신호가 커지지도 사라지지도 않게</a></li>
-<li><a href="gradient-descent.html" class="active">경사하강: 학습률은 어디까지 키울 수 있나</a><ul class="sidebar-toc"><li><a href="gradient-descent.html">경사하강: 그래디언트 반대쪽으로 한 스텝씩</a></li><li><a href="gradient-descent-sec-learning-rate-limit.html">학습률의 상한: 2/L 을 넘으면 튕겨 나간다</a></li><li><a href="gradient-descent-sec-condition-number.html" class="current">조건수: 길쭉한 골짜기에서는 왜 스텝이 늘어날까</a></li><li><a href="gradient-descent-sec-gradient-clipping.html">그래디언트 클리핑: 벼랑에서 스텝을 묶는다</a></li><li><a href="gradient-descent-sec-gradient-descent-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="gradient-descent.html" class="active">경사하강: 학습률은 어디까지 키울 수 있나</a><ul class="sidebar-toc"><li><a href="gradient-descent.html">경사하강: 그래디언트 반대쪽으로 한 스텝씩</a></li><li><a href="gradient-descent-sec-learning-rate-limit.html">학습률의 상한: 2/L 을 넘으면 튕겨 나간다</a></li><li><a href="gradient-descent-sec-condition-number.html" class="current">조건수: 길쭉한 골짜기에서는 왜 스텝이 늘어날까</a></li><li><a href="gradient-descent-sec-gradient-clipping.html">그래디언트 클리핑: 벼랑에서 스텝을 묶는다</a></li><li><a href="gradient-descent-sec-gradient-descent-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="sgd.html">확률적 경사하강: 노이즈 섞인 그래디언트로 걷기</a></li>
 <li class="toc-part">2차 최적화</li>
 <li><a href="newton.html">뉴턴법과 헤시안: 곡률을 알면 한 번에</a></li>
@@ -689,6 +705,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>학습률의 상한 2/<span class="sym" style="color:#c45a00">L</span>은 손실이 가장 가파르게 휜 방향이 정했지만, 파라미터가 여럿이면 방향마다 곡률이 다르다. 가파른 방향에 맞춰 학습률을 작게 잡으면, 완만한 방향에서는 그 작은 학습률로 걸어야 한다. 이 장의 물음에서 본, 어떤 파라미터는 금방 자리를 잡고 어떤 것은 한참 기어가는 일이 여기서 생기는 것 같다. 그렇다면 완만한 방향은 얼마나 느려지고, 그 느림은 학습률을 잘 고르면 없앨 수 있을까?</p>
 <h3 id="hist-steepest-descent-zigzag" class="history" data-people="akaike-hirotugu">역사: 두 방향 사이를 오가는 가장 가파른 내리막<span id="역사-두-방향-사이를-오가는-가장-가파른-내리막" class="anchor-alias"></span></h3>
 <p>코시의 둘째 선택처럼 스텝마다 그 방향의 최솟값까지 가는 방법은 이론상 가장 욕심 많은 경사하강이다. 이 방법이 실제로는 느리다는 것이 1950년대에 수학적으로 드러났다. 일본 통계수리연구소에서 일하던 아카이케 히로츠구(赤池弘次, Hirotugu Akaike)는 1959년 논문 「확률 분포의 잇따른 변환과 그것을 최적 경사 방법의 분석에 쓰기」에서 2차 함수 위의 이 방법을 따졌다. 그가 보인 것은, 스텝을 거듭하면 그래디언트의 방향이 결국 두 방향 사이를 번갈아 오가게 되고, 그 두 방향은 가장 크게 휜 방향과 가장 작게 휜 방향이 만드는 평면 안에 있다는 것이다. 스텝마다 그 방향에서는 최선을 다하는데도 길은 골짜기를 가로질러 지그재그로 꺾인다. 아카이케는 뒤에 모델을 고르는 기준(AIC)으로 이름이 더 알려졌다.</p>
+<figure class="fig "><img src="images/gradient-descent/h2_akaike.png" alt="곡률이 1, 4, 10인 세 방향의 그릇에서 스텝마다 그 방향의 최솟값까지 가면, 그래디언트 제곱이 방향마다 차지하는 비율(아카이케가 확률 분포로 본 것)에서 곡률 4 방향은 몇 스텝 만에 사라지고 곡률 1과 10 두 방향이 0.28과 0.72를 번갈아 맡으며, 길은 그 두 방향의 평면에서 지그재그로 꺾인다. 그릇과 출발점 (1, 1, 1)은 이 책에서 고른 값이고 논문의 그림이 아니다(sources/gradient-descent/h_history.py)" loading="lazy"><figcaption>곡률이 1, 4, 10인 세 방향의 그릇에서 스텝마다 그 방향의 최솟값까지 가면, 그래디언트 제곱이 방향마다 차지하는 비율(아카이케가 확률 분포로 본 것)에서 곡률 4 방향은 몇 스텝 만에 사라지고 곡률 1과 10 두 방향이 0.28과 0.72를 번갈아 맡으며, 길은 그 두 방향의 평면에서 지그재그로 꺾인다. 그릇과 출발점 (1, 1, 1)은 이 책에서 고른 값이고 논문의 그림이 아니다(sources/gradient-descent/h_history.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>스텝마다 그 방향에서 최선을 다하는데 느리다는 게 이상해요. 그리고 느린지는 등고선 위에 길을 그려 보면 바로 보이잖아요. <code>matplotlib</code> 몇 줄이면요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그림으로 보이는 건 그려 본 그 함수 하나예요. 모든 2차 함수에서 느리다고 말하려면요? 파라미터가 수십 개면 등고선을 그릴 수도 없고요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 그림 하나로는 다른 함수까지 말할 수가 없네요. 예를 아무리 많이 돌려도 증명이 되지는 않고요.</p></div></div>
@@ -750,7 +767,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>둘째 식이 이 절의 핵심이다. 학습률은 가파른 방향 때문에 2/<span class="sym" style="color:#c45a00">L</span>보다 작아야 하고, 그러면 완만한 방향의 배율은 1 − 2<span class="sym" style="color:#c45a00">μ</span>/<span class="sym" style="color:#c45a00">L</span> = 1 − 2/<span class="sym" style="color:#697800">κ</span>보다 작아질 수 없다. 학습률을 아무리 잘 골라도 완만한 방향은 스텝마다 대략 1/<span class="sym" style="color:#697800">κ</span>의 몇 배만큼씩만 줄어든다. 그래서 고정된 학습률의 경사하강이 걸리는 스텝 수는 조건수에 비례한다.</p>
 <p>학습률을 1/<span class="sym" style="color:#c45a00">L</span>과 2/<span class="sym" style="color:#c45a00">L</span> 사이로 키우면 무슨 일이 생길까? 가파른 방향의 배율 1 − <span class="sym" style="color:#006600">η</span><span class="sym" style="color:#c45a00">L</span>이 음수가 되어, 그 방향에서는 골짜기의 양쪽 벽을 오가게 된다. <span class="sym" style="color:#697800">κ</span> = 10에서 <span class="sym" style="color:#006600">η</span> = 1.8/<span class="sym" style="color:#c45a00">L</span>로 잡으면 가파른 방향은 −0.8, 0.64, −0.512, 0.41, …로 오가고, 완만한 방향은 0.82배씩 줄어서 스텝 수는 66에서 36으로 준다. 2/<span class="sym" style="color:#c45a00">L</span>에 더 다가간 1.95/<span class="sym" style="color:#c45a00">L</span>에서는 벽 사이를 오가는 움직임이 거의 줄지 않아 오히려 135스텝이 걸리고, 2.05/<span class="sym" style="color:#c45a00">L</span>에서는 벽에서 벽으로 튈 때마다 멀어진다. 아래 그림은 같은 그릇을 30° 돌려 놓고 그린 것인데, 그릇을 돌려도 경사하강의 움직임은 같이 돌아갈 뿐이다.</p>
 <figure class="fig "><img src="images/gradient-descent/a3_zigzag.png" alt="조건수 κ = 10인 그릇의 등고선 위에서 학습률 셋의 길. η = 1/L은 가파른 방향을 한 스텝에 끝내고 골짜기 바닥을 따라 천천히 가고, η = 1.8/L은 벽 사이를 지그재그로 오가며 더 빨리 가고, η = 2.05/L은 벽 사이를 오갈수록 멀리 튄다(sources/gradient-descent/s3_condition.py)" loading="lazy"><figcaption>조건수 κ = 10인 그릇의 등고선 위에서 학습률 셋의 길. η = 1/L은 가파른 방향을 한 스텝에 끝내고 골짜기 바닥을 따라 천천히 가고, η = 1.8/L은 벽 사이를 지그재그로 오가며 더 빨리 가고, η = 2.05/L은 벽 사이를 오갈수록 멀리 튄다(sources/gradient-descent/s3_condition.py)</figcaption></figure>
-<figure class="widget-embed" id="widget-gradient-descent-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 길쭉한 그릇과 학습률</span><a class="widget-open" href="widgets/gradient-descent.html?v=339205d8#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/gradient-descent.html?w=w2&embed=1&v=339205d8" title="위젯 2: 길쭉한 그릇과 학습률" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-gradient-descent-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 길쭉한 그릇과 학습률</span><a class="widget-open" href="widgets/gradient-descent.html?v=be5c5549#w2">크게 열기</a></div><iframe data-src="widgets/gradient-descent.html?w=w2&embed=1&v=be5c5549" title="위젯 2: 길쭉한 그릇과 학습률" loading="lazy"></iframe></figure>
 <h3 id="ml에서-입력을-고르게-맞추기">ML에서: 입력을 고르게 맞추기</h3>
 <p>신경망의 손실도 방향마다 곡률이 크게 다르고, 그래서 학습이 조건수만큼 느려진다. 얀 르쿤(Yann LeCun)과 동료들은 1998년 글 「효율적인 역전파(Efficient BackProp)」에서 이 분석을 그대로 적었다. 학습률이 2 ÷ (헤시안의 가장 큰 고윳값)을 넘으면 발산하고, 수렴에 걸리는 시간은 가장 큰 고윳값 ÷ 가장 작은 고윳값에 비례하므로 고윳값이 고르게 퍼진 것이 좋다는 것이다. 그들이 이 분석에서 끌어낸 처방이 입력의 평균을 0으로 빼고 분산을 맞추라는 전처리였다. 입력이 왜 조건수를 바꾸는지는 아래 문제 9에서 직접 계산한다.</p>
 <aside class="guide"><p class="guide-title">길잡이 · 『미분기하학의 언어들』 「자연 그래디언트: 좌표를 바꿔도 같은 방향」</p><p>길쭉한 골짜기를 둥글게 보이게 하는 자(계량)를 골라 그 자로 가장 가파른 방향을 재면 지그재그가 사라진다. 같은 그릇 위에서 보통 경사하강과 자연 그래디언트가 지나는 경로를 견주는 그림과, 피셔 행렬이 왜 그 자가 되는지. <a href="https://lameproof.com/diffgeo-book/parameter-space-sec-natural-gradient-invariance.html">이어 읽기</a></p>
@@ -787,7 +804,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>한 스텝에 줄어드는 비율이 두 배일 뿐이에요. 앞의 숫자만 반이 되고 <span class="sym" style="color:#697800">κ</span>에 비례하는 건 바뀌지 않아요. 학습률 하나로는 조건수를 이길 수 없네요. 미적분 시간에 n²과 n²/2는 같은 차수라고 배운 게 이거예요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>학습률 튜닝을 열심히 해서 두 배 빨라졌다고 좋아했는데, 근본적으로 빨라지려면 그릇 모양을 바꾸든 걷는 방법을 바꾸든 해야 하는 거군요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>위젯 2에서 문제 8 설정을 불러와 학습률을 1/L 쪽으로 옮겨 가며 길이 어떻게 달라지는지 비교해 보세요.</p></div></div>
-<figure class="preset-card"><a href="widgets/gradient-descent.html?p=prob-gradient-best-rate-limit&v=339205d8#w2" target="_blank" rel="noopener"><img src="images/gradient-descent/preset-prob-gradient-best-rate-limit.png" alt="위젯 2 · 문제 8 설정" loading="lazy"></a><figcaption><a href="widgets/gradient-descent.html?p=prob-gradient-best-rate-limit&v=339205d8#w2" target="_blank" rel="noopener">위젯에서 열기: 위젯 2 · 문제 8 설정 ↗</a></figcaption></figure>
+<figure class="preset-card"><a href="widgets/gradient-descent.html?p=prob-gradient-best-rate-limit&v=be5c5549#w2"><img src="images/gradient-descent/preset-prob-gradient-best-rate-limit.png" alt="위젯 2 · 문제 8 설정" loading="lazy"></a><figcaption><a href="widgets/gradient-descent.html?p=prob-gradient-best-rate-limit&v=be5c5549#w2">위젯에서 열기: 위젯 2 · 문제 8 설정</a></figcaption></figure>
 </div><div class="dialogue"><h3 id="prob-gradient-input-centering">문제 9. 입력의 평균을 빼면<span id="문제-9-입력의-평균을-빼면" class="anchor-alias"></span></h3>
 <blockquote>
 <p>입력이 둘인 선형 회귀가 있다(편향 없이 예측 = <span class="sym" style="color:#665522">w</span>₁<span class="sym" style="color:#1b9e77">x</span>₁ + <span class="sym" style="color:#665522">w</span>₂<span class="sym" style="color:#1b9e77">x</span>₂). 두 입력은 서로 따로 뽑았고, 각각 평균 5·표준편차 1인 정규분포에서 나온 500개다(씨앗 고정). (가) 손실의 헤시안 XᵀX/500(X는 샘플 하나의 두 입력을 한 줄로 놓고 500줄 쌓은 행렬)의 두 고윳값과 조건수는? (나) 두 입력에서 각자의 평균을 뺀 뒤에는? (다) <span class="sym" style="color:#006600">η</span> = 1/<span class="sym" style="color:#c45a00">L</span>로 경사하강을 하면 각각 몇 스텝이 걸리는가?</p>

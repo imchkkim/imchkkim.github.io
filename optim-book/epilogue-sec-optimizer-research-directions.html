@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 경사하강에서 Muon 까지</a></li>
 <li class="toc-part">미분과 근사</li>
 <li><a href="loss-landscape.html">손실 지형: 공을 굴려 손실의 바닥을 찾는 첫 실험</a></li>
@@ -689,6 +705,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>지도의 점들을 다시 보면, 최근 반세기의 일은 거의 모두 1차와 2차 사이, 휨을 흉내 내는 칸에 있다. 2차 칸에는 가장 오래된 뉴턴법 하나뿐이다. 휨을 다 계산하면 한 스텝에 닿지만 n × n 칸의 값을 치를 수 없어서, 사람들은 휨의 어느 부분을 얼마나 값싸게 흉내 낼지를 두고 방법을 바꿔 왔다. 휨을 흉내 내는 칸에서 앞으로 무엇이 바뀔까? 이 책이 지나온 길에서 보이는 방향은 둘인데, 하나는 스텝의 크기를 재는 자를 고르는 일이고, 다른 하나는 버렸던 곡률을 다시 들여오는 일이다.</p>
 <h3 id="hist-old-optimizer-new-norm" class="history" data-people="bernstein-jeremy newhouse-laker jordan-keller">역사: 옛 옵티마이저, 새 노름<span id="역사-옛-옵티마이저-새-노름" class="anchor-alias"></span></h3>
 <p>제러미 번스타인(Jeremy Bernstein)과 래커 뉴하우스(Laker Newhouse)는 2024년 글 「옛 옵티마이저, 새 노름(Old Optimizer, New Norm: An Anthology)」에서 이동 평균을 끈 Adam 이 칸마다의 최댓값으로 잰 가장 가파른 스텝, 곧 부호 하강이라고 읽었다. 층의 그래디언트 행렬 양쪽에 곡률 추정값을 곱하는 Shampoo 는 그 누적을 끄면 스펙트럼 노름 아래의 가장 가파른 스텝이 된다고 보였고, 층마다 그 층이 하는 일에 맞는 노름을 골라야 한다고 주장했다. 같은 해 켈러 조던은 스펙트럼 노름 아래의 가장 가파른 스텝을 뉴턴–슐츠 반복 다섯 번으로 값싸게 계산하는 Muon 으로 공개 속도 경주의 기록을 갈아 치웠고, 이듬해 문샷 AI 는 같은 옵티마이저로 큰 언어 모델을 학습시켜 AdamW 보다 약 두 배의 계산 효율을 보고했다.</p>
+<figure class="fig "><img src="images/epilogue/h5_norm_steps.png" alt="번스타인과 뉴하우스의 읽기를 숫자로 본 것. 왼쪽: 그래디언트 g = (3, 1) 에서 크기 1 안의 가장 가파른 스텝은 유클리드 노름(원)으로 재면 −g/|g|, 칸마다의 최댓값(정사각형)으로 재면 꼭짓점 −sign(g) 이다. 오른쪽: 특잇값이 4, 1, 0.3, 0.08 인 4×4 그래디언트 행렬을 Muon 의 뉴턴–슐츠 반복 다섯 번에 넣으면 특잇값이 0.69~1.12 로 모이고, 정확한 직교화 −UVᵀ 는 모두 1이다. 행렬은 이 그림을 위해 고른 것이다(sources/epilogue/h4_history.py)" loading="lazy"><figcaption>번스타인과 뉴하우스의 읽기를 숫자로 본 것. 왼쪽: 그래디언트 g = (3, 1) 에서 크기 1 안의 가장 가파른 스텝은 유클리드 노름(원)으로 재면 −g/|g|, 칸마다의 최댓값(정사각형)으로 재면 꼭짓점 −sign(g) 이다. 오른쪽: 특잇값이 4, 1, 0.3, 0.08 인 4×4 그래디언트 행렬을 Muon 의 뉴턴–슐츠 반복 다섯 번에 넣으면 특잇값이 0.69~1.12 로 모이고, 정확한 직교화 −UVᵀ 는 모두 1이다. 행렬은 이 그림을 위해 고른 것이다(sources/epilogue/h4_history.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>이동 평균을 끈 Adam 이 부호 하강이라는 건, 식에서 β 두 개를 0으로 놓기만 하면 보이잖아요. 그게 2024년 글의 내용이라니 신기해요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>식을 줄이는 건 쉽죠. 번스타인과 뉴하우스가 한 일은 줄인 식을 「어떤 노름 아래의 가장 가파른 스텝」으로 읽은 거예요. Adam 은 2014년에 무엇을 하려고 만든 방법이었어요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>음, 칸마다 그래디언트 크기가 달라도 비슷한 크기로 걷게 하려고… 그래디언트를 그 크기의 이동 평균으로 나눈 거요. 노름 얘기는 없었네요.</p></div></div>
@@ -702,7 +719,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>노름을 고르는 방법에 남은 물음은 둘이다. 첫째, 층마다 맞는 노름은 무엇으로 정하는가. 은닉층의 2차원 가중치에는 스펙트럼 노름이 맞았지만, 입력이 낱말 번호 하나만 1인 원-핫 벡터인 임베딩 층이나 숫자 한 줄짜리 바이어스(층에서 더하는 b)에는 맞지 않아 Muon 은 임베딩 층과 바이어스에 AdamW 를 따로 썼다. 어텐션의 질의·키 행렬, 입력마다 어느 하위 신경망(전문가)에 보낼지 정하는 전문가 혼합의 갈림 층처럼 하는 일이 다른 행렬마다 노름을 하나씩 손으로 고르는 수밖에 없을까? 둘째, 부호 하강은 1차 근사로 가장 가파르지만 손실의 바닥 둘레를 맴돌았으니, 한 스텝이 가파르다는 것과 학습 전체가 빠르다는 것은 다른 말이었다. 직교화한 스텝이 수많은 스텝이 쌓인 뒤에도 더 좋은 곳에 닿는다는 근거는 아직 실험뿐이다.</p>
 <h3 id="곡률을-다시-들여오기">곡률을 다시 들여오기</h3>
 <p>곡률을 다시 들여오자는 생각은 반대쪽에서, Muon 이 그래디언트의 특잇값을 모두 1로 만든다는 데서 출발한다. 방향마다 손실의 곡률(2차 미분의 크기)이 달라도 모든 특이 방향에 똑같은 스텝을 쓰니, 곡률 정보를 버린 셈이라는 비판이 나온다. 그리고 Muon 은 누적을 끈 Shampoo 였다. 누적을 다시 켜면, 곧 지난 그래디언트들로 곡률을 추정해 스텝에 넣으면 무엇을 얻을까?</p>
-<p>곡률 추정을 다시 켜면 나아지느냐는 물음에 실험으로 답하려는 시도가 있다. 신경망 학습 알고리즘을 같은 조건에서 비교하는 공개 대회 AlgoPerf 의 첫 결과는 카심베그(Priya Kasimbeg)와 동료들의 논문(2025년 국제 학습 표현 학회)이 정리했다. 그 논문에 따르면 학습률 같은 설정값(하이퍼파라미터)을 참가자가 바깥에서 조율해 내는 부문에서 Shampoo 를 여러 장치에 나눠 돌리는 구현(Distributed Shampoo)이 1위를 했으니, 대각선이 아닌 곡률 근사가 실제 학습 시간에서도 Adam 을 이길 수 있음을 보인 것이다. 쉬천루이(Chenrui Xu)와 동료들의 FISMO(2026년 1월)는 스텝을 고르는 범위를 피셔 행렬(그래디언트가 흩어진 모양으로 곡률을 근사하는 행렬)을 층마다 작은 두 행렬로 쪼개 근사한 것으로 재고 그 안에서 스텝을 풀어, 직교화와 곡률 근사를 함께 쓰자고 제안했다. 이런 방향이 얼마나 쓸모 있을지는 아직 정해지지 않았다.</p>
+<p>곡률 추정을 다시 켜면 나아지느냐는 물음에 실험으로 답하려는 시도가 있다. 신경망 학습 알고리즘을 같은 조건에서 비교하는 공개 대회 AlgoPerf 의 첫 결과는 카심베그(Priya Kasimbeg)와 동료들의 논문(2025년 국제 학습 표현 학회)이 정리했다. 그 논문에 따르면 학습률 같은 설정값(하이퍼파라미터)을 참가자가 바깥에서 조율해 내는 부문에서 Shampoo 를 여러 장치에 나눠 돌리는 구현(Distributed Shampoo)이 1위를 했으니, 대각선이 아닌 곡률 근사가 실제 학습 시간에서도 Adam 을 이길 수 있음을 보인 것이다. 쉬천루이(Chenrui Xu)와 동료들의 FISMO(2026년)는 스텝을 고르는 범위를 피셔 행렬(그래디언트가 흩어진 모양으로 곡률을 근사하는 행렬)을 층마다 작은 두 행렬로 쪼개 근사한 것으로 재고 그 안에서 스텝을 풀어, 직교화와 곡률 근사를 함께 쓰자고 제안했다. 이런 방향이 얼마나 쓸모 있을지는 아직 정해지지 않았다.</p>
 <p>두 방향은 서로 다른 말을 하는 것처럼 보이지만 같은 물음을 두고 있다. 머리말에서 본 테일러 사다리의 셋째 항, ½<span class="sym" style="color:#0078e1">Δθ</span>ᵀ<span class="sym" style="color:#9467bd">H</span><span class="sym" style="color:#0078e1">Δθ</span> 를 무엇으로 대신할 것인가. 노름을 고르는 방법은 <span class="sym" style="color:#9467bd">H</span> 자리에 미리 정한 자를 놓고, 곡률을 들여오는 방법은 그 자를 학습하는 동안 지난 그래디언트로 고쳐 간다. 자를 고정하면 값싸고 단단하지만 지형에 맞지 않을 수 있고, 자를 고쳐 가면 지형에 맞지만 곡률 근사를 계산하는 값과 지난 그래디언트로 추정할 때 섞이는 노이즈를 치러야 한다. 지도의 맨 위 칸에 홀로 있는 뉴턴법까지 얼마나 다가가는 것이 값에 맞는지가 다음 점들이 찍힐 자리를 정할 것이다.</p>
 
 </article>

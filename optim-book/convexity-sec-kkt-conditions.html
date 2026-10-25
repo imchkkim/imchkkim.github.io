@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,13 +664,14 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 경사하강에서 Muon 까지</a></li>
 <li class="toc-part">미분과 근사</li>
 <li><a href="loss-landscape.html">손실 지형: 공을 굴려 손실의 바닥을 찾는 첫 실험</a></li>
 <li><a href="gradient-jacobian.html">그래디언트와 자코비안: 미분 가능성에서 연쇄법칙까지</a></li>
 <li><a href="taylor.html">테일러 전개: 0·1·2차 근사의 사다리</a></li>
 <li><a href="lipschitz.html">립시츠 연속: 함수가 얼마나 빨리 변할 수 있나</a></li>
-<li><a href="convexity.html" class="active">볼록이면 왜 쉬운가: 극소가 곧 최소</a><ul class="sidebar-toc"><li><a href="convexity.html">볼록 함수: 극소가 곧 최소</a></li><li><a href="convexity-sec-strong-convexity-linear-rate.html">강볼록: 오차가 스텝마다 같은 비율로 준다</a></li><li><a href="convexity-sec-convex-sets-constraints.html">볼록 집합: 제약 안에서도 극소는 최소</a></li><li><a href="convexity-sec-kkt-conditions.html" class="current">KKT 조건: 제약에 닿은 최소점을 알아보는 법</a></li><li><a href="convexity-sec-convexity-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="convexity.html" class="active">볼록이면 왜 쉬운가: 극소가 곧 최소</a><ul class="sidebar-toc"><li><a href="convexity.html">볼록 함수: 극소가 곧 최소</a></li><li><a href="convexity-sec-strong-convexity-linear-rate.html">강볼록: 오차가 스텝마다 같은 비율로 준다</a></li><li><a href="convexity-sec-convex-sets-constraints.html">볼록 집합: 제약 안에서도 극소는 최소</a></li><li><a href="convexity-sec-kkt-conditions.html" class="current">KKT 조건: 제약에 닿은 최소점을 알아보는 법</a></li><li><a href="convexity-sec-convexity-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li class="toc-part">0차 최적화</li>
 <li><a href="zeroth-order.html">미분 없이: 0차 최적화</a></li>
 <li><a href="evolution.html">진화 알고리즘: 개체군으로 하는 탐색</a></li>
@@ -688,7 +704,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h2 id="sec-kkt-conditions">KKT 조건: 제약에 닿은 최소점을 알아보는 법<span id="kkt-조건-제약에-닿은-최소점을-알아보는-법" class="anchor-alias"></span></h2>
 <p>원판 제약 안에서 목표 (2.5, 0.4)에 가장 가까운 점을 찾을 때, 사영 경사하강은 어디서 출발하든 원판 가장자리의 점 (1.9749, 0.3160)에 닿았다. 그런데 그 점에서 함수 ½|<span class="sym" style="color:#665522">θ</span> − <span class="sym" style="color:#87965a">a</span>|²의 그래디언트는 (−0.5251, −0.0840)이라 0이 아니다. 제약이 없을 때는 「그래디언트가 0인가」 하나로 최소점을 알아볼 수 있었지만, 제약에 기대 멈춘 최소점에서는 그 시험이 통하지 않는다. 경사하강을 몇천 스텝 돌려 얻은 답이 정말 최소점인지 확인하고 싶을 때, 또는 스텝을 돌리지 않고 답을 식으로 풀고 싶을 때, 제약에 닿은 최소점이 만족해야 할 조건은 무엇일까?</p>
 <h3 id="hist-kkt-three-discoveries" class="history" data-people="karush-william kuhn-harold tucker-albert">역사: 세 번 발견된 조건<span id="역사-세-번-발견된-조건" class="anchor-alias"></span></h3>
-<p>1950년 여름, 캘리포니아 버클리에서 열린 제2회 버클리 수리통계·확률 심포지엄에서 위상수학자로 알려진 프린스턴의 앨버트 터커(Albert W. Tucker)가 「비선형 계획(Nonlinear Programming)」이라는 제목으로 발표를 했다. 프린스턴에서 막 박사 학위를 마친 해럴드 쿤(Harold W. Kuhn)과 함께 한 일이었다. 두 사람은 원래 선형 계획에서 막 밝혀진 쌍대성(최소화 문제에서 만든 최대화 문제의 답이 원래 답과 같다는 성질)을 2차식 목적함수로 넓히려 했고, 그러다 부등식 제약이 있는 최소화 문제에서 최적점이 만족해야 할 조건을 얻었다. 발표는 1951년 논문집에 실렸고, 「비선형 계획」이라는 이름이 수학 문헌에 처음 등장한 것도 이 논문이었다. 두 사람이 얻은 최적점 조건은 곧바로 「쿤–터커 정리」라 불리며 새 연구 분야를 열었다.</p>
+<p>1950년 여름, 캘리포니아 버클리에서 열린 제2회 버클리 수리통계·확률 심포지엄에서 위상수학자로 알려진 프린스턴의 앨버트 터커(Albert W. Tucker)가 「비선형 계획(Nonlinear Programming)」이라는 제목으로 발표를 했다. 프린스턴에서 막 박사 학위를 마친 해럴드 쿤(Harold W. Kuhn)과 함께 한 일이었다. 두 사람은 원래 선형 계획에서 막 밝혀진 쌍대성(최소화 문제에서 만든 최대화 문제의 답이 원래 답과 같다는 성질)을 2차식 목적함수로 넓히려 했고, 그러다 부등식 제약이 있는 최소화 문제에서 최적점이 만족해야 할 조건을 얻었다. 발표는 1951년 논문집에 실렸고, 「비선형 계획」이라는 이름이 수학 문헌에 처음 등장한 것도 이 논문이었다. 두 사람이 얻은 최적점 조건은 곧바로 「쿤–터커 정리」라 불리며 새 연구 분야를 열었다. 이 논문은 조건이 통하지 않는 경우도 하나 들었는데, 제약 영역의 경계가 바깥으로 뾰족하게 튀어나온 끝에서는 최적점이어도 조건이 맞지 않을 수 있다는 것이다.</p>
+<figure class="fig "><img src="images/convexity/h5_cusp.png" alt="쿤과 터커가 1951년 논문 484쪽에 든 예를 이 책의 꼴(c(θ) ≤ 0 안에서 f를 최소화)로 옮겨 그린 것. 제약 θ₂ ≤ (1 − θ₁)³, θ₁ ≥ 0, θ₂ ≥ 0 안에서 f = −θ₁을 줄이면 답은 뾰족한 끝 (1, 0)이다. 그 점에서 두 제약의 그래디언트는 위와 아래를 가리켜 승수를 어떻게 붙여도 가로 방향의 ∇f를 지울 수 없다(논문에는 그림이 없다. sources/convexity/h_history.py)" loading="lazy"><figcaption>쿤과 터커가 1951년 논문 484쪽에 든 예를 이 책의 꼴(c(θ) ≤ 0 안에서 f를 최소화)로 옮겨 그린 것. 제약 θ₂ ≤ (1 − θ₁)³, θ₁ ≥ 0, θ₂ ≥ 0 안에서 f = −θ₁을 줄이면 답은 뾰족한 끝 (1, 0)이다. 그 점에서 두 제약의 그래디언트는 위와 아래를 가리켜 승수를 어떻게 붙여도 가로 방향의 ∇f를 지울 수 없다(논문에는 그림이 없다. sources/convexity/h_history.py)</figcaption></figure>
 <p>그런데 같은 조건은 이미 두 번 나온 적이 있었다. 1939년 12월 시카고 대학의 윌리엄 카루시(William Karush)는 로런스 그레이브스(Lawrence M. Graves)의 지도로 쓴 석사 논문 「부등식을 곁조건으로 한 여러 변수 함수의 최솟값」에서 거의 같은 조건을 증명했다. 당시 시카고 수학과의 관심은 무한 차원의 변분법이었고, 유한 차원의 이 최적점 조건은 작은 정리 작업쯤으로 여겨져 출판되지 않았다. 1948년에는 뉴욕 대학의 프리츠 존(Fritz John)이 리하르트 쿠란트의 60세 기념 논문집에 비슷한 결과를 실었는데, 그 전에 『듀크 수학 저널』에 냈다가 거절당한 논문이었다. 두 번 다 아무도 주목하지 않았다.</p>
 <p>카루시의 논문이 다시 빛을 본 것은 한참 뒤였다. 쿤은 미국 수학회 심포지엄에서 비선형 계획의 역사를 발표해 달라는 요청을 받았고, 그 무렵 다카야마 아키라(Takayama Akira)가 1974년에 낸 『수리경제학』을 읽다가 카루시의 석사 논문을 알게 되었다. 쿤은 1975년 2월 카루시에게 「쿤–터커 조건이라 불리는 결과에 대해 당신이 분명히 앞섰다」는 편지를 보냈고, 1976년의 역사 논문에서 카루시의 석사 논문을 출판되지 않은 고전으로 소개했다. 그래서 지금은 이 최적점 조건을 세 사람의 머리글자를 따서 KKT(카루시–쿤–터커) 조건이라 부른다.</p>
 <figure class="fig "><img src="images/convexity/h1_kkt_timeline.png" alt="같은 조건이 나온 다섯 순간. 1939년 카루시의 석사 논문은 출판되지 않았고, 1948년 존의 논문도 주목받지 못했다. 1950년 쿤과 터커의 발표가 비선형 계획이라는 분야를 열었고, 1976년 쿤이 카루시의 앞섬을 밝혔다(출처: 키엘센, 「비선형 계획에서 쿤–터커 정리의 맥락적 역사 분석」, Historia Mathematica 27, 2000)" loading="lazy"><figcaption>같은 조건이 나온 다섯 순간. 1939년 카루시의 석사 논문은 출판되지 않았고, 1948년 존의 논문도 주목받지 못했다. 1950년 쿤과 터커의 발표가 비선형 계획이라는 분야를 열었고, 1976년 쿤이 카루시의 앞섬을 밝혔다(출처: 키엘센, 「비선형 계획에서 쿤–터커 정리의 맥락적 역사 분석」, Historia Mathematica 27, 2000)</figcaption></figure>
@@ -754,7 +771,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <aside class="guide"><p class="guide-title">길잡이 · 『정보기하학』 「르장드르 변환: 높이 대신 접선으로 적은 함수」</p><p>승수 ν를 변수로 삼아 문제를 뒤집어 푸는 쌍대 문제의 밑바탕에는 볼록 함수를 접선들로 다시 적는 르장드르 변환이 있다. 볼록 함수와 그 쌍대가 맞물리는 펜헬–영 부등식까지 이어진다. <a href="https://lameproof.com/infogeo-book/convex-duality-sec-legendre-transform-tangents.html">이어 읽기</a></p>
 </aside>
 <h3 id="잠수함-수색-시간을-칸마다-나누기">잠수함 수색: 시간을 칸마다 나누기</h3>
-<p>잃어버린 지갑을 찾을 때는 가장 있을 법한 가방부터 뒤진다. 그렇다고 가방만 한 시간 내내 뒤지지는 않는다. 몇 분 뒤져도 안 나오면 거기 있을 가능성이 낮아진 것 같아서 다른 곳으로 옮긴다. 정해진 시간을 여러 곳에 얼마씩 나눌지를 셈으로 정하면 제약이 붙은 최소화 문제가 된다.</p>
+<p>잃어버린 지갑을 찾을 때는 가장 있을 법한 가방부터 뒤지지만, 가방만 한 시간 내내 뒤지지는 않는다. 가방을 몇 분 뒤져도 안 나오면 거기 있을 가능성이 낮아진 것 같고, 아직 손대지 않은 외투 주머니나 책상 서랍이 이제는 더 있을 법해 보여서 뒤지는 곳을 옮긴다. 정해진 시간을 여러 곳에 얼마씩 나눌지를 셈으로 정하면 제약이 붙은 최소화 문제가 된다.</p>
 <p>이 문제를 학문으로 세운 것은 전쟁이었다. 2차 세계대전 때 미 해군은 대서양의 유보트를 찾으려고 물리학자 필립 모스(Philip M. Morse)를 중심으로 대잠전 작전연구반을 꾸렸고, 컬럼비아 대학의 수학자 버나드 쿠프먼(Bernard O. Koopman)이 여기서 일했다. 쿠프먼은 비행기와 함정의 탐색 시간을 해역에 어떻게 나눌지를 다루었고, 그 연구는 1946년 해군 작전평가단 보고서 56호 『탐색과 차단(Search and Screening)』에 정리되었다. 이 보고서는 기밀로 묶여 있다가 1958년에 풀렸다. 쿠프먼은 한 해역에 탐색 노력 z를 쏟았을 때 거기 있는 목표를 찾을 확률을 1 − e⁻ᶻ로 두고, 전체 노력이 정해져 있을 때 찾을 확률이 가장 커지게 노력을 나누는 문제를 풀었다. 1957년 학술지 『오퍼레이션스 리서치』에 「탐색 이론 III: 탐색 노력의 최적 분배」로 실린 내용이다.</p>
 <p>숫자로 따라가 보자. 해역을 세 칸으로 나누고, 잠수함이 각 칸에 있을 확률을 <span class="sym" style="color:#c2408a">p</span>₁ = 0.5, <span class="sym" style="color:#c2408a">p</span>₂ = 0.3, <span class="sym" style="color:#c2408a">p</span>₃ = 0.2로 둔다. 한 칸을 <span class="sym" style="color:#665522">θ</span>ᵢ시간 뒤지면 거기 있는 잠수함을 1 − exp(−<span class="sym" style="color:#665522">θ</span>ᵢ)의 확률로 찾는다고 하자. 한 시간이면 63%다. 비행기가 쓸 수 있는 시간은 1시간이다. 줄일 손실은 놓칠 확률 <span class="sym" style="color:#d62728">f</span>(<span class="sym" style="color:#665522">θ</span>) = 0.5 exp(−<span class="sym" style="color:#665522">θ₁</span>) + 0.3 exp(−<span class="sym" style="color:#665522">θ₂</span>) + 0.2 exp(−<span class="sym" style="color:#665522">θ₃</span>)이고, 제약은 <span class="sym" style="color:#665522">θ₁</span> + <span class="sym" style="color:#665522">θ₂</span> + <span class="sym" style="color:#665522">θ₃</span> ≤ 1과 <span class="sym" style="color:#665522">θ</span>ᵢ ≥ 0 세 개다. exp(−θ)는 볼록 함수이니 그 합도 볼록이고 제약은 모두 일차식이라, KKT 조건을 만족하는 점이 곧 답이다. 1시간을 다 칸 1에 쓰면 찾을 확률이 0.316, 세 칸에 20분씩 고르게 나누면 0.283이다. KKT 조건을 풀어 나온 답은 칸 1에 0.755시간, 칸 2에 0.245시간, 칸 3에 0시간이고, 찾을 확률은 0.330이다. 가장 있을 법한 칸에 다 거는 것보다도, 고르게 나누는 것보다도 낫다.</p>
 <p>조건을 하나씩 읽어 보자. 시간 제약의 승수를 <span class="sym" style="color:#a000c8">ν</span>₀, 「<span class="sym" style="color:#665522">θ</span>ᵢ ≥ 0」을 −<span class="sym" style="color:#665522">θ</span>ᵢ ≤ 0으로 적은 제약의 승수를 <span class="sym" style="color:#a000c8">ν</span>ᵢ라 하면, KKT 첫 줄은 칸마다 −<span class="sym" style="color:#c2408a">p</span>ᵢ exp(−<span class="sym" style="color:#665522">θ</span>ᵢ) + <span class="sym" style="color:#a000c8">ν</span>₀ − <span class="sym" style="color:#a000c8">ν</span>ᵢ = 0이다. <span class="sym" style="color:#c2408a">p</span>ᵢ exp(−<span class="sym" style="color:#665522">θ</span>ᵢ)는 칸 i를 조금 더 뒤질 때 놓칠 확률이 시간당 줄어드는 속도다. 칸 1과 칸 2는 뒤지는 칸이라 −<span class="sym" style="color:#665522">θ</span>ᵢ ≤ 0에 닿지 않았으므로 넷째 조건에서 <span class="sym" style="color:#a000c8">ν</span>ᵢ = 0이고, 두 칸의 속도가 0.5 exp(−0.755) = 0.3 exp(−0.245) = 0.2349로 같아야 한다. 한 칸의 속도가 더 빠르면 시간을 그 칸으로 옮겨 놓칠 확률을 더 줄일 수 있기 때문이다. 칸 3은 한 번도 뒤지지 않았을 때의 속도가 0.2라서 0.2349보다 느리다. 칸 3은 제약 −<span class="sym" style="color:#665522">θ₃</span> ≤ 0에 닿아 있고, 승수가 <span class="sym" style="color:#a000c8">ν</span>₃ = 0.2349 − 0.2 = 0.035 &gt; 0이다. 셋째 조건 <span class="sym" style="color:#a000c8">ν</span> ≥ 0이 「처음 뒤지는 순간부터 다른 칸보다 느린 칸은 아예 뒤지지 않는다」는 판단을 맡는다.</p>
@@ -815,7 +832,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>반 평균이 아니라 커트라인 근처 학생 몇 명이 합격선을 정하는 것과 같네요. 전교 1등이 전학을 가도 커트라인은 안 바뀌는데, 커트라인에 걸린 학생 한 명이 빠지면 바뀌는 거죠.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="convexity-sec-convex-sets-constraints.html">&larr; 볼록 집합: 제약 안에서도 극소는 최소</a><span class="page-count">4 / 5</span><a class="chapter-nav-next" href="convexity-sec-convexity-summary.html">자주 하는 실수와 요약 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="convexity-sec-convex-sets-constraints.html">&larr; 볼록 집합: 제약 안에서도 극소는 최소</a><span class="page-count">4 / 5</span><a class="chapter-nav-next" href="convexity-sec-convexity-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

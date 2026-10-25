@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,13 +664,14 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 경사하강에서 Muon 까지</a></li>
 <li class="toc-part">미분과 근사</li>
 <li><a href="loss-landscape.html">손실 지형: 공을 굴려 손실의 바닥을 찾는 첫 실험</a></li>
 <li><a href="gradient-jacobian.html">그래디언트와 자코비안: 미분 가능성에서 연쇄법칙까지</a></li>
 <li><a href="taylor.html">테일러 전개: 0·1·2차 근사의 사다리</a></li>
 <li><a href="lipschitz.html">립시츠 연속: 함수가 얼마나 빨리 변할 수 있나</a></li>
-<li><a href="convexity.html" class="active">볼록이면 왜 쉬운가: 극소가 곧 최소</a><ul class="sidebar-toc"><li><a href="convexity.html">볼록 함수: 극소가 곧 최소</a></li><li><a href="convexity-sec-strong-convexity-linear-rate.html" class="current">강볼록: 오차가 스텝마다 같은 비율로 준다</a></li><li><a href="convexity-sec-convex-sets-constraints.html">볼록 집합: 제약 안에서도 극소는 최소</a></li><li><a href="convexity-sec-kkt-conditions.html">KKT 조건: 제약에 닿은 최소점을 알아보는 법</a></li><li><a href="convexity-sec-convexity-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="convexity.html" class="active">볼록이면 왜 쉬운가: 극소가 곧 최소</a><ul class="sidebar-toc"><li><a href="convexity.html">볼록 함수: 극소가 곧 최소</a></li><li><a href="convexity-sec-strong-convexity-linear-rate.html" class="current">강볼록: 오차가 스텝마다 같은 비율로 준다</a></li><li><a href="convexity-sec-convex-sets-constraints.html">볼록 집합: 제약 안에서도 극소는 최소</a></li><li><a href="convexity-sec-kkt-conditions.html">KKT 조건: 제약에 닿은 최소점을 알아보는 법</a></li><li><a href="convexity-sec-convexity-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li class="toc-part">0차 최적화</li>
 <li><a href="zeroth-order.html">미분 없이: 0차 최적화</a></li>
 <li><a href="evolution.html">진화 알고리즘: 개체군으로 하는 탐색</a></li>
@@ -780,10 +796,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>왼쪽 식은 강볼록 함수에 대한 약속으로, 스텝마다 남은 오차가 1 − <span class="sym" style="color:#006600">η</span><span class="sym" style="color:#c45a00">μ</span>배 아래로 준다고 말한다. 포물선(<span class="sym" style="color:#c45a00">μ</span> = 1, <span class="sym" style="color:#006600">η</span> = 0.1)이라면 보장된 비는 0.9이고, 실제 비 0.81은 그 안에 있다. 오른쪽 식은 강볼록이 아닌 볼록 함수에 대한 약속인데, 이때는 비율이 아니라 1/<span class="sym" style="color:#a67a63">k</span>로 줄어든다는 것까지만 장담할 수 있다. 4차 함수(<span class="sym" style="color:#665522">x</span>₀ = 1, <span class="sym" style="color:#006600">η</span> = 0.1, 출발점 아래 구간에서 <span class="sym" style="color:#c45a00">L</span> = 3)라면 보장은 5/<span class="sym" style="color:#a67a63">k</span>이고, 100스텝에서 0.05, 1000스텝에서 0.005다. 보장은 볼록 함수 가운데 가장 나쁜 경우까지 묶어 둔 상한이기 때문에, 실제 오차 0.000542, 6.14 × 10⁻⁶은 보장보다 훨씬 작다. 그래도 차이의 종류는 분명하다. 비율로 줄면 정확도의 자릿수가 스텝 수에 비례해 늘고, 1/<span class="sym" style="color:#a67a63">k</span>로 줄면 자릿수 하나를 더 얻는 데 스텝이 열 배씩 든다.</p>
 <p>두 가지를 섞은 ③ 0.05<span class="sym" style="color:#665522">x</span>² + <span class="sym" style="color:#665522">x</span>⁴/4(<span class="sym" style="color:#c45a00">μ</span> = 0.1)는 처음에는 4차 함수처럼 기어가다가, 최소점 근처에서 곡률 0.1이 버텨 주면서 남은 오차가 스텝마다 0.9801배(거리로 0.99배)씩 줄어드는 곧은 내리막으로 바뀌어, 10⁻⁶ 아래까지 418스텝이 걸린다. 학습률은 1/<span class="sym" style="color:#c45a00">L</span>을 넘을 수 없으니 1 − <span class="sym" style="color:#006600">η</span><span class="sym" style="color:#c45a00">μ</span>는 1 − <span class="sym" style="color:#c45a00">μ</span>/<span class="sym" style="color:#c45a00">L</span>보다 작아질 수 없다. 가장 큰 곡률과 가장 작은 곡률의 비 <span class="sym" style="color:#c45a00">L</span>/<span class="sym" style="color:#c45a00">μ</span>가 스텝 수를 정한다는 이야기는 경사하강의 학습률을 다룰 때 「조건수」라는 이름으로 다시 나온다.</p>
 <figure class="fig "><img src="images/convexity/a2_rates.png" alt="같은 학습률 0.1, 같은 출발점 1에서 세 함수의 남은 오차. 왼쪽(세로축 로그 눈금): 강볼록인 ½x²는 곧은 내리막이고, 최소점에서 곡률이 0인 x⁴/4는 휘어 기어간다. 오른쪽(두 축 모두 로그 눈금): x⁴/4는 기울기 −2의 곧은 선(1/k²)이고, 회색 점선은 볼록 함수의 보장 5/k. 0.05x² + x⁴/4는 최소점 근처에서 곡률 0.1이 버텨 주자 아래로 꺾인다(sources/convexity/s3_rates.py)" loading="lazy"><figcaption>같은 학습률 0.1, 같은 출발점 1에서 세 함수의 남은 오차. 왼쪽(세로축 로그 눈금): 강볼록인 ½x²는 곧은 내리막이고, 최소점에서 곡률이 0인 x⁴/4는 휘어 기어간다. 오른쪽(두 축 모두 로그 눈금): x⁴/4는 기울기 −2의 곧은 선(1/k²)이고, 회색 점선은 볼록 함수의 보장 5/k. 0.05x² + x⁴/4는 최소점 근처에서 곡률 0.1이 버텨 주자 아래로 꺾인다(sources/convexity/s3_rates.py)</figcaption></figure>
-<figure class="widget-embed" id="widget-convexity-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 강볼록과 수렴</span><a class="widget-open" href="widgets/convexity.html?v=4abe0420#w2" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/convexity.html?w=w2&embed=1&v=4abe0420" title="위젯 2: 강볼록과 수렴" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-convexity-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 2: 강볼록과 수렴</span><a class="widget-open" href="widgets/convexity.html?v=e5d9983e#w2">크게 열기</a></div><iframe data-src="widgets/convexity.html?w=w2&embed=1&v=e5d9983e" title="위젯 2: 강볼록과 수렴" loading="lazy"></iframe></figure>
 <h3 id="hist-polyak-condition-complexity" class="history" data-people="polyak-boris nemirovski-arkadi yudin-david">역사: 폴랴크의 조건과 네미롭스키·유딘의 물음<span id="역사-폴랴크의-조건과-네미롭스키-유딘의-물음" class="anchor-alias"></span></h3>
 <p>위의 증명에서 강볼록을 쓴 곳은 그래디언트 길이의 제곱이 남은 오차의 2<span class="sym" style="color:#c45a00">μ</span>배 이상이라는 부등식 한 군데뿐이었다. 소련의 수학자 보리스 폴랴크(Boris Polyak)는 1963년 소련의 계산수학 학술지에 실은 「범함수를 최소화하는 그래디언트 방법」(범함수는 함수를 넣으면 수 하나를 내놓는 함수)에서, 바로 이 부등식 하나만 있으면 경사하강이 같은 비율로 줄어든다는 것을 보였다. 같은 해 폴란드의 스타니스와프 워야시에비치(Stanisław Łojasiewicz)는 해석 함수에 대해 더 넓은 꼴의 부등식을 냈고, 그래서 지금은 이것을 폴랴크–워야시에비치 조건이라 부른다. 폴랴크–워야시에비치 조건이 강볼록과 무엇이 다른지는 아래 문제 5에서 직접 따져 본다. 2016년 하메드 카리미(Hamed Karimi)와 동료들은 「폴랴크–워야시에비치 조건 아래에서 그래디언트 방법과 근접 그래디언트 방법의 선형 수렴」에서 이 오래된 조건을 기계학습의 여러 방법에 다시 들고 나왔다.</p>
 <p>1970년대에 소련의 아르카디 네미롭스키(Arkadi Nemirovski)와 다비드 유딘(David Yudin)은 물음을 뒤집었다. 특정 방법이 얼마나 빠른지가 아니라, 함수에 그래디언트를 몇 번 물어봐야 하는지를 물은 것이다. 1979년에 러시아어로, 1983년에 영어로 낸 책 『최적화에서 문제의 복잡도와 방법의 효율』에서 그들은 함수의 종류(볼록인지, 강볼록인지, 매끄러운지)마다 그래디언트만 물어보는 어떤 방법도 넘을 수 없는 한계를 따졌다. 이 틀에서 보면 볼록과 강볼록은 계산의 편의를 위한 가정이 아니라 문제의 어려움을 가르는 경계다. 매끄러운 볼록 함수에서 경사하강의 1/<span class="sym" style="color:#a67a63">k</span>는 그 한계에 못 미쳤고, 경사하강과 한계 사이를 메우는 방법은 지난 스텝들을 기억해 두는 쪽에서 나왔다.</p>
+<figure class="fig "><img src="images/convexity/h3_bounds.png" alt="매끄러운 볼록 함수에서 그래디언트를 k번 물은 뒤의 남은 오차(두 축 모두 로그 눈금). 경사하강이 보장하는 1/(2k)(점선)와 실제로 가장 나쁜 함수에서 낸 값(실선)이, 그래디언트만 묻는 어떤 방법도 넘지 못하는 하한 3/(32(k+1)²)(검은 선)보다 k = 1000에서 각각 5344배, 49배 크다. 하한의 꼴과 가장 나쁜 함수는 네스테로프의 교과서(2004) 정리 2.1.7을 따랐다(sources/convexity/h_history.py)" loading="lazy"><figcaption>매끄러운 볼록 함수에서 그래디언트를 k번 물은 뒤의 남은 오차(두 축 모두 로그 눈금). 경사하강이 보장하는 1/(2k)(점선)와 실제로 가장 나쁜 함수에서 낸 값(실선)이, 그래디언트만 묻는 어떤 방법도 넘지 못하는 하한 3/(32(k+1)²)(검은 선)보다 k = 1000에서 각각 5344배, 49배 크다. 하한의 꼴과 가장 나쁜 함수는 네스테로프의 교과서(2004) 정리 2.1.7을 따랐다(sources/convexity/h_history.py)</figcaption></figure>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>폴랴크의 조건은 |<span class="sym" style="color:#b0892a">∇f</span>|² ≥ 2<span class="sym" style="color:#c45a00">μ</span>(<span class="sym" style="color:#d62728">f</span> − <span class="sym" style="color:#d62728">f</span>*)라는 부등식 하나이고 증명도 짧잖아요. 그게 1963년에야 나왔다는 게 신기해요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>증명은 짧아요. 그런데 그 한 줄이 핵심이라는 걸 알아보려면 무엇이 먼저 있어야 할까요? 위에서 강볼록이 쓰인 곳을 찾을 때 우리가 한 일을 떠올려 보세요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>증명을 한 줄씩 보면서 어느 가정이 실제로 쓰였는지 찾았어요… 아, 강볼록을 가정한 증명이 먼저 있어야 거기서 덜어 낼 수 있네요.</p></div></div>
@@ -830,7 +847,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>아, 그럼 폴랴크의 조건은 「그래디언트가 0인 곳은 최소점뿐」이라는 말을 품고 있었네요. 강볼록은 폴랴크의 조건을 성립시키는 넉넉한 경우 하나이고, 비율로 줄어드는 데 꼭 필요한 건 그 부등식 쪽이에요. 해석학에서 정리의 가정을 하나씩 빼 보며 어느 가정이 진짜 필요한지 찾던 것과 같아요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>볼록이 아니면 무조건 느리고 위험한 줄 알았는데, 최소점 말고는 그래디언트가 0인 곳이 없으면 빨리 닿는군요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>위젯 2에서 문제 5 설정을 불러와, 로그 눈금 위의 남은 오차 곡선과 10⁻⁶ 아래까지 걸린 스텝 수를 직접 확인해 보세요.</p></div></div>
-<figure class="preset-card"><a href="widgets/convexity.html?p=prob-convexity-nonconvex-linear-rate&v=4abe0420#w2" target="_blank" rel="noopener"><img src="images/convexity/preset-prob-convexity-nonconvex-linear-rate.png" alt="위젯 2 · 문제 5 설정" loading="lazy"></a><figcaption><a href="widgets/convexity.html?p=prob-convexity-nonconvex-linear-rate&v=4abe0420#w2" target="_blank" rel="noopener">위젯에서 열기: 위젯 2 · 문제 5 설정 ↗</a></figcaption></figure>
+<figure class="preset-card"><a href="widgets/convexity.html?p=prob-convexity-nonconvex-linear-rate&v=e5d9983e#w2"><img src="images/convexity/preset-prob-convexity-nonconvex-linear-rate.png" alt="위젯 2 · 문제 5 설정" loading="lazy"></a><figcaption><a href="widgets/convexity.html?p=prob-convexity-nonconvex-linear-rate&v=e5d9983e#w2">위젯에서 열기: 위젯 2 · 문제 5 설정</a></figcaption></figure>
 </div><div class="dialogue"><h3 id="prob-convexity-separable-logistic">문제 6. 다 가를 수 있는 데이터의 로지스틱 회귀<span id="문제-6-다-가를-수-있는-데이터의-로지스틱-회귀" class="anchor-alias"></span></h3>
 <blockquote>
 <p>씨앗 3으로 뽑은 2차원 점 40개(두 덩어리, 직선 하나로 완전히 갈린다)에 편향 없는 로지스틱 회귀를 학습률 0.5로 맞춘다. (가) 페널티 없이(<span class="sym" style="color:#874b0f">λ</span> = 0) 100, 1000, 10000스텝 뒤의 손실과 가중치 길이 |<span class="sym" style="color:#665522">w</span>|는? (나) 손실은 볼록 함수인데 왜 이렇게 될까? 강볼록인가? (다) 가중치 감쇠 <span class="sym" style="color:#874b0f">λ</span> = 0.01을 더하면 어떻게 되는가?</p>

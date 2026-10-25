@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 경사하강에서 Muon 까지</a></li>
 <li class="toc-part">미분과 근사</li>
 <li><a href="loss-landscape.html">손실 지형: 공을 굴려 손실의 바닥을 찾는 첫 실험</a></li>
@@ -666,7 +682,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="sgd.html">확률적 경사하강: 노이즈 섞인 그래디언트로 걷기</a></li>
 <li class="toc-part">2차 최적화</li>
 <li><a href="newton.html">뉴턴법과 헤시안: 곡률을 알면 한 번에</a></li>
-<li><a href="sharpness.html" class="active">샤프니스: 안정성의 가장자리</a><ul class="sidebar-toc"><li><a href="sharpness.html" class="current">샤프니스: 헤시안의 가장 큰 고윳값</a></li><li><a href="sharpness-sec-edge-of-stability.html">안정성의 가장자리: 샤프니스가 2/η 에 붙는다</a></li><li><a href="sharpness-sec-flat-minima-learning-rate.html">평평한 극소: 학습률이 바닥을 고른다</a></li><li><a href="sharpness-sec-sharpness-aware-minimization.html">SAM: 샤프니스를 깎는 학습</a></li><li><a href="sharpness-sec-sharpness-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="sharpness.html" class="active">샤프니스: 안정성의 가장자리</a><ul class="sidebar-toc"><li><a href="sharpness.html" class="current">샤프니스: 헤시안의 가장 큰 고윳값</a></li><li><a href="sharpness-sec-edge-of-stability.html">안정성의 가장자리: 샤프니스가 2/η 에 붙는다</a></li><li><a href="sharpness-sec-flat-minima-learning-rate.html">평평한 극소: 학습률이 바닥을 고른다</a></li><li><a href="sharpness-sec-sharpness-aware-minimization.html">SAM: 샤프니스를 깎는 학습</a></li><li><a href="sharpness-sec-sharpness-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li class="toc-part">2차의 근사와 큰 모델의 스텝</li>
 <li><a href="momentum.html">모멘텀: 무거운 공과 네스테로프 가속</a></li>
 <li><a href="adaptive.html">적응 학습률: AdaGrad 에서 AdamW 까지</a></li>
@@ -788,7 +804,7 @@ s &amp; \text{방향 }\textcolor{#87965a}{v}\text{로 움직인 거리}
 <p>무작위 방향은 거의 모두 0에 가까운 고윳값의 방향들로 이루어져 있기 때문에, 무작위 방향에서 출발한 파워 이터레이션은 첫 추정값이 0.0081이다. 둘째 반복에서 7.2162, 셋째에서 8.9983, 다섯째에서 9.6848, 열째에서 10.0540이 되고, 여덟째 반복부터 참값의 1% 안에 든다. 헤시안-벡터 곱 여덟 번이면 140만 칸짜리 표를 보지 않고도 가장 큰 고윳값을 안다. 이 장의 컴퓨터에서 곱 하나는 그래디언트 하나의 약 2.9배 시간이 걸렸다.</p>
 <p>이렇게 지금 자리에서 헤시안이 가진 가장 큰 고윳값, 곧 손실이 가장 가파르게 휜 방향의 곡률을 <strong>샤프니스</strong> (지금 자리의 가장 가파른 곡률 / sharpness)라 한다. 그릇에서는 어디서나 10이고, 신경망에서는 파라미터가 움직이면 함께 바뀐다. 2/L의 L이 「어디서나의 상한」이었다면, 샤프니스는 「지금 여기의 값」이다.</p>
 <figure class="fig "><img src="images/sharpness/a2_power_mlp.png" alt="왼쪽: 작은 신경망(파라미터 1185개)의 처음 헤시안의 고윳값 분포(세로축 로그 눈금). 거의 모두 0 근처에 몰려 있고 1보다 큰 것은 셋이다. 오른쪽: 무작위 방향에서 출발한 파워 이터레이션의 추정값. 헤시안 전체로 구한 참값 10.07에 여덟째 반복부터 1% 안으로 든다(sources/sharpness/s1_sharpness.py)" loading="lazy"><figcaption>왼쪽: 작은 신경망(파라미터 1185개)의 처음 헤시안의 고윳값 분포(세로축 로그 눈금). 거의 모두 0 근처에 몰려 있고 1보다 큰 것은 셋이다. 오른쪽: 무작위 방향에서 출발한 파워 이터레이션의 추정값. 헤시안 전체로 구한 참값 10.07에 여덟째 반복부터 1% 안으로 든다(sources/sharpness/s1_sharpness.py)</figcaption></figure>
-<figure class="widget-embed" id="widget-sharpness-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 1: 그릇의 샤프니스와 학습률</span><a class="widget-open" href="widgets/sharpness.html?v=c92140a6#w1" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div><iframe data-src="widgets/sharpness.html?w=w1&embed=1&v=c92140a6" title="위젯 1: 그릇의 샤프니스와 학습률" loading="lazy"></iframe></figure>
+<figure class="widget-embed" id="widget-sharpness-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">위젯 1: 그릇의 샤프니스와 학습률</span><a class="widget-open" href="widgets/sharpness.html?v=d0e4f438#w1">크게 열기</a></div><iframe data-src="widgets/sharpness.html?w=w1&embed=1&v=d0e4f438" title="위젯 1: 그릇의 샤프니스와 학습률" loading="lazy"></iframe></figure>
 <h3 id="ml에서-0-근처에-몰린-고윳값과-헤시안-도구">ML에서: 0 근처에 몰린 고윳값과 헤시안 도구</h3>
 <p>작은 신경망의 고윳값이 0 근처에 몰리고 몇 개만 멀리 떨어져 있던 모습은 파라미터 1185개짜리 작은 신경망만의 것이 아니다. 레벤트 사군(Levent Sagun), 레옹 보투(Léon Bottou), 얀 르쿤(Yann LeCun)은 2016년 원고 「딥러닝에서 헤시안의 고윳값: 특이성과 그 너머」에서, 학습한 신경망의 헤시안 고윳값이 0 근처의 큰 덩어리와 그 밖으로 떨어진 몇 개로 나뉜다고 보고했다. 덩어리는 신경망이 데이터에 비해 얼마나 큰지와, 떨어진 몇 개는 데이터와 관련이 있다고 보았다. 학습률의 벼랑을 정하는 것은 그 떨어진 몇 개 가운데 가장 큰 하나다.</p>
 <p>큰 신경망의 샤프니스도 같은 방법으로 잰다. 파이토치에서는 그래디언트를 <code>create_graph=True</code>로 구한 뒤 그 그래디언트와 <span class="sym" style="color:#87965a">v</span>의 내적을 한 번 더 미분하면 <span class="sym" style="color:#9467bd">H</span><span class="sym" style="color:#87965a">v</span>가 나오고, <code>torch.autograd.functional.hvp</code>도 Hv를 바로 계산해 준다. 캘리포니아 대학교 버클리의 즈웨이 야오(Zhewei Yao)와 동료들이 2019년에 공개한 PyHessian은 이 곱을 바탕으로 큰 신경망 헤시안의 가장 큰 고윳값, 대각합, 고윳값 분포를 계산하는 도구다.</p>
@@ -841,7 +857,7 @@ s &amp; \text{방향 }\textcolor{#87965a}{v}\text{로 움직인 거리}
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>스펙트럼 정규화가 가장 큰 특잇값을 스텝마다 한 번씩만 반복하고 벡터를 다음 스텝으로 넘겨 쓰던 것과 같은 꾀네요. 수치해석 수업에서 고윳값이 가까우면 수렴이 느리다고 배운 걸 이렇게 쓰는 거고요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="newton-sec-newton-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="sharpness-sec-edge-of-stability.html">안정성의 가장자리: 샤프니스가 2/η 에 붙는다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="newton-sec-newton-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="sharpness-sec-edge-of-stability.html">안정성의 가장자리: 샤프니스가 2/η 에 붙는다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

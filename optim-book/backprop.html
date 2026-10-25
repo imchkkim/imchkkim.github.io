@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 경사하강에서 Muon 까지</a></li>
 <li class="toc-part">미분과 근사</li>
 <li><a href="loss-landscape.html">손실 지형: 공을 굴려 손실의 바닥을 찾는 첫 실험</a></li>
@@ -660,7 +676,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="zeroth-order.html">미분 없이: 0차 최적화</a></li>
 <li><a href="evolution.html">진화 알고리즘: 개체군으로 하는 탐색</a></li>
 <li class="toc-part">1차 최적화</li>
-<li><a href="backprop.html" class="active">역전파: 자코비안 곱을 거꾸로</a><ul class="sidebar-toc"><li><a href="backprop.html" class="current">순방향 모드: 입력 하나에 대한 방향 미분을 앞으로 실어 나른다</a></li><li><a href="backprop-sec-reverse-mode-backpropagation.html">역전파: 출력 하나의 그래디언트를 뒤로 나눠 준다</a></li><li><a href="backprop-sec-automatic-differentiation-code.html">자동미분: 식이 아니라 코드를 미분한다</a></li><li><a href="backprop-sec-gradient-checkpointing.html">체크포인팅: 활성값을 다 남기지 않고 다시 계산한다</a></li><li><a href="backprop-sec-backprop-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="backprop.html" class="active">역전파: 자코비안 곱을 거꾸로</a><ul class="sidebar-toc"><li><a href="backprop.html" class="current">순방향 모드: 입력 하나에 대한 방향 미분을 앞으로 실어 나른다</a></li><li><a href="backprop-sec-reverse-mode-backpropagation.html">역전파: 출력 하나의 그래디언트를 뒤로 나눠 준다</a></li><li><a href="backprop-sec-automatic-differentiation-code.html">자동미분: 식이 아니라 코드를 미분한다</a></li><li><a href="backprop-sec-gradient-checkpointing.html">체크포인팅: 활성값을 다 남기지 않고 다시 계산한다</a></li><li><a href="backprop-sec-backprop-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="initialization.html">가중치 초기화: 신호가 커지지도 사라지지도 않게</a></li>
 <li><a href="gradient-descent.html">경사하강: 학습률은 어디까지 키울 수 있나</a></li>
 <li><a href="sgd.html">확률적 경사하강: 노이즈 섞인 그래디언트로 걷기</a></li>
@@ -732,11 +748,13 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </tr>
 </tbody>
 </table></div>
+<figure class="fig "><img src="images/backprop/h2_wengert_pass.png" alt="웽거트의 예제 y = x₁x₂ + sin(x₂x₃)를 네 단계의 그래프로 그리고, 이 책이 고른 점 x = (1, 2, 3)에서 단계마다의 값(검은 글자)과 ẋ₁ = 1, ẋ₂ = ẋ₃ = 0으로 놓고 함께 계산한 미분(초록 글자)을 적었다. 함수를 한 번 계산하자 끝에서 ∂y/∂x₁ = 2가 덤으로 나온다. 원 논문의 그림이 아니라 그 예제를 직접 그린 것이다(sources/backprop/h_history.py)" loading="lazy"><figcaption>웽거트의 예제 y = x₁x₂ + sin(x₂x₃)를 네 단계의 그래프로 그리고, 이 책이 고른 점 x = (1, 2, 3)에서 단계마다의 값(검은 글자)과 ẋ₁ = 1, ẋ₂ = ẋ₃ = 0으로 놓고 함께 계산한 미분(초록 글자)을 적었다. 함수를 한 번 계산하자 끝에서 ∂y/∂x₁ = 2가 덤으로 나온다. 원 논문의 그림이 아니라 그 예제를 직접 그린 것이다(sources/backprop/h_history.py)</figcaption></figure>
 <p>점이 붙은 것은 「입력을 조금 바꿨을 때 그 단계의 값이 입력 변화의 몇 배로 바뀌나」, 곧 그 단계의 값을 입력으로 미분한 값이다. 편미분 ∂y/∂x₁을 얻으려면 ẋ₁ = 1, ẋ₂ = ẋ₃ = 0으로 놓고 함수를 한 번 계산한다. ∂y/∂x₂, ∂y/∂x₃도 같은 방식이다. 그래서 웽거트의 「편미분 생성기」 서브루틴은 함숫값을 한 번 구한 뒤, 편미분 하나마다 함수 서브루틴을 한 번씩, 모두 세 번 더 부른다. 입력이 셋이면 세 번이고, 입력이 백만 개면 백만 번이다.</p>
+<figure class="fig "><img src="images/backprop/h3_wengert_three.png" alt="같은 점 x = (1, 2, 3)에서 편미분 생성기가 씨앗 ẋ를 (1, 0, 0), (0, 1, 0), (0, 0, 1)로 바꿔 가며 함수를 세 번 더 불러 ∂y/∂x₁ = 2, ∂y/∂x₂ = 3.881, ∂y/∂x₃ = 1.920을 하나씩 얻는 모습. 호출 한 번이 편미분 하나만 내준다(직접 그림, sources/backprop/h_history.py)" loading="lazy"><figcaption>같은 점 x = (1, 2, 3)에서 편미분 생성기가 씨앗 ẋ를 (1, 0, 0), (0, 1, 0), (0, 0, 1)로 바꿔 가며 함수를 세 번 더 불러 ∂y/∂x₁ = 2, ∂y/∂x₂ = 3.881, ∂y/∂x₃ = 1.920을 하나씩 얻는 모습. 호출 한 번이 편미분 하나만 내준다(직접 그림, sources/backprop/h_history.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>식을 단계로 쪼개서 값이랑 미분을 같이 계산하는 거면, 지금은 파이토치가 알아서 해 주잖아요. 두 쪽짜리 글로 실을 만한 일이었나요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>1964년에 도함수가 필요한 프로그램을 짜던 사람은 무엇을 했다고 했죠?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>손으로 미분해서 도함수 식을 따로 적어 넣었다고요. 음, 그러면 손으로 옮긴 도함수 식이 틀려도 프로그램은 그냥 돌아가니까 틀린 줄도 모르겠네요.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래서 웽거트는 이 프로그램을 도함수 식을 점검하는 도구로도 내놓았어요. 또 지금 파이토치에서는 <code>a * b</code>라고만 써도 곱셈의 미분 규칙이 따라붙죠. 그때 포트란에는 곱셈 기호에 새 뜻을 붙이는 기능이 없었어요. 그 기능(연산자 오버로딩)이 포트란 표준에 들어온 것은 1990년이에요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래서 웽거트는 이 프로그램을 도함수 식을 점검하는 도구로도 내놓았어요. 또 지금 파이토치에서는 <code>a * b</code>라고만 써도 곱셈의 미분 규칙이 따라붙죠. 그때 포트란에는 곱셈 기호에 새 뜻을 붙이는 기능이 없었어요. 그 기능(연산자 오버로딩)은 1991년에 국제 표준이 된 포트란 90에서야 들어왔어요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 그래서 단계마다 값과 미분을 내주는 서브루틴을 따로 만들어 불러야 했구나. 식 하나를 표처럼 네 단계로 풀어 적은 거네요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 편미분 생성기는 입력 하나마다 함수를 한 번씩 다시 불렀잖아요. 신경망처럼 입력이 많으면, 이 방법으로 그래디언트 하나를 얻는 데 몇 번이나 계산해야 해요?</p></div></div>
 <h3 id="뉴런-하나를-앞으로-따라가기">뉴런 하나를 앞으로 따라가기</h3>
@@ -828,7 +846,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>손실이 하나라는 게 쓸 수 있는 성질이었네요. 리포트 채점표가 항목 79,510개를 점수 하나로 모으는데, 항목마다 채점표 전체를 처음부터 다시 훑고 있었던 거예요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="evolution-sec-evolution-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="backprop-sec-reverse-mode-backpropagation.html">역전파: 출력 하나의 그래디언트를 뒤로 나눠 준다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="evolution-sec-evolution-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="backprop-sec-reverse-mode-backpropagation.html">역전파: 출력 하나의 그래디언트를 뒤로 나눠 준다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

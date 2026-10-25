@@ -634,6 +634,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
 
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -649,6 +664,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">머리말: 경사하강에서 Muon 까지</a></li>
 <li class="toc-part">미분과 근사</li>
 <li><a href="loss-landscape.html">손실 지형: 공을 굴려 손실의 바닥을 찾는 첫 실험</a></li>
@@ -678,7 +694,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="wgan.html">WGAN: 최소최대와 1-립시츠 판별기</a></li>
 <li class="toc-part">최적화가 일반화를 만든다</li>
 <li><a href="implicit-bias.html">암묵적 편향: 옵티마이저가 고르는 해</a></li>
-<li><a href="double-descent.html" class="active">이중 하강: 외우고 나서도 나아진다</a><ul class="sidebar-toc"><li><a href="double-descent.html" class="current">편향–분산: 너무 단순해도, 너무 흔들려도 틀린다</a></li><li><a href="double-descent-sec-double-descent.html">이중 하강: 문턱을 넘으면 시험 오차가 다시 내려간다</a></li><li><a href="double-descent-sec-interpolation-threshold.html">보간 문턱: 가장 작은 특잇값이 노이즈를 키운다</a></li><li><a href="double-descent-sec-grokking.html">그로킹: 다 외운 뒤 한참 지나 규칙을 찾는다</a></li><li><a href="double-descent-sec-double-descent-summary.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="double-descent.html" class="active">이중 하강: 외우고 나서도 나아진다</a><ul class="sidebar-toc"><li><a href="double-descent.html" class="current">편향–분산: 너무 단순해도, 너무 흔들려도 틀린다</a></li><li><a href="double-descent-sec-double-descent.html">이중 하강: 문턱을 넘으면 시험 오차가 다시 내려간다</a></li><li><a href="double-descent-sec-interpolation-threshold.html">보간 문턱: 가장 작은 특잇값이 노이즈를 키운다</a></li><li><a href="double-descent-sec-grokking.html">그로킹: 다 외운 뒤 한참 지나 규칙을 찾는다</a></li><li><a href="double-descent-sec-double-descent-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="epilogue.html">맺음: 남은 물음</a></li></ol>
 </nav>
 <button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
@@ -699,7 +715,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h2 id="sec-bias-variance">편향–분산: 너무 단순해도, 너무 흔들려도 틀린다<span id="편향-분산-너무-단순해도-너무-흔들려도-틀린다" class="anchor-alias"></span></h2>
 <p>곡선 맞추기를 해 본 사람은 차수를 고르는 데서 망설여 본 적이 있을 것이다. 1차 직선으로는 점들의 굽이를 따라가지 못하고, 차수를 크게 올리면 점은 다 지나는데 점 사이에서 곡선이 출렁인다. 그 사이 어딘가에 알맞은 크기가 있을 것 같지만, 학습한 기록에서 틀린 정도는 모델을 키울수록 줄기만 하니 그것으로는 고를 수 없다. 그렇다면 「알맞다」는 무엇을 재서 정할까?</p>
 <h3 id="hist-bias-variance-dilemma" class="history" data-people="geman-stuart bienenstock-elie doursat-rene">역사: 게만, 비넨스톡, 두르사의 「딜레마」<span id="역사-게만-비넨스톡-두르사의-딜레마" class="anchor-alias"></span></h3>
-<p>1992년 『뉴럴 컴퓨테이션(Neural Computation)』 4권 1호에 58쪽짜리 긴 논문 「신경망과 편향/분산 딜레마(Neural Networks and the Bias/Variance Dilemma)」가 실렸다. 지은이는 스튜어트 게만(Stuart Geman), 엘리 비넨스톡(Elie Bienenstock), 르네 두르사(René Doursat)다. 역전파가 다시 주목받으며 신경망이 한창 유행하던 때였다. 세 사람은 역전파로 학습한 신경망을 통계학이 오래 다뤄 온 회귀 추정기, 그것도 미리 정한 꼴 없이 데이터에서 함수의 모양까지 배우는 추정기로 보자고 했다. 그렇게 보면 통계학이 이미 아는 어려움이 그대로 신경망의 어려움이 된다. 오차는 「평균적으로 빗나가는 정도」와 「데이터가 바뀔 때마다 흔들리는 정도」 두 항으로 나뉘고, 하나를 줄이면 다른 하나가 커지기 쉽다. 그들은 인공 데이터와 손글씨 숫자로 실험한 뒤, 당시의 앞먹임 신경망은 기계 지각과 학습의 어려운 문제에 대체로 모자라며 진짜 어려움은 학습보다 표현에 있다고 결론지었다. 「모델을 키우면 평균의 빗나감(편향)은 줄고 데이터마다의 흔들림(분산)은 커진다」는 생각은 통계학에서 먼저 나왔지만, 이 논문이 그것을 신경망 연구자들에게 널리 퍼뜨렸고 그 뒤 교과서마다 실리는 U자 곡선이 되었다.</p>
+<p>1992년 『뉴럴 컴퓨테이션(Neural Computation)』 4권 1호에 58쪽짜리 긴 논문 「신경망과 편향/분산 딜레마(Neural Networks and the Bias/Variance Dilemma)」가 실렸다. 지은이는 스튜어트 게만(Stuart Geman), 엘리 비넨스톡(Elie Bienenstock), 르네 두르사(René Doursat)다. 역전파가 다시 주목받으며 신경망이 한창 유행하던 때였다. 세 사람은 역전파로 학습한 신경망을 통계학이 오래 다뤄 온 회귀 추정기, 그것도 미리 정한 꼴 없이 데이터에서 함수의 모양까지 배우는 추정기로 보자고 했다. 그렇게 보면 통계학이 이미 아는 어려움이 그대로 신경망의 어려움이 된다. 오차는 「평균적으로 빗나가는 정도」와 「데이터가 바뀔 때마다 흔들리는 정도」 두 항으로 나뉘고, 하나를 줄이면 다른 하나가 커지기 쉽다. 그들은 인공 데이터와 손글씨 숫자로 실험한 뒤, 당시의 앞먹임 신경망은 기계 지각과 학습의 어려운 문제에 대체로 모자라며 진짜 어려움은 학습보다 표현에 있다고 결론지었다. 그 앞의 인공 데이터 실험에서는 사인 곡선으로 나뉜 평면 위의 점 100개로 k-최근접 이웃 회귀를 학습 세트 100벌에 되풀이해, 이웃 수 k를 늘리면 편향은 커지고 분산은 줄어드는 것을 숫자로 보였다. 「모델을 키우면 평균의 빗나감(편향)은 줄고 데이터마다의 흔들림(분산)은 커진다」는 생각은 통계학에서 먼저 나왔지만, 이 논문이 그것을 신경망 연구자들에게 널리 퍼뜨렸고 그 뒤 교과서마다 실리는 U자 곡선이 되었다.</p>
+<figure class="fig "><img src="images/double-descent/h2_geman_knn.png" alt="게만 외(1992) 3.5절의 인공 데이터 실험을 논문에 적힌 설정(경계 x₂ = sin(πx₁/2), 반지름 1 원판으로 흔들어 정한 애매한 판정, 학습 세트 100개 × 100벌)으로 다시 돌린 그림. 왼쪽은 학습 세트 한 벌, 오른쪽은 k-최근접 이웃 회귀의 편향²·분산·합으로, 이웃이 늘면 편향²은 0.008에서 0.057로 커지고 분산은 0.445에서 0.060으로 줄어 합은 k = 8에서 가장 작다(원 논문 그림 4를 새로 계산해 다시 그림, sources/double-descent/h_history.py)" loading="lazy"><figcaption>게만 외(1992) 3.5절의 인공 데이터 실험을 논문에 적힌 설정(경계 x₂ = sin(πx₁/2), 반지름 1 원판으로 흔들어 정한 애매한 판정, 학습 세트 100개 × 100벌)으로 다시 돌린 그림. 왼쪽은 학습 세트 한 벌, 오른쪽은 k-최근접 이웃 회귀의 편향²·분산·합으로, 이웃이 늘면 편향²은 0.008에서 0.057로 커지고 분산은 0.445에서 0.060으로 줄어 합은 k = 8에서 가장 작다(원 논문 그림 4를 새로 계산해 다시 그림, sources/double-descent/h_history.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>편향과 분산으로 쪼개는 건 지금 보면 쉬워요. 기록을 몇천 벌 뽑아서 평균 내면 끝이잖아요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그건 정답 곡선을 우리가 정해 둔 장난감이라서 되는 일이에요. 세 사람이 실험한 손글씨 숫자에는 정답 곡선이 있었을까요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>손글씨에는 정해 둔 정답 함수가 없죠. 그럼 평균 예측을 내려면 손글씨 데이터를 몇 벌이고 새로 모아야 하는데… 그건 못 했겠네요.</p></div></div>
@@ -826,7 +843,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>캐글에서 다들 큰 모델을 시드만 바꿔 여러 개 학습해서 평균 내는 이유를 알겠어요. 편향이 큰 작은 모델을 여러 개 모으는 건 조별 과제에서 같은 오해를 한 사람 넷이 모이는 거랑 같네요. 모두가 같은 쪽으로 틀린 오해는 머릿수를 늘려도 평균에서 안 지워져요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="implicit-bias-sec-implicit-bias-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="double-descent-sec-double-descent.html">이중 하강: 문턱을 넘으면 시험 오차가 다시 내려간다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="implicit-bias-sec-implicit-bias-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="double-descent-sec-double-descent.html">이중 하강: 문턱을 넘으면 시험 오차가 다시 내려간다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');
