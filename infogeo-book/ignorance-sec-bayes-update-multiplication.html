@@ -658,6 +658,21 @@ blockquote.person-story::after { content: ""; display: block; clear: both; }
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
 </style>
 <script>
 (function(){var s=null;try{s=localStorage.getItem('theme')}catch(e){}if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -673,6 +688,7 @@ blockquote.person-story::after { content: ""; display: block; clear: both; }
       <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
     </div>
   </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
   <ol><li><a href="preface.html">서문</a></li>
 <li><a href="why-infogeo.html">왜 정보기하학인가</a></li>
 <li><a href="point.html">점</a></li>
@@ -718,10 +734,10 @@ blockquote.person-story::after { content: ""; display: block; clear: both; }
 <p>로그 공간의 덧셈 식은 프롬프트를 확률로 옮겨 본 것이다. 보통의 이미지 모델은 쉼표로 이은 프롬프트 전체를 한 번에 읽어 그림을 만들 뿐, 조건마다 확률을 따로 곱하지 않는다. 조건마다 따로 계산해 곱하도록 만든 방법도 있다. 2022년 리우(Nan Liu) 등의 합성 디퓨전(Composable Diffusion)은 「A AND B」를 p(그림) × p(A | 그림) × p(B | 그림)에 비례하는 분포로 정의하고, 두 조건이 그림을 두고 서로 독립이라고 가정해 이 곱을 계산한다.</p>
 <h3 id="바다-밑-수색-찾지-못한-것도-곱한다">바다 밑 수색: 찾지 못한 것도 곱한다</h3>
 <p>실종된 비행기나 배를 몇 달씩 찾는다는 뉴스를 들으면, 한 번 훑고도 아무것도 못 찾은 바다를 왜 꼼꼼히 기록해 두는지 궁금해진다. 「찾지 못했다」도 검사 결과 하나이기 때문이다. 수색대는 「못 찾음」이라는 결과를 의사가 MRI 결과를 곱하듯 수색 지도에 곱한다.</p>
-<p>바다를 A, B, C, D 네 칸으로 나누고, 표류 계산과 목격담으로 잔해가 각 칸에 있을 사전 확률을 (0.4, 0.3, 0.2, 0.1)로 잡았다고 하자. 음파 탐지기로 한 칸을 훑으면 잔해가 훑은 칸에 있을 때 열 번에 아홉 번 찾아낸다(탐지 확률 0.9). 가장 그럴듯한 A를 훑었는데 못 찾았다. 「못 찾음」의 우도는 잔해가 A에 있으면 1 − 0.9 = 0.1, 다른 칸에 있으면 1이다. 사전에 곱하면 (0.04, 0.3, 0.2, 0.1)이고, 합 0.64(A를 훑어 못 찾을 확률)로 나누면 (0.062, 0.469, 0.312, 0.156)이다. A의 확률은 0.4에서 0.062로 눌렸고, A에서 줄어든 확률은 나머지 칸에 원래 비율대로 나뉘어 B가 가장 그럴듯한 칸이 되었다. 이어서 B도 못 찾으면 (0.108, 0.081, 0.541, 0.270)이 되어 다음에 훑을 칸은 C다. B를 먼저, A를 나중에 훑어도 결과는 같다. A를 두 번 훑어 두 번 다 못 찾은 것은 A에 0.1² = 0.01을 한 번 곱한 것과 같다. 같은 우도를 두 번 곱하는 것은 우도의 제곱을 한 번 곱하는 것이다.</p>
+<p>바다를 A, B, C, D 네 칸으로 나누고, 표류 계산과 목격담으로 잔해가 각 칸에 있을 사전 확률을 (0.4, 0.3, 0.2, 0.1)로 잡았다고 하자. 음파 탐지기로 한 칸을 훑으면 잔해가 훑은 칸에 있을 때 열 번에 아홉 번 찾아낸다(탐지 확률 0.9). 가장 그럴듯한 A를 훑었는데 못 찾았다. 「못 찾음」의 우도는 잔해가 A에 있으면 1 − 0.9 = 0.1, 다른 칸에 있으면 1이다. 사전에 곱하면 (0.04, 0.3, 0.2, 0.1)이고, 합 0.64(A를 훑어 못 찾을 확률)로 나누면 (0.062, 0.469, 0.312, 0.156)이다. A의 확률은 0.4에서 0.062로 눌렸고, A에서 줄어든 확률은 나머지 칸에 원래 비율대로 나뉘어 B가 가장 그럴듯한 칸이 되었다. 이어서 B도 못 찾으면 (0.108, 0.081, 0.541, 0.270)이 되어 다음에 훑을 칸은 C다. B를 먼저, A를 나중에 훑어도 결과는 같은데, 두 번의 「못 찾음」은 A와 B에 0.1을 하나씩 곱하는 일이라 순서를 바꿔도 곱은 (0.04, 0.03, 0.2, 0.1)로 같고, 합 0.37로 나누면 같은 (0.108, 0.081, 0.541, 0.270)이 나오기 때문이다. 같은 칸을 거듭 훑을 때도 곱셈이 그대로 쌓여서, A를 두 번 훑어 두 번 다 못 찾은 것은 A에 우도 0.1의 제곱 0.1² = 0.01을 한 번 곱한 것과 같다.</p>
 <figure class="fig"><img src="images/chapters/ch10-search-map.svg" alt="바다를 네 칸으로 나눈 수색 지도. 사전 (0.4, 0.3, 0.2, 0.1)에서 A를 탐지 확률 0.9로 훑어 못 찾으면 (0.062, 0.469, 0.312, 0.156), 이어서 B도 못 찾으면 (0.108, 0.081, 0.541, 0.270). 오른쪽 아래는 A의 신호기가 죽어 실제 탐지 확률이 0인데 0.77로 셈한 경우로, 잔해가 있는 A가 0.133으로 밀려난다(sources/10-무지와확신/fig_search.py)" loading="lazy"><figcaption>바다를 네 칸으로 나눈 수색 지도. 사전 (0.4, 0.3, 0.2, 0.1)에서 A를 탐지 확률 0.9로 훑어 못 찾으면 (0.062, 0.469, 0.312, 0.156), 이어서 B도 못 찾으면 (0.108, 0.081, 0.541, 0.270). 오른쪽 아래는 A의 신호기가 죽어 실제 탐지 확률이 0인데 0.77로 셈한 경우로, 잔해가 있는 A가 0.133으로 밀려난다(sources/10-무지와확신/fig_search.py)</figcaption></figure>
 <p>이 계산법은 전쟁에서 나왔다. 2차 세계대전 중인 1943년부터 미 해군 작전연구 그룹에서 잠수함 탐색을 연구한 쿠프먼(Bernard Koopman)이 연구 결과를 1946년 보고서 「탐색과 차단(Search and Screening)」으로 묶었고, 이 연구가 베이즈 탐색 이론의 바탕이 되었다. 1966년 스페인 팔로마레스 앞바다에 떨어진 수소폭탄을 찾을 때도, 1968년 5월 귀항하지 않은 미 해군 잠수함 스코피온을 찾을 때도 이 방법을 썼다. 스코피온은 크레이븐(John Craven)의 팀이 일어났을 법한 사고 경위마다 확률을 매겨 만든 지도를 따라 수색한 끝에, 그해 10월 말 아조레스 제도 남서쪽 바다 3,000 m 아래에서 발견되었다.</p>
-<p>곱셈이 믿음을 제대로 옮기려면 곱하는 우도가 맞아야 한다. 2009년 6월 1일 대서양에서 사라진 에어프랑스 447편(탑승 228명)의 수색에서 우도가 틀렸을 때 어떻게 되는지 볼 수 있다. 사고 직후 31일 동안 배 두 척이 블랙박스에 달린 수중 위치 신호기의 소리를 들으며 비행 경로를 훑었지만 아무것도 듣지 못했다. 두 해의 수색이 실패한 뒤 프랑스 사고조사국(BEA)의 의뢰로 스톤(Lawrence Stone) 등이 그때까지의 실패를 모두 지도에 곱했는데, 이 청음 수색의 탐지 확률을 0.77로 잡아 훑은 자리에 1 − 0.77 = 0.23을 곱했다. 그런데 잔해는 바로 그 청음 수색이 촘촘히 훑은 구역 안에 있었다. 회수한 신호기는 충전된 전지를 이어도 소리를 내지 않았다. 신호기가 망가져 실제 탐지 확률이 0이었던 자리에 0.23을 곱했던 것이다. 네 칸 지도로 옮기면, 잔해가 실제로 A에 있는데 A에 0.23을 곱하면 A의 확률이 0.4에서 0.133으로 내려가 수색 순서가 B와 C 뒤로 밀린다. 스톤의 팀은 신호기가 고장 났다고 가정한 지도를 따로 만들었고, 2011년 수색은 그 지도의 확률이 높은 구역에서 한 주 만에 잔해를 찾았다(스톤 외 2014). 곱셈은 우도가 말하는 만큼만 믿음을 옮기므로, 우도가 틀리면 사후분포도 틀린다.</p>
+<p>곱셈이 믿음을 제대로 옮기려면 곱하는 우도가 맞아야 한다. 2009년 6월 1일 대서양에서 사라진 에어프랑스 447편(탑승 228명)의 수색에서 우도가 틀렸을 때 어떻게 되는지 볼 수 있다. 사고 직후 31일 동안 배 두 척이 블랙박스에 달린 수중 위치 신호기의 소리를 들으며 비행 경로를 훑었지만 아무것도 듣지 못했다. 두 해의 수색이 실패한 뒤 프랑스 사고조사국(BEA)의 의뢰로 스톤(Lawrence Stone) 등이 그때까지의 실패를 모두 지도에 곱했는데, 이 청음 수색의 탐지 확률을 0.77로 잡아 훑은 자리에 1 − 0.77 = 0.23을 곱했다. 그런데 잔해는 바로 그 청음 수색이 촘촘히 훑은 구역 안에 있었고, 회수한 신호기는 충전된 전지를 이어도 소리를 내지 않았다. 신호기가 망가져 있었다면 배가 아무리 가까이 지나가도 들을 소리가 없으니 실제 탐지 확률은 0이고 「못 찾음」의 우도는 1이어야 했는데, 지도는 청음 수색이 훑은 구역에 0.23을 곱했던 것이다. 네 칸 지도로 옮기면, 잔해가 실제로 A에 있는데 A에 0.23을 곱하면 A의 확률이 0.4에서 0.133으로 내려가 수색 순서가 B와 C 뒤로 밀린다. 스톤의 팀은 신호기가 고장 났다고 가정한 지도를 따로 만들었고, 2011년 수색은 그 지도의 확률이 높은 구역에서 한 주 만에 잔해를 찾았다(스톤 외 2014). 곱셈은 우도가 말하는 만큼만 믿음을 옮기므로, 우도가 틀리면 사후분포도 틀린다.</p>
 <h3 id="식으로-2">식으로</h3>
 <p>두 분포 p<sub>0</sub>, p<sub>1</sub>을 곱해서 잇는 경로를 기하평균 보간이라 한다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mstyle mathcolor="#d6479f"><mi>p</mi></mstyle><mi>t</mi></msub><mo stretchy="false">(</mo><mstyle mathcolor="#6f8fa6"><mi>x</mi></mstyle><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><msub><mstyle mathcolor="#d6479f"><mi>p</mi></mstyle><mn>0</mn></msub><mo stretchy="false">(</mo><mstyle mathcolor="#6f8fa6"><mi>x</mi></mstyle><msup><mo stretchy="false">)</mo><mrow><mn>1</mn><mo>−</mo><mstyle mathcolor="#007800"><mi>t</mi></mstyle></mrow></msup><mtext> </mtext><msub><mstyle mathcolor="#d6479f"><mi>p</mi></mstyle><mn>1</mn></msub><mo stretchy="false">(</mo><mstyle mathcolor="#6f8fa6"><mi>x</mi></mstyle><msup><mo stretchy="false">)</mo><mi>t</mi></msup></mrow><mrow><mstyle mathcolor="#7d8a3a"><mi>Z</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#007800"><mi>t</mi></mstyle><mo stretchy="false">)</mo></mrow></mfrac><mo separator="true">,</mo><mspace width="2em"/><mi>log</mi><mo>⁡</mo><msub><mstyle mathcolor="#d6479f"><mi>p</mi></mstyle><mi>t</mi></msub><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mstyle mathcolor="#007800"><mi>t</mi></mstyle><mo stretchy="false">)</mo><mi>log</mi><mo>⁡</mo><msub><mstyle mathcolor="#d6479f"><mi>p</mi></mstyle><mn>0</mn></msub><mo>+</mo><mstyle mathcolor="#007800"><mi>t</mi></mstyle><mi>log</mi><mo>⁡</mo><msub><mstyle mathcolor="#d6479f"><mi>p</mi></mstyle><mn>1</mn></msub><mo>−</mo><mi>log</mi><mo>⁡</mo><mstyle mathcolor="#7d8a3a"><mi>Z</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#007800"><mi>t</mi></mstyle><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\textcolor{#d6479f}{p}_t(\textcolor{#6f8fa6}{x}) = \frac{\textcolor{#d6479f}{p}_0(\textcolor{#6f8fa6}{x})^{1-\textcolor{#007800}{t}}\, \textcolor{#d6479f}{p}_1(\textcolor{#6f8fa6}{x})^{t}}{\textcolor{#7d8a3a}{Z}(\textcolor{#007800}{t})}, \qquad \log \textcolor{#d6479f}{p}_t = (1-\textcolor{#007800}{t}) \log \textcolor{#d6479f}{p}_0 + \textcolor{#007800}{t} \log \textcolor{#d6479f}{p}_1 - \log \textcolor{#7d8a3a}{Z}(\textcolor{#007800}{t})
@@ -778,7 +794,8 @@ for t in [0, 0.5, 1]:
 <figure class="fig"><img src="images/portraits/thomas-bayes.gif" alt="토머스 베이즈의 초상으로 전해지는 그림. 출처: Wikimedia Commons, 퍼블릭 도메인" loading="lazy"><figcaption>토머스 베이즈의 초상으로 전해지는 그림. 출처: Wikimedia Commons, 퍼블릭 도메인</figcaption></figure>
 <p><small>그림: 1936년에 나온 생명보험 역사책에 「T. 베이즈 목사」로 실린 초상. 머리 모양과 옷차림이 베이즈가 살던 18세기 것과 맞지 않아, 실제로 베이즈인지는 의심받는다. 출처 Wikimedia Commons, 퍼블릭 도메인</small></p>
 <p>1730년대, 잉글랜드 턴브리지웰스. 토머스 베이즈(Thomas Bayes)는 이곳 마운트 시온 예배당의 장로교 목사였다(1752년까지). 직업 수학자는 아니었고, 생전에 낸 수학 저작도 익명의 소책자 하나뿐이었다. 1736년, 철학자이자 주교인 버클리(George Berkeley)의 비판에 맞서 뉴턴의 유율법(미적분)을 변호한 글이다. 그래도 수학 실력은 알려져 있었던지, 1742년 왕립학회 회원이 되었다.</p>
-<p>그가 남긴 문제는 이것이었다. 무언가가 일어난 횟수와 일어나지 않은 횟수만 알 때, 그 일이 한 번에 일어날 확률이 어느 범위에 있다고 말할 수 있는가? 논문은 이 문제를 네모난 탁자 위의 공으로 푼다. 공 하나를 던져 멈춘 자리를 모른 채, 공을 더 던져 그 공들이 첫 공의 왼쪽에 몇 번 멈췄는지만 세고, 그 횟수로 첫 공의 자리를 거꾸로 추론한다. 흔히 당구대 이야기로 옮겨지지만 베이즈 자신은 당구라는 말을 쓰지 않았다. 논문에는 복권 예도 있는데, 꽝 열 장과 당첨 한 장을 본 사람이 꽝과 당첨의 참 비율이 9 : 1에서 11 : 1 사이에 있을 확률을 셈하면 7.7%쯤이다. 꽝 1만 장과 당첨 1천 장을 보고 나면 그 확률이 97%쯤으로 오른다.</p>
+<p>그가 남긴 문제는 이것이었다. 무언가가 일어난 횟수와 일어나지 않은 횟수만 알 때, 그 일이 한 번에 일어날 확률이 어느 범위에 있다고 말할 수 있는가? 논문은 이 문제를 네모난 탁자 위의 공으로 푼다. 공 하나를 던져 멈춘 자리를 모른 채, 공을 더 던져 그 공들이 첫 공의 왼쪽에 몇 번 멈췄는지만 세고, 그 횟수로 첫 공의 자리를 거꾸로 추론한다. 흔히 당구대 이야기로 옮겨지지만 베이즈 자신은 당구라는 말을 쓰지 않았다. 프라이스가 논문 끝에 붙인 부록에는 복권 예도 있는데, 꽝 열 장과 당첨 한 장을 본 사람이 꽝과 당첨의 참 비율이 9 : 1에서 11 : 1 사이에 있을 확률을 셈하면 7.7%쯤이다. 꽝 1만 장과 당첨 1천 장을 보고 나면, 프라이스는 그 확률이 0.974보다 크다는 데까지만 셈할 수 있었다. 오늘 컴퓨터로 다시 셈하면 99.7%쯤이다.</p>
+<figure class="fig"><img src="images/chapters/ch10-hist-price-lottery.svg" alt="꽝과 당첨을 더 많이 볼수록 당첨 비율의 사후 믿음이 1/11 근처로 좁아지고, 꽝 : 당첨이 9 : 1에서 11 : 1 사이일 확률이 7.7%에서 99.7%로 오른다. 베이즈 논문(1763)에 프라이스가 붙인 부록의 복권 예를 고른 사전 믿음으로 이 책에서 다시 계산해 그렸다" loading="lazy"><figcaption>꽝과 당첨을 더 많이 볼수록 당첨 비율의 사후 믿음이 1/11 근처로 좁아지고, 꽝 : 당첨이 9 : 1에서 11 : 1 사이일 확률이 7.7%에서 99.7%로 오른다. 베이즈 논문(1763)에 프라이스가 붙인 부록의 복권 예를 고른 사전 믿음으로 이 책에서 다시 계산해 그렸다</figcaption></figure>
 <p>설명을 위해 더 익숙한 예로 바꿔 보자(베이즈의 원래 예는 아니다). 동전을 열 번 던져서 앞면이 일곱 번 나왔다고 하자. 앞면 확률이 0.7인 동전이 열 번 중 일곱 번 앞면을 낼 확률은 계산할 수 있으니 순방향은 쉽지만, 일곱 번의 앞면을 본 뒤 앞면 확률이 얼마인지를 역으로 추론하는 역방향은 어렵다.</p>
 <p>답의 핵심은 던지기 전에 앞면 확률에 대해 이미 갖고 있는 믿음, 「사전 확률(prior)」이다. 그 믿음에 데이터의 우도를 곱해서 업데이트하면 새로운 믿음(사후 확률, posterior)이 된다.</p>
 <p>사전 × 우도 → 사후. 이 관계를 베이즈 정리라 하는데, 사전에 우도를 「곱한다」는 이 연산이 바로 이 장의 주제다.</p>
