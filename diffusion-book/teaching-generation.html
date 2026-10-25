@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -652,7 +653,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li class="toc-part">기본기</li>
 <li><a href="conditional-prob.html">조건부 확률분포: p(a∣b) 와 p(b∣a)</a></li>
 <li class="toc-part">오토인코더와 VAE</li>
-<li><a href="teaching-generation.html" class="active">생성을 가르치는 법: 분류기를 뒤집으면</a><ul class="sidebar-toc"><li><a href="teaching-generation.html" class="current">조건부 평균: 분류기를 뒤집으면 평균 그림이 나온다</a></li><li><a href="teaching-generation-2.html">내재적 확률성: 라벨을 알아도 남는 분산</a></li><li><a href="teaching-generation-3.html">암기: 같은 입력에 같은 답이면 룩업 테이블이다</a></li><li><a href="teaching-generation-4.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="teaching-generation.html" class="active">생성을 가르치는 법: 분류기를 뒤집으면</a><ul class="sidebar-toc"><li><a href="teaching-generation.html" class="current">조건부 평균: 분류기를 뒤집으면 평균 그림이 나온다</a></li><li><a href="teaching-generation-sec-intrinsic-label-variance.html">내재적 확률성: 라벨을 알아도 남는 분산</a></li><li><a href="teaching-generation-sec-memorization-lookup-table.html">암기: 같은 입력에 같은 답이면 룩업 테이블이다</a></li><li><a href="teaching-generation-sec-teaching-generation-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="autoencoder-vae.html">오토인코더에서 VAE 로</a></li>
 <li class="toc-part">조건을 붙여가기</li>
 <li><a href="denoising.html">디노이징과 조건부 디노이징: 고치다 보면 만들게 된다</a></li>
@@ -684,7 +685,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter chapter-paged">
 <h1>생성을 가르치는 법: 분류기를 뒤집으면</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-teaching-generation">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>사진을 주고 라벨을 묻는 p(라벨 ∣ 사진)과 라벨을 주고 사진을 묻는 p(사진 ∣ 라벨)은 세로 막대 ∣ 양쪽의 자리만 바꾼 것인데, 내놓아야 할 것이 전혀 달랐다. 라벨을 내놓을 때는 확률 몇 개짜리 막대그래프 하나면 되지만, 사진을 내놓을 때는 표로 적을 수 없을 만큼 넓은 분포에서 사진을 하나씩 뽑아 내놓아야 한다. 그런데 그 분포의 모양은 아무도 알려 주지 않아서, 손에 있는 것은 라벨이 붙은 사진 수천 장뿐이다.</p>
 <p>이런 자료로 분류기는 잘 배운다. 손글씨 숫자 그림을 받아 0부터 9까지 무슨 숫자인지 맞히는 층 세 개짜리 작은 신경망도 처음 보는 그림 만 장 가운데 97% 넘게 맞힌다. 그림마다 정답 라벨이 하나씩 붙어 있어서, 신경망의 답이 정답에서 얼마나 벗어났는지를 숫자 하나로 잴 수 있기 때문이다.</p>
 <p>우리가 원하는 것은 반대 방향이다. 「3」을 주면 3 그림이 나오는 것. 그런데 「3」 라벨이 붙은 그림은 6,000장이 넘고, 그 가운데 어느 한 장도 「3의 정답 그림」이 아니다. 맞출 정답이 하나가 아닌데 무엇을 맞히도록 가르쳐야 할까? 이 장은 다음 물음을 차례로 따라간다.</p>
@@ -693,7 +694,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>신경망을 키우고 더 오래 학습하면, 그 신경망은 언젠가 진짜 3을 그리게 될까?</li>
 <li>「3」을 넣을 때마다 늘 같은 그림을 내놓는 생성기는 무엇이 모자랄까? 학습 그림 가운데 하나를 무작위로 골라 주면 그것으로 충분할까?</li>
 </ul>
-<h2 id="조건부-평균-분류기를-뒤집으면-평균-그림이-나온다">조건부 평균: 분류기를 뒤집으면 평균 그림이 나온다</h2>
+<h2 id="sec-conditional-mean-blur">조건부 평균: 분류기를 뒤집으면 평균 그림이 나온다<span id="조건부-평균-분류기를-뒤집으면-평균-그림이-나온다" class="anchor-alias"></span></h2>
 <p>라벨을 주면 그림이 나오는 신경망을 만들려면, 가장 먼저 떠오르는 방법은 잘 아는 분류기를 거꾸로 세우는 것이다. 그러려면 분류기가 어떻게 생겼는지부터 되짚어야 한다. 손글씨 숫자 분류기를 다시 떠올려 보자. 쓰는 데이터는 MNIST(손글씨 숫자 데이터셋. 학습용 60,000장, 시험용 10,000장)다. 그림 한 장은 가로세로 28픽셀 회색조라 28 × 28 = 784개의 밝기(0은 바탕, 1은 잉크)로 적히고, 신경망에게는 784개의 숫자가 늘어선 벡터 하나다.</p>
 <h3 id="되짚기-층을-쌓은-함수">되짚기: 층을 쌓은 함수</h3>
 <p>이 책에서 처음 쓰는 신경망은 가장 단순한 꼴이다. 벡터를 받아 가중치 행렬을 곱하고 바이어스를 더한 뒤, 음수를 0으로 자르는 함수(ReLU)를 씌운다. 이 계산 한 번을 층이라 부르고, 층을 몇 개 이어 붙인다.</p>
@@ -728,10 +729,11 @@ c-10,0,-16.667,5,-20,15z M188 15 H145 v585 v0 v585 h43z"/></svg></span></span></
 <p>c에 대해 미분하면 −2(E[<span class="sym" style="color:#1b9e77">x</span> ∣ <span class="sym" style="color:#0093b8">y</span>] − c)이고, 이 미분이 0이 되는 c가 평균이다. 이 평균을 <strong>조건부 평균</strong> (같은 입력에 붙은 정답들의 평균 / conditional mean)이라 한다. 분류에서는 그림 하나에 정답 라벨이 거의 하나라 조건부 평균을 내놓는 성질이 드러나지 않았다. 입력 하나에 정답이 여럿인 문제에서는, 정답을 맞히도록 배운 신경망이 정답 어느 것도 아닌 평균을 내놓는다.</p>
 <h3 id="ml에서-그럴듯한-하나-와-평균-은-다르다">ML에서: 「그럴듯한 하나」와 「평균」은 다르다</h3>
 <p>그림을 만드는 모델에게 바라는 것은 실제로 있을 법한 3 하나, 다시 물으면 또 다른 3 하나다. 평균은 그 어느 쪽도 아니지만, 이것이 신경망의 크기나 학습 시간의 문제가 아니라는 점이 중요하다. 이 MLP는 이미 평균 그림과 제곱 거리 0.09까지 다가가, 손실이 시킨 일을 거의 완벽하게 해냈다. 그러니 그림을 만들려면 손실이 시키는 일 자체를 바꿔야 하는데, 그 전에 평균이 지워 버린 것, 3 그림들끼리 서로 다른 정도부터 재 봐야 한다.</p>
-<div class="dialogue"><h3 id="문제-1-택배는-언제-오나">문제 1. 택배는 언제 오나</h3>
+<div class="dialogue"><h3 id="prob-teaching-parcel-arrival">문제 1. 택배는 언제 오나<span id="문제-1-택배는-언제-오나" class="anchor-alias"></span></h3>
 <blockquote>
 <p>우리 동네 택배는 날마다 오전 10시 아니면 오후 4시(16시)에 오는데, 둘은 반반이다. 앱이 도착 시각을 숫자 하나로 예측하고, 예측과 실제 도착 시각의 차이를 제곱한 값의 평균으로 평가받는다. (가) 10시, 13시, 16시로 예측할 때 평가 점수(제곱 오차의 평균)는 각각 얼마인가? (나) 점수가 가장 좋은 예측은 무엇인가? (다) 그 시각에 택배가 온 날은 며칠인가?</p>
 </blockquote>
+<figure class="fig "><img src="images/teaching-generation/p01_parcel.png" alt="택배가 오는 시각(오전 10시와 오후 4시가 반반)과 앱이 내놓을 예측 후보 10시·13시·16시" loading="lazy"><figcaption>택배가 오는 시각(오전 10시와 오후 4시가 반반)과 앱이 내놓을 예측 후보 10시·13시·16시</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>10시나 16시 중에 하나를 고르면 반은 딱 맞히니까 그게 낫지 않아요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>계산해 봐요. 10시로 예측하면요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>10시에 오는 날은 0, 16시에 오는 날은 6² = 36이니까 평균 18이요. 16시도 똑같이 18이고요. 13시는 3² = 9, 9라서 평균 9예요.</p></div></div>
@@ -739,10 +741,11 @@ c-10,0,-16.667,5,-20,15z M188 15 H145 v585 v0 v585 h43z"/></svg></span></span></
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(다)는 0일이야. 13시에 택배가 온 날은 하루도 없어. 점수가 가장 좋은 예측이 한 번도 일어나지 않는 시각이네.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그게 제곱 오차를 쓰면 생기는 일이에요. 정답이 둘로 갈라져 있으면 가운데를 고르는 게 점수로는 가장 안전해요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>라벨 넣고 그림 받는 MLP가 3들의 평균을 그린 것도 이거네요. 획이 왼쪽에 있는 3과 오른쪽에 있는 3 사이, 아무도 쓰지 않은 자리에 흐린 획을 긋는 거예요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-절댓값-오차로-바꾸면">문제 2. 절댓값 오차로 바꾸면</h3>
+</div><div class="dialogue"><h3 id="prob-teaching-absolute-error">문제 2. 절댓값 오차로 바꾸면<span id="문제-2-절댓값-오차로-바꾸면" class="anchor-alias"></span></h3>
 <blockquote>
 <p>어떤 값 X가 0 아니면 10이다. (가) 둘이 반반일 때, 제곱 오차의 평균 E[(X − c)²]을 가장 작게 하는 c와 절댓값 오차의 평균 E[|X − c|]를 가장 작게 하는 c를 구하라. (나) 0이 나올 확률이 0.6, 10이 나올 확률이 0.4이면? (다) 절댓값 오차를 픽셀마다 따로 써서 그림을 그리면 평균 그림의 문제가 사라지는가?</p>
 </blockquote>
+<figure class="fig "><img src="images/teaching-generation/p02_two_values.png" alt="0 아니면 10인 값 X의 두 경우(반반, 0.6 : 0.4)와 숫자 하나로 고를 예측 c" loading="lazy"><figcaption>0 아니면 10인 값 X의 두 경우(반반, 0.6 : 0.4)와 숫자 하나로 고를 예측 c</figcaption></figure>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>제곱 오차는 미분해서 2c − 2E[X] = 0이니까 c = E[X], 반반이면 5예요. 절댓값 오차는 c가 0과 10 사이에 있으면 |0 − c| + |10 − c| = 10이라서 반반이면 0부터 10까지 어디든 평균이 5로 같아요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(나)에서는요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>제곱 오차는 E[X] = 4예요. 절댓값 오차는 0.6c + 0.4(10 − c) = 4 + 0.2c라서 c를 줄일수록 좋아지고, c = 0에서 4가 가장 작아요. 그러니까 0이에요.</p></div></div>
@@ -753,10 +756,11 @@ c-10,0,-16.667,5,-20,15z M188 15 H145 v585 v0 v585 h43z"/></svg></span></span></
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>칸마다는 그렇지. 그런데 모아 놓은 그림은 어느 1도 아니야. 획이 끊기거나 두 줄이 될 수 있어.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>맞아요. 절댓값 오차가 고르는 값(중앙값)도 결국 칸마다 하나를 정해 내놓을 뿐이에요. 칸들이 서로 맞춰서 「이번에는 왼쪽 1」이라고 함께 정하는 장치가 없으면 문제가 남아요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>해석학 시간에 좌표마다 수렴한다고 벡터 전체가 원하는 모양으로 수렴하는 건 아니라고 했던 거랑 비슷하네요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-3-소프트맥스는-왜-평균을-내지-않나">문제 3. 소프트맥스는 왜 평균을 내지 않나</h3>
+</div><div class="dialogue"><h3 id="prob-teaching-softmax-no-average">문제 3. 소프트맥스는 왜 평균을 내지 않나<span id="문제-3-소프트맥스는-왜-평균을-내지-않나" class="anchor-alias"></span></h3>
 <blockquote>
 <p>너무 흐리게 써서 3인지 5인지 애매한 손글씨 그림을 본 사람 가운데 60%는 「3」, 40%는 「5」라고 라벨을 붙였다. (가) 이 그림과 라벨들로 MLP 분류기를 학습하면, 크로스 엔트로피를 가장 작게 하는 소프트맥스 출력은 무엇인가? (나) 그 출력에서 라벨을 하나 뽑으면 무엇이 나오는가? (다) 라벨을 넣고 그림을 받는 MLP와 무엇이 다른가?</p>
 </blockquote>
+<figure class="fig "><img src="images/teaching-generation/p03_ambiguous_labels.png" alt="3인지 5인지 애매한 그림 한 장에 사람들이 붙인 라벨(「3」 60%, 「5」 40%)과 분류기가 내놓을 확률 10개의 자리" loading="lazy"><figcaption>3인지 5인지 애매한 그림 한 장에 사람들이 붙인 라벨(「3」 60%, 「5」 40%)과 분류기가 내놓을 확률 10개의 자리</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>분류기도 평균을 내겠죠. 라벨 3과 5의 평균이면 4요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>분류기가 내놓는 게 숫자 하나예요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아니요, 확률 열 개요. 그럼 크로스 엔트로피는 −(0.6 log p₃ + 0.4 log p₅)이고요.</p></div></div>
@@ -770,7 +774,7 @@ c-10,0,-16.667,5,-20,15z M188 15 H145 v585 v0 v585 h43z"/></svg></span></span></
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>과제 피드백을 「평균적으로 B」라고만 주면 A 받은 친구도 C 받은 친구도 아무것도 모르는데, 점수 분포를 보여 주면 어디쯤인지 아는 거랑 같네요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="conditional-prob-4.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="teaching-generation-2.html">내재적 확률성: 라벨을 알아도 남는 분산 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="conditional-prob-sec-conditional-prob-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="teaching-generation-sec-intrinsic-label-variance.html">내재적 확률성: 라벨을 알아도 남는 분산 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

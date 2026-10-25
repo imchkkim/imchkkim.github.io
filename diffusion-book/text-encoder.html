@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -674,7 +675,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="latent-diffusion.html">잠재 디퓨전: 작게 줄여 놓고 퍼뜨리기</a></li>
 <li><a href="dit.html">디퓨전 트랜스포머: U-Net 자리에 트랜스포머를</a></li>
 <li><a href="guidance.html">가이던스: 조건 쪽으로 더 세게</a></li>
-<li><a href="text-encoder.html" class="active">글을 읽는 인코더: CLIP의 마지막 층에서 언어 모델의 여러 층으로</a><ul class="sidebar-toc"><li><a href="text-encoder.html" class="current">CLIP 글 인코더: 글과 그림을 한 공간에 놓도록 배운 인코더</a></li><li><a href="text-encoder-2.html">끝에서 둘째 층: 왜 마지막 층을 한 칸 건너뛸까</a></li><li><a href="text-encoder-3.html">언어 모델 인코더: 다음 토큰을 맞히도록 배운 모델의 속을 빌리기</a></li><li><a href="text-encoder-4.html">층 뽑기: 여러 층의 은닉 상태를 쌓아 넘기기</a></li><li><a href="text-encoder-5.html">조건이 들어가는 자리: 글 벡터가 디퓨전 신경망을 만나는 길</a></li><li><a href="text-encoder-6.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="text-encoder.html" class="active">글을 읽는 인코더: CLIP의 마지막 층에서 언어 모델의 여러 층으로</a><ul class="sidebar-toc"><li><a href="text-encoder.html" class="current">CLIP 글 인코더: 글과 그림을 한 공간에 놓도록 배운 인코더</a></li><li><a href="text-encoder-sec-penultimate-layer.html">끝에서 둘째 층: 왜 마지막 층을 한 칸 건너뛸까</a></li><li><a href="text-encoder-sec-language-model-encoder.html">언어 모델 인코더: 다음 토큰을 맞히도록 배운 모델의 속을 빌리기</a></li><li><a href="text-encoder-sec-multi-layer-extraction.html">층 뽑기: 여러 층의 은닉 상태를 쌓아 넘기기</a></li><li><a href="text-encoder-sec-condition-injection-paths.html">조건이 들어가는 자리: 글 벡터가 디퓨전 신경망을 만나는 길</a></li><li><a href="text-encoder-sec-text-encoder-mistakes-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="image-condition.html">그림으로 조건 걸기: 참조 이미지 여러 장</a></li>
 <li><a href="video.html">영상 생성: 시퀀스와 디퓨전 사이</a></li>
 <li><a href="appendix-rl.html">부록 A — 강화학습으로 이어지는 다리</a></li>
@@ -684,7 +685,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter chapter-paged">
 <h1>글을 읽는 인코더: CLIP의 마지막 층에서 언어 모델의 여러 층으로</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-text-encoder">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>가이던스는 조건을 넣은 예측과 넣지 않은 예측의 차이를 키워, 생성 결과가 조건이 가리키는 그림으로 더 세게 끌려가게 했다. 그런데 그 그림이 무엇인지는 조건 벡터가 정한다. Stable Diffusion 1.x 가 쓰는 글 인코더에 「a red cube on top of a blue sphere」(파란 공 위의 빨간 정육면체)를 넣고 문장 하나를 나타내는 벡터를 받아 보면, 색을 맞바꾼 「a blue cube on top of a red sphere」의 벡터와 코사인 유사도가 0.981이다. 정육면체만 초록으로 바꾼 「a green cube on top of a blue sphere」와는 0.789다. 장면으로는 원래 문장과 색을 맞바꾼 문장이 전혀 다른 그림인데, 인코더는 두 문장을 거의 같은 것으로 본다. 이런 조건을 아무리 세게 따라가게 해도 두 그림 가운데 무엇을 그려야 하는지는 정해지지 않는다.</p>
 <p>최근 모델은 글 인코더 자리에 글만 읽고 배운 큰 언어 모델을 놓는다. <a href="http://krea.ai">krea.ai</a> 의 Krea 2 는 거기서 한 걸음 더 나아가, 언어 모델의 마지막 층 출력 하나가 아니라 서로 다른 열두 층의 출력을 함께 넘긴다. 이 장은 다음 물음에 차례로 답한다.</p>
 <ul>
@@ -694,11 +695,17 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>왜 마지막 층 하나로는 모자라서 여러 층을 뽑아 쌓을까?</li>
 <li>그렇게 만든 글 벡터는 디퓨전 신경망의 어디로 들어갈까?</li>
 </ul>
-<h2 id="clip-글-인코더-글과-그림을-한-공간에-놓도록-배운-인코더">CLIP 글 인코더: 글과 그림을 한 공간에 놓도록 배운 인코더</h2>
+<h2 id="sec-clip-text-encoder">CLIP 글 인코더: 글과 그림을 한 공간에 놓도록 배운 인코더<span id="clip-글-인코더-글과-그림을-한-공간에-놓도록-배운-인코더" class="anchor-alias"></span></h2>
 <p>분류 라벨로 조건을 걸 때는 라벨 열 개에 벡터 열 개를 하나씩 두는 표 한 장이면 되어서, 「고양이」는 3번 줄의 벡터, 「개」는 5번 줄의 벡터였다. 글은 그렇게 할 수 없다. 「소파에서 자는 갈색 고양이」와 「눈 속에서 웅크린 흰 고양이」는 둘 다 고양이지만 그려야 할 그림이 다르고, 사용자가 쓸 문장은 끝없이 많다. 문장 하나를 받아 벡터로 바꾸는 신경망, 곧 글 인코더(text encoder)가 필요하다. 그런데 문장을 벡터로 바꾸는 방법은 많은데, 그림을 그리는 데 쓸 벡터라면 무엇을 기준으로 배운 인코더여야 할까?</p>
-<h3 id="역사-낱말을-맞히던-시도에서-그림-글-쌍을-맞히는-시도로">역사: 낱말을 맞히던 시도에서 그림–글 쌍을 맞히는 시도로</h3>
+<h3 id="hist-clip-contrastive-pairs" class="history" data-people="radford-alec">역사: 낱말을 맞히던 시도에서 그림–글 쌍을 맞히는 시도로<span id="역사-낱말을-맞히던-시도에서-그림-글-쌍을-맞히는-시도로" class="anchor-alias"></span></h3>
 <p>2021년 초 OpenAI의 래드퍼드(Alec Radford)와 동료들은 인터넷에서 모은 그림과 그 곁의 글 4억 쌍으로 그림 인코더와 글 인코더를 함께 학습했다. 그전까지 그림 인식 모델은 미리 정한 범주 몇 개(ImageNet이라면 1,000개) 가운데 하나를 맞히도록 학습했다. 범주 밖의 것을 말하려면 새 라벨을 붙여 다시 학습해야 했지만, 인터넷의 글을 그대로 정답으로 쓰면 범주가 따로 필요 없다.</p>
 <p>처음 시도는 그림을 보고 곁의 글을 낱말 하나하나까지 그대로 맞히는 것이었다. 논문의 그래프에 따르면 이 방법은 글에 어떤 낱말이 들어 있는지만 맞히는(순서는 버리는) 더 단순한 방법보다 학습이 세 배 느렸다. 같은 그림에 붙는 글이 설명, 감상, 농담처럼 제각각이라, 정확한 낱말을 맞히는 일 자체가 너무 어려웠던 것이다. 그래서 학습 태스크를 더 쉽게 바꿔, 낱말을 맞히지 말고 미니배치 안에서 어느 글이 어느 그림의 짝인지만 맞히게 했다. 이렇게 바꾸자 효율이 다시 네 배 좋아졌다고 논문은 적었다. 이 모델의 이름이 <strong>CLIP</strong> (글·그림 대조 프리트레인 / Contrastive Language–Image Pre-training)이다.</p>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그림 옆에 글이 이미 붙어 있으니까, 그 글을 정답으로 맞히게 하면 끝 아니에요? 라벨을 붙일 사람도 필요 없고요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그전에는 사람이 글을 붙여 다듬은 그림 데이터를 썼어요. MS-COCO 같은 데이터가 학습용 그림 10만 장 남짓이었고, ImageNet 은 글이 아니라 범주 1,000개 가운데 하나를 고르는 번호였죠. 그럼 4억 쌍의 글은 누가 붙였을까요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>인터넷에서 그대로 모았으니까 아무도 안 다듬었겠네요. 같은 그림에 설명도 붙고, 감상도 붙고, 농담도 붙고.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래서 낱말 하나하나를 맞히는 첫 시도는, 어떤 낱말이 들어 있는지만 맞히는 방법보다도 세 배 느렸어요. 정답이 그림마다 제각각인 문제를 낸 거니까요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 데이터를 크게 모으는 순간 정답이 지저분해지는 거네요. 깨끗한 10만 장이냐, 지저분한 4억 쌍이냐.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 사이에서 찾은 길이 「어느 글이 짝인지만 맞혀라」였어요. 문제를 그렇게 쉽게 바꾸면, 벡터는 무엇을 배우고 무엇은 배우지 않아도 될까요?</p></div></div>
 <h3 id="짝-맞히기로-배운-벡터">짝 맞히기로 배운 벡터</h3>
 <p>미니배치에 (그림, 글) 쌍이 N개 있으면, 그림 벡터 N개와 글 벡터 N개로 만들 수 있는 모든 (그림, 글) 조합의 코사인 유사도를 표로 만든다. 표의 대각선 칸이 실제로 함께 실렸던 쌍이고, 학습은 대각선 칸을 키우고 나머지 칸을 줄인다.</p>
 <figure class="fig "><img src="images/text-encoder/clip_contrastive.png" alt="CLIP의 학습 표(짝 넷인 경우). 칸마다 그림 벡터와 글 벡터의 코사인 유사도를 적고, 맞는 짝인 대각선은 키우고 나머지는 줄인다. 실제 학습에서는 미니배치 하나에 (그림, 글) 쌍이 32,768개였다." loading="lazy"><figcaption>CLIP의 학습 표(짝 넷인 경우). 칸마다 그림 벡터와 글 벡터의 코사인 유사도를 적고, 맞는 짝인 대각선은 키우고 나머지는 줄인다. 실제 학습에서는 미니배치 하나에 (그림, 글) 쌍이 32,768개였다.</figcaption></figure>
@@ -723,10 +730,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </aside>
 <h3 id="ml에서-디퓨전이-받아-간-것은-토큰마다의-벡터">ML에서: 디퓨전이 받아 간 것은 토큰마다의 벡터</h3>
 <p>Stable Diffusion 1.x 는 이 글 인코더를 얼려 둔 채 가져다 썼다. 그런데 Stable Diffusion 1.x 가 받는 것은 문장 임베딩 하나가 아니다. ComfyUI의 구현(<code>comfy/sd1_clip.py</code>)을 보면 마지막 층의 은닉 상태를 토큰 77개 자리 모두 받아, 마지막 정규화만 씌워 넘긴다. 글 인코더가 한 번에 받는 토큰 자리가 77개(시작·끝 토큰 포함)이고 토큰 하나가 768개의 수이므로, 그림을 만드는 U-Net이 받는 조건은 77 × 768 짜리 표다(U-Net 설정의 <code>context_dim</code> 이 768인 것도 이 때문이다). 문장 임베딩 하나로 줄이면 「빨강이 어디에 붙었는가」 같은 것이 뭉개질 수 있으니, 토큰마다의 벡터를 그대로 주고 그림 쪽이 필요한 토큰을 골라 읽게 한 것이다. 그 읽는 장치가 크로스 어텐션이다(이 장 마지막 절에서 되짚는다).</p>
-<div class="dialogue"><h3 id="문제-1-졸업-앨범의-이름표">문제 1. 졸업 앨범의 이름표</h3>
+<div class="dialogue"><h3 id="prob-text-yearbook-name-tags">문제 1. 졸업 앨범의 이름표<span id="문제-1-졸업-앨범의-이름표" class="anchor-alias"></span></h3>
 <blockquote>
 <p>졸업 앨범의 증명사진 5장과 이름표 5장이 섞였다. (가) 사진 하나와 이름표 하나를 고르는 (사진, 이름표) 조합은 모두 몇 가지이고, 그 가운데 틀린 조합은 몇 가지인가? (나) 사진 한 장만 놓고 이름표를 아무거나 하나 집으면 맞을 확률은? (다) CLIP의 미니배치에는 (그림, 글) 쌍이 32,768개 들어 있었다. 틀린 (그림, 글) 조합은 몇 개인가?</p>
 </blockquote>
+<figure class="fig "><img src="images/text-encoder/p01_yearbook.png" alt="증명사진 다섯 장과 섞인 이름표 다섯 장. 사진 한 장을 골라 이름표를 하나 집는다 (sources/text-encoder/problems_figs.py)" loading="lazy"><figcaption>증명사진 다섯 장과 섞인 이름표 다섯 장. 사진 한 장을 골라 이름표를 하나 집는다 (sources/text-encoder/problems_figs.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>다섯 명에서 둘씩 고르면 5 × 4 ÷ 2 = 10이니까, 조합은 10가지고 그중 맞는 게 5개, 틀린 게 5개요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>「철수 사진과 영희 이름표」와 「영희 사진과 철수 이름표」는 같은 조합인가요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 다르네요. 사진에서 하나, 이름표에서 하나를 고르는 거니까 5 × 5 = 25가지고, 맞는 건 5개, 틀린 건 20개예요. 나눠 줄 게 아니었어요.</p></div></div>
@@ -736,10 +744,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>맞는 (그림, 글) 쌍은 3만 개인데 틀린 조합이 10억 개. 학습 한 번에 그만큼 「이건 아니다」를 배우는 거네.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 그래서 하나하나에 정답 라벨을 붙이지 않아도 배울 거리가 많아요. 대신 「아니다」의 재료가 미니배치 안의 다른 글뿐이라는 점은 기억해 두세요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조교가 답안지 이름을 가리고 채점지를 섞어서, 누구 답안인지 맞혀 보라는 문제네요. 답안이 그림, 가린 이름이 글이고요. 글씨체만 알아도 대부분 맞히겠는데요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-배율-κ가-하는-일">문제 2. 배율 κ가 하는 일</h3>
+</div><div class="dialogue"><h3 id="prob-text-clip-temperature-scale">문제 2. 배율 κ가 하는 일<span id="문제-2-배율-κ가-하는-일" class="anchor-alias"></span></h3>
 <blockquote>
 <p>그림 하나에 대한 글 셋의 코사인 유사도가 0.30(그림과 함께 실렸던 글), 0.25, 0.20이다. 위 손실의 한 줄처럼 배율 <span class="sym" style="color:#87965a">κ</span>를 곱해 소프트맥스를 하면 코사인 0.30인 글의 확률은 얼마인가? (가) <span class="sym" style="color:#87965a">κ</span> = 1 (나) 처음 값 <span class="sym" style="color:#87965a">κ</span> = 1/0.07 (다) 상한 <span class="sym" style="color:#87965a">κ</span> = 100. (라) 글 벡터 <span class="sym" style="color:#0093b8">c</span>의 길이를 두 배로 늘리면 확률이 바뀌는가?</p>
 </blockquote>
+<figure class="fig "><img src="images/text-encoder/p02_kappa.png" alt="그림 하나에 대한 글 셋의 코사인 0.30(함께 실린 글), 0.25, 0.20. 여기에 배율 κ를 곱해 소프트맥스를 한다 (sources/text-encoder/problems_figs.py)" loading="lazy"><figcaption>그림 하나에 대한 글 셋의 코사인 0.30(함께 실린 글), 0.25, 0.20. 여기에 배율 κ를 곱해 소프트맥스를 한다 (sources/text-encoder/problems_figs.py)</figcaption></figure>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p><span class="sym" style="color:#87965a">κ</span> = 1이면 e^0.30, e^0.25, e^0.20의 비율이라 0.350, 0.333, 0.317. 셋이 거의 같아.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 배율은 클수록 좋은 거 아니에요? 100이면 0.993이니까 처음부터 100으로 두면 되잖아요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>1/0.07이면 얼마죠? 그리고 100에서 0.993이 나온 건 코사인 차이가 몇일 때예요?</p></div></div>
@@ -748,10 +757,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>논문도 학습이 불안정해지지 않게 하려고 100을 넘지 않게 묶었다고 적었어요. (라)는요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>코사인은 길이로 나눈 값이라 두 배로 늘려도 0.30, 0.25, 0.20에서 바뀌지 않아. 확률도 안 바뀌어.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.webp" alt="김민준 M08" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 CLIP 벡터는 방향만 뜻이 있고 길이는 아무 말도 안 하는 거네요. 시험 점수를 반 평균으로 나눠 등수만 보는 거랑 비슷하다.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-3-위아래를-뒤집으면">문제 3. 위아래를 뒤집으면</h3>
+</div><div class="dialogue"><h3 id="prob-text-flip-order">문제 3. 위아래를 뒤집으면<span id="문제-3-위아래를-뒤집으면" class="anchor-alias"></span></h3>
 <blockquote>
 <p>「a red cube on top of a blue sphere」의 문장 임베딩은 색만 맞바꾼 문장과 0.981, 색 하나만 바꾼 문장과 0.789였다. (가) 위아래를 뒤집은 「a blue sphere on top of a red cube」(빨간 정육면체 위의 파란 공)는 기준 문장과 얼마나 비슷할까? (나) 색과 모양을 무작위로 골라 만든 60쌍에서도 「맞바꾼 문장이 하나 바꾼 문장보다 가깝다」가 성립할까? (다) 그렇다면 이 벡터에는 「무엇이 무슨 색인가」가 아예 들어 있지 않은 걸까?</p>
 </blockquote>
+<figure class="fig "><img src="images/text-encoder/p03_flip_scenes.png" alt="기준 문장과 색만 맞바꾼 문장, 색 하나만 바꾼 문장, 위아래를 뒤집은 문장이 말하는 장면과 기준 문장과의 유사도 (sources/text-encoder/problems_figs.py)" loading="lazy"><figcaption>기준 문장과 색만 맞바꾼 문장, 색 하나만 바꾼 문장, 위아래를 뒤집은 문장이 말하는 장면과 기준 문장과의 유사도 (sources/text-encoder/problems_figs.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>위아래가 뒤집히면 뜻이 정반대니까 색 맞바꾼 것보다는 멀겠죠. 0.7쯤?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>기준 문장과 뒤집은 문장에서 빠지거나 새로 들어온 낱말이 있나요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>없네요. 순서만 바뀌었어요. 돌려 보니 0.972예요. 다른 장면인데 색 하나 바꾼 것보다 훨씬 가까워요.</p></div></div>
@@ -765,7 +775,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.webp" alt="김민준 M08" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>보고서 표절 검사기가 낱말 겹침만 보면 문장 순서를 뒤섞은 표절은 못 잡잖아요. 낱말이 같으면 위아래를 뒤집어도 0.972로 가깝다고 본 CLIP 처럼요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="guidance-6.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="text-encoder-2.html">끝에서 둘째 층: 왜 마지막 층을 한 칸 건너뛸까 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="guidance-sec-guidance-mistakes-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="text-encoder-sec-penultimate-layer.html">끝에서 둘째 층: 왜 마지막 층을 한 칸 건너뛸까 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

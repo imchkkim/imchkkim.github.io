@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -660,7 +661,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li class="toc-part">신호와 스펙트럼</li>
 <li><a href="spectrum.html">그림을 나누는 축: 스펙트럼</a></li>
 <li><a href="convolution.html">합성곱: 이웃만 보는 MLP</a></li>
-<li><a href="noising.html" class="active">퍼짐: 그림에 노이즈를 섞으면</a><ul class="sidebar-toc"><li><a href="noising.html" class="current">순방향 과정: 그림에 노이즈를 조금씩 섞기</a></li><li><a href="noising-2.html">열 방정식: 노이즈 섞인 분포가 퍼지는 규칙</a></li><li><a href="noising-3.html">푸리에 성분: 파수가 큰 성분부터 사라진다</a></li><li><a href="noising-4.html">노이즈 스케줄: 언제 얼마나 섞을까</a></li><li><a href="noising-5.html">제로 터미널 SNR: 마지막 스텝에서 그림을 다 지우기</a></li><li><a href="noising-6.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="noising.html" class="active">퍼짐: 그림에 노이즈를 섞으면</a><ul class="sidebar-toc"><li><a href="noising.html" class="current">순방향 과정: 그림에 노이즈를 조금씩 섞기</a></li><li><a href="noising-sec-heat-equation-spreading.html">열 방정식: 노이즈 섞인 분포가 퍼지는 규칙</a></li><li><a href="noising-sec-fourier-components-fading.html">푸리에 성분: 파수가 큰 성분부터 사라진다</a></li><li><a href="noising-sec-noise-schedule.html">노이즈 스케줄: 언제 얼마나 섞을까</a></li><li><a href="noising-sec-zero-terminal-snr.html">제로 터미널 SNR: 마지막 스텝에서 그림을 다 지우기</a></li><li><a href="noising-sec-noising-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="unet.html">U-Net: 여러 해상도로 노이즈를 읽는다</a></li>
 <li class="toc-part">직관을 합치기</li>
 <li><a href="score.html">스코어: 퍼지기 전으로 되돌리는 방향</a></li>
@@ -684,7 +685,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter chapter-paged">
 <h1>퍼짐: 그림에 노이즈를 섞으면</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-noising">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>고치는 법만 배운 디노이저가 순수한 노이즈에서 새 숫자를 만들었다. 디노이저(그림을 고치는 수리공)는 노이즈 크기 σ 를 3에서 0.02까지 줄여 가며, 단계마다 「지금 그림은 σ 만큼 망가진 그림이다」라고 믿고 고쳤다. 그 믿음이 맞으려면 그림을 망가뜨리는 방법이 정확히 정해져 있어야 한다. 학습할 때 그림을 σ 만큼 망가뜨린 방법과, 만들 때 디노이저가 지나는 그림들이 같은 길 위에 있어야 하기 때문이다. VAE 는 그림을 어떤 잠재 변수로 보낼지를 인코더가 배워야 해서, 디코더와 서로 기대며 함께 흔들렸다. 이번에는 그림을 망가뜨리는 과정을 우리가 식으로 정해 두고, 고치는 디노이저만 배운다. 그러려면 망가뜨리는 과정이 어떤 그림들을 지나는지부터 알아야 하는데, 「σ = 3 만큼 망가진 그림」이란 정확히 어떤 그림들일까?</p>
 <p>디노이저가 σ 를 줄여 간 과정을 다시 보자. 큰 σ 에서는 어느 숫자가 될지와 큰 꼴이 정해졌고, 작은 σ 에서야 획의 가장자리가 다듬어졌다. 그림을 공간 주파수로 나눠 보면 그림의 파워는 공간 주파수가 낮은 성분(굵은 무늬)에 몰려 있고, 픽셀마다 따로 뽑은 노이즈의 파워 스펙트럼은 평평했다. 노이즈를 키워 가면 그림의 무엇이 먼저 덮이고 무엇이 오래 남을까? 노이즈를 걷는 가장 좋은 커널이 노이즈 크기마다 달랐던 것도, 노이즈가 그림의 어떤 무늬를 먼저 덮느냐와 이어져 있을까? 이 장은 다음 물음에 차례로 답한다.</p>
 <ul>
@@ -694,12 +695,18 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>노이즈를 언제 얼마나 섞을지는 어떻게 정하며, 정하는 방식이 달라지면 무엇이 달라질까?</li>
 <li>마지막 스텝에서 그림을 정말 다 지워야 할까? 아주 조금 남겨 두면 만든 그림의 무엇이 어긋날까?</li>
 </ul>
-<h2 id="순방향-과정-그림에-노이즈를-조금씩-섞기">순방향 과정: 그림에 노이즈를 조금씩 섞기</h2>
+<h2 id="sec-forward-process">순방향 과정: 그림에 노이즈를 조금씩 섞기<span id="순방향-과정-그림에-노이즈를-조금씩-섞기" class="anchor-alias"></span></h2>
 <p>그림을 망가뜨리는 과정을 우리가 정해 둔다면 어떤 과정이 좋을까? 바랄 수 있는 것은 세 가지로, 계산이 싸야 하고, 끝에 가서는 그림이 무엇이었든 우리가 잘 아는 분포 하나로 모여야 하며, 한 번에 크게 망가뜨리지 않고 조금씩 망가뜨려서 한 스텝씩 되돌리는 일이 쉬워야 한다. 디노이징 오토인코더가 그림을 흔들 때 쓴 규칙(픽셀마다 정규분포 노이즈를 더하는 규칙)을 조금씩 되풀이하면 세 가지를 모두 갖춘다. 그런데 「조금씩 여러 번」 더한 노이즈는 모두 합쳐 얼마만큼일까?</p>
-<h3 id="역사-구조를-천천히-부수는-과정을-정해-두기">역사: 구조를 천천히 부수는 과정을 정해 두기</h3>
+<h3 id="hist-diffusion-thermodynamics-origin" class="history" data-people="sohl-dickstein-jascha">역사: 구조를 천천히 부수는 과정을 정해 두기<span id="역사-구조를-천천히-부수는-과정을-정해-두기" class="anchor-alias"></span></h3>
 <p>생성 모델을 만드는 사람들은 오래 한 가지 줄다리기에 시달렸다. 그림처럼 복잡한 데이터를 담으려면 모델이 유연해야 하는데, 유연한 모델일수록 학습하고 샘플을 뽑고 확률을 계산하기가 어려워진다. 2015년 졸-딕스타인(Jascha Sohl-Dickstein), 와이스, 마헤스와라나탄, 강굴리는 논문 「비평형 열역학을 이용한 깊은 비지도 학습」 첫 문장에 바로 이 줄다리기를 적었다. 그들이 내놓은 방법은 물리학에서 빌려 왔다. 잉크 방울이 물에 번지듯 데이터 분포의 구조를 「체계적으로, 천천히」 부수는 과정을 앞으로 가는 방향에 정해 두고, 구조를 되살리는 거꾸로 가는 과정만 배우는 것이다. 앞으로 가는 과정은 배울 것이 없으니 다루기 쉽고, 거꾸로 가는 과정은 한 스텝이 작으니 스텝마다의 모양이 단순하다. 대신 스텝이 수천 번에 이른다. 논문은 이 모델로 「수천 개의 층 또는 시간 단계」를 가진 생성 모델을 빠르게 배우고 샘플을 뽑을 수 있다고 적었다.</p>
 <p>논문의 첫 그림은 2차원 평면에 말린 김밥 모양(스위스 롤)으로 놓인 점들이 노이즈에 섞여 흩어지는 모습이다. 아래는 같은 생각을 이 책의 관례로 다시 그린 것이다. 이 과정의 이름 「확산(diffusion)」을 이어받아, 2020년 호(Jonathan Ho)와 동료들은 논문 「노이즈 제거 디퓨전 확률 모델」을 「이 논문은 디퓨전 확률 모델의 진전을 보인다」로 시작했다. 오늘날 디퓨전 모델이라는 이름이 여기서 왔다.</p>
 <figure class="fig "><img src="images/noising/swiss_roll.png" alt="스위스 롤 모양으로 놓인 2차원 데이터 분포에 노이즈를 섞어 가는 모습. 스위스 롤 그림 한 장을 흐리게 만드는 것이 아니다. 점 하나하나가 숫자 두 개로 된 데이터 하나이고, 점마다 따로 노이즈를 더하면 점들이 모인 모양(분포)이 퍼진다. 졸-딕스타인과 동료들(2015)의 그림 1 윗줄과 같은 생각을 이 책의 관례(t = 0 데이터, 노이즈 분산 σ² = 2Dt, D = 4)로 다시 그렸다. 점 3000개와 시간 값은 이 책에서 고른 것이고 논문의 값이 아니다. 말린 띠 사이의 좁은 틈부터 메워지고, 끝에는 둥글게 퍼진 정규분포 하나가 남는다." loading="lazy"><figcaption>스위스 롤 모양으로 놓인 2차원 데이터 분포에 노이즈를 섞어 가는 모습. 스위스 롤 그림 한 장을 흐리게 만드는 것이 아니다. 점 하나하나가 숫자 두 개로 된 데이터 하나이고, 점마다 따로 노이즈를 더하면 점들이 모인 모양(분포)이 퍼진다. 졸-딕스타인과 동료들(2015)의 그림 1 윗줄과 같은 생각을 이 책의 관례(t = 0 데이터, 노이즈 분산 σ² = 2Dt, D = 4)로 다시 그렸다. 점 3000개와 시간 값은 이 책에서 고른 것이고 논문의 값이 아니다. 말린 띠 사이의 좁은 틈부터 메워지고, 끝에는 둥글게 퍼진 정규분포 하나가 남는다.</figcaption></figure>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>잉크가 번지듯 노이즈를 섞고 그걸 거꾸로 배우면 된다는 거잖아요. 생각만 떠오르면 바로 될 것 같은데, 디퓨전 모델이라는 이름이 자리 잡기까지 5년이나 걸렸네요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>구조를 부수는 과정은 정말 쉬워요. 어려운 건 되살리는 과정이에요. 거꾸로 가는 한 스텝의 모양이 단순하려면 스텝이 작아야 하고, 그래서 스텝이 수천 번이 됐죠. 그림 한 장을 뽑을 때마다 신경망을 수천 번 돌려야 했어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 학습도 수천 스텝을 하나하나 다 밟아야 했어요?</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그건 이 절에서 직접 따져 봐요. 하나 더 있어요. 2015년에는 노이즈 크기를 바꿔 가며 그림을 고치는 디노이저를 배우는 일과 이 거꾸로 걷기가 하나라는 연결이 아직 없었어요. 그 연결은 2020년 호와 동료들의 논문이 보였고요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 그러면 2015년에는 물리학에서 빌린 생각 하나만 들고, 그 수천 스텝을 무엇으로 배워야 잘 되는지는 모른 채 시작했네요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 노이즈를 조금씩 수천 번 섞으면, 다 합쳐서는 얼마나 섞인 거예요? 그걸 알면 수천 스텝을 다 밟지 않아도 될 것 같은데요.</p></div></div>
 <h3 id="두-번-섞은-노이즈는-얼마인가">두 번 섞은 노이즈는 얼마인가</h3>
 <p>가장 작은 예로 시작하자. 픽셀 하나의 밝기가 0.8이다(밝기는 −1에서 1까지로 잰다). 여기에 표준편차 0.3인 노이즈를 한 번 더하고, 새로 뽑은 표준편차 0.4인 노이즈를 한 번 더 더한다. 모두 표준편차 0.7만큼 흔들릴 것 같지만, 이백만 번 해 보면 밝기는 평균 0.800, 표준편차 0.500으로 흩어진다. 처음부터 표준편차 0.5인 노이즈를 한 번 더한 것과 같다.</p>
 <p>0.3 + 0.4 = 0.7이 아니라 √(0.3² + 0.4²) = 0.5다. 두 노이즈는 서로 상관없이 뽑았으므로, 하나가 오른쪽으로 갈 때 다른 하나가 왼쪽으로 가서 메워 주는 경우가 늘 섞여 있다. 식으로는 두 노이즈를 곱한 교차항의 평균이 0이 되어, 제곱의 평균(분산)만 더해진다. 더해지는 것이 표준편차가 아닌 분산이라는 이 사실 하나가 이 장 전체를 끌고 간다.</p>
@@ -738,10 +745,11 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <h3 id="ml에서-학습-코드는-노이즈를-한-번에-섞는다">ML에서: 학습 코드는 노이즈를 한 번에 섞는다</h3>
 <p>순방향 과정을 수천 스텝으로 나눠 생각하더라도, 학습 코드는 수천 개의 스텝을 하나씩 밟지 않는다. 그림 한 장을 고르고, 노이즈 레벨 <span class="sym" style="color:#a67a63">t</span>를 무작위로 하나 뽑고, 노이즈 <span class="sym" style="color:#1f6066">ε</span>를 한 번 뽑아 <span class="sym" style="color:#1b9e77">x₀</span> + <span class="sym" style="color:#4c5d80">σ<sub>t</sub></span><span class="sym" style="color:#1f6066">ε</span>를 만들면 그 수준의 노이즈 섞인 그림이 바로 나온다. 분산이 더해진다는 사실 덕분이다.</p>
 <p>노이즈 섞인 그림은 원래 그림에서 얼마나 멀리 떠나 있을까? 가로세로 32픽셀 컬러 그림 한 장도 숫자가 수천 개라, 그림은 수천 차원 공간의 점 하나다. 그 공간에서 숫자를 아무렇게나 뽑으면 거의 확실히 지지직거리는 노이즈가 나오므로, 의미 있는 그림들은 그 넓은 공간의 아주 좁은 곳에만 모여 있다. 실제 데이터가 높은 차원 공간 전체에 퍼져 있지 않고 차원이 낮은 매끈한 면 근처에 모여 있다는 이 경험적 주장을 매니폴드 가설이라 한다. 노이즈를 섞는 것은 그 좁은 곳을 떠나는 일이고, 생성은 거꾸로 그 좁은 곳으로 돌아오는 일이다. 얼마나 멀리 떠나는지는 아래 문제에서 직접 재 보자.</p>
-<div class="dialogue"><h3 id="문제-1-버스와-지하철">문제 1. 버스와 지하철</h3>
+<div class="dialogue"><h3 id="prob-noising-bus-subway">문제 1. 버스와 지하철<span id="문제-1-버스와-지하철" class="anchor-alias"></span></h3>
 <blockquote>
 <p>민준의 등굣길은 버스를 탄 뒤 지하철로 갈아탄다. 버스 구간에 걸리는 시간은 날마다 평균에서 표준편차 5분만큼 들쭉날쭉하고, 지하철 구간은 표준편차 12분만큼 들쭉날쭉하다. (가) 두 구간의 들쭉날쭉함이 서로 상관없다면 등굣길 전체 시간은 표준편차 몇 분만큼 흔들리는가? (나) 비 오는 날 길이 막히는 것처럼, 버스가 평소보다 늦는 날은 지하철도 꼭 같은 비율로 늦는다면?</p>
 </blockquote>
+<figure class="fig "><img src="images/noising/p01_bus_subway.png" alt="버스 구간(표준편차 5분)과 지하철 구간(표준편차 12분)의 걸리는 시간 분포, 그리고 물음인 등굣길 전체의 표준편차" loading="lazy"><figcaption>버스 구간(표준편차 5분)과 지하철 구간(표준편차 12분)의 걸리는 시간 분포, 그리고 물음인 등굣길 전체의 표준편차</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>5분 흔들리고 12분 흔들리니까 합쳐서 17분이요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>버스가 5분 늦은 날에 지하철도 꼭 늦나요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아니요. 지하철이 바로 와서 늦은 걸 메워 주는 날도 있겠네요. 그러면 17분보다는 작겠는데… 얼마인지는 모르겠어요.</p></div></div>
@@ -749,10 +757,11 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(나)는요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>둘이 늘 같은 쪽으로 같은 비율만큼 늦으면 메워 주는 날이 없으니까, 표준편차가 그대로 더해져서 17분이에요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>제 처음 답은 틀린 게 아니고 (나)의 답이었네요. 과제 두 개의 마감이 서로 상관없으면 둘이 한꺼번에 몰리는 날은 드문데, 같은 날로 몰아 잡히면 그날 다 같이 몰리는 거랑 같아요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-잘게-나눈-노이즈">문제 2. 잘게 나눈 노이즈</h3>
+</div><div class="dialogue"><h3 id="prob-noising-split-noise">문제 2. 잘게 나눈 노이즈<span id="문제-2-잘게-나눈-노이즈" class="anchor-alias"></span></h3>
 <blockquote>
 <p><span class="sym" style="color:#8787ff">D</span> = 4로 <span class="sym" style="color:#a67a63">t</span> = 0부터 1까지 노이즈를 섞는다. (가) 시간을 <span class="sym" style="color:#006600">Δt</span> = 0.1씩 열 스텝으로 나눠, 스텝마다 표준편차 √(2<span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#006600">Δt</span>)인 노이즈를 새로 뽑아 더한다. 한 스텝의 표준편차와 열 스텝 뒤 쌓인 표준편차는 각각 얼마인가? 100스텝, 1000스텝으로 나누면? (나) 노이즈 앞에 √<span class="sym" style="color:#006600">Δt</span> 대신 <span class="sym" style="color:#006600">Δt</span>를 붙여 한 스텝의 표준편차를 2<span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#006600">Δt</span>로 잡으면, 10, 100, 1000스텝 뒤에 쌓인 표준편차는?</p>
 </blockquote>
+<figure class="fig "><img src="images/noising/p02_split_noise.png" alt="D = 4로 t = 0부터 1까지를 Δt = 0.1씩 열 스텝으로 나눠, 스텝마다 새 노이즈를 한 번씩 더한 길 하나" loading="lazy"><figcaption>D = 4로 t = 0부터 1까지를 Δt = 0.1씩 열 스텝으로 나눠, 스텝마다 새 노이즈를 한 번씩 더한 길 하나</figcaption></figure>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(가)는 한 스텝이 √(2 × 4 × 0.1) = 0.894예요. 분산이 열 번 더해지니까 열 스텝 뒤는 0.894 × √10 = 2.828이고요. 100스텝이면 한 스텝 0.283, 쌓인 것은 똑같이 2.828이에요. √8이네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M03"><img src="images/cast/M03.webp" alt="김민준 M03" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>근데 제곱근이 붙은 게 좀 이상해요. 속도에 시간을 곱하면 거리니까, 한 스텝에 움직이는 양은 시간 간격에 그냥 비례해야 자연스럽지 않아요? 그래서 (나)처럼 계산해 봤어요. 10스텝이면 한 스텝 0.8에 쌓인 것 2.53, 100스텝이면 0.80, 1000스텝이면 0.253이요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>같은 시간 동안 같은 과정을 섞었는데, 스텝을 잘게 나눌수록 노이즈가 줄어드네요. 그럼 아주 잘게 나누면요?</p></div></div>
@@ -760,10 +769,11 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>스텝이 1/<span class="sym" style="color:#006600">Δt</span>개고 한 스텝의 분산이 (2<span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#006600">Δt</span>)²이니까 쌓인 분산은 4<span class="sym" style="color:#8787ff">D</span>²<span class="sym" style="color:#006600">Δt</span>예요. <span class="sym" style="color:#006600">Δt</span>를 줄이면 같이 줄어요. 스텝 수에 상관없으려면 한 스텝의 분산이 <span class="sym" style="color:#006600">Δt</span>에 비례해야 하고, 그러면 표준편차는 √<span class="sym" style="color:#006600">Δt</span>에 비례할 수밖에 없어요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 노이즈는 서로 메워 주며 쌓이니까 스텝 수가 n배가 되면 쌓인 크기는 √n배밖에 안 늘어요. 그래서 한 스텝의 크기가 √<span class="sym" style="color:#006600">Δt</span>여야 시간을 어떻게 나누든 같은 과정이 돼요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>걷는 사람이 일정한 방향으로 가면 시간에 비례해 멀어지지만, 술 취해서 제멋대로 걸으면 √시간만큼만 멀어지는 거네요. 노이즈는 늘 제멋대로 걷는 쪽이고요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-3-노이즈-섞인-그림은-얼마나-멀리-있나">문제 3. 노이즈 섞인 그림은 얼마나 멀리 있나</h3>
+</div><div class="dialogue"><h3 id="prob-noising-distance-from-data">문제 3. 노이즈 섞인 그림은 얼마나 멀리 있나<span id="문제-3-노이즈-섞인-그림은-얼마나-멀리-있나" class="anchor-alias"></span></h3>
 <blockquote>
 <p>가로세로 32픽셀 컬러 그림 한 장은 숫자 <span class="sym" style="color:#3c4bff">d</span> = 32 × 32 × 3 = 3072개다. 등장인물 김민준의 표정 그림을 32 × 32로 줄여 밝기를 −1~1로 두면, 원점에서 이 그림까지의 길이 ‖<span class="sym" style="color:#1b9e77">x₀</span>‖는 33.85다. (가) 노이즈 <span class="sym" style="color:#4c5d80">σ</span> = 0.1과 <span class="sym" style="color:#4c5d80">σ</span> = 1을 섞으면 노이즈 섞인 그림 <span class="sym" style="color:#1b9e77">x<sub>t</sub></span>는 원래 그림에서 얼마나 떨어지는가? 노이즈를 새로 뽑을 때마다 그 거리는 얼마나 흔들리는가? (나) 같은 그림에 서로 다른 노이즈를 섞은 두 장 사이의 거리는? (다) <span class="sym" style="color:#4c5d80">σ</span> = 1에서 <span class="sym" style="color:#1b9e77">x<sub>t</sub></span>의 길이는 원래 그림의 길이보다 큰가 작은가?</p>
 </blockquote>
+<figure class="fig "><img src="images/noising/p03_distance.png" alt="32 × 32 컬러 그림 x₀(‖x₀‖ = 33.85)와, 같은 그림에 노이즈 σ = 0.1, σ = 1을 섞은 그림" loading="lazy"><figcaption>32 × 32 컬러 그림 x₀(‖x₀‖ = 33.85)와, 같은 그림에 노이즈 σ = 0.1, σ = 1을 섞은 그림</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>픽셀마다 0.1만큼 흔들리니까 0.1쯤 떨어지겠죠.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>숫자 하나가 0.1쯤 움직여요. 그런 숫자가 3072개면 거리는요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 거리는 제곱을 다 더해서 제곱근이니까 √(3072 × 0.01) = <span class="sym" style="color:#4c5d80">σ</span>√<span class="sym" style="color:#3c4bff">d</span> = 5.54예요. <span class="sym" style="color:#4c5d80">σ</span> = 1이면 55.4고요. 돌려 보니 한 번은 5.40, 54.77이 나왔어요.</p></div></div>
@@ -781,7 +791,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>문제 1의 등굣길이랑 같은 계산이네요. 버스와 지하철 대신 그림과 노이즈이고, 구간이 3072개일 뿐이에요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="convolution-5.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="noising-2.html">열 방정식: 노이즈 섞인 분포가 퍼지는 규칙 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="convolution-sec-convolution-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="noising-sec-heat-equation-spreading.html">열 방정식: 노이즈 섞인 분포가 퍼지는 규칙 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

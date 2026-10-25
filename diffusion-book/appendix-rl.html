@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -677,14 +678,14 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="text-encoder.html">글을 읽는 인코더: CLIP의 마지막 층에서 언어 모델의 여러 층으로</a></li>
 <li><a href="image-condition.html">그림으로 조건 걸기: 참조 이미지 여러 장</a></li>
 <li><a href="video.html">영상 생성: 시퀀스와 디퓨전 사이</a></li>
-<li><a href="appendix-rl.html" class="active">부록 A — 강화학습으로 이어지는 다리</a><ul class="sidebar-toc"><li><a href="appendix-rl.html" class="current">스텝의 로그확률: 생성의 한 스텝을 행동 하나로 읽기</a></li><li><a href="appendix-rl-2.html">노이즈 다시 넣기: 결정적인 스텝을 같은 분포의 확률적인 스텝으로</a></li><li><a href="appendix-rl-3.html">ELBO 의 차이: 그림의 로그확률 대신 ELBO 끼리 비교하기</a></li><li><a href="appendix-rl-4.html">대응 사전: 언어 모델의 강화학습 낱말을 디퓨전에서 읽기</a></li><li><a href="appendix-rl-5.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="appendix-rl.html" class="active">부록 A — 강화학습으로 이어지는 다리</a><ul class="sidebar-toc"><li><a href="appendix-rl.html" class="current">스텝의 로그확률: 생성의 한 스텝을 행동 하나로 읽기</a></li><li><a href="appendix-rl-sec-noise-reinjection-sde.html">노이즈 다시 넣기: 결정적인 스텝을 같은 분포의 확률적인 스텝으로</a></li><li><a href="appendix-rl-sec-elbo-difference.html">ELBO 의 차이: 그림의 로그확률 대신 ELBO 끼리 비교하기</a></li><li><a href="appendix-rl-sec-llm-rl-glossary.html">대응 사전: 언어 모델의 강화학습 낱말을 디퓨전에서 읽기</a></li><li><a href="appendix-rl-sec-appendix-rl-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="epilogue.html">에필로그</a></li></ol>
 </nav>
 <button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
 <main>
 <article class="chapter chapter-paged">
 <h1>부록 A — 강화학습으로 이어지는 다리</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-appendix-rl">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>그림 생성 서비스에는 같은 프롬프트로 만든 두 그림 가운데 사람이 어느 쪽을 골랐는지가 쌓인다. 웹 앱 Pick-a-Pic 이 모은 기록은 비긴 쌍을 빼고도 85만 1,293쌍이다. 언어 모델은 학습이 끝난 뒤 이런 기록이나 채점 규칙(보상)으로 한 번 더 고친다. 사람이 고른 쪽을 더 자주 내도록 고치는 방법들(RLHF, DPO, GRPO)이 그 도구다. 이 도구들은 두 가지에 기댄다. 모델이 낸 답의 로그확률을 잴 수 있어야 하고, 같은 질문에도 뽑을 때마다 다른 답이 나와 서로 비교할 거리가 있어야 한다. 언어 모델에서는 둘 다 저절로 갖춰진다. 문장의 로그확률은 토큰마다의 로그확률을 더한 값이고, 토큰은 확률에 따라 뽑힌다.</p>
 <p>디퓨전 모델은 그림을 한 번에 내지 않고, 노이즈에서 출발해 여러 스텝을 밟으며 스텝마다 신경망을 한 번 부른다. 스텝마다 새 노이즈를 넣는 샘플러도, 넣지 않는 샘플러도 있다. 그림 하나의 로그우도는 직접 잴 수 없어서 로그우도의 하한(ELBO)으로 배웠다. 이런 모델을 사람의 선호나 보상으로 고치려면, 언어 모델의 토큰과 토큰의 로그확률 대신 무엇을 써야 할까? 영상을 자기 과거로 굴리며 「진짜 영상다움」 쪽으로 배우던 모델에, 진짜 영상다움 대신 사람이 원하는 점수를 앉히려 할 때도 같은 물음을 만난다. 이 부록은 다음 물음에 차례로 답하며, 『생성모델의 강화학습』이 디퓨전 쪽에서 기대는 것을 이 책의 말로 묶는다.</p>
 <ul>
@@ -693,11 +694,21 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>그림 하나의 로그확률 대신 하한 ELBO 만 잴 수 있다면, 선호 쌍으로 배우는 DPO 는 ELBO 로 버틸 수 있을까?</li>
 <li>강화학습 책의 다른 낱말들, 이를테면 레퍼런스 모델, 길이 편향, 리워드 해킹은 디퓨전에서 무엇이 될까?</li>
 </ul>
-<h2 id="스텝의-로그확률-생성의-한-스텝을-행동-하나로-읽기">스텝의 로그확률: 생성의 한 스텝을 행동 하나로 읽기</h2>
+<h2 id="sec-step-log-probability">스텝의 로그확률: 생성의 한 스텝을 행동 하나로 읽기<span id="스텝의-로그확률-생성의-한-스텝을-행동-하나로-읽기" class="anchor-alias"></span></h2>
 <p>언어 모델을 보상으로 고치는 가장 기본적인 방법은 이렇다. 답을 하나 뽑아 보상을 받고, 보상이 좋으면 그 답이 다시 나올 확률을, 나쁘면 덜 나올 확률을 키운다. 실제 계산은 그 답의 로그확률을 파라미터로 미분한 그래디언트에 보상을 곱해 모델을 미는 것이다(REINFORCE 라는 이름의 방법이다). 답 한 줄의 로그확률은 토큰마다의 로그확률을 더한 것이므로, 토큰 하나를 모델이 고른 행동 하나로 볼 수 있다. 행동을 고르는 확률 규칙, 곧 언어 모델에서는 다음 토큰의 분포를 강화학습에서는 정책(policy)이라 부른다.</p>
 <p>디퓨전에서 그림 한 장은 스텝 <span class="sym" style="color:#a67a63">T</span>번 끝에 나오고, 보상은 그림을 다 그린 뒤 한 번 받는다. 그렇다면 언어 모델의 토큰 대신 스텝을 행동으로 보면 될까? 스텝을 행동으로 보려면 언어 모델의 토큰마다 확률이 있듯 스텝 하나하나에도 확률이 있어야 한다.</p>
-<h3 id="역사-그림-한-장을-여러-번의-결정으로">역사: 그림 한 장을 여러 번의 결정으로</h3>
-<p>2023년 5월 블랙(Kevin Black), 재너(Michael Janner), 두(Yilun Du), 코스트리코프(Ilya Kostrikov), 레빈(Sergey Levine)은 「강화학습으로 디퓨전 모델 학습하기」를 내놓았다. 논문 요약은 이렇게 시작한다. 디퓨전 모델은 로그우도에 가까운 목표로 학습되지만, 쓰는 사람이 실제로 바라는 것은 우도보다 사람이 보기에 좋은 그림, 약의 효과 같은 다른 목표다. 그런 목표는 프롬프트를 고쳐 쓰는 것만으로는 잘 맞춰지지 않는다. 이들은 노이즈를 걷어 내는 과정을 여러 스텝의 결정 문제로 보고, 그림이 얼마나 잘 압축되는지, 사람의 평가로 배운 미적 점수, 시각 언어 모델이 판정한 프롬프트와 그림의 맞음 같은 보상으로 모델을 고쳤다. 마지막 보상은 새 데이터를 모으거나 사람이 라벨을 붙이지 않고도 얻는다. 이 방법의 이름이 DDPO(디노이징 디퓨전 정책 최적화 / denoising diffusion policy optimization)다.</p>
+<h3 id="hist-dpok-kl-online-rl" class="history" data-people="fan-ying">역사: 보상을 좇되 원래 모델에서 멀어지지 않게<span id="역사-보상을-좇되-원래-모델에서-멀어지지-않게" class="anchor-alias"></span><span id="hist-denoising-as-decisions" class="anchor-alias"></span></h3>
+<p>사람의 평가로 배운 채점 모델(보상 모델)로 그림 모델을 고치려는 시도는 그전에도 있었다. 미리 학습한 모델로 그림을 잔뜩 만들어 두고, 보상이 높은 그림에 큰 가중치를 주어 지도 학습으로 다시 배우는 방법이다. 색이나 개수를 프롬프트에 맞추는 정도는 좋아졌지만 그림의 질은 자주 나빠졌다. 2023년 5월 판(Ying Fan)과 이기민(Kimin Lee)을 비롯한 구글 리서치 등의 연구자 열 명은 그 원인을 고정된 데이터에서 찾았다. 원래 모델이 만들어 둔 그림 묶음으로만 배우니, 고친 모델이 새로 그리는 그림에는 보상 모델의 판정이 닿지 않는다는 것이다. 그들은 지금 모델이 새로 그린 그림에 점수를 매겨 모델을 고치고, 고친 모델로 다시 그리는 온라인 강화학습을 택했다.</p>
+<figure class="fig "><img src="images/appendix-rl/dpok_objective.png" alt="DPOK 의 목표를 네 스텝 체인 위에 그렸다. 보상은 끝의 그림에서 한 번 받고, 페널티는 스텝마다 학습하는 모델의 정규분포와 원래 모델의 정규분포 사이의 KL 발산을 더한 값이다. 그림의 정규분포 모양은 그림을 위해 고른 것이다. 스크립트 sources/appendix-rl/hist_figs.py" loading="lazy"><figcaption>DPOK 의 목표를 네 스텝 체인 위에 그렸다. 보상은 끝의 그림에서 한 번 받고, 페널티는 스텝마다 학습하는 모델의 정규분포와 원래 모델의 정규분포 사이의 KL 발산을 더한 값이다. 그림의 정규분포 모양은 그림을 위해 고른 것이다. 스크립트 sources/appendix-rl/hist_figs.py</figcaption></figure>
+<p>그림 하나의 확률은 잴 수 없으니, 그들은 보상 기댓값의 그래디언트를 디노이징 스텝마다의 로그확률 그래디언트의 합에 보상을 곱한 꼴로 고쳐 썼다. 스텝의 분산은 고정하고 평균만 배우게 했으므로 스텝 하나하나가 정규분포다. 보상만 좇으면 모델이 보상 모델의 빈틈에 맞춰지며 원래 모델의 솜씨를 잃을 수 있어, 원래 모델과의 KL 발산을 페널티로 붙였다. 그림 하나의 KL 발산도 직접 잴 수 없으므로 스텝마다 두 정규분포의 KL 발산을 더한 값을 썼다. 이 합은 그림 하나의 KL 발산보다 늘 크거나 같다. 방법의 이름은 DPOK(KL 정규화를 붙인 디퓨전 정책 최적화)다. Stable Diffusion v1.5 를 사람의 평가 기록으로 배운 채점 모델 ImageReward 로 고쳤고, 사람 평가에서 지도 학습으로 고친 모델보다 프롬프트 맞춤과 그림의 질 모두 나았다. 「Four roses」라는 프롬프트에 원래 모델은 같은 이름의 위스키와 얽힌 그림을 자주 냈는데, 고친 모델은 장미꽃을 그렸다(ImageReward 점수 −0.52 → 1.12). 같은 무렵 블랙(Kevin Black)과 동료들도 디노이징을 여러 스텝의 결정으로 보는 DDPO를 냈다(『생성모델의 강화학습』 25장). 두 방법 모두 스텝마다 정규분포의 로그확률을 잴 수 있다는 데서 출발한다.</p>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>언어 모델에서는 보상 모델로 고치는 방법이 이미 있었잖아요. 그걸 그림 모델에 그대로 붙이면 될 것 같은데, 왜 처음에는 그림을 잔뜩 만들어 두고 지도 학습으로 했어요?</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>언어 모델의 방법을 그대로 붙이려면 무엇을 잴 수 있어야 했죠?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>음, 답의 로그확률이요. 토큰마다 로그확률을 더하면 되는… 아, 그림은 그게 없네요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그림 하나의 로그우도는 직접 못 재고 하한 ELBO 로만 쟀잖아. 그러면 보상을 곱할 로그확률의 그래디언트를 적을 수가 없어.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 보상이 높은 그림에 가중치를 주는 지도 학습은 평소의 노이즈 맞히기 손실에 가중치만 곱하면 되니까 그 벽을 피해 갈 수 있었어요. 대신 원래 모델이 만들어 둔 그림만 봤죠.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>고친 모델이 새로 그리는 그림은 보상 모델이 한 번도 채점하지 않은 거네요. 지난 학기 답안지로만 첨삭을 받고 이번 시험을 치는 셈이고요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>KL 페널티도 같은 벽에 막혔어요. 그림 하나의 KL 발산을 잴 수 없으니, 판과 동료들은 스텝마다의 KL 발산을 더해 그보다 큰 값으로 눌렀어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 그림 하나는 못 재도 스텝 하나의 확률은 잴 수 있다는 거네요. 스텝 하나가 정규분포라면, 실제로 뽑힌 자리의 로그확률은 어떻게 계산해요?</p></div></div>
 <h3 id="네-스텝-체인의-한-경로">네 스텝 체인의 한 경로</h3>
 <p>스텝의 확률을 직접 재 보려고, 데이터가 두 점 ±1 이고 노이즈 섞기가 네 스텝(한 스텝 분산 <span class="sym" style="color:#4c5d80">β<sub>t</sub></span> = 0.05, 0.15, 0.3, 0.6)뿐인 체인을 쓰자. DDPM 손실이 정말 ELBO 인지 확인할 때 쓴 장난감과 같은 체인이고, 신경망 대신 이 데이터에서 가장 잘 배운 노이즈 예측을 식으로 넣는다. 체인을 거꾸로 밟는 한 스텝은 DDPM 의 역방향 스텝과 같은 꼴이다. 신경망이 다음 자리의 평균 <span class="sym" style="color:#008787">μ<sub>θ</sub></span>를 정하고, 분산 <span class="sym" style="color:#4c5d80">β<sub>t</sub></span>인 노이즈를 더해 다음 자리를 뽑는다. 다음 자리가 정규분포에서 뽑히므로, 실제로 뽑힌 자리의 로그확률은 식 하나로 적힌다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>log</mi><mo>⁡</mo><mstyle mathcolor="#ff5a78"><msub><mi>p</mi><mi>θ</mi></msub></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#1b9e77"><msub><mi>x</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub></mstyle><mo>∣</mo><mstyle mathcolor="#1b9e77"><msub><mi>x</mi><mi>t</mi></msub></mstyle><mo stretchy="false">)</mo><mo>=</mo><mo>−</mo><mfrac><mrow><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">∥</mo><mstyle mathcolor="#1b9e77"><msub><mi>x</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub></mstyle><mo>−</mo><mstyle mathcolor="#008787"><msub><mi>μ</mi><mi>θ</mi></msub></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#1b9e77"><msub><mi>x</mi><mi>t</mi></msub></mstyle><mo separator="true">,</mo><mstyle mathcolor="#a67a63"><mi>t</mi></mstyle><mo stretchy="false">)</mo><msup><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">∥</mo><mn>2</mn></msup></mrow><mrow><mn>2</mn><mtext> </mtext><mstyle mathcolor="#4c5d80"><msub><mi>β</mi><mi>t</mi></msub></mstyle></mrow></mfrac><mo>−</mo><mfrac><mstyle mathcolor="#3c4bff"><mi>d</mi></mstyle><mn>2</mn></mfrac><mi>log</mi><mo>⁡</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mn>2</mn><mi>π</mi><mtext> </mtext><mstyle mathcolor="#4c5d80"><msub><mi>β</mi><mi>t</mi></msub></mstyle><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo></mrow><annotation encoding="application/x-tex">\log \textcolor{#ff5a78}{p_\theta}(\textcolor{#1b9e77}{x_{t-1}} \mid \textcolor{#1b9e77}{x_t}) = -\frac{\big\|\textcolor{#1b9e77}{x_{t-1}} - \textcolor{#008787}{\mu_\theta}(\textcolor{#1b9e77}{x_t}, \textcolor{#a67a63}{t})\big\|^2}{2\,\textcolor{#4c5d80}{\beta_t}} - \frac{\textcolor{#3c4bff}{d}}{2}\log\big(2\pi\,\textcolor{#4c5d80}{\beta_t}\big)
@@ -787,20 +798,22 @@ c-10,0,-16.667,5,-20,15z M410 15 H367 v585 v0 v585 h43z"/></svg></span></span></
 </aside>
 <aside class="guide"><p class="guide-title">길잡이 · 『생성모델의 강화학습』 「DDPO 추정기: REINFORCE와 PPO를 스텝 위에」</p><p>위 그래디언트와 확률 비를 자르는 꼴이 언어 모델의 REINFORCE·PPO 와 어떻게 한 줄씩 대응하는지, 보상으로 무엇을 썼는지. <a href="https://lameproof.com/genrl-book/25-DDPO-3.html">이어 읽기</a></p>
 </aside>
-<div class="dialogue"><h3 id="문제-1-출근길의-갈림길">문제 1. 출근길의 갈림길</h3>
+<div class="dialogue"><h3 id="prob-appendix-commute-forks">문제 1. 출근길의 갈림길<span id="문제-1-출근길의-갈림길" class="anchor-alias"></span></h3>
 <blockquote>
 <p>민준의 출근길에는 갈림길이 세 곳 있다. 첫 갈림길에서 큰길로 갈 확률 0.7, 둘째에서 다리를 건널 확률 0.5, 셋째에서 지하도로 갈 확률 0.9 이고, 갈림길마다 따로 고른다. (가) 오늘 민준이 「큰길 → 다리 → 지하도」로 왔을 확률과 그 로그는? (나) 민준이 회사에 도착할 확률은? (다) (가)의 값을 「회사에 도착할 확률」로 써도 될까?</p>
 </blockquote>
+<figure class="fig "><img src="images/appendix-rl/p01_commute_forks.png" alt="집에서 회사까지 갈림길 세 곳과 갈림길마다 두 길의 확률. 굵은 실선이 오늘 민준이 온 길(큰길 → 다리 → 지하도)이다" loading="lazy"><figcaption>집에서 회사까지 갈림길 세 곳과 갈림길마다 두 길의 확률. 굵은 실선이 오늘 민준이 온 길(큰길 → 다리 → 지하도)이다</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>곱하면 0.7 × 0.5 × 0.9 = 0.315 예요. 로그는 −0.357 − 0.693 − 0.105 = −1.155 고요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>회사에 도착할 확률은요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>어… 오늘 온 길이 0.315 니까 그것도 0.315 아닌가요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>다른 길로 와도 회사에는 도착하잖아. 길이 여덟 가지고 어느 길이든 회사로 가니까, 여덟 길의 확률을 다 더하면 1 이야.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 길 하나의 확률은 갈림길마다의 확률을 곱하면 되지만, 도착지의 확률은 그 도착지로 가는 모든 길을 더해야 해요. 앞의 네 스텝 체인에서 경로 하나의 로그확률과 그림 하나의 로그 밀도가 달랐던 것도 그래서예요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>과제 제출 경로가 메일, 게시판, 직접 내기 셋인데, 메일로 낼 확률을 「과제를 낼 확률」이라고 하면 안 되죠. 메일이 경로 하나, 과제를 낸 것이 그림 하나네요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-분산을-줄이면">문제 2. 분산을 줄이면</h3>
+</div><div class="dialogue"><h3 id="prob-appendix-variance-reduction">문제 2. 분산을 줄이면<span id="문제-2-분산을-줄이면" class="anchor-alias"></span></h3>
 <blockquote>
 <p>역방향 한 스텝의 평균이 0 이고 실제로 뽑힌 자리가 평균에서 0.1 떨어졌다(1차원). (가) 분산이 0.6, 0.006, 0.0006 일 때 스텝의 로그확률은 각각 얼마인가? (나) 분산이 0.0006 일 때, 평균 자리에 정확히 내렸다면 로그확률은? (다) 분산을 0 으로 두면, 곧 스텝마다 노이즈를 넣지 않으면 스텝의 로그확률은 어떻게 되는가?</p>
 </blockquote>
+<figure class="fig "><img src="images/appendix-rl/p02_variance_bells.png" alt="평균 0, 분산 0.6 · 0.006 · 0.0006 인 역방향 한 스텝의 정규분포와 실제로 뽑힌 자리 0.1. 세 종의 높이는 같게 맞춰 모양만 그렸다" loading="lazy"><figcaption>평균 0, 분산 0.6 · 0.006 · 0.0006 인 역방향 한 스텝의 정규분포와 실제로 뽑힌 자리 0.1. 세 종의 높이는 같게 맞춰 모양만 그렸다</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>식에 넣었어요. 0.6 이면 −0.672, 0.006 이면 0.806, 0.0006 이면 −5.543 이에요. 0.006 에서 왜 커졌다가 다시 줄죠?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>식의 두 항이 분산에 따라 어떻게 움직이는지 따로 볼까요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>뒤의 −½log(2π분산)부터 볼게. 분산이 줄면 로그가 작아지니까 이 항은 커져. 종이 좁아져서 봉우리가 높아지는 거지.</p></div></div>
@@ -814,7 +827,7 @@ c-10,0,-16.667,5,-20,15z M410 15 H367 v585 v0 v585 h43z"/></svg></span></span></
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>정규분포의 분산을 0 으로 보내면 디랙 델타가 된다고 배운 거네요. 밀도가 함수로는 남지 않아요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="video-7.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="appendix-rl-2.html">노이즈 다시 넣기: 결정적인 스텝을 같은 분포의 확률적인 스텝으로 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="video-sec-video-mistakes-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="appendix-rl-sec-noise-reinjection-sde.html">노이즈 다시 넣기: 결정적인 스텝을 같은 분포의 확률적인 스텝으로 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

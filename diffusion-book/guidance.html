@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -673,7 +674,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="transformer.html">어텐션과 트랜스포머: 멀리 떨어진 칸끼리 읽기</a></li>
 <li><a href="latent-diffusion.html">잠재 디퓨전: 작게 줄여 놓고 퍼뜨리기</a></li>
 <li><a href="dit.html">디퓨전 트랜스포머: U-Net 자리에 트랜스포머를</a></li>
-<li><a href="guidance.html" class="active">가이던스: 조건 쪽으로 더 세게</a><ul class="sidebar-toc"><li><a href="guidance.html" class="current">조건부 스코어: 조건을 넣고 배운 디퓨전 모델</a></li><li><a href="guidance-2.html">분류기 가이던스: 분류기 그래디언트를 w배로 더한다</a></li><li><a href="guidance-3.html">분류기 없는 가이던스: 조건 있는 예측과 없는 예측의 차이를 키운다</a></li><li><a href="guidance-4.html">부정 프롬프트: 빈 조건 자리에 피할 것을 넣는다</a></li><li><a href="guidance-5.html">과포화: 배율을 올리면 데이터 밖으로 밀려난다</a></li><li><a href="guidance-6.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="guidance.html" class="active">가이던스: 조건 쪽으로 더 세게</a><ul class="sidebar-toc"><li><a href="guidance.html" class="current">조건부 스코어: 조건을 넣고 배운 디퓨전 모델</a></li><li><a href="guidance-sec-classifier-guidance.html">분류기 가이던스: 분류기 그래디언트를 w배로 더한다</a></li><li><a href="guidance-sec-classifier-free-guidance.html">분류기 없는 가이던스: 조건 있는 예측과 없는 예측의 차이를 키운다</a></li><li><a href="guidance-sec-negative-prompt.html">부정 프롬프트: 빈 조건 자리에 피할 것을 넣는다</a></li><li><a href="guidance-sec-guidance-oversaturation.html">과포화: 배율을 올리면 데이터 밖으로 밀려난다</a></li><li><a href="guidance-sec-guidance-mistakes-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="text-encoder.html">글을 읽는 인코더: CLIP의 마지막 층에서 언어 모델의 여러 층으로</a></li>
 <li><a href="image-condition.html">그림으로 조건 걸기: 참조 이미지 여러 장</a></li>
 <li><a href="video.html">영상 생성: 시퀀스와 디퓨전 사이</a></li>
@@ -684,7 +685,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter chapter-paged">
 <h1>가이던스: 조건 쪽으로 더 세게</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-guidance">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>그림 생성 도구 ComfyUI에서 그림을 만드는 마디(KSampler)를 열면, 스텝 수와 샘플러 말고도 cfg라는 칸이 있다. 기본값은 8.0이고, 마우스를 올리면 「이 값은 창의성과 프롬프트를 따르는 정도 사이의 균형을 잡는다. 값이 크면 프롬프트에 더 가까운 그림이 나오지만, 너무 크면 그림의 질이 나빠진다」는 설명이 뜬다. 같은 마디에는 프롬프트를 받는 입력(positive) 옆에 입력이 하나 더 있다. 이름은 negative다.</p>
 <p>조건을 받는 신경망은 이미 지었다. 글 토큰 줄을 크로스 어텐션이나 합동 어텐션으로 읽으며, 글이 붙은 그림들로 배운다. 그렇게 배운 신경망은 조건이 붙은 그림들의 분포를 배웠을 텐데, 왜 그 위에 8배를 곱하는 cfg 값이 또 필요할까? 코드(<code>comfy/samplers.py</code>)를 열어 보면 cfg가 1이 아닐 때 ComfyUI는 스텝마다 신경망을 두 번 부르는데, 무엇을 두 번 읽는 것일까? 이 장은 다음 물음에 차례로 답한다.</p>
 <ul>
@@ -694,11 +695,18 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>negative 칸에 글을 넣으면 그 글은 계산의 어디에 들어갈까?</li>
 <li>배율을 올리면 무엇을 얻고 무엇을 잃을까?</li>
 </ul>
-<h2 id="조건부-스코어-조건을-넣고-배운-디퓨전-모델">조건부 스코어: 조건을 넣고 배운 디퓨전 모델</h2>
+<h2 id="sec-conditional-score">조건부 스코어: 조건을 넣고 배운 디퓨전 모델<span id="조건부-스코어-조건을-넣고-배운-디퓨전-모델" class="anchor-alias"></span></h2>
 <p>글처럼 복잡한 조건을 따지기 전에, 조건을 가장 단순한 꼴로 줄여 보자. 조건 없이 노이즈 섞인 그림과 노이즈 레벨만 받은 신경망은 데이터 전체의 분포에서 아무 그림이나 뽑는다. 낮 사진만 원한다면, 학습 데이터에 「낮」「밤」 같은 라벨을 붙여 두고 신경망에 라벨도 함께 넣어 배우면 된다. 그러면 신경망이 배우는 스코어는 낮 그림들만 모은 분포의 스코어가 되는데, 이 스코어를 따라 걸으면 낮 그림만 나올까?</p>
-<h3 id="역사-라벨-표-한-장을-시간-벡터에-더하기">역사: 라벨 표 한 장을 시간 벡터에 더하기</h3>
+<h3 id="hist-label-embedding-time-vector" class="history" data-people="dhariwal-prafulla nichol-alex">역사: 라벨 표 한 장을 시간 벡터에 더하기<span id="역사-라벨-표-한-장을-시간-벡터에-더하기" class="anchor-alias"></span></h3>
 <p>라벨을 신경망에 넣는 방법은 노이즈 레벨을 넣는 방법과 같다. 다리왈(Prafulla Dhariwal)과 니콜(Alex Nichol)은 2021년 논문에서 ImageNet(1,000가지 범주로 나눈 사진 데이터셋)의 범주마다 벡터를 하나씩 두는 표를 만들고, 그림의 범주에 해당하는 벡터를 시간 벡터와 함께 잔차 블록마다 넣었다(정규화한 특징에 곱하고 더할 수를 이 벡터들이 정한다). ComfyUI의 U-Net 코드(<code>comfy/ldm/modules/diffusionmodules/openaimodel.py</code>)에도 같은 자리가 남아 있다. 범주 수만큼 줄이 있는 표(<code>label_emb</code>)를 두고, 시간 벡터에 그 줄을 더한다(<code>emb = emb + self.label_emb(y)</code>). 그 뒤로는 라벨 벡터를 더한 시간 벡터가 잔차 블록마다 들어간다.</p>
 <p>효과는 컸다. 같은 구조를 가로세로 256픽셀 ImageNet에서 같은 횟수만큼 배웠을 때, 라벨 없이 배운 모델의 FID(만든 그림 묶음과 실제 사진 묶음의 특징 분포가 얼마나 다른지 재는 값, 낮을수록 좋다)는 26.21, 라벨을 넣어 배운 모델은 10.94였다. 그런데 이 논문의 가장 좋은 숫자는 라벨을 넣어 배운 모델에서 나오지 않았다. 그들은 라벨을 넣어 배운 모델에 무언가를 하나 더 덧대어 FID를 4.59까지 낮췄다. 조건을 넣고 배운 것만으로는 모자랐다는 뜻인데, 무엇이 모자랐을까?</p>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>표에서 한 줄 꺼내 시간 벡터에 더하기만 하면 되네요. 이 정도면 진작 다들 했을 것 같은데요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>더하는 건 한 줄이 맞아요. 그럼 그 표의 줄 1,000개는 어디서 왔을까요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>ImageNet 범주 수요. 아, 그러면 사진마다 사람이 범주를 하나씩 붙여 둔 데이터가 먼저 있어야 하네요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 표 한 장으로 넣는 방법은 범주가 정해진 데이터에서만 써요. 「모자 쓴 고양이」 같은 줄은 그 표에 없어요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M03"><img src="images/cast/M03.webp" alt="김민준 M03" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그래도 라벨을 넣으니까 FID가 26.21에서 10.94로 절반 아래가 됐잖아요. 그걸로 충분하지 않아요?</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그런데 논문의 가장 좋은 숫자 4.59는 그 모델에서 나오지 않았어요. 라벨을 넣고 배운 모델이 조건대로 그림을 낸다면, 남은 차이는 어디서 생겼을까요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>음… 모델이 조건을 그대로 따르는데도 모자라다면, 조건이 붙은 그림들 자체에 뭔가 섞여 있다는 걸까요?</p></div></div>
 <h3 id="낮-그림과-밤-그림">낮 그림과 밤 그림</h3>
 <p>답을 숫자로 보려면, 조건을 정확히 따르는 스코어를 식으로 아는 장난감이 필요하다. 그림을 밝기 숫자 하나 <span class="sym" style="color:#1b9e77">x</span>로 줄이자. 밤 그림은 밝기 −0.5 둘레에, 낮 그림은 +0.5 둘레에 표준편차 0.3으로 흩어져 있고 둘이 반반이니, 두 조건이 겹치는 가장 작은 장난감이다. 해 질 녘처럼 밝기가 0 근처인 그림은 낮이라 해도, 밤이라 해도 이상하지 않다.</p>
 <p>조건이 붙은 분포와 조건 없는 분포는 베이즈 정리로 이어지고, 노이즈 섞인 그림에서도 그렇다. <span class="sym" style="color:#c2408a">p<sub>t</sub></span>(<span class="sym" style="color:#1b9e77">x<sub>t</sub></span> ∣ <span class="sym" style="color:#0093b8">y</span>) = <span class="sym" style="color:#c2408a">p<sub>t</sub></span>(<span class="sym" style="color:#0093b8">y</span> ∣ <span class="sym" style="color:#1b9e77">x<sub>t</sub></span>) <span class="sym" style="color:#c2408a">p<sub>t</sub></span>(<span class="sym" style="color:#1b9e77">x<sub>t</sub></span>) / <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#0093b8">y</span>)에 로그를 씌우고 자리 <span class="sym" style="color:#1b9e77">x<sub>t</sub></span>로 미분하면, <span class="sym" style="color:#1b9e77">x<sub>t</sub></span>와 상관없는 <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#0093b8">y</span>)는 사라진다.</p>
@@ -717,10 +725,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>조건이 붙은 스코어를 따라 샘플러를 다룰 때 본 오일러 방법으로 30스텝 걸어 낮 그림 2만 장을 뽑으면, 밝기의 평균이 0.492, 표준편차가 0.280으로 낮 그림의 분포(0.5, 0.3)를 잘 따른다. 그런데 뽑힌 그림 가운데 14.5%는 그림만 보고 낮일 확률을 매기면 0.9가 안 된다. 낮 그림 데이터 자체에서 p(낮 | x)가 0.9보다 작은 그림의 비율이 15.6%이니, 스코어는 조건을 정확히 따랐다. 조건을 정확히 따른다는 것은 조건이 붙은 그림들의 분포를 그대로 재현한다는 뜻이고, 그 분포에는 해 질 녘처럼 애매한 그림이 원래 들어 있다. 이렇게 조건이 붙은 그림들의 분포의 로그 밀도 그래디언트 <span class="sym" style="color:#b0892a">s</span>(<span class="sym" style="color:#1b9e77">x<sub>t</sub></span> ∣ <span class="sym" style="color:#0093b8">y</span>) = ∇ log <span class="sym" style="color:#c2408a">p<sub>t</sub></span>(<span class="sym" style="color:#1b9e77">x<sub>t</sub></span> ∣ <span class="sym" style="color:#0093b8">y</span>)를 <strong>조건부 스코어</strong> (조건이 붙은 그림들만 모은 분포의 스코어 / conditional score)라 한다. 신경망으로는 노이즈 예측 <span class="sym" style="color:#1f6066">ε<sub>θ</sub></span>(<span class="sym" style="color:#1b9e77">x<sub>t</sub></span>, <span class="sym" style="color:#a67a63">t</span>, <span class="sym" style="color:#0093b8">y</span>)처럼 조건을 하나 더 받는 꼴로 배운다.</p>
 <h3 id="ml에서-조건이-들어가는-자리">ML에서: 조건이 들어가는 자리</h3>
 <p>라벨처럼 가짓수가 정해진 조건은 위의 표 한 장으로 넣는다. Stable Diffusion XL은 같은 자리(<code>label_emb</code>)에 글 인코더가 문장 하나를 줄인 벡터와 그림 크기 정보를 펴서 넣는다(ComfyUI 설정 <code>adm_in_channels</code> 2816). 글은 가짓수가 정해져 있지 않으므로, 문장을 토큰마다의 벡터 줄로 바꿔 크로스 어텐션이나 합동 어텐션으로 그림의 칸들이 골라 읽게 하는 길이 하나 더 있다. 문장을 어떤 벡터로 바꾸는지는 이 장이 다루지 않고, 조건이 무엇이든 조건을 받은 신경망의 예측을 어떻게 쓰느냐만 본다.</p>
-<div class="dialogue"><h3 id="문제-1-아주-밝은-사진-한-장">문제 1. 아주 밝은 사진 한 장</h3>
+<div class="dialogue"><h3 id="prob-guidance-very-bright-photo">문제 1. 아주 밝은 사진 한 장<span id="문제-1-아주-밝은-사진-한-장" class="anchor-alias"></span></h3>
 <blockquote>
 <p>사진 앨범에 낮 사진 600장, 밤 사진 400장이 있고, 낮 사진의 30%, 밤 사진의 5%가 「아주 밝은」 사진이다. (가) 아주 밝은 사진 한 장을 골랐을 때 그 사진이 낮 사진일 확률은? (나) 앨범이 낮 사진 100장, 밤 사진 900장이라면? (다) 두 앨범에서 「낮 사진 가운데 아주 밝은 사진의 비율」은 같은데 (가)와 (나)의 답은 왜 다른가?</p>
 </blockquote>
+<figure class="fig "><img src="images/guidance/p01_albums.png" alt="두 앨범의 낮 사진과 밤 사진 수, 그 가운데 아주 밝은 사진(빗금, 낮의 30%·밤의 5%)" loading="lazy"><figcaption>두 앨범의 낮 사진과 밤 사진 수, 그 가운데 아주 밝은 사진(빗금, 낮의 30%·밤의 5%)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>낮 사진의 30%가 아주 밝다고 했으니까 30%요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 30%는 어느 사진들 가운데의 비율이죠? 지금 손에 든 건 어느 사진들 가운데 하나고요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 30%는 낮 사진 가운데 밝은 사진이고, 저는 밝은 사진 가운데 하나를 들고 있어요. 방향이 반대예요. 세어 보면 밝은 낮 사진이 180장, 밝은 밤 사진이 20장이니까 180/200 = 0.9예요.</p></div></div>
@@ -728,10 +737,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(다)를 식으로 말해 볼까요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>p(낮 ∣ 밝음) = p(밝음 ∣ 낮) p(낮) / p(밝음)이에요. 앞의 p(밝음 ∣ 낮)은 두 앨범이 같고, 다른 건 p(낮)과 p(밝음)이에요. 로그를 씌우면 셋이 더하기 빼기로 갈라지네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조교님이 「이 반 보고서는 대부분 A였다」고 한 거랑 「A 보고서는 대부분 이 반 거였다」는 다른 말이었구나. 반 인원이 다르면 완전히 다르겠어요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-스코어에-분류기-그래디언트를-더하기">문제 2. 스코어에 분류기 그래디언트를 더하기</h3>
+</div><div class="dialogue"><h3 id="prob-guidance-add-classifier-gradient">문제 2. 스코어에 분류기 그래디언트를 더하기<span id="문제-2-스코어에-분류기-그래디언트를-더하기" class="anchor-alias"></span></h3>
 <blockquote>
 <p>낮·밤 장난감(밤 −0.5, 낮 +0.5, 표준편차 0.3, 반반)에 노이즈 <span class="sym" style="color:#4c5d80">σ</span> = 0.5를 섞었다. 노이즈 섞인 낮 그림의 분포는 N(0.5, 0.3² + 0.5²), 밤 그림은 N(−0.5, 0.3² + 0.5²)이다. 자리 <span class="sym" style="color:#1b9e77">x<sub>t</sub></span> = 0.2에서 (가) 낮 그림들의 스코어 <span class="sym" style="color:#b0892a">s</span>(<span class="sym" style="color:#1b9e77">x<sub>t</sub></span> ∣ 낮) (나) 모든 그림의 스코어 <span class="sym" style="color:#b0892a">s</span>(<span class="sym" style="color:#1b9e77">x<sub>t</sub></span>) (다) ∇ log <span class="sym" style="color:#c2408a">p<sub>t</sub></span>(낮 ∣ <span class="sym" style="color:#1b9e77">x<sub>t</sub></span>)를 구하고, (가) = (나) + (다)인지 확인하라. (라) <span class="sym" style="color:#c2408a">p<sub>t</sub></span>(낮 ∣ <span class="sym" style="color:#1b9e77">x<sub>t</sub></span>)는 <span class="sym" style="color:#1b9e77">x<sub>t</sub></span>의 어떤 함수인가?</p>
 </blockquote>
+<figure class="fig "><img src="images/guidance/p02_noisy_daynight.png" alt="노이즈 σ = 0.5를 섞은 낮 그림 N(0.5, 0.34), 밤 그림 N(−0.5, 0.34), 둘을 반반 섞은 모든 그림의 분포와 자리 xₜ = 0.2" loading="lazy"><figcaption>노이즈 σ = 0.5를 섞은 낮 그림 N(0.5, 0.34), 밤 그림 N(−0.5, 0.34), 둘을 반반 섞은 모든 그림의 분포와 자리 xₜ = 0.2</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>분산이 0.09 + 0.25 = 0.34예요. (가)는 정규분포 하나의 스코어라 −(0.2 − 0.5)/0.34 = 0.882예요. (나)는 두 정규분포를 반반 섞은 거니까 스코어도 반반 섞으면… (0.882 + (−(0.2 + 0.5)/0.34))/2 = (0.882 − 2.059)/2 = −0.588이요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>스코어를 반반 섞어도 돼? 반반인 건 처음 비중이지, 0.2에 선 사람이 낮에서 왔을 확률은 반반이 아닐 텐데.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>0.2에 선 사람이 낮에서 왔을 확률부터 구해 볼까요?</p></div></div>
@@ -746,10 +756,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M02"><img src="images/cast/M02.webp" alt="김민준 M02" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>2.941 안에 0.34가 들어 있잖아. 노이즈가 바뀌면 당기는 세기도 바뀌어?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>2.941은 노이즈 분산 0.34로 나눈 값이니까… 노이즈가 짙을수록 시그모이드 p<sub>t</sub>(낮 ∣ x<sub>t</sub>)의 기울기는 완만해지겠네.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.webp" alt="김민준 M08" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>전체 학생 평균은 C인데 우리 조 평균이 B면, 우리 조 점수 = 전체 경향 + 「우리 조라서 더해지는 점수」예요. 전체 경향이 모든 그림의 스코어, 더해지는 점수가 분류기 그래디언트네요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-3-뽑고-나서-버리기">문제 3. 뽑고 나서 버리기</h3>
+</div><div class="dialogue"><h3 id="prob-guidance-sample-then-reject">문제 3. 뽑고 나서 버리기<span id="문제-3-뽑고-나서-버리기" class="anchor-alias"></span></h3>
 <blockquote>
 <p>낮 그림만 쓰는 데이터셋을 만들려고, 조건부 스코어로 낮 그림을 뽑은 뒤 분류기 <span class="sym" style="color:#c2408a">p</span>(낮 ∣ <span class="sym" style="color:#1b9e77">x</span>)가 0.99 이상인 그림만 남기기로 했다(장난감의 정확한 분류기를 쓴다). (가) 뽑은 그림의 몇 %를 버리게 되는가? (나) 1,000장을 남기려면 평균 몇 장을 뽑아야 하고, 한 장에 30스텝이면 신경망을 몇 번 부르는가? (다) 버리지 않고 처음부터 덜 애매한 그림을 뽑는 방법은 없을까?</p>
 </blockquote>
+<figure class="fig "><img src="images/guidance/p03_threshold.png" alt="조건부 스코어로 뽑는 낮 그림의 분포 p(x | 낮)와 분류기 p(낮 | x), 문턱 0.9와 0.99" loading="lazy"><figcaption>조건부 스코어로 뽑는 낮 그림의 분포 p(x | 낮)와 분류기 p(낮 | x), 문턱 0.9와 0.99</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>본문에서 0.9보다 낮은 게 15.6%였으니까 15.6%쯤 버리겠네요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>문턱이 0.9에서 0.99로 바뀌었어요. 문턱을 높이면 버리는 그림의 비율은 늘까요, 줄까요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>늘어나죠. 돌려 보니 38.6%예요. 두 배가 넘어요. 그럼 1,000장을 남기려면 1,000/(1 − 0.386) = 1,627장을 뽑아야 하고, 신경망은 1,627 × 30 = 48,818번 불러요.</p></div></div>
@@ -759,7 +770,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>과제를 다 받아 놓고 기준 미달을 반려하는 대신, 처음부터 채점 기준을 더 세게 알려 주는 거네요. 조교님 품이 훨씬 덜 들겠어요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="dit-8.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="guidance-2.html">분류기 가이던스: 분류기 그래디언트를 w배로 더한다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="dit-sec-dit-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="guidance-sec-classifier-guidance.html">분류기 가이던스: 분류기 그래디언트를 w배로 더한다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

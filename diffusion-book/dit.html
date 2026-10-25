@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -672,7 +673,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li class="toc-part">구조와 조건, 영상</li>
 <li><a href="transformer.html">어텐션과 트랜스포머: 멀리 떨어진 칸끼리 읽기</a></li>
 <li><a href="latent-diffusion.html">잠재 디퓨전: 작게 줄여 놓고 퍼뜨리기</a></li>
-<li><a href="dit.html" class="active">디퓨전 트랜스포머: U-Net 자리에 트랜스포머를</a><ul class="sidebar-toc"><li><a href="dit.html" class="current">왜 U-Net 을 떠났나: 모든 것을 한 줄로 읽는 한 가지 통로</a></li><li><a href="dit-2.html">패치: 잠재 그림을 토큰 줄로 자르기</a></li><li><a href="dit-3.html">adaLN-Zero: 시간은 정규화의 배율과 바이어스로</a></li><li><a href="dit-4.html">합동 어텐션: 글 토큰과 그림 토큰을 한 줄로</a></li><li><a href="dit-5.html">규모: 무엇을 키우면 그림이 좋아지나</a></li><li><a href="dit-6.html">주요 디퓨전 트랜스포머 비교: 같은 설계 요소, 다른 선택</a></li><li><a href="dit-7.html">픽셀 패치: 토큰 하나가 폭만큼 커지면</a></li><li><a href="dit-8.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="dit.html" class="active">디퓨전 트랜스포머: U-Net 자리에 트랜스포머를</a><ul class="sidebar-toc"><li><a href="dit.html" class="current">왜 U-Net 을 떠났나: 모든 것을 한 줄로 읽는 한 가지 통로</a></li><li><a href="dit-sec-latent-patch-tokens.html">패치: 잠재 그림을 토큰 줄로 자르기</a></li><li><a href="dit-sec-adaln-zero-conditioning.html">adaLN-Zero: 시간은 정규화의 배율과 바이어스로</a></li><li><a href="dit-sec-joint-text-image-attention.html">합동 어텐션: 글 토큰과 그림 토큰을 한 줄로</a></li><li><a href="dit-sec-dit-scaling-quality.html">규모: 무엇을 키우면 그림이 좋아지나</a></li><li><a href="dit-sec-dit-model-comparison.html">주요 디퓨전 트랜스포머 비교: 같은 설계 요소, 다른 선택</a></li><li><a href="dit-sec-pixel-patch-width.html">픽셀 패치: 토큰 하나가 폭만큼 커지면</a></li><li><a href="dit-sec-dit-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="guidance.html">가이던스: 조건 쪽으로 더 세게</a></li>
 <li><a href="text-encoder.html">글을 읽는 인코더: CLIP의 마지막 층에서 언어 모델의 여러 층으로</a></li>
 <li><a href="image-condition.html">그림으로 조건 걸기: 참조 이미지 여러 장</a></li>
@@ -684,7 +685,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter chapter-paged">
 <h1>디퓨전 트랜스포머: U-Net 자리에 트랜스포머를</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-dit">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>잠재 공간으로 줄여도 칸은 많아서, 1024 × 1024 그림의 잠재는 128 × 128칸이다. SDXL 의 U-Net 은 그래서 멀리 읽는 어텐션을 해상도를 낮춘 단계에만 두고, 가장 고운 128 × 128칸 단계에서는 합성곱으로 이웃만 보았다. 그래도 멀리 보는 일의 무게는 어텐션 쪽으로 옮겨 가고 있었다. Stable Diffusion 1.x 의 노이즈 예측 U-Net 은 파라미터 8억 6,000만 개 가운데 31.1%가 이미 어텐션 블록이었다. 2024년 이후 공개된 그림 생성 모델의 코드를 열어 보면 이 흐름이 끝까지 간 것을 본다. FLUX.1, Qwen-Image, Z-Image, <a href="http://krea.ai">krea.ai</a> 의 Krea 2, Anima 의 노이즈 예측 신경망에는 합성곱 층이 하나도 없다. 합성곱 단계를 걷어 내고 트랜스포머 블록만 수십 개 쌓았다.</p>
 <p>트랜스포머는 토큰 줄을 받는다. 그런데 잠재 그림은 가로세로로 늘어선 칸이고, 칸을 모두 토큰으로 삼으면 서로 읽는 쌍이 감당하기 어렵게 많아진다. 또 U-Net 은 시간 벡터를 채널마다 더했고, 글 조건은 크로스 어텐션으로 읽었다. U-Net 자리에 트랜스포머를 놓으려면 이것들을 하나씩 다시 정해야 하므로, 이 장은 다음 물음에 차례로 답한다.</p>
 <ul>
@@ -696,10 +697,10 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>지금 쓰이는 모델들은 같은 설계 요소(패치, 시간을 넣는 블록, 글과 그림을 잇는 어텐션, 규모)를 어떻게 서로 다르게 골랐을까?</li>
 <li>그 모델들은 모두 VAE 로 줄인 잠재 위에서 노이즈나 속도를 맞힌다. 압축기 없이 픽셀을 큰 조각으로 잘라 넣으면 무엇이 무너지고, 신경망에게 무엇을 맞히게 해야 버틸까?</li>
 </ul>
-<h2 id="왜-u-net-을-떠났나-모든-것을-한-줄로-읽는-한-가지-통로">왜 U-Net 을 떠났나: 모든 것을 한 줄로 읽는 한 가지 통로</h2>
+<h2 id="sec-leaving-unet-single-path">왜 U-Net 을 떠났나: 모든 것을 한 줄로 읽는 한 가지 통로<span id="왜-u-net-을-떠났나-모든-것을-한-줄로-읽는-한-가지-통로" class="anchor-alias"></span></h2>
 <p>U-Net 기반 모델을 오래 써 온 사람들이 꼽는 흠이 있다. 체육관에서 운동하는 사람을 그리게 하면, 사람 뒤로 지나가는 철봉이 왼쪽과 오른쪽에서 높이가 어긋나 한 막대로 이어지지 않는 경향이 있다는 것이다. 수평선, 울타리, 책장의 선반처럼 앞의 물체에 가려 두 조각으로 보이는 것은 모두 같은 처지다. 손가락이 여섯 개로 나오거나 작은 간판 글씨가 엉뚱한 획이 되는 흠은 갈라 두자. 작게 그린 글자와 손가락은 압축기를 한 번 왕복하는 것만으로 무너질 수 있어서, 몸통이 아니라 압축기의 복원 정밀도 한계에서 오는 흠이다.</p>
 <p>그런데 2024년 이후 공개된 모델들이 U-Net 을 버린 것은 흠 하나 때문이 아니었다. 그림 생성 모델에게 바라는 일이 늘었다. 긴 글을 정확히 따르기, 아무 가로세로 비로 그리기, 참조 사진을 보고 고치기, 몇 초짜리 영상 만들기, 그리고 모델을 키운 만큼 좋아지기. U-Net 은 이 요구마다 무엇을 덧대야 했고, 트랜스포머는 무엇을 그대로 둔 채 받았을까?</p>
-<h3 id="역사-어텐션을-어디에-몇-개">역사: 어텐션을 어디에, 몇 개</h3>
+<h3 id="hist-unet-attention-placement" class="history" data-people="dhariwal-prafulla nichol-alex podell-dustin">역사: 어텐션을 어디에, 몇 개<span id="역사-어텐션을-어디에-몇-개" class="anchor-alias"></span></h3>
 <p>2020년의 DDPM 은 노이즈 예측 U-Net 의 16 × 16칸 단계 한 곳에만 셀프 어텐션을 두었다. 이듬해 OpenAI 의 다리왈(Prafulla Dhariwal)과 니콜(Alex Nichol)은 U-Net 의 구조 선택(어텐션을 두는 해상도, 머리 수, 잔차 블록 수 같은 것)을 하나씩 바꿔 보는 비교를 했다. 그들은 어텐션을 16 × 16 한 곳에서 32 × 32, 16 × 16, 8 × 8 세 단계로 늘리자 ImageNet 128 × 128 에서 학습 70만 스텝 뒤의 FID 가 15.33에서 0.72 내려간다고 보고했다. 멀리 읽는 층은 늘수록 좋았다.</p>
 <p>다만 어텐션은 칸 수의 제곱만큼 비싸서, 가장 고운 단계에 두기가 부담스러웠다. Stable Diffusion 1.x 는 잠재 64 × 64칸(그림 512 × 512) 단계까지 어텐션을 두었다. 그림을 1024 × 1024 로 키우면 그 단계가 16,384칸이 되어 쌍이 16배로 는다. 2023년 1024 × 1024 그림을 만드는 SDXL 을 내놓은 Stability AI 의 포델(Dustin Podell)과 동료들은 「효율을 위해 가장 높은 단계의 트랜스포머 블록을 뺐다」고 적고, 128 × 128칸 단계에는 어텐션을 두지 않고 그 아래 두 단계에 트랜스포머 층 2개짜리와 10개짜리 블록을 몰았다. ComfyUI 의 설정으로 두 U-Net 을 지어 세어 보면 이렇다(sources/dit/unet_attention_layout.py).</p>
 <div class="table-wrap"><table>
@@ -746,6 +747,13 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </table></div>
 <p>(U-Net 의 층 하나는 셀프 어텐션·크로스 어텐션·MLP 한 벌. SDXL 의 128 × 128칸 단계에는 합성곱 잔차 블록 5개만 있다.)</p>
 <p>어텐션은 점점 늘었지만, 늘어난 곳은 언제나 칸을 크게 묶은 단계였다.</p>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>어텐션이 늘수록 FID 가 좋아졌으면, 128 × 128칸 단계에도 그냥 넣으면 됐을 것 같은데요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 단계는 칸이 16,384개예요. 머리 하나가 층 하나에서 계산하는 쌍은 몇 개일까요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>음, 16,384의 제곱이니까… 2억 6,843만 개요. SD 1.x 의 64 × 64칸 단계는 1,677만 개였으니 16배네요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>쌍마다 16비트 수 하나씩만 저장해도 5억 바이트가 넘어. 머리 하나, 층 하나, 그림 한 장에서만.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>게다가 어디에 몇 개를 둘지 미리 알려 주는 이론도 없었어요. 다리왈과 니콜도 구조를 하나 바꿀 때마다 모델을 70만 스텝 학습시켜 FID 를 재 보는 수밖에 없었죠.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그래서 SDXL 은 비싼 128칸 단계는 비워 두고, 감당할 수 있는 거친 단계에 어텐션을 몰아넣었군요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 어텐션이 없는 128칸 단계에서는, 막대 왼쪽 조각의 높이가 어떤 층들을 거쳐 오른쪽 칸에 닿았을까요?</p></div></div>
 <h3 id="정보가-오가는-길">정보가 오가는 길</h3>
 <p>막대의 오른쪽 조각을 정확한 높이에 그리려면, 왼쪽 조각이 「어느 높이에, 어떤 기울기로」 있는지가 오른쪽 칸의 출력에 닿아야 한다. 이렇게 한 칸의 정보가 멀리 떨어진 칸의 출력에 닿기까지 거치는 층들의 길을 이 책에서는 <strong>정보 통로</strong> (멀리 떨어진 칸끼리 정보가 오가는 층들의 길)라 부르자. 수용 영역이 「닿을 수 있는 구역」이라면, 정보 통로는 그 구역 안에서 정보가 실제로 지나가는 길이다.</p>
 <p>U-Net 의 정보 통로는 셋인데, 그 가운데 합성곱은 층마다 이웃 칸까지만 닿는다. 멀리 닿는 통로(어텐션)는 해상도를 낮춘 단계에 있는데, 거기서 칸 하나는 픽셀 32 × 32 같은 큰 덩어리다. 올라오는 길의 건너뛰기 연결은 높은 해상도의 정확한 위치를 건네주지만, 건네주는 것은 같은 위치의 정보뿐이다. 그래서 칸 하나 단위로 어디에 칠할지는 마지막에 높은 해상도의 합성곱이 이웃만 보고 정한다. 디퓨전 트랜스포머의 통로는 하나로, 모든 블록에서 모든 토큰이 서로 읽으므로 FLUX.1 은 같은 16 × 16 픽셀 굵기에서 57번 읽는다.</p>
@@ -761,10 +769,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h3 id="ml에서-언어-모델의-연장을-그대로">ML에서: 언어 모델의 연장을 그대로</h3>
 <p>꼴이 언어 모델과 같으면 연장도 같이 쓴다. ComfyUI 에서 FLUX 의 어텐션과 Qwen·Mistral 같은 언어 모델 글 인코더의 어텐션은 같은 어텐션 함수 모음(<code>comfy/ldm/modules/attention.py</code>)에서 계산법을 고른다. FlashAttention, SageAttention, PyTorch 내장 어텐션 같은, 트랜스포머를 빠르게 돌리려고 다듬어 온 것들이다. 수를 8비트로 줄여 곱하는 fp8 행렬 곱은 선형 층에만 걸린다(<code>comfy/ops.py</code> 의 <code>fp8_ops</code> 는 <code>Linear</code> 만 바꾼다). 트랜스포머만으로 잠재 디퓨전의 노이즈 예측 신경망을 짠 피블스(William Peebles)와 셰(Saining Xie)도 2022년 논문 머리에서, U-Net 의 귀납 편향이 꼭 필요하지 않다면 디퓨전도 「다른 분야의 모범 사례와 학습 비법을 물려받는」 구조 통일의 흐름에 올라탈 수 있다고 적었다.</p>
 <p>키우는 일도 같다. U-Net 을 키우려면 단계 수, 단계마다의 채널, 어텐션을 둘 해상도를 함께 정해야 했다. 블록 하나를 되풀이해 쌓은 몸통이면 폭과 깊이와 토큰 수만 남는다. 계산을 늘린 만큼 그림이 고르게 좋아지는지는 모델을 키우는 이야기에서 숫자로 본다.</p>
-<div class="dialogue"><h3 id="문제-1-담-양쪽의-빨랫줄">문제 1. 담 양쪽의 빨랫줄</h3>
+<div class="dialogue"><h3 id="prob-dit-clothesline-wall">문제 1. 담 양쪽의 빨랫줄<span id="문제-1-담-양쪽의-빨랫줄" class="anchor-alias"></span></h3>
 <blockquote>
 <p>높은 담 양쪽에 선 두 사람이 담 위로 빨랫줄 하나를 걸쳐, 양쪽 끝을 같은 높이의 못에 걸려 하는데, 담 너머는 보이지 않는다. 방법은 둘이다. (ㄱ) 담 너머로 「내 못은 몇 cm」라고 외치는데, 외치는 말은 10cm 단위로 반올림돼서만 들린다. (ㄴ) 담 위 사다리에 선 친구가 양쪽을 한눈에 보고 「왼쪽을 2cm 올려」라고 고쳐 준다. (가) (ㄱ)만 쓰면 두 못의 높이 차는 최대 얼마까지 생길 수 있는가? (나) 사다리 친구를 한 번만 부를 수 있다면, 처음 대충 걸 때와 못을 박기 바로 전 가운데 언제가 좋은가? (다) (ㄱ)을 열 번 외쳐도 왜 (ㄴ) 한 번을 못 따라갈까?</p>
 </blockquote>
+<figure class="fig "><img src="images/dit/p01_clothesline.png" alt="담을 사이에 둔 두 못과 빨랫줄, 10cm 단위로만 들리는 외침 (ㄱ)과 담 위 사다리에서 양쪽을 보는 친구 (ㄴ). 스크립트 sources/dit/problems_figs.py" loading="lazy"><figcaption>담을 사이에 둔 두 못과 빨랫줄, 10cm 단위로만 들리는 외침 (ㄱ)과 담 위 사다리에서 양쪽을 보는 친구 (ㄴ). 스크립트 sources/dit/problems_figs.py</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 10cm 단위니까 최대 10cm요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>반올림해서 들린다고 했죠. 「80」이라고 들리는 못은 실제로 어디쯤일 수 있죠?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>75에서 85 사이요. 듣는 사람이 정확히 80에 박으면 많아야 5cm 차이네요.</p></div></div>
@@ -774,10 +783,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(다)는 외침이 몇 번이든 10cm 단위라는 굵기가 그대로라서야. 같은 굵기의 말을 되풀이해도 더 가는 자리는 안 실려.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 멀리 닿는 길이 몇 개냐, 어느 굵기로 말을 싣느냐, 마지막 손질 가까이에 있느냐. 세 가지가 함께 정해요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조별 보고서를 각자 나눠 쓰고 첫 회의 때만 목차를 맞추면, 마지막에 합쳤을 때 용어가 서로 안 맞는 거랑 같네요. 제출 직전에 한 사람이 처음부터 끝까지 읽어야 맞아요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-sdxl-의-통로를-세면">문제 2. SDXL 의 통로를 세면</h3>
+</div><div class="dialogue"><h3 id="prob-dit-sdxl-path-count">문제 2. SDXL 의 통로를 세면<span id="문제-2-sdxl-의-통로를-세면" class="anchor-alias"></span></h3>
 <blockquote>
 <p>SDXL 은 1024 × 1024 그림을 잠재 128 × 128칸으로 받아 128 → 64 → 32칸 세 단계를 지난다. 128칸 단계에는 어텐션이 없고 3 × 3 합성곱이 내려가는 길에 4층, 올라오는 길에 6층 있다(잔차 블록 하나에 2층. 처음·마지막 합성곱과 해상도를 바꾸는 합성곱은 뺌). (가) 128칸 단계에서 칸 하나는 픽셀 몇 × 몇인가? 그 단계의 합성곱 10층만으로 정보가 옆으로 갈 수 있는 거리는 이론상 몇 픽셀인가? (나) 사람 몸 폭 300픽셀을 사이에 둔 막대 두 조각을 32칸 단계의 어텐션이 직접 잇는다. 그 단계에서 칸 하나가 맡는 픽셀은? (다) FLUX.1 에서 모든 토큰이 서로 읽는 층은 몇 개이고, 토큰 하나는 픽셀 몇 × 몇인가?</p>
 </blockquote>
+<figure class="fig "><img src="images/dit/p02_sdxl_stages.png" alt="1024 × 1024 그림에서 사람 몸 300픽셀을 사이에 둔 막대 두 조각과, SDXL U-Net 의 128 × 128·64 × 64·32 × 32칸 세 단계에 있는 층. 스크립트 sources/dit/problems_figs.py" loading="lazy"><figcaption>1024 × 1024 그림에서 사람 몸 300픽셀을 사이에 둔 막대 두 조각과, SDXL U-Net 의 128 × 128·64 × 64·32 × 32칸 세 단계에 있는 층. 스크립트 sources/dit/problems_figs.py</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 1024 ÷ 128 = 8이라 8 × 8픽셀이요. 3 × 3 합성곱 한 층이 양옆으로 한 칸씩 넓히니까 10층이면 10칸, 80픽셀이요. 300픽셀에 한참 모자라요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(나)는 1024 ÷ 32 = 32라서 32 × 32픽셀. 그럼 막대 높이를 32픽셀 단위로만 아는 거네. 문제 1의 10cm 외침이랑 같아.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>32칸 단계의 칸 하나에는 수가 몇 개 들어 있죠? 칸 안 어디쯤에 막대가 있는지를 그 수로 적을 수는 없을까요?</p></div></div>
@@ -786,10 +796,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(다)는 두 줄 19개와 한 줄 38개라 57개, 토큰 하나는 2 × 2칸이라 16 × 16픽셀이요. 마지막 층 바로 앞까지 모든 층이 그 굵기로 서로 읽어요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 32칸 단계의 어텐션도 정보를 나르기는 해요. 다른 것은 정보를 담는 칸의 크기, 통로의 수, 그리고 마지막 손질과의 거리예요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>해석학에서 근사를 거칠게 한 번 하고 나중에 국소적으로만 고치면, 국소 수정으로는 전체 오차를 못 줄이는 거랑 같네요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-3-선형-층만-빨라지면">문제 3. 선형 층만 빨라지면</h3>
+</div><div class="dialogue"><h3 id="prob-dit-faster-linear-layers">문제 3. 선형 층만 빨라지면<span id="문제-3-선형-층만-빨라지면" class="anchor-alias"></span></h3>
 <blockquote>
 <p>ComfyUI 의 fp8 행렬 곱 가속은 선형 층에만 걸린다. ComfyUI 설정으로 두 모델을 지어 샘플링 스텝 한 번의 층 계산(곱셈·덧셈 짝, 어텐션 쌍의 계산은 뺌)을 세면, SDXL U-Net(1024 × 1024)은 2조 9,887억 짝 가운데 합성곱이 27.2%, 선형 층이 72.8%이고, FLUX.1 [dev](1024 × 1024, 글 512토큰)은 29조 7,561억 짝이 모두 선형 층이다. 파라미터로 세면 SDXL 에서 합성곱이 차지하는 비율은 13.0%다. (가) 선형 층의 계산만 두 배 빨라진다면 두 모델의 층 계산 시간은 각각 처음의 몇 배가 되는가? (나) SDXL 에서 합성곱이 차지하는 비율이 파라미터로는 13.0%인데 계산으로는 왜 27.2%일까? 128 × 128칸 단계의 잔차 블록 5개는 파라미터 1,662만 개이고, 그 단계의 합성곱 계산은 2,839억 짝이다. (다) 언어 모델 쪽에서 널리 쓰인 양자화 파일 형식 GGUF 를 ComfyUI 에 들여온 개발자는 「보통의 U-Net(합성곱)에는 양자화가 쓸 만하지 않았는데, FLUX 같은 트랜스포머 모델은 양자화의 영향을 덜 받는 것 같다」고 적었다. 언어 모델을 위해 만든 연장이 왜 디퓨전 트랜스포머에 잘 맞는지 몸통의 생김새로 말해 보라.</p>
 </blockquote>
+<figure class="fig "><img src="images/dit/p03_linear_share.png" alt="샘플링 스텝 한 번의 층 계산에서 합성곱과 선형 층이 차지하는 비율(SDXL U-Net, FLUX.1 [dev])과 SDXL 에서 합성곱이 차지하는 파라미터·계산 비율. 스크립트 sources/dit/problems_figs.py" loading="lazy"><figcaption>샘플링 스텝 한 번의 층 계산에서 합성곱과 선형 층이 차지하는 비율(SDXL U-Net, FLUX.1 [dev])과 SDXL 에서 합성곱이 차지하는 파라미터·계산 비율. 스크립트 sources/dit/problems_figs.py</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 쉬워요. 72.8%가 빨라지니까 SDXL 도 거의 두 배요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>빨라지지 않는 27.2%는 얼마나 걸리죠?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 27.2%는 그대로 걸려요. 0.272 + 0.728 ÷ 2 = 0.636배, 1.57배 빨라지는 데서 멈춰요. FLUX.1 은 전부 선형 층이니까 0.5배, 딱 두 배고요.</p></div></div>
@@ -801,7 +812,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>공구가 규격 나사 하나로 통일된 조립식 가구 같네요. 드라이버 하나로 다 조이니까, 더 좋은 드라이버가 나오면 가구 전체가 한꺼번에 덕을 봐요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="latent-diffusion-6.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 8</span><a class="chapter-nav-next" href="dit-2.html">패치: 잠재 그림을 토큰 줄로 자르기 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="latent-diffusion-sec-latent-diffusion-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 8</span><a class="chapter-nav-next" href="dit-sec-latent-patch-tokens.html">패치: 잠재 그림을 토큰 줄로 자르기 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

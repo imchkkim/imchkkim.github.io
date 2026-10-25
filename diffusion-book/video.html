@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -676,7 +677,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="guidance.html">가이던스: 조건 쪽으로 더 세게</a></li>
 <li><a href="text-encoder.html">글을 읽는 인코더: CLIP의 마지막 층에서 언어 모델의 여러 층으로</a></li>
 <li><a href="image-condition.html">그림으로 조건 걸기: 참조 이미지 여러 장</a></li>
-<li><a href="video.html" class="active">영상 생성: 시퀀스와 디퓨전 사이</a><ul class="sidebar-toc"><li><a href="video.html" class="current">두 목표의 만남: 영상은 프레임의 줄이자 걷어 낼 노이즈다</a></li><li><a href="video-2.html">노출 편향: 정답 과거로만 배우면 생기는 일</a></li><li><a href="video-3.html">스케줄드 샘플링: 연습의 과거에 자기 것을 섞는다</a></li><li><a href="video-4.html">디퓨전 포싱: 프레임마다 노이즈 레벨을 따로 준다</a></li><li><a href="video-5.html">셀프 포싱: 학습 때도 자기 과거로 굴린다</a></li><li><a href="video-6.html">긴 영상의 오류 누적: 선생보다 길게 굴리기</a></li><li><a href="video-7.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="video.html" class="active">영상 생성: 시퀀스와 디퓨전 사이</a><ul class="sidebar-toc"><li><a href="video.html" class="current">두 목표의 만남: 영상은 프레임의 줄이자 걷어 낼 노이즈다</a></li><li><a href="video-sec-exposure-bias.html">노출 편향: 정답 과거로만 배우면 생기는 일</a></li><li><a href="video-sec-scheduled-sampling.html">스케줄드 샘플링: 연습의 과거에 자기 것을 섞는다</a></li><li><a href="video-sec-diffusion-forcing.html">디퓨전 포싱: 프레임마다 노이즈 레벨을 따로 준다</a></li><li><a href="video-sec-self-forcing.html">셀프 포싱: 학습 때도 자기 과거로 굴린다</a></li><li><a href="video-sec-long-video-error-accumulation.html">긴 영상의 오류 누적: 선생보다 길게 굴리기</a></li><li><a href="video-sec-video-mistakes-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li><a href="appendix-rl.html">부록 A — 강화학습으로 이어지는 다리</a></li>
 <li><a href="epilogue.html">에필로그</a></li></ol>
 </nav>
@@ -684,7 +685,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter chapter-paged">
 <h1>영상 생성: 시퀀스와 디퓨전 사이</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-video">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>디퓨전 트랜스포머는 1024 × 1024 그림 한 장을 잠재 그림으로 줄이고 2 × 2 패치로 잘라 토큰 4,096개로 다뤘다. 참조 그림을 여러 장 넣을 때는 좌표의 첫째 축인 번호 축에 몇 번째 그림인지를 매겨 그림들을 한 줄에 세웠다. 그 줄의 그림을 모두 새로 만들어야 하고 번호가 시간 순서라면, 이를테면 1초에 열여섯 장씩 이어진 그림이라면 그것이 영상이다. 알리바바가 공개한 영상 생성 모델 Wan2.1 을 ComfyUI 에서 열면 기본 설정이 832 × 480 크기의 프레임 81장, 곧 5초짜리 영상이다. 이 모델의 VAE 는 가로세로를 8분의 1로 줄이면서 프레임도 넷씩 묶어(첫 프레임만 혼자) 잠재 프레임 21장을 만들고, 잠재 프레임 하나를 2 × 2 패치로 자르면 토큰이 1,560개다. 5초짜리 영상 하나가 토큰 32,760개, 그림 한 장의 8배이고, 셀프 어텐션이 서로 비교하는 토큰 쌍은 64배다.</p>
 <p>크기만 문제가 아니다. 5초가 아니라 3분짜리 영상을 원하면 어떻게 할까? 플레이어가 버튼을 누를 때마다 다음 장면이 바뀌어야 하는 게임 화면이라면? 처음부터 끝까지를 한 번에 정해 놓고 만들 수 없으니, 앞에서 만든 프레임에 이어 붙여 가야 한다. 그런데 그렇게 이어 붙인 영상은 처음 몇 초는 멀쩡하다가 점점 색이 바래거나, 지나치게 선명해지거나, 인물이 뭉개진다. 이 장은 다음 물음에 차례로 답한다.</p>
 <ul>
@@ -693,7 +694,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>학습 때 모델에게 보여 줄 과거를 어디서 가져와야, 학습 때 본 과거와 생성 때 딛는 과거의 차이가 줄어들까?</li>
 <li>학습 때 굴려 본 길이보다 훨씬 긴 영상을 만들면 무엇이 다시 틀어질까?</li>
 </ul>
-<h2 id="두-목표의-만남-영상은-프레임의-줄이자-걷어-낼-노이즈다">두 목표의 만남: 영상은 프레임의 줄이자 걷어 낼 노이즈다</h2>
+<h2 id="sec-video-autoregressive-diffusion">두 목표의 만남: 영상은 프레임의 줄이자 걷어 낼 노이즈다<span id="두-목표의-만남-영상은-프레임의-줄이자-걷어-낼-노이즈다" class="anchor-alias"></span></h2>
 <p>지금까지 만든 디퓨전 모델은 그림 한 장의 노이즈를 한꺼번에 걷어 냈는데, 영상 81장도 그렇게 할 수 있을까? 81장을 한 덩어리로 보고 모든 프레임의 노이즈를 함께 걷어 낼 수도 있고, 첫 프레임을 만든 뒤 그것을 보고 둘째 프레임을 만드는 식으로 한 장씩 이어 갈 수도 있다. 모든 프레임을 함께 걷어 내는 방식은 그림 디퓨전을 시간 축으로 늘린 것이고, 한 장씩 이어 가는 방식은 언어 모델이 다음 토큰을 하나씩 쓰는 방식을 프레임에 옮긴 것이다. 둘은 학습하는 목표부터 다르다.</p>
 <h3 id="두-방식을-노이즈-레벨로-나란히-놓기">두 방식을 노이즈 레벨로 나란히 놓기</h3>
 <p>프레임 여섯 장으로 두 방식을 나란히 그려 보자. 칸의 숫자는 그 프레임에 남은 노이즈의 양을 다섯 단계로 센 것으로, 0이 깨끗한 프레임, 4가 아무 정보도 없는 순수 노이즈다. 지금까지 시간 t 로 적던 노이즈 레벨을 단계로 센 것이라, 이 장에서는 글자를 바꿔 <span class="sym" style="color:#697800">k</span>로 쓴다. 프레임 번호와 노이즈 레벨이 둘 다 흔히 「시점」이라 불려서, 한 글자로 쓰면 곧 헷갈리기 때문이다.</p>
@@ -758,10 +759,11 @@ c-10,0,-16.667,5,-20,15z M410 15 H367 v585 v0 v585 h43z"/></svg></span></span></
 <p>표의 마지막 줄이 이 장 전체의 줄거리다. 2024년부터 「○○ 포싱(forcing)」이라는 이름의 학습법이 잇달아 나왔다. 포싱은 학습 때 모델에게 보여 주는 과거를 어디서 가져오는가를 정하는 학습법의 이름이다. 이 학습법들은 모두 두 목표를 한 모델에 어떻게 담을지, 그리고 자기회귀의 약점을 어떻게 막을지에 대한 답이다.</p>
 <h3 id="ml에서-영상-모델은-어느-쪽으로-가고-있나">ML에서: 영상 모델은 어느 쪽으로 가고 있나</h3>
 <p>2024년까지 공개된 큰 영상 모델은 대부분 전체 시퀀스 디퓨전이었고, Wan2.1 도 전체 시퀀스 디퓨전이다. 수 초짜리 영상을 한 번에 만들고, 더 길게 하려면 끝부분을 조건으로 다음 덩어리를 다시 만들었다. 2025년에는 자기회귀 쪽이 규모를 키웠다. Sand AI 의 MAGI-1(2025년 5월)은 영상을 24프레임짜리 덩어리(청크) 단위로 이어 만드는 파라미터 240억 개짜리 모델로, 뒤 덩어리일수록 노이즈가 많게 덩어리마다의 노이즈를 단조롭게 늘려 두고 여러 덩어리를 공장의 흐름 작업처럼 겹쳐 걷어 낸다. SkyReels-V2(2025년 4월)는 전체 시퀀스 모델을 가져와 프레임마다 다른 노이즈를 주는 방식으로 다시 학습해 길이 제한을 풀었다. 둘 다 프레임(덩어리)마다 노이즈 레벨을 다르게 준다는 점에서, 이 장 뒤쪽의 디퓨전 포싱과 같은 도구를 쓴다.</p>
-<div class="dialogue"><h3 id="문제-1-10초짜리-영상의-토큰">문제 1. 10초짜리 영상의 토큰</h3>
+<div class="dialogue"><h3 id="prob-video-clip-token-count">문제 1. 10초짜리 영상의 토큰<span id="문제-1-10초짜리-영상의-토큰" class="anchor-alias"></span></h3>
 <blockquote>
 <p>Wan2.1 에 832 × 480 크기의 프레임 161장(1초에 16장으로 10초)을 넣는다. VAE 는 첫 프레임을 혼자, 그 뒤는 넷씩 묶어 잠재 프레임 하나로 만들고, 가로세로를 8분의 1로 줄인다. 패치는 가로세로 2 × 2다. (가) 잠재 프레임은 몇 장이고 토큰은 모두 몇 개인가? (나) 5초짜리(토큰 32,760개)보다 셀프 어텐션이 비교하는 토큰 쌍은 몇 배인가? (다) 「영상 길이를 두 배로 늘리면 비교하는 토큰 쌍은 정확히 네 배」라는 말은 맞는가?</p>
 </blockquote>
+<figure class="fig "><img src="images/video/p01_clip_tokens.png" alt="프레임 161장을 첫 장만 혼자, 그 뒤는 넷씩 묶어 잠재 프레임으로 만들고, 잠재 프레임 하나(104 × 60)를 2 × 2 패치로 자른다. 잠재 프레임 수는 물음으로 남겼다. 스크립트 sources/video/problems_figs.py" loading="lazy"><figcaption>프레임 161장을 첫 장만 혼자, 그 뒤는 넷씩 묶어 잠재 프레임으로 만들고, 잠재 프레임 하나(104 × 60)를 2 × 2 패치로 자른다. 잠재 프레임 수는 물음으로 남겼다. 스크립트 sources/video/problems_figs.py</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>161 ÷ 4 = 40.25니까 잠재 프레임은 40장쯤이요. 한 장에 토큰이 60 × 104 ÷ 4 = 1,560개라 40 × 1,560 = 62,400개.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>81장일 때 잠재 프레임이 몇 장이었죠? 같은 셈으로 81 ÷ 4를 해 보면요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>20.25인데 실제로는 21장이었어요. 아, 첫 프레임이 혼자 한 장이니까 1 + (81 − 1) ÷ 4 = 21이에요.</p></div></div>
@@ -771,10 +773,11 @@ c-10,0,-16.667,5,-20,15z M410 15 H367 v585 v0 v585 h43z"/></svg></span></span></
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그러면 (다)는 틀렸네. 프레임 수는 81에서 161로 두 배가 안 되고(1.99배), 잠재 프레임은 21에서 41로 1.95배야. 첫 프레임을 혼자 한 장으로 묶기 때문에 정확히 두 배가 아니야.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 그래도 거의 네 배라는 큰 그림은 맞아요. 전체 시퀀스 모델은 영상이 길어지면 셈이 길이의 제곱으로 자라요. 그래서 학습 때 길이를 정해 두는 거예요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조별 과제에서 조원이 두 배로 늘면 서로 맞춰 봐야 할 두 사람 쌍은 네 배가 되죠. 조원이 토큰이고 두 사람 쌍이 셀프 어텐션의 토큰 쌍이네요. 그래서 회의가 갑자기 길어지는 거고요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-어느-쪽으로-만들까">문제 2. 어느 쪽으로 만들까</h3>
+</div><div class="dialogue"><h3 id="prob-video-generation-direction">문제 2. 어느 쪽으로 만들까<span id="문제-2-어느-쪽으로-만들까" class="anchor-alias"></span></h3>
 <blockquote>
 <p>다음 세 가지 쓰임새에 전체 시퀀스 디퓨전과 자기회귀 가운데 어느 방식이 맞는지 고르고, 이유를 한 줄로 쓰시오. (가) 광고용 5초 영상 한 편 (나) 플레이어의 조작에 따라 다음 화면이 바뀌는 게임 화면 (다) 끊기지 않는 3분짜리 영상</p>
 </blockquote>
+<figure class="fig "><img src="images/video/p02_three_uses.png" alt="세 쓰임새의 시간 줄. 5초로 정해진 광고, 3초에 조작이 들어오고 끝이 정해지지 않은 게임 화면, 3분짜리 영상. 스크립트 sources/video/problems_figs.py" loading="lazy"><figcaption>세 쓰임새의 시간 줄. 5초로 정해진 광고, 3초에 조작이 들어오고 끝이 정해지지 않은 게임 화면, 3분짜리 영상. 스크립트 sources/video/problems_figs.py</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>셋 다 전체 시퀀스죠. 앞뒤를 다 보니까 품질이 더 좋다고 했잖아요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(나)에서 플레이어가 3초 지점에 오른쪽으로 꺾었어요. 전체 시퀀스 모델은 그 조작을 언제 알게 되죠?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>영상 전체를 한꺼번에 만들기 시작할 때 이미 3초 뒤 장면까지 걷어 내고 있으니까… 조작이 들어올 자리가 없네요.</p></div></div>
@@ -783,7 +786,7 @@ c-10,0,-16.667,5,-20,15z M410 15 H367 v585 v0 v585 h43z"/></svg></span></span></
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>전체 시퀀스 모델은 발표 자료를 끝까지 다 만든 뒤에야 질문을 받는 발표자네요. 발표 중간에 들어온 질문, 곧 플레이어의 조작은 반영할 수가 없죠.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="image-condition-6.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 7</span><a class="chapter-nav-next" href="video-2.html">노출 편향: 정답 과거로만 배우면 생기는 일 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="image-condition-sec-image-condition-summary.html">&larr; 자주 하는 실수와 요약</a><span class="page-count">1 / 7</span><a class="chapter-nav-next" href="video-sec-exposure-bias.html">노출 편향: 정답 과거로만 배우면 생기는 일 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

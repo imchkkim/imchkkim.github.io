@@ -633,7 +633,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 .book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
 .book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
 @media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
-</style>
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
@@ -650,7 +651,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   </div>
   <ol><li><a href="preface.html">머리말: MLP에서 디퓨전 트랜스포머까지</a></li>
 <li class="toc-part">기본기</li>
-<li><a href="conditional-prob.html" class="active">조건부 확률분포: p(a∣b) 와 p(b∣a)</a><ul class="sidebar-toc"><li><a href="conditional-prob.html" class="current">조건부 확률: 아는 것을 세로 막대 오른쪽에</a></li><li><a href="conditional-prob-2.html">조건의 방향: p(a∣b) 와 p(b∣a) 는 다른 분포다</a></li><li><a href="conditional-prob-3.html">라벨이 조건인 그림의 분포: 생성이 배워야 할 것</a></li><li><a href="conditional-prob-4.html">자주 하는 실수와 요약</a></li></ul></li>
+<li><a href="conditional-prob.html" class="active">조건부 확률분포: p(a∣b) 와 p(b∣a)</a><ul class="sidebar-toc"><li><a href="conditional-prob.html" class="current">조건부 확률: 아는 것을 세로 막대 오른쪽에</a></li><li><a href="conditional-prob-sec-condition-direction.html">조건의 방향: p(a∣b) 와 p(b∣a) 는 다른 분포다</a></li><li><a href="conditional-prob-sec-label-conditioned-distribution.html">라벨이 조건인 그림의 분포: 생성이 배워야 할 것</a></li><li><a href="conditional-prob-sec-conditional-prob-summary.html">자주 하는 실수와 요약</a></li></ul></li>
 <li class="toc-part">오토인코더와 VAE</li>
 <li><a href="teaching-generation.html">생성을 가르치는 법: 분류기를 뒤집으면</a></li>
 <li><a href="autoencoder-vae.html">오토인코더에서 VAE 로</a></li>
@@ -684,7 +685,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <main>
 <article class="chapter chapter-paged">
 <h1>조건부 확률분포: p(a∣b) 와 p(b∣a)</h1>
-<h2 id="이-장의-물음">이 장의 물음</h2>
+<h2 id="q-conditional-prob">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>휴대폰 사진첩에 고양이 사진을 올리면 앱이 사진 아래에 「고양이」라고 적고, 그림 생성 앱에 「고양이」라고 적으면 앱이 고양이 사진을 한 장 그려 준다. 앞의 앱은 사진을 받아 낱말을 내놓고 뒤의 앱은 낱말을 받아 사진을 내놓는데, 두 앱의 논문을 펴 보면 둘 다 같은 꼴로 적혀 있다. 글자 둘 사이에 세로 막대 하나를 세운 꼴이고, 두 논문은 막대 양쪽의 자리만 서로 바꿔 놓았다.</p>
 <p>자리만 바꿨을 뿐인데 하나는 휴대폰 안에서 순식간에 돌고, 다른 하나는 큰 그래픽 카드를 몇 초씩 붙잡는다. 이 장은 다음 물음을 따라간다.</p>
 <ul>
@@ -692,7 +693,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>「병이 있으면 검사가 양성일 확률」과 「검사가 양성이면 병이 있을 확률」을 섞어 읽으면 어떤 일이 생기나?</li>
 <li>사진이 주어졌을 때의 라벨과, 라벨이 주어졌을 때의 사진은 왜 다루기가 이렇게 다를까?</li>
 </ul>
-<h2 id="조건부-확률-아는-것을-세로-막대-오른쪽에">조건부 확률: 아는 것을 세로 막대 오른쪽에</h2>
+<h2 id="sec-conditional-probability">조건부 확률: 아는 것을 세로 막대 오른쪽에<span id="조건부-확률-아는-것을-세로-막대-오른쪽에" class="anchor-alias"></span></h2>
 <p>고양이와 강아지 사진이 200장 든 사진첩에서 「실내」 앨범을 열었더니 고양이가 유난히 많아 보인다면, 이 느낌을 숫자로 말하려고 두 가지로 물을 수 있다. 「고양이 사진 가운데 몇 %가 실내에서 찍혔나?」와 「실내 사진 가운데 몇 %가 고양이인가?」. 말은 비슷하지만 하나는 고양이 사진만 모아 놓고 세고, 다른 하나는 실내 사진만 모아 놓고 센다. 어느 사진들(고양이 사진인지 실내 사진인지)을 모아 놓고 셌는지를 적어 두지 않으면 두 숫자는 쉽게 섞인다.</p>
 <h3 id="사진첩-표를-줄과-칸으로-자르기">사진첩 표를 줄과 칸으로 자르기</h3>
 <p>200장을 동물과 찍은 곳으로 나눠 세면 아래 표가 된다.</p>
@@ -745,10 +746,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>가운데 표는 줄마다 합이 1이고 칸마다는 아니지만, 오른쪽 표는 거꾸로다. 그래서 표를 받으면 먼저 「어느 쪽으로 더해 1이 되는가」를 보면 어떤 조건부 분포가 적혀 있는지 알 수 있다.</p>
 <h3 id="ml에서-분류기가-내놓는-줄-하나">ML에서: 분류기가 내놓는 줄 하나</h3>
 <p>고양이·강아지 분류기는 사진 한 장 <span class="sym" style="color:#1b9e77">x</span>를 받아 소프트맥스 출력 두 개를 내놓는다. 예를 들어 (0.93, 0.07). 합이 1이고, 사진이 이미 주어진 상태에서 라벨을 묻는다. 위 표의 말로 하면 「사진」이라는 조건으로 자른 줄 하나, 곧 <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#0093b8">y</span> ∣ <span class="sym" style="color:#1b9e77">x</span>)다(<span class="sym" style="color:#0093b8">y</span>는 라벨). 사진첩 표는 줄이 둘뿐이었지만, 사진을 조건으로 쓰면 줄이 사진 수만큼 생긴다. 분류기는 그 줄들을 표로 적어 두는 대신, 사진을 받을 때마다 그 사진의 줄을 계산해 내놓는 함수다.</p>
-<div class="dialogue"><h3 id="문제-1-카페-주문표">문제 1. 카페 주문표</h3>
+<div class="dialogue"><h3 id="prob-conditional-cafe-orders">문제 1. 카페 주문표<span id="문제-1-카페-주문표" class="anchor-alias"></span></h3>
 <blockquote>
 <p>학교 앞 카페가 하루 동안 받은 주문 120건을 세었더니 오전 커피 54건, 오전 차 6건, 오후 커피 36건, 오후 차 24건이었다. (가) 오전에 들어온 주문이 커피일 확률은? (나) 커피 주문이 오전에 들어왔을 확률은? (다) 사장님이 「오전 손님은 90%가 커피를 마신다」는 말을 듣고 「그럼 커피 재료는 90%를 오전에 준비해야겠다」고 했다. 맞는가?</p>
 </blockquote>
+<figure class="fig "><img src="images/conditional-prob/p01_cafe.png" alt="학교 앞 카페가 하루 동안 받은 주문 120건. 오전 60건(커피 54, 차 6)과 오후 60건(커피 36, 차 24)을 한 건에 동그라미 하나로(sources/conditional-prob/problems_figs.py)" loading="lazy"><figcaption>학교 앞 카페가 하루 동안 받은 주문 120건. 오전 60건(커피 54, 차 6)과 오후 60건(커피 36, 차 24)을 한 건에 동그라미 하나로(sources/conditional-prob/problems_figs.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 오전 주문만 보면 돼요. 오전 60건 가운데 커피 54건이니 0.9요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(나)는 커피 90건 가운데 오전 54건이니 0.6이야.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>둘 다 분자가 54예요. 그런데 왜 답이 달라요?</p></div></div>
@@ -757,10 +759,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>들은 건 p(커피 ∣ 오전) = 0.9이고… 재료를 언제 준비하느냐는 커피를 이미 안다고 보고 시간을 묻는 거니까 p(오전 ∣ 커피) = 0.6이 필요해요. 90%가 아니라 60%만 오전에 준비하면 되네요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>오후에도 커피가 36건이나 나가는데, 오전 손님 비율만 보면 그게 안 보이는구나. 오후 손님은 60%만 커피를 마셔도 오후 손님 자체가 60명이니까.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조교님이 「제출한 사람 중 90%가 만점」이라고 했는데, 알고 보니 제출한 사람이 열 명뿐이었던 거랑 같네요. 90%를 낸 분모가 수강생 전체가 아니고 제출한 열 명이었던 거죠. 무엇으로 나눴는지를 먼저 물어야 해요.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-2-줄로-자를까-칸으로-자를까">문제 2. 줄로 자를까, 칸으로 자를까</h3>
+</div><div class="dialogue"><h3 id="prob-conditional-rows-or-cells">문제 2. 줄로 자를까, 칸으로 자를까<span id="문제-2-줄로-자를까-칸으로-자를까" class="anchor-alias"></span></h3>
 <blockquote>
 <p>두 값을 갖는 <span class="sym" style="color:#008787">a</span>(<span class="sym" style="color:#008787">a</span>₁, <span class="sym" style="color:#008787">a</span>₂)와 <span class="sym" style="color:#874b0f">b</span>(<span class="sym" style="color:#874b0f">b</span>₁, <span class="sym" style="color:#874b0f">b</span>₂)의 결합 확률이 <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#008787">a</span>₁, <span class="sym" style="color:#874b0f">b</span>₁) = 0.30, <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#008787">a</span>₁, <span class="sym" style="color:#874b0f">b</span>₂) = 0.10, <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#008787">a</span>₂, <span class="sym" style="color:#874b0f">b</span>₁) = 0.15, <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#008787">a</span>₂, <span class="sym" style="color:#874b0f">b</span>₂) = 0.45 이다. (가) <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#874b0f">b</span> ∣ <span class="sym" style="color:#008787">a</span>₁)과 <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#008787">a</span> ∣ <span class="sym" style="color:#874b0f">b</span>₁)을 구하라. (나) <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#008787">a</span>₁ ∣ <span class="sym" style="color:#874b0f">b</span>₁)과 <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#008787">a</span>₁ ∣ <span class="sym" style="color:#874b0f">b</span>₂)를 더하면 1인가? (다) 결합 확률표를 잃어버리고 <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#874b0f">b</span>)와 <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#008787">a</span> ∣ <span class="sym" style="color:#874b0f">b</span>)만 남았다. 표를 되살릴 수 있는가?</p>
 </blockquote>
+<figure class="fig "><img src="images/conditional-prob/p02_joint.png" alt="a 두 값과 b 두 값의 결합 확률 네 칸. 칸 안 옅은 네모의 넓이는 칸마다 적힌 확률에 비례한다(sources/conditional-prob/problems_figs.py)" loading="lazy"><figcaption>a 두 값과 b 두 값의 결합 확률 네 칸. 칸 안 옅은 네모의 넓이는 칸마다 적힌 확률에 비례한다(sources/conditional-prob/problems_figs.py)</figcaption></figure>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(가)는 줄 <span class="sym" style="color:#008787">a</span>₁ = (0.30, 0.10)을 줄의 합 0.40으로 나누면 <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#874b0f">b</span> ∣ <span class="sym" style="color:#008787">a</span>₁) = (0.75, 0.25). 칸 <span class="sym" style="color:#874b0f">b</span>₁ = (0.30, 0.15)를 칸의 합 0.45로 나누면 <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#008787">a</span> ∣ <span class="sym" style="color:#874b0f">b</span>₁) = (0.667, 0.333).</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(나)는 0.667에다 <span class="sym" style="color:#874b0f">b</span>₂ 칸의 0.10 ÷ 0.55 = 0.182를 더하면 0.848이네요. 1이 안 되는데요, 계산이 틀렸나?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>계산은 맞아요. 그 두 값은 각각 어느 분포에 들어 있어요?</p></div></div>
@@ -770,10 +773,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>식을 뒤집으면 <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#008787">a</span>, <span class="sym" style="color:#874b0f">b</span>) = <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#008787">a</span> ∣ <span class="sym" style="color:#874b0f">b</span>) <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#874b0f">b</span>)니까 칸마다 곱하면 돼요. 0.667 × 0.45 = 0.30, 0.182 × 0.55 = 0.10. 네 칸 다 돌아와요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 <span class="sym" style="color:#c2408a">p</span>(<span class="sym" style="color:#008787">a</span> ∣ <span class="sym" style="color:#874b0f">b</span>)만 있으면요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그건 칸마다 비율만 있고 칸의 크기를 모르니까 안 돼. 해석학에서 방향만 알고 길이를 모르는 벡터랑 같아.</p></div></div>
-</div><div class="dialogue"><h3 id="문제-3-분류기-출력-네-줄">문제 3. 분류기 출력 네 줄</h3>
+</div><div class="dialogue"><h3 id="prob-conditional-classifier-outputs">문제 3. 분류기 출력 네 줄<span id="문제-3-분류기-출력-네-줄" class="anchor-alias"></span></h3>
 <blockquote>
-<p>고양이·강아지 분류기에 사진 네 장을 넣었더니 (고양이, 강아지) 확률이 (0.92, 0.08), (0.15, 0.85), (0.60, 0.40), (0.05, 0.95)로 나왔다. (가) 넷을 표로 쌓으면 합이 1인 것은 줄인가 칸인가? (나) 「고양이」 칸 넷을 더한 1.72는 확률인가? (다) 네 장이 사진첩에서 고르게 뽑은 샘플이라면, 칸마다 평균 낸 값은 무엇을 어림하는가?</p>
+<p>고양이·강아지 분류기에 사진 네 장을 넣었더니 (고양이, 강아지) 확률이 (0.92, 0.08), (0.15, 0.85), (0.60, 0.40), (0.05, 0.95)로 나왔다. (가) 넷을 표로 쌓으면 합이 1인 것은 줄인가 칸인가? (나) 「고양이」 칸 넷을 더한 1.72는 확률인가? (다) 네 장이 사진첩에서 고르게 뽑은 샘플이라면, 칸마다 평균 낸 값은 무엇의 추정값인가?</p>
 </blockquote>
+<figure class="fig "><img src="images/conditional-prob/p03_outputs.png" alt="분류기가 사진 네 장에 낸 (고양이, 강아지) 확률을 한 줄에 하나씩 쌓은 막대(sources/conditional-prob/problems_figs.py)" loading="lazy"><figcaption>분류기가 사진 네 장에 낸 (고양이, 강아지) 확률을 한 줄에 하나씩 쌓은 막대(sources/conditional-prob/problems_figs.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 줄이에요. 사진 한 장마다 합이 1이니까요. (나)는… 1을 넘으니 확률은 아니죠. 그래도 1.72장쯤 고양이라는 뜻 아닐까요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 1.72는 몇 장 가운데 1.72예요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>네 장 가운데요. 확률로 만들려면 4로 나눠야 해요. 0.43이요.</p></div></div>
@@ -782,7 +786,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>학과 사무실이 반마다 출석률만 보고 학과 전체 출석률을 낼 때, 반 인원으로 무게를 줘야 하는 거랑 같네요. 반 하나가 사진 한 장, 반 인원이 곱하는 무게 4분의 1에 해당해요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="preface.html">&larr; 머리말: MLP에서 디퓨전 트랜스포머까지</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="conditional-prob-2.html">조건의 방향: p(a∣b) 와 p(b∣a) 는 다른 분포다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="preface.html">&larr; 머리말: MLP에서 디퓨전 트랜스포머까지</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="conditional-prob-sec-condition-direction.html">조건의 방향: p(a∣b) 와 p(b∣a) 는 다른 분포다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');
