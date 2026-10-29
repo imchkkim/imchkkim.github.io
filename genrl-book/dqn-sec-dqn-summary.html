@@ -673,9 +673,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=ee27df36" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"ee27df36"}</script>
-<script defer src="/reader/reader.js?v=ee27df36" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=b96c5c0f" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"b96c5c0f"}</script>
+<script defer src="/reader/reader.js?v=b96c5c0f" data-lp-reader></script>
 </head>
 <body>
 
@@ -726,7 +726,55 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="dqn.html">8. DQN: 표를 신경망으로 바꾸면 무엇이 흔들리나</a></p>
 <h4 id="sec-dqn-summary">혼동하기 쉬운 점과 요약<span id="혼동하기-쉬운-점과-요약" class="anchor-alias"></span></h4>
-<h5 id="혼동하기-쉬운-점">혼동하기 쉬운 점</h5>
+<h5 id="talk-dqn-function-approx-alone">토론 1. 함수 근사만 해도 값이 한없이 커지나<span id="토론-1-함수-근사만-해도-값이-한없이-커지나" class="anchor-alias"></span></h5>
+<div class="exercise">
+<p>두 칸 장난감에서 칸마다 숫자를 따로 주면(표) 값이 커지지 않았고, 숫자 하나로 묶으면 커졌다. 그러면 값을 키운 것은 함수 근사 하나인가?</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">서연 학생, 두 칸 장난감에서 칸마다 숫자를 따로 주니 값이 1.35 에서 멈췄죠. 그럼 값을 키운 범인은 무엇일까요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">표에서는 안 커지고 숫자 하나로 묶으니 커졌으니까, 함수 근사 아닐까요? 칸 하나를 고치면 다른 칸이 따라 움직이는 게 함수 근사잖아요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">문제 2의 (나)에서도 숫자 하나로 묶은 채였어요. <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#cc00ff"><mi>w</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#cc00ff}{w}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;color:var(--sym-cc00ff, #cc00ff);">w</span></span></span></span></eq> 는 어떻게 됐죠?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S02.webp" alt="이서연 (생각)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">목표를 실제 리턴 0 으로 바꿨더니 0.9 씩 곱해져서 거의 0 이 됐어요. 함수 근사는 그대로였는데요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">(다)도 숫자 하나 그대로였어. 지금 정책대로 B 에 들르는 비율로 배우니까 에피소드마다 줄었고.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S04.webp" alt="이서연 (난처함)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그럼 함수 근사가 있어도 부트스트랩을 빼거나 오프폴리시를 빼면 안 커지네요. 함수 근사 하나만으로는 범인이 아니에요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">신경망으로 값을 배운 TD-개먼은 어땠죠? 신경망은 함수 근사고, 다음 국면의 값으로 목표를 만들었으니 부트스트랩도 했는데요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">자기 대국으로만 배웠으니까… 지금 정책이 실제로 들르는 국면을 그 비율대로 배운 거네요. 오프폴리시가 빠졌어요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">그래서 둘만 가진 TD-개먼은 잘 됐고, 셋 다 가진 DQN 은 따로 장치가 필요했던 거구나.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T13.webp" alt="선생님 (흐뭇함)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 장난감의 값은 셋 가운데 하나만 빠져도 커지지 않았어요. 위험은 함수 근사, 부트스트랩, 오프폴리시가 한자리에 겹칠 때 생겨요. 그래서 「세 조합」이라고 불러요.</div></div>
+</div><h5 id="talk-dqn-replay-for-reinforce">토론 2. 리플레이 버퍼의 경험으로 REINFORCE 를 돌려도 되나<span id="토론-2-리플레이-버퍼의-경험으로-reinforce-를-돌려도-되나" class="anchor-alias"></span></h5>
+<div class="exercise">
+<p>2015년 DQN 설정(버퍼 100만 개, 행동 네 번마다 업데이트 한 번)의 버퍼에 쌓인 경험으로 REINFORCE를 돌려도 되는가?</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">서연 학생, 버퍼에는 이 게임에서 실제로 겪은 장면이 100만 개 있어요. 이걸로 REINFORCE 를 돌려도 될까요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">모두 같은 게임에서 겪은 일이니까 써도 될 것 같아요. 샘플이 많을수록 그래디언트 추정도 정확해지잖아요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">버퍼에서 가장 오래된 경험은 얼마나 예전의 정책이 모은 거죠?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">행동 100만 번 전이니까 업데이트 100만 번 전이요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">업데이트는 행동 네 번마다 한 번이니까 25만 번 전이야.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.webp" alt="김민준 (난처함)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">아, 맞다. 머무는 시간을 행동 수로 세고 업데이트 수로 그대로 옮겼네. 그래도 25만 번이면 엄청 예전이다.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">REINFORCE 의 그래디언트는 어느 분포에서 뽑은 행동의 기댓값이었죠?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S02.webp" alt="이서연 (생각)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">지금 정책이 뽑은 행동이요. 지금 정책이 자주 고르는 행동은 자주, 드물게 고르는 행동은 드물게 나와야 기댓값이 맞아요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">25만 번 전 정책은 어떤 행동을 0.5 로 골랐는데, 지금 정책은 0.01 로만 고른다면요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S04.webp" alt="이서연 (난처함)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">버퍼에서는 그 행동이 지금보다 50배 자주 나와요. 그 행동의 로그확률을 지나치게 자주 올리고 내리게 되니까, 지금 정책의 기댓값이 아니네요. 같은 게임이라도 고른 정책이 다르면 다른 분포예요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">Q-러닝은 「그 상태에서 그 행동을 하니 이렇게 됐다」만 쓰니까 누가 골랐는지 상관없었지.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T13.webp" alt="선생님 (흐뭇함)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 버퍼 속 데이터는 예전 정책이 모은 것이라, 지금 정책의 샘플이 필요한 방법에는 그대로 못 써요. 리플레이 버퍼는 Q-러닝 같은 오프폴리시 방법과 짝을 지어야 해요.</div></div>
+</div><h5 id="talk-dqn-argmax-advantage-token">토론 3. Q − V 가 가장 큰 토큰만 고르면 되나<span id="토론-3-q-v-가-가장-큰-토큰만-고르면-되나" class="anchor-alias"></span></h5>
+<div class="exercise">
+<p>모아 둔 데이터로 배운 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#00897b"><mi>Q</mi></mstyle><mo>−</mo><mstyle mathcolor="#00897b"><mi>V</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#00897b}{Q} - \textcolor{#00897b}{V}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="color:var(--sym-00897b, #00897b);">Q</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.2222em;color:var(--sym-00897b, #00897b);">V</span></span></span></span></eq>가 어떤 자리에서 세 토큰에 (−0.5, 0.4, 0.2)이고, 데이터를 만든 모델은 그 자리에서 세 토큰을 (0.6, 0.3, 0.1)로 골랐다. <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#00897b"><mi>Q</mi></mstyle><mo>−</mo><mstyle mathcolor="#00897b"><mi>V</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#00897b}{Q} - \textcolor{#00897b}{V}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="color:var(--sym-00897b, #00897b);">Q</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.2222em;color:var(--sym-00897b, #00897b);">V</span></span></span></span></eq>가 가장 큰 토큰을 늘 고르면 되는가?</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 배운 Q − V 가 (−0.5, 0.4, 0.2) 라면 어느 토큰을 고르겠어요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">둘째요. 0.4 로 제일 크니까요. DQN 처럼 argmax 하면 되잖아요. 셋째보다 0.2 나 좋은데 굳이 확률을 나눌 이유가 없어 보여요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그 Q 는 무엇으로 배웠죠?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">모아 둔 데이터요. 행동 정책이 (0.6, 0.3, 0.1) 로 고른 기록이요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그 데이터에 둘째와 셋째 토큰은 얼마나 나와요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">셋째는 열 번에 한 번, 둘째는 열 번에 세 번이야. 기록이 적은 토큰일수록 Q 추정이 노이즈에 많이 흔들려.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M02.webp" alt="김민준 (생각)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">그럼 0.4 가 진짜 0.4 인지 모르는 거네. 흔들리는 추정 가운데 제일 큰 걸 고르면 위로 튄 걸 고르기 쉽고.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그리고 argmax 로 고르기 시작하면, 다음 자리부터는 어떤 응답이 만들어지죠?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.webp" alt="김민준 (난처함)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">데이터를 만든 모델이 잘 안 가던 쪽으로만 가요. 그 뒤의 자리들은 기록이 더 적으니까, 갈수록 믿기 어려운 Q 를 따라가게 되네요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그래서 행동 정책의 확률을 바탕에 두고 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>e</mi><mrow><mi>k</mi><mo stretchy="false">(</mo><mi>Q</mi><mo>−</mo><mi>V</mi><mo stretchy="false">)</mo></mrow></msup></mrow><annotation encoding="application/x-tex">e^{k(Q - V)}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.888em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.888em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight">Q</span><span class="mbin mtight">−</span><span class="mord mathnormal mtight" style="margin-right:0.2222em;">V</span><span class="mclose mtight">)</span></span></span></span></span></span></span></span></span></span></span></span></eq> 를 곱해 기울이는 거구나. 기록이 많은 토큰은 원래 확률대로 힘을 쓰고, 어드밴티지만큼만 옮겨 가니까.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T13.webp" alt="선생님 (흐뭇함)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 데이터에 드문 토큰의 추정은 믿기 어려워요. 그래서 고르는 대신 기울여요. k 를 키울수록 argmax 에 가까워지고, 그만큼 데이터 밖으로 나가는 위험을 지게 돼요.</div></div>
+</div><h5 id="혼동하기-쉬운-점">혼동하기 쉬운 점</h5>
 <div class="table-scroll"><table>
 <thead>
 <tr>
@@ -743,7 +791,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 <tr>
 <td>함수 근사만 하면 값이 커진다고 봄, 또는 세 재료를 하나씩 따로 위험하다고 봄</td>
-<td>2</td>
+<td>토론 1</td>
 <td>셋 가운데 하나만 빠져도 장난감의 값은 커지지 않았다. 위험은 셋이 겹친 자리에서 생긴다</td>
 </tr>
 <tr>
@@ -768,12 +816,12 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 <tr>
 <td>버퍼의 머무는 시간을 업데이트 횟수로 그대로 셈함</td>
-<td>6</td>
+<td>토론 2</td>
 <td>업데이트는 행동 네 번마다 한 번이다. 머무는 동안 25만 번, 경험 하나는 평균 8번 쓰인다</td>
 </tr>
 <tr>
 <td>리플레이 버퍼를 아무 방법에나 붙일 수 있다고 봄</td>
-<td>6</td>
+<td>토론 2</td>
 <td>버퍼 속 데이터는 예전 정책이 모은 것이다. 지금 정책의 샘플이 필요한 방법에는 그대로 못 쓴다</td>
 </tr>
 <tr>
@@ -788,7 +836,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 <tr>
 <td>게임 점수의 원점수나 평균으로 여러 게임을 견줌</td>
-<td>9, 10</td>
+<td>10</td>
 <td>무작위 0%, 사람 100%로 맞춘 사람 기준 점수와 중앙값으로 견준다</td>
 </tr>
 <tr>
@@ -803,7 +851,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 <tr>
 <td>어드밴티지가 큰 토큰만 고르면 된다고 봄</td>
-<td>13</td>
+<td>토론 3</td>
 <td>데이터에 드문 토큰의 추정은 믿기 어렵다. 행동 정책의 확률에 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>e</mi><mrow><mi>k</mi><mo stretchy="false">(</mo><mstyle mathcolor="#00897b"><mi>Q</mi></mstyle><mo>−</mo><mstyle mathcolor="#00897b"><mi>V</mi></mstyle><mo stretchy="false">)</mo></mrow></msup></mrow><annotation encoding="application/x-tex">e^{k(\textcolor{#00897b}{Q}-\textcolor{#00897b}{V})}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.888em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.888em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="color:var(--sym-00897b, #00897b);">Q</span><span class="mbin mtight">−</span><span class="mord mathnormal mtight" style="margin-right:0.2222em;color:var(--sym-00897b, #00897b);">V</span><span class="mclose mtight">)</span></span></span></span></span></span></span></span></span></span></span></span></eq>를 곱해 기울인다</td>
 </tr>
 </tbody>

@@ -673,9 +673,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=ee27df36" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"ee27df36"}</script>
-<script defer src="/reader/reader.js?v=ee27df36" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=b96c5c0f" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"b96c5c0f"}</script>
+<script defer src="/reader/reader.js?v=b96c5c0f" data-lp-reader></script>
 </head>
 <body>
 
@@ -726,7 +726,34 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="reinforce.html">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a></p>
 <h4 id="sec-reinforce-summary">혼동하기 쉬운 점과 요약<span id="혼동하기-쉬운-점과-요약" class="anchor-alias"></span></h4>
-<h5 id="혼동하기-쉬운-점">혼동하기 쉬운 점</h5>
+<h5 id="talk-reinforce-half-mean-samples">토론 1: 평균이 절반이 되면 샘플도 두 배면 되나<span id="토론-1-평균이-절반이-되면-샘플도-두-배면-되나" class="anchor-alias"></span></h5>
+<div class="exercise">
+<p>학습 초반에 어떤 프롬프트의 그래디언트 한 성분은 샘플 하나당 평균 0.2, 표준편차 1이어서 샘플 25개면 평균의 표준편차가 평균과 같아졌다. 학습이 진행되어 평균이 0.1로 줄면(표준편차는 그대로 1) 샘플이 몇 개 있어야 하는가?</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">학습이 무르익으면 모델이 이미 꽤 잘해서, 그래디언트의 평균이 작아져요. 0.2이던 게 0.1이 됐어요. 샘플은 몇 개를 뽑으면 될까요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">신호가 반으로 줄었으니까 샘플을 두 배로 늘려서 50개면 될 것 같아요. 25개로 0.2를 읽었으니, 0.1을 읽으려면 두 배를 모으는 거죠.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">50개를 평균 내면 평균의 표준편차는 얼마예요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S02.webp" alt="이서연 (생각)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">1/√50 이니까… 0.14요. 평균 0.1보다 크네요. 이러면 부호도 제대로 못 읽어요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S04.webp" alt="이서연 (난처함)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">두 배로는 모자라요. 샘플을 늘려도 표준편차는 √n으로만 줄어드니까, 반으로 줄이려면 √n을 두 배, n은 네 배가 있어야 하네요. 100개요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">MT 투표에서 24명이 99명이 된 것도 그거였구나. 평균이 분모에 있고, 그게 제곱으로 들어가니까.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 필요한 샘플 수는 (표준편차 ÷ 평균)²이에요. 그래서 학습 후반에 신호가 작아질수록, 같은 정확도를 얻는 데 드는 응답 생성이 제곱으로 늘어요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그러면 표준편차를 줄이는 쪽이 샘플을 늘리는 것보다 훨씬 싸겠네요. 표준편차를 반으로 줄이면 샘플 네 배를 아끼는 거니까요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T13.webp" alt="선생님 (흐뭇함)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">베이스라인을 빼는 까닭이 바로 그거예요.</div></div>
+</div><h5 id="talk-reinforce-same-reward-same-credit">토론 2: 보상이 같은 두 정답은 똑같이 잘한 것인가<span id="토론-2-보상이-같은-두-정답은-똑같이-잘한-것인가" class="anchor-alias"></span></h5>
+<div class="exercise">
+<p>쉬운 프롬프트(평소 정답률 0.9)와 어려운 프롬프트(평소 정답률 0.2)에서 정답을 하나씩 받았다. 두 정답의 보상은 모두 1이다. 두 정답을 똑같이 올려야 하는가?</p>
+</div>
+<div class="dlg">
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">두 프롬프트에서 정답이 하나씩 나왔어요. 보상은 둘 다 1이에요. 둘을 똑같이 칭찬해도 될까요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">음, 둘 다 1점짜리 정답이니까 똑같이 올리면 될 것 같아요. 베이스라인을 빼도 같은 숫자를 빼니까 가중치도 같고요. 두 프롬프트를 합친 평균이 (0.9 + 0.2)/2 = 0.55라서 둘 다 1 − 0.55 = +0.45요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">쉬운 프롬프트에서 정답을 낸 건, 그 프롬프트에서 모델이 평소 하던 것보다 얼마나 나은 일이에요?</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M02.webp" alt="김민준 (생각)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">평소에도 열에 아홉은 맞히니까… 0.9보다 0.1 나은 거예요. 어려운 쪽은 평소 0.2인데 맞혔으니 0.8 나은 거고요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.webp" alt="김민준 (난처함)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">똑같이 +0.45가 아니었네요. 서연이 쉬운 시험의 90점을 어려운 시험의 60점보다 잘 봤다고 친 거랑 같은 착각이에요. 보상 숫자만 같지, 그 프롬프트 안에서는 전혀 다른 일이었어요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">오답 쪽은 더 심해. 합친 평균을 빼면 두 프롬프트의 오답이 똑같이 −0.55인데, 쉬운 프롬프트의 오답은 평소보다 0.9나 못한 거고 어려운 프롬프트의 오답은 0.2만 못한 거잖아.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">합친 평균 하나를 빼면, 그 차이는 어디로 가요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">가중치에 그대로 남아요. 쉬운 프롬프트의 실수는 덜 혼나고, 어려운 프롬프트에서 늘 하던 실수는 더 혼나요. 프롬프트마다 그 프롬프트의 평균을 빼야 난이도가 지워져요.</div></div>
+</div><h5 id="혼동하기-쉬운-점">혼동하기 쉬운 점</h5>
 <div class="table-scroll"><table>
 <thead>
 <tr>
@@ -738,7 +765,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <tbody>
 <tr>
 <td>평균이 절반이 되면 필요한 샘플도 두 배면 된다고 봄</td>
-<td>1</td>
+<td>토론 1</td>
 <td>필요한 수는 (표준편차 ÷ 평균)²이다. 평균이 절반이면 네 배가 든다</td>
 </tr>
 <tr>
@@ -753,7 +780,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 <tr>
 <td>한 번에 많이 받는 방식이 이긴다고 봄</td>
-<td>3</td>
+<td>4</td>
 <td>칭찬이 늘 양수면 합은 횟수를 따른다. 기준을 빼야 못한 방식에 음수가 붙는다</td>
 </tr>
 <tr>
@@ -768,7 +795,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 <tr>
 <td>쉬운 시험의 높은 점수를 더 잘 본 것으로 봄</td>
-<td>6</td>
+<td>토론 2</td>
 <td>시험마다 그 시험의 평균을 빼야 난이도가 지워진다</td>
 </tr>
 <tr>
