@@ -673,6 +673,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="/reader/reader.css?v=be5a456d" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"be5a456d"}</script>
+<script defer src="/reader/reader.js?v=be5a456d" data-lp-reader></script>
 </head>
 <body>
 
@@ -782,6 +785,55 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </table></div>
 <h5 id="요약">요약</h5>
 <p>문장의 로그확률은 토큰마다의 조건부 로그확률을 더한 것으로, 확률을 곱하면 긴 문장에서 언더플로우가 나므로 자연로그의 합으로 다룬다. 선호 응답과 비선호 응답의 마진은 대부분 두 응답이 갈라지는 분기 토큰에서 나오고, 분기 앞의 공유 토큰은 완전히, 분기 뒤의 공유 토큰은 조건이 달라 근사적으로만 상쇄된다. 생성은 확률표를 얻고 뽑는 두 단계를 토큰마다 순차로 반복하지만, DPO 학습은 이미 있는 응답의 확률을 조회할 뿐이라 티처 포싱 한 번의 순전파로 모든 자리의 표를 얻고, 응답 토큰의 확률을 한 칸 앞 자리의 표에서 읽는다. 샘플링 온도 같은 설정은 뽑는 단계에만 끼어들므로 DPO 학습에는 영향이 없지만, 학습 중에 직접 샘플링하는 온라인 RL에서는 샘플러의 설정과 로그확률 계산이 같은 정책을 가리켜야 한다.</p>
+<h5 id="정리-연습문제">정리 연습문제</h5>
+<div class="quiz" data-id="q-log-probability-1">
+<p><strong>물음.</strong> 세 토큰짜리 응답에서 토큰마다의 조건부 확률(앞 토큰들이 주어졌을 때의 확률)이 0.5, 0.5, 0.5다. 응답 전체의 확률은?</p>
+<ul>
+<li>[x] 0.125 〔맞음: 0.5 × 0.5 × 0.5 = 0.125다. 로그로 쓰면 세 로그확률의 합이다.〕</li>
+<li>[ ] 0.5 〔틀림: 0.5는 앞 토큰이 나왔다는 조건 아래의 비율이다. 전체 확률은 조건부 확률을 차례로 곱해야 한다.〕</li>
+<li>[ ] 1.5 〔틀림: 더하는 것은 로그확률일 때다. 확률 자체는 곱한다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-log-probability-2">
+<p><strong>물음.</strong> 수백 토큰짜리 응답의 확률을 계산할 때 맞는 방법은?</p>
+<ul>
+<li>[ ] 토큰 확률을 그대로 곱한다 〔틀림: 1보다 작은 수를 수백 번 곱하면 부동소수점이 나타낼 수 있는 값보다 작아져 0이 된다(언더플로우).〕</li>
+<li>[ ] 상용로그(밑 10)를 취해 더한다 〔틀림: 딥러닝 라이브러리의 로그는 자연로그다. 밑을 바꾸면 값이 ln 10배만큼 달라진다.〕</li>
+<li>[x] 자연로그를 취해 더한다 〔맞음: 곱이 합으로 바뀌어 언더플로우가 없고, 라이브러리의 값과도 맞는다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-log-probability-3">
+<p><strong>물음.</strong> 선호 응답과 비선호 응답이 앞부분은 같고 중간의 한 토큰(분기 토큰)에서 갈라진 뒤, 끝의 몇 토큰이 다시 같다. 마진을 계산할 때 공유 토큰들은?</p>
+<ul>
+<li>[ ] 같은 토큰이니 모두 완전히 상쇄된다 〔틀림: 분기 뒤의 같은 토큰은 앞 문맥이 달라 조건부 확률도 조금씩 다르다.〕</li>
+<li>[x] 분기 앞의 공유 토큰은 완전히, 분기 뒤의 공유 토큰은 근사적으로만 상쇄된다 〔맞음: 분기 앞에서는 문맥까지 같아 확률이 똑같다. 그래서 마진은 대부분 분기 토큰에서 나온다.〕</li>
+<li>[ ] 공유 토큰은 하나도 상쇄되지 않는다 〔틀림: 분기 앞의 토큰은 문맥과 토큰이 모두 같아 두 응답에서 같은 값이 빠진다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-log-probability-4">
+<p><strong>물음.</strong> DPO 학습에서 이미 있는 응답의 로그확률을 구하는 방법은?</p>
+<ul>
+<li>[ ] 생성할 때처럼 토큰을 하나씩 순서대로 넣어 응답 길이만큼 순전파한다 〔틀림: 차례가 필요한 것은 답을 만들어 낼 때다. 응답이 이미 적혀 있으면 자리마다 따로 볼 수 있다.〕</li>
+<li>[ ] 프롬프트와 응답의 모든 자리 로그확률을 더한다 〔틀림: 그 합은 프롬프트와 응답이 함께 나올 확률이다. 응답의 조건부 로그확률에는 응답 토큰만 더한다.〕</li>
+<li>[x] 티처 포싱으로 한 번 순전파해 모든 자리의 확률표를 얻고, 응답 토큰의 확률을 한 칸 앞 자리의 표에서 읽는다 〔맞음: 학습은 뽑는 단계 없이 확률을 조회만 한다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-log-probability-5">
+<p><strong>물음.</strong> 샘플링 온도 같은 설정은 어디에 영향을 주는가?</p>
+<ul>
+<li>[x] 뽑는 단계에만 끼어든다. 그래서 DPO에는 영향이 없지만, 학습 중에 샘플링하는 온라인 RL에서는 샘플러와 로그확률 계산이 같은 정책을 가리켜야 한다 〔맞음: 샘플러만 온도를 쓰면 샘플이 학습하는 정책이 아닌 분포에서 나와 그래디언트가 치우친다.〕</li>
+<li>[ ] 어디에도 영향이 없다. 순서를 보존하는 변환이라 같은 정책이다 〔틀림: 기댓값에는 확률의 순서가 아니라 값이 들어간다. 온도를 바꾸면 확률값이 바뀐다.〕</li>
+<li>[ ] DPO 학습과 온라인 RL 학습 모두에서 그래디언트를 바꾼다 〔틀림: DPO는 이미 있는 응답의 확률을 조회할 뿐이라 뽑는 단계가 없다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-log-probability-6">
+<p><strong>물음.</strong> 너무 많이 뽑힌 쪽과 덜 뽑힌 쪽이 섞인 설문에서, 응답의 순서는 그대로 두고 평균만 바로잡고 싶다. 맞는 말은?</p>
+<ul>
+<li>[ ] 순서가 같으면 평균도 비슷하니 그대로 써도 된다 〔틀림: 평균에는 비율의 값이 들어간다. 순서가 같아도 평균은 달라진다.〕</li>
+<li>[x] 너무 많이 뽑힌 쪽은 덜, 덜 뽑힌 쪽은 더 세어 보정한다 〔맞음: 임포턴스 가중치와 같은 보정이다. 온라인 RL에서 샘플러와 학습기의 정책이 다를 때도 같은 방법을 쓴다.〕</li>
+<li>[ ] 덜 뽑힌 쪽은 버리고 많이 뽑힌 쪽만 쓴다 〔틀림: 버리면 그 쪽의 정보가 사라져 평균이 더 어긋난다.〕</li>
+</ul>
+</div>
 
 </section>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="log-probability-sec-sampling-temperature.html">&larr; 샘플링 온도: 뽑을 때만 쓰는 설정</a><span class="page-count">4 / 4</span><a class="chapter-nav-next" href="length-bias.html">14. 길이 편향: 합이 공정한가? &rarr;</a></nav>

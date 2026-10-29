@@ -673,6 +673,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="/reader/reader.css?v=be5a456d" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"be5a456d"}</script>
+<script defer src="/reader/reader.js?v=be5a456d" data-lp-reader></script>
 </head>
 <body>
 
@@ -819,6 +822,55 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 </tbody>
 </table></div>
+<h5 id="정리-연습문제">정리 연습문제</h5>
+<div class="quiz" data-id="q-ppo-rlhf-1">
+<p><strong>물음.</strong> 옛 정책으로 뽑은 샘플에 비율(지금 정책의 확률 ÷ 옛 정책의 확률)을 곱해 지금 정책의 기댓값을 추정한다. 이 보정에 대해 맞는 말은?</p>
+<ul>
+<li>[x] 옛 정책이 그 응답을 뽑을 확률이 0보다 큰 곳에서만 보정할 수 있다 〔맞음: 옛 정책이 뽑을 수 있어야 샘플에 나오고, 나와야 비율을 곱할 수 있다.〕</li>
+<li>[ ] 옛 정책이 한 번도 뽑지 못하는 응답도 가중치를 크게 주면 되살릴 수 있다 〔틀림: 가중치는 샘플에 곱하는 수인데, 한 번도 나오지 않은 응답에는 곱할 샘플이 없다. 비율의 분모도 0이 된다.〕</li>
+<li>[ ] 드문 샘플이 나올수록 추정이 좋아진다 〔틀림: 드문 샘플은 비율이 커서 혼자 추정값을 크게 움직인다. 샘플을 다시 뽑을 때마다 추정값이 크게 달라진다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-ppo-rlhf-2">
+<p><strong>물음.</strong> PPO는 방금 생성한 배치 하나로 여러 에폭을 학습한다. 둘째 에폭부터의 데이터는?</p>
+<ul>
+<li>[ ] 방금 생성했으니 모든 에폭에서 온폴리시다 〔틀림: 첫 업데이트에서 정책이 바뀌었다. 데이터는 바뀌기 전 정책이 뽑은 것이다.〕</li>
+<li>[ ] 남이 만든 고정 데이터셋과 같은 오프라인 데이터다 〔틀림: 학습 도중 배치를 새로 생성하므로 온라인이다. 한 배치를 몇 번 다시 쓸 뿐이다.〕</li>
+<li>[x] 살짝 오프폴리시라서 비율로 보정한다 〔맞음: 첫 업데이트 뒤로 지금 정책과 데이터를 뽑은 옛 정책이 달라지므로, 토큰마다 비율을 곱해 보정한다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-ppo-rlhf-3">
+<p><strong>물음.</strong> 클리핑 폭이 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#1f6d7a"><mi>ϵ</mi></mstyle><mo>=</mo><mn>0.2</mn></mrow><annotation encoding="application/x-tex">\textcolor{#1f6d7a}{\epsilon} = 0.2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="color:var(--sym-1f6d7a, #1f6d7a);">ϵ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.2</span></span></span></span></eq> 인 PPO에서, 한 토큰의 비율(지금 정책 ÷ 옛 정책)에 대해 맞는 말은?</p>
+<ul>
+<li>[ ] 클리핑이 있으니 비율은 1.2를 넘을 수 없다 〔틀림: 클리핑은 선을 넘은 샘플을 더 밀지 않을 뿐이다. 파라미터를 함께 쓰는 다른 토큰의 업데이트가 비율을 넘길 수 있다.〕</li>
+<li>[x] 이득 방향으로 1.2를 넘은 샘플은 그래디언트가 끊기지만, 비율 자체는 1.2를 넘을 수 있다 〔맞음: 잘린 항은 상수라 그래디언트가 0이다. 비율이 넘는 것을 막는 장치는 아니다.〕</li>
+<li>[ ] 비율이 0.8~1.2 밖이면 방향과 상관없이 늘 잘린다 〔틀림: 손해 방향으로 벗어난 샘플은 자르지 않고 끝까지 바로잡는다. 자르는 것은 이득 방향으로 넘은 샘플이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-ppo-rlhf-4">
+<p><strong>물음.</strong> 사람의 쌍비교 데이터에서 응답 A가 응답 B를 이긴 비율이 50%였다. Bradley-Terry 보상 모델에서 두 응답의 점수 차는?</p>
+<ul>
+<li>[ ] 0.5 〔틀림: 이긴 비율을 그대로 점수로 쓴 것이다. 점수 차는 ln(p/(1−p))로 구하고, p = 0.5면 ln 1 = 0이다.〕</li>
+<li>[ ] A의 점수가 0.5, B의 점수가 0.5로 정해진다 〔틀림: 점수의 절댓값은 정해지지 않는다. 두 점수에 같은 수를 더해도 승률은 그대로라서 차이만 뜻이 있다.〕</li>
+<li>[x] 0 〔맞음: 이길 확률은 σ(점수 차)이고 σ(0) = 0.5다. 반반이면 점수 차가 없다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-ppo-rlhf-5">
+<p><strong>물음.</strong> 모든 보상에 상수 10을 더했다. 정책 그래디언트 추정에서 생기는 일은?</p>
+<ul>
+<li>[x] 기댓값은 그대로지만 분산이 커진다 〔맞음: 그래서 베이스라인(비평가)이나 보상 정규화로 상수를 흡수한다.〕</li>
+<li>[ ] 기댓값도 분산도 그대로라 아무 영향이 없다 〔틀림: 기댓값은 그대로지만 샘플마다 곱하는 수가 커져 추정값이 배치마다 크게 달라진다.〕</li>
+<li>[ ] 기댓값이 10만큼 커져 학습 방향이 바뀐다 〔틀림: 상수를 더한 항의 기댓값은 0이라 방향은 바뀌지 않는다. 문제는 분산이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-ppo-rlhf-6">
+<p><strong>물음.</strong> RLHF의 PPO 단계에는 클리핑이 있는데도 레퍼런스와의 KL 페널티를 따로 둔다. 둘이 묶는 것은 무엇이 다른가?</p>
+<ul>
+<li>[ ] 클리핑 폭 0.2면 SFT 모델에서 20% 넘게 멀어질 수 없으니 KL은 보험일 뿐이다 〔틀림: 클리핑의 기준인 옛 정책은 반복마다 바뀐다. 1.2를 열 번 곱하면 약 6.19라서 반복이 쌓이면 얼마든지 멀어진다.〕</li>
+<li>[x] 클리핑은 움직이는 기준(옛 정책), KL은 고정된 기준(레퍼런스)에 대한 제한이다 〔맞음: 클리핑은 한 반복의 스텝을, KL은 출발점에서의 누적 거리를 묶는다. 보상 모델의 빈틈으로 너무 멀리 가지 않게 하려면 둘 다 필요하다.〕</li>
+<li>[ ] 둘 다 한 스텝의 크기만 제한한다 〔틀림: KL 페널티의 기준인 레퍼런스는 고정이라, 출발점에서 쌓인 거리에 페널티를 준다.〕</li>
+</ul>
+</div>
 
 </section>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="ppo-rlhf-sec-kl-penalty-reference.html">&larr; KL 페널티: 레퍼런스에서 멀어진 만큼 물리는 값</a><span class="page-count">5 / 5</span><a class="chapter-nav-next" href="dpo-reappear.html">11. DPO의 재등장: 보상 모델을 수식으로 지우다 &rarr;</a></nav>

@@ -673,6 +673,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="/reader/reader.css?v=be5a456d" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"be5a456d"}</script>
+<script defer src="/reader/reader.js?v=be5a456d" data-lp-reader></script>
 </head>
 <body>
 
@@ -688,7 +691,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
-<li><a href="reinforce.html" class="active">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a><ul class="sidebar-toc"><li><a href="reinforce.html">몬테카를로 추정: 기댓값 대신 샘플 평균</a></li><li><a href="reinforce-sec-baseline-subtraction.html" class="current">베이스라인: 모두에게서 같은 숫자를 빼라</a></li><li><a href="reinforce-sec-per-prompt-baseline.html">프롬프트별 베이스라인: 이 문제에서 평소보다 잘했나</a></li><li><a href="reinforce-sec-reinforce-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li><a href="reinforce.html" class="active">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a><ul class="sidebar-toc"><li><a href="reinforce.html">몬테카를로 추정: 기댓값 대신 샘플 평균</a></li><li><a href="reinforce-sec-baseline-subtraction.html" class="current">베이스라인: 모두에게서 같은 숫자를 빼라</a></li><li><a href="reinforce-sec-per-prompt-baseline.html">프롬프트별 베이스라인: 이 문제에서 평소보다 잘했나</a></li><li><a href="reinforce-sec-bias-variance-tradeoff.html">분산–편향 트레이드오프: 덜 흩어지는 대신 비켜 가는 추정</a></li><li><a href="reinforce-sec-reinforce-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다</a></li>
 <li><a href="bellman.html">5. 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</a></li>
 <li><a href="td.html">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a></li>
@@ -802,32 +805,45 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tr>
 </tbody>
 </table></div>
-<p>보상에 5를 더했을 때처럼 샘플 하나의 추정치를 펼쳐 보면, 베이스라인을 뺀 추정치는 「서울입니다」가 뽑힐 때의 큰 값이 줄고 세 값이 서로 가까워진다.</p>
-<svg class="fig" viewBox="0 0 560 390" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="샘플 하나의 그래디언트 추정치: 보상 그대로면 0.86, 0, −0.08 가운데 하나, 평균 보상을 빼면 0.62, 0.04, −0.04 가운데 하나. 평균은 둘 다 0.098">
+<p>보상에 5를 더했을 때처럼 샘플 하나의 추정치를 펼쳐 보면, 베이스라인을 뺀 추정치는 「서울입니다」가 뽑힐 때의 큰 값이 줄고 세 값이 서로 가까워진다. 이번에도 막대는 표의 「서울입니다」 로짓 성분이고, 오른쪽 칸은 뽑힌 답이 자기 로짓에 주는 힘이다.</p>
+<svg class="fig" viewBox="0 0 560 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="뽑힌 답마다 샘플 하나의 그래디언트 추정치. 막대는 「서울입니다」 로짓 성분: 보상 그대로면 +0.86, 0, −0.08, 평균 보상을 빼면 +0.62, +0.04, −0.04이고 평균은 둘 다 +0.098. 오른쪽 칸은 뽑힌 답이 자기 로짓에 주는 힘: 보상 그대로면 +0.86, 0, +0.45, 평균 보상을 빼면 +0.62, −0.11, +0.24">
   <text class="t-strong" x="10" y="24" style="font-size:17px">보상 그대로 (<tspan style="fill:var(--sym-00897b, #00897b)">b</tspan> = 0)</text>
-  <text x="10" y="64" style="font-size:16px">서울입니다 <tspan class="t-muted">· 0.14</tspan></text>
-  <rect class="f1" x="236.0" y="48" width="172.6" height="20" rx="2"/>
-  <text class="t-strong" x="416.6" y="64" style="font-size:16px">+0.86</text>
-  <text x="10" y="102" style="font-size:16px">부산입니다 <tspan class="t-muted">· 0.61</tspan></text>
-  <text class="t-strong" x="244.0" y="102" style="font-size:16px">0</text>
-  <text x="10" y="140" style="font-size:16px">서울이요 <tspan class="t-muted">· 0.25</tspan></text>
-  <rect class="f2" x="219.6" y="124" width="16.4" height="20" rx="2"/>
-  <text class="t-strong" x="244.0" y="140" style="font-size:16px">−0.08</text>
-  <line class="saxis" x1="236" y1="40" x2="236" y2="152" stroke-width="1.2"/>
-  <text x="10" y="180" style="font-size:16px">평균 +0.098 · 표준편차 0.31</text>
-  <text class="t-strong" x="10" y="219" style="font-size:17px">평균 보상을 뺌 (<tspan style="fill:var(--sym-00897b, #00897b)">b</tspan> ≈ 0.29)</text>
-  <text x="10" y="259" style="font-size:16px">서울입니다 <tspan class="t-muted">· 0.14</tspan></text>
-  <rect class="f1" x="236.0" y="243" width="123.1" height="20" rx="2"/>
-  <text class="t-strong" x="367.1" y="259" style="font-size:16px">+0.62</text>
-  <text x="10" y="297" style="font-size:16px">부산입니다 <tspan class="t-muted">· 0.61</tspan></text>
-  <rect class="f1" x="236.0" y="281" width="7.8" height="20" rx="2"/>
-  <text class="t-strong" x="251.8" y="297" style="font-size:16px">+0.04</text>
-  <text x="10" y="335" style="font-size:16px">서울이요 <tspan class="t-muted">· 0.25</tspan></text>
-  <rect class="f2" x="227.4" y="319" width="8.6" height="20" rx="2"/>
-  <text class="t-strong" x="244.0" y="335" style="font-size:16px">−0.04</text>
-  <line class="saxis" x1="236" y1="235" x2="236" y2="347" stroke-width="1.2"/>
-  <text x="10" y="375" style="font-size:16px">평균 +0.098 · 표준편차 0.21</text>
+  <text class="t-muted" x="10" y="50" style="font-size:14px">뽑힌 답 · 뽑힐 확률</text>
+  <text class="t-muted" x="200" y="50" style="font-size:14px">「서울입니다」 로짓에 주는 힘</text>
+  <text class="t-muted" x="550" y="50" text-anchor="end" style="font-size:14px">자기 로짓에 주는 힘</text>
+  <text x="10" y="84" style="font-size:16px">서울입니다 <tspan class="t-muted">· 0.14</tspan></text>
+  <rect class="f1" x="200.0" y="68" width="189.9" height="20" rx="2"/>
+  <text class="t-strong" x="397.9" y="84" style="font-size:16px">+0.86</text>
+  <text x="550" y="84" text-anchor="end" style="font-size:16px">+0.86</text>
+  <text x="10" y="122" style="font-size:16px">부산입니다 <tspan class="t-muted">· 0.61</tspan></text>
+  <text class="t-strong" x="208" y="122" style="font-size:16px">0</text>
+  <text x="550" y="122" text-anchor="end" style="font-size:16px">0</text>
+  <text x="10" y="160" style="font-size:16px">서울이요 <tspan class="t-muted">· 0.25</tspan></text>
+  <rect class="f2" x="181.9" y="144" width="18.1" height="20" rx="2"/>
+  <text class="t-strong" x="208" y="160" style="font-size:16px">−0.08</text>
+  <text x="550" y="160" text-anchor="end" style="font-size:16px">+0.45</text>
+  <line class="saxis" x1="200" y1="60" x2="200" y2="172" stroke-width="1.2"/>
+  <text x="10" y="204" style="font-size:16px">「서울입니다」 로짓: 평균 +0.098 · 표준편차 0.31</text>
+  <text class="t-strong" x="10" y="229" style="font-size:17px">평균 보상을 뺌 (<tspan style="fill:var(--sym-00897b, #00897b)">b</tspan> ≈ 0.29)</text>
+  <text class="t-muted" x="10" y="255" style="font-size:14px">뽑힌 답 · 뽑힐 확률</text>
+  <text class="t-muted" x="200" y="255" style="font-size:14px">「서울입니다」 로짓에 주는 힘</text>
+  <text class="t-muted" x="550" y="255" text-anchor="end" style="font-size:14px">자기 로짓에 주는 힘</text>
+  <text x="10" y="289" style="font-size:16px">서울입니다 <tspan class="t-muted">· 0.14</tspan></text>
+  <rect class="f1" x="200.0" y="273" width="135.5" height="20" rx="2"/>
+  <text class="t-strong" x="343.5" y="289" style="font-size:16px">+0.62</text>
+  <text x="550" y="289" text-anchor="end" style="font-size:16px">+0.62</text>
+  <text x="10" y="327" style="font-size:16px">부산입니다 <tspan class="t-muted">· 0.61</tspan></text>
+  <rect class="f1" x="200.0" y="311" width="8.6" height="20" rx="2"/>
+  <text class="t-strong" x="216.6" y="327" style="font-size:16px">+0.04</text>
+  <text x="550" y="327" text-anchor="end" style="font-size:16px">−0.11</text>
+  <text x="10" y="365" style="font-size:16px">서울이요 <tspan class="t-muted">· 0.25</tspan></text>
+  <rect class="f2" x="190.6" y="349" width="9.4" height="20" rx="2"/>
+  <text class="t-strong" x="208" y="365" style="font-size:16px">−0.04</text>
+  <text x="550" y="365" text-anchor="end" style="font-size:16px">+0.24</text>
+  <line class="saxis" x1="200" y1="265" x2="200" y2="377" stroke-width="1.2"/>
+  <text x="10" y="409" style="font-size:16px">「서울입니다」 로짓: 평균 +0.098 · 표준편차 0.21</text>
 </svg>
+<p>막대의 −0.04와 +0.04는 「서울이요」와 「부산입니다」가 받은 점수가 아니다. 다른 답이 뽑히면 「서울입니다」 로짓 성분은 뽑힌 답의 가중치 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#d9670b"><mi>R</mi></mstyle><mo>−</mo><mstyle mathcolor="#00897b"><mi>b</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#d9670b}{R} - \textcolor{#00897b}{b}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;color:var(--sym-d9670b, #d9670b);">R</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="color:var(--sym-00897b, #00897b);">b</span></span></span></span></eq> 에 −0.14(「서울입니다」의 확률에 음수를 붙인 값)를 곱한 값이 된다. 뽑힌 답의 로그확률을 올리면 확률의 합이 1이라 나머지 답의 확률이 함께 내려가기 때문이다. 「서울이요」는 0.6점이 평균 0.29보다 높아 가중치가 +0.31이다. 오른쪽 칸처럼 자기 로짓을 +0.24 올리면서 「서울입니다」의 로짓은 0.31 × 0.14 ≈ 0.04 내린다. 「부산입니다」는 가중치가 −0.29라 자기 로짓을 −0.11 내리고, 「서울입니다」의 로짓은 0.29 × 0.14 ≈ 0.04 올린다. 그래서 두 막대의 부호는 두 답의 점수 순서와 거꾸로 나온다. 세 막대를 확률로 가중 평균하면 참 그래디언트 +0.098이 되는 것은 베이스라인을 빼기 전과 같다.</p>
 <div class="widget" data-widget="reinforce-variance" data-set="baseline"></div>
 <p>위젯에서 확인할 것:</p>
 <ul>
@@ -1001,7 +1017,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </blockquote>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="reinforce.html">&larr; 몬테카를로 추정: 기댓값 대신 샘플 평균</a><span class="page-count">2 / 4</span><a class="chapter-nav-next" href="reinforce-sec-per-prompt-baseline.html">프롬프트별 베이스라인: 이 문제에서 평소보다 잘했나 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="reinforce.html">&larr; 몬테카를로 추정: 기댓값 대신 샘플 평균</a><span class="page-count">2 / 5</span><a class="chapter-nav-next" href="reinforce-sec-per-prompt-baseline.html">프롬프트별 베이스라인: 이 문제에서 평소보다 잘했나 &rarr;</a></nav>
 </main>
 
 <script type="module">

@@ -673,6 +673,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="/reader/reader.css?v=be5a456d" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"be5a456d"}</script>
+<script defer src="/reader/reader.js?v=be5a456d" data-lp-reader></script>
 </head>
 <body>
 
@@ -688,7 +691,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   <ol><li><a href="preface.html">생성모델의 강화학습: DPO에서 GRPO까지</a></li>
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
-<li><a href="reinforce.html" class="active">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a><ul class="sidebar-toc"><li><a href="reinforce.html">몬테카를로 추정: 기댓값 대신 샘플 평균</a></li><li><a href="reinforce-sec-baseline-subtraction.html">베이스라인: 모두에게서 같은 숫자를 빼라</a></li><li><a href="reinforce-sec-per-prompt-baseline.html">프롬프트별 베이스라인: 이 문제에서 평소보다 잘했나</a></li><li><a href="reinforce-sec-reinforce-summary.html" class="current">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li><a href="reinforce.html" class="active">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a><ul class="sidebar-toc"><li><a href="reinforce.html">몬테카를로 추정: 기댓값 대신 샘플 평균</a></li><li><a href="reinforce-sec-baseline-subtraction.html">베이스라인: 모두에게서 같은 숫자를 빼라</a></li><li><a href="reinforce-sec-per-prompt-baseline.html">프롬프트별 베이스라인: 이 문제에서 평소보다 잘했나</a></li><li><a href="reinforce-sec-bias-variance-tradeoff.html">분산–편향 트레이드오프: 덜 흩어지는 대신 비켜 가는 추정</a></li><li><a href="reinforce-sec-reinforce-summary.html" class="current">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다</a></li>
 <li><a href="bellman.html">5. 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</a></li>
 <li><a href="td.html">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a></li>
@@ -778,10 +781,58 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <td>7</td>
 <td>문제 난이도가 제각각일수록 그룹 평균이 이긴다. 대가는 프롬프트당 여러 샘플이다</td>
 </tr>
+<tr>
+<td>덜 흩어지는 추정이 늘 낫다고 봄</td>
+<td>8</td>
+<td>(RMS 오차)² = 편향² + 분산/<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#5f970c"><mi>N</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#5f970c}{N}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;color:var(--sym-5f970c, #5f970c);">N</span></span></span></span></eq>. 평균 낼 샘플이 많아지면 분산은 줄고 편향만 남아, 편향 없는 추정이 이긴다</td>
+</tr>
 </tbody>
 </table></div>
 <h5 id="요약">요약</h5>
-<p>기댓값을 계산할 수 없으니 지금의 모델로 응답 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#5f970c"><mi>N</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#5f970c}{N}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;color:var(--sym-5f970c, #5f970c);">N</span></span></span></span></eq>개를 뽑아 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#d9670b"><mi>R</mi></mstyle><mo>⋅</mo><mi mathvariant="normal">∇</mi><mi>log</mi><mo>⁡</mo><mstyle mathcolor="#1565c0"><mi>π</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#d9670b}{R} \cdot \nabla \log \textcolor{#1565c0}{\pi}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;color:var(--sym-d9670b, #d9670b);">R</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord">∇</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-1565c0, #1565c0);">π</span></span></span></span></eq> 를 평균내는데, 이 추정에는 편향이 없지만 분산이 크고 보상에 상수를 더하면 분산이 더 커진다. 분산이 크면 샘플이 더 필요하고, 샘플 하나가 응답 생성 한 번이라 분산은 GPU 비용이 된다. 보상에서 베이스라인 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#00897b"><mi>b</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#00897b}{b}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="color:var(--sym-00897b, #00897b);">b</span></span></span></span></eq>를 빼면 방향은 그대로이고 분산만 주는데, 이때 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#00897b"><mi>b</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#00897b}{b}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="color:var(--sym-00897b, #00897b);">b</span></span></span></span></eq>는 뽑힌 응답에 의존하면 안 된다. 베이스라인을 빼면 보상이 전부 양수여도 기준보다 못한 답이 음수 가중치를 받아, 나쁜 예가 저절로 생긴다. 베이스라인 없이 보상이 늘 양수이면 뽑힌 답이 늘 올라가서, 나쁜 답이 여러 번 뽑힌 배치에서는 나쁜 답이 오른다. 문제마다 난이도가 다르면 같은 프롬프트에서 여러 응답을 뽑아 그 평균을 기준으로 삼는 편이 낫다. 자기를 뺀 평균은 편향이 없고 자기를 포함한 평균은 크기만 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mstyle mathcolor="#5f970c"><mi>N</mi></mstyle><mo>−</mo><mn>1</mn></mrow><mstyle mathcolor="#5f970c"><mi>N</mi></mstyle></mfrac></mrow><annotation encoding="application/x-tex">\frac{\textcolor{#5f970c}{N}-1}{\textcolor{#5f970c}{N}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2173em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8723em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.109em;color:var(--sym-5f970c, #5f970c);">N</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.109em;color:var(--sym-5f970c, #5f970c);">N</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></eq> 배로 줄어드는데, 어느 쪽이든 모든 응답의 보상이 같으면 그 프롬프트에서는 배울 것이 없다.</p>
+<p>기댓값을 계산할 수 없으니 지금의 모델로 응답 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#5f970c"><mi>N</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#5f970c}{N}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;color:var(--sym-5f970c, #5f970c);">N</span></span></span></span></eq>개를 뽑아 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#d9670b"><mi>R</mi></mstyle><mo>⋅</mo><mi mathvariant="normal">∇</mi><mi>log</mi><mo>⁡</mo><mstyle mathcolor="#1565c0"><mi>π</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#d9670b}{R} \cdot \nabla \log \textcolor{#1565c0}{\pi}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;color:var(--sym-d9670b, #d9670b);">R</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord">∇</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-1565c0, #1565c0);">π</span></span></span></span></eq> 를 평균내는데, 이 추정에는 편향이 없지만 분산이 크고 보상에 상수를 더하면 분산이 더 커진다. 분산이 크면 샘플이 더 필요하고, 샘플 하나가 응답 생성 한 번이라 분산은 GPU 비용이 된다. 보상에서 베이스라인 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#00897b"><mi>b</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#00897b}{b}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="color:var(--sym-00897b, #00897b);">b</span></span></span></span></eq>를 빼면 방향은 그대로이고 분산만 주는데, 이때 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#00897b"><mi>b</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#00897b}{b}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="color:var(--sym-00897b, #00897b);">b</span></span></span></span></eq>는 뽑힌 응답에 의존하면 안 된다. 베이스라인을 빼면 보상이 전부 양수여도 기준보다 못한 답이 음수 가중치를 받아, 나쁜 예가 저절로 생긴다. 베이스라인 없이 보상이 늘 양수이면 뽑힌 답이 늘 올라가서, 나쁜 답이 여러 번 뽑힌 배치에서는 나쁜 답이 오른다. 문제마다 난이도가 다르면 같은 프롬프트에서 여러 응답을 뽑아 그 평균을 기준으로 삼는 편이 낫다. 자기를 뺀 평균은 편향이 없고 자기를 포함한 평균은 크기만 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mstyle mathcolor="#5f970c"><mi>N</mi></mstyle><mo>−</mo><mn>1</mn></mrow><mstyle mathcolor="#5f970c"><mi>N</mi></mstyle></mfrac></mrow><annotation encoding="application/x-tex">\frac{\textcolor{#5f970c}{N}-1}{\textcolor{#5f970c}{N}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2173em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8723em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.109em;color:var(--sym-5f970c, #5f970c);">N</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.109em;color:var(--sym-5f970c, #5f970c);">N</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></eq> 배로 줄어드는데, 어느 쪽이든 모든 응답의 보상이 같으면 그 프롬프트에서는 배울 것이 없다. 큰 추정치를 잘라 내는 것처럼 편향을 조금 받아들이고 분산을 줄이는 방법도 있는데, 샘플을 늘리면 분산은 줄어도 편향은 남으므로 어느 쪽이 나은지는 평균 낼 샘플 수에 달렸다(분산–편향 트레이드오프).</p>
+<h5 id="정리-연습문제">정리 연습문제</h5>
+<p>요약만 읽고 풀 수 있는 객관식이다. 틀리면 이유가 나오고 다시 고를 수 있다.</p>
+<div class="quiz" data-id="q-reinforce-1">
+<p><strong>물음.</strong> 모든 보상을 10배로 키워 REINFORCE를 돌렸다. 무엇이 달라지는가?</p>
+<ul>
+<li>[ ] 방향이 같으니 아무것도 달라지지 않는다 〔틀림: 방향은 같아도 한 스텝에 움직이는 크기가 10배로 커진다.〕</li>
+<li>[ ] 추정치의 분산이 100배가 되었으니 추정이 나빠졌다 〔틀림: 평균도 같은 배수로 커져서 신호 대 잡음비는 바뀌지 않는다.〕</li>
+<li>[x] 추정의 질은 그대로이고, 학습률을 10배로 올린 것과 같아진다 〔맞음: 신호 대 잡음비는 변하지 않고 스텝 크기만 커진다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-reinforce-2">
+<p><strong>물음.</strong> 정답은 1점, 오답은 0.2점을 받고 베이스라인은 없다. 오답이 여러 번 뽑힌 배치에서는 무슨 일이 생기는가?</p>
+<ul>
+<li>[ ] 정답의 점수가 더 높으니 어느 배치에서나 정답의 확률이 오른다 〔틀림: 보상이 늘 양수이면 뽑힌 답은 늘 확률이 오른다. 오답이 여러 번 뽑히면 오답이 많이 오른다.〕</li>
+<li>[ ] 오답은 점수가 낮으니 뽑힐 때마다 확률이 내려간다 〔틀림: 0.2점도 양수라 뽑힌 오답의 로그확률을 올린다. 기준을 빼야 음수가 붙는다.〕</li>
+<li>[x] 오답의 확률이 오를 수 있다. 베이스라인을 0.2와 1 사이에 두면 오답은 뽑힐 때마다 내려간다 〔맞음: 베이스라인을 빼면 기준보다 못한 답이 음수 가중치를 받아 나쁜 예가 저절로 생긴다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-reinforce-3">
+<p><strong>물음.</strong> 같은 프롬프트에서 응답 4개를 뽑고 베이스라인을 정한다. 옳은 것은 어느 것인가?</p>
+<ul>
+<li>[ ] 그 응답 자신의 보상을 베이스라인으로 쓰면 분산이 0이라 가장 좋다 〔틀림: 가중치가 늘 0이 되어 그래디언트도 0이다. 베이스라인은 뽑힌 응답에 의존하면 안 된다.〕</li>
+<li>[ ] 자기를 포함한 네 응답의 평균이면 편향이 없다 〔틀림: 자기를 포함한 평균은 기댓값의 크기를 4분의 3으로 줄인다. 방향은 맞지만 크기에 편향이 생긴다.〕</li>
+<li>[x] 자기를 뺀 나머지 세 응답의 평균이면 편향이 없다 〔맞음: 베이스라인이 뽑힌 응답에 의존하지 않으므로 방향도 크기도 그대로이고 분산만 준다.〕</li>
+<li>[ ] 문제 난이도가 제각각이어도 모든 프롬프트의 전역 평균 하나가 늘 낫다 〔틀림: 난이도가 제각각일수록 그룹 평균이 이긴다. 대가는 프롬프트마다 여러 샘플을 뽑는 것이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-reinforce-4">
+<p><strong>물음.</strong> 응답 A는 쉬운 문제에서 0.9점, 응답 B는 어려운 문제에서 0.5점을 받았다. 어느 응답을 더 칭찬해야 하는가?</p>
+<ul>
+<li>[ ] 0.9점을 받은 A 〔틀림: 쉬운 시험의 높은 점수일 수 있다. 시험마다 그 시험의 평균을 빼야 난이도가 지워진다.〕</li>
+<li>[x] 각 문제에서 뽑은 응답들의 평균을 빼 봐야 안다 〔맞음: 그래서 같은 프롬프트에서 여러 응답을 뽑아 그 평균을 기준으로 삼는다.〕</li>
+<li>[ ] 모든 문제의 점수를 합친 평균 하나를 빼면 된다 〔틀림: 전역 평균 하나로는 문제마다 다른 난이도가 지워지지 않는다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-reinforce-5">
+<p><strong>물음.</strong> 추정 A는 편향이 조금 있고 분산이 작다. 추정 B는 편향이 없고 분산이 크다. 평균 낼 샘플 수를 아주 많이 늘리면 어느 추정이 더 정확해지는가?</p>
+<ul>
+<li>[ ] A. 분산이 작은 추정이 늘 낫다 〔틀림: 오차의 제곱은 편향의 제곱 + 분산 ÷ 샘플 수다. 샘플이 많아지면 분산 항은 줄고 A의 편향만 남는다.〕</li>
+<li>[ ] 둘 다 같아진다. 샘플을 늘리면 편향도 함께 줄어든다 〔틀림: 평균을 내서 줄어드는 것은 분산뿐이다. 편향은 샘플을 아무리 늘려도 남는다.〕</li>
+<li>[x] B 〔맞음: 샘플이 많으면 B의 분산 항은 0에 가까워지고 A에는 편향이 남는다. 어느 추정이 나은지는 평균 낼 샘플 수에 달렸다(분산–편향 트레이드오프).〕</li>
+</ul>
+</div>
 <h5 id="막힌-곳">막힌 곳</h5>
 <p>REINFORCE에 베이스라인까지 더했는데도 두 가지가 남는다.</p>
 <ol>
@@ -790,7 +841,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </ol>
 
 </section>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="reinforce-sec-per-prompt-baseline.html">&larr; 프롬프트별 베이스라인: 이 문제에서 평소보다 잘했나</a><span class="page-count">4 / 4</span><a class="chapter-nav-next" href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="reinforce-sec-bias-variance-tradeoff.html">&larr; 분산–편향 트레이드오프: 덜 흩어지는 대신 비켜 가는 추정</a><span class="page-count">5 / 5</span><a class="chapter-nav-next" href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다 &rarr;</a></nav>
 </main>
 
 <script type="module">
