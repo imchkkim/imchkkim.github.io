@@ -601,8 +601,8 @@
         if (!it.ch.why) continue;
         var tmp = document.createElement("div");
         tmp.innerHTML = it.ch.why;
-        var t = normQuery(tmp.textContent || "");
-        if (t.indexOf(phrase) < 0 && !terms.every(function (x) { return t.indexOf(x) >= 0; })) continue;
+        var t = normQuery(tmp.textContent || ""), tn = noSpace(t);
+        if (!hasTerm(t, tn, phrase) && !terms.every(function (x) { return hasTerm(t, tn, x); })) continue;
         if (it.why.hidden) showWhy(it, !!it.ch.correct);
         return it.why;
       }
@@ -1216,6 +1216,40 @@
     return out;
   }
   function normQuery(q) { return lowerSame(String(q || "")).replace(/\s+/g, " ").trim(); }
+  /** 공백을 뺀 글자와, 그 글자마다 원래 글자에서의 자리(공백 무시 찾기: 「트위디공식」 ↔ 「트위디 공식」) */
+  function spaceless(l) {
+    var n = "", map = [];
+    for (var i = 0; i < l.length; i++) { var c = l.charAt(i); if (!/\s/.test(c)) { n += c; map.push(i); } }
+    return { n: n, map: map };
+  }
+  function noSpace(x) { return x.replace(/\s+/g, ""); }
+  /** 글자 l(소문자) 안에서 needle 이 든 자리 [시작, 끝) 목록. 그대로 든 곳과 공백을 건너 든 곳 모두(겹치면 합친다).
+   *  sp = spaceless(l)(없으면 만든다), from 이후만, max 개까지 */
+  function hitRanges(l, needles, sp, from, max) {
+    var out = [];
+    from = from || 0; max = max || 1e9;
+    needles.forEach(function (t) {
+      if (!t) return;
+      var i, k = 0;
+      for (i = l.indexOf(t, from); i >= 0 && k < max; i = l.indexOf(t, i + t.length), k++) out.push([i, i + t.length]);
+      var tn = noSpace(t);
+      if (!tn) return;
+      sp = sp || spaceless(l);
+      var j0 = 0;
+      while (j0 < sp.map.length && sp.map[j0] < from) j0++;
+      k = 0;
+      for (i = sp.n.indexOf(tn, j0); i >= 0 && k < max; i = sp.n.indexOf(tn, i + tn.length), k++) out.push([sp.map[i], sp.map[i + tn.length - 1] + 1]);
+    });
+    out.sort(function (a, b) { return a[0] - b[0] || b[1] - a[1]; });
+    var merged = [];
+    out.forEach(function (r) {
+      var m = merged[merged.length - 1];
+      if (m && r[0] <= m[1]) { if (r[1] > m[1]) m[1] = r[1]; } else merged.push([r[0], r[1]]);
+    });
+    return merged;
+  }
+  /** 낱말이 들어 있나(그대로 또는 공백 무시). n = 공백 뺀 글자 */
+  function hasTerm(l, n, t) { return l.indexOf(t) >= 0 || n.indexOf(noSpace(t)) >= 0; }
   function termsOf(nq) {
     var seen = {}, out = [];
     nq.split(" ").forEach(function (t) { if (t && !seen[t]) { seen[t] = 1; out.push(t); } });
@@ -1230,9 +1264,14 @@
         var pages = [];
         j.pages.forEach(function (p) {
           if (!p || !okFile(p.f) || !Array.isArray(p.c)) return;
-          var t = typeof p.t === "string" ? p.t : p.f;
-          pages.push({ f: p.f, t: t, tl: lowerSame(t), c: p.c.filter(function (c) { return Array.isArray(c) && typeof c[1] === "string"; })
-            .map(function (c) { var x = c[1]; return { a: typeof c[0] === "string" ? c[0] : "", x: x, l: lowerSame(x) }; }) });
+          var t = typeof p.t === "string" ? p.t : p.f, tl = lowerSame(t);
+          var subs = Array.isArray(p.s) ? p.s : []; // 소제목 목록(옛 색인에는 없다 → 페이지 제목만)
+          pages.push({ f: p.f, t: t, tl: tl, tn: noSpace(tl), c: p.c.filter(function (c) { return Array.isArray(c) && typeof c[1] === "string"; })
+            .map(function (c) {
+              var x = c[1], l = lowerSame(x), h = typeof c[2] === "number" && typeof subs[c[2]] === "string" ? subs[c[2]] : "";
+              if (h && noSpace(h) === noSpace(t)) h = "";
+              return { a: typeof c[0] === "string" ? c[0] : "", x: x, l: l, n: noSpace(l), h: h };
+            }) });
         });
         return { book: book, title: typeof j.title === "string" ? j.title : book, base: base, pages: pages };
       });
@@ -1261,30 +1300,32 @@
       .catch(fallback);
     return BOOKS_P;
   }
-  /** 한 책 색인에서 찾기. 모든 낱말이 들어 있는 덩이(AND), 붙여 쓴 구가 그대로 있으면 위로 */
+  /** 한 책 색인에서 찾기. 모든 낱말이 들어 있는 덩이(AND, 낱말마다 공백 무시도 맞춤).
+   *  순서: 입력 그대로(공백 포함) 든 덩이 > 공백을 빼고 맞는 덩이 > 낱말 AND */
   function searchIn(idx, terms, phrase, out) {
+    var pn = noSpace(phrase);
     idx.pages.forEach(function (p, pi) {
       p.c.forEach(function (c, ci) {
-        for (var i = 0; i < terms.length; i++) if (c.l.indexOf(terms[i]) < 0) return;
-        var score = 0, pp = c.l.indexOf(phrase);
-        if (pp >= 0) score += 100; // 낱말 하나면 모두 여기
-        if (terms.every(function (t) { return p.tl.indexOf(t) >= 0; })) score += 20; // 페이지 제목에도 있음
-        if (ci === 0 && pp >= 0 && pp < 80) score += 5; // 절 첫머리(제목 근처)
-        out.push({ idx: idx, page: p, chunk: c, score: score, order: pi * 100000 + ci, at: pp });
+        for (var i = 0; i < terms.length; i++) if (!hasTerm(c.l, c.n, terms[i])) return;
+        var score = 0, pp = c.l.indexOf(phrase), head = -1;
+        if (pp >= 0) { score += 100; head = pp; } // 입력 그대로
+        else { var q = c.n.indexOf(pn); if (q >= 0) { score += 60; head = q; } } // 공백 무시로 맞음
+        if (terms.every(function (t) { return hasTerm(p.tl, p.tn, t); })) score += 20; // 페이지 제목에도 있음
+        if (ci === 0 && head >= 0 && head < 80) score += 5; // 절 첫머리(제목 근처)
+        out.push({ idx: idx, page: p, chunk: c, score: score, order: pi * 100000 + ci });
       });
     });
   }
-  /** 미리보기: 찾은 자리 앞뒤 SEARCH_CTX 자, 찾은 말은 <b>. 글자 노드로만 */
-  function snippet(c, terms, phrase, at) {
-    var x = c.x, l = c.l, pos = at, len = phrase.length;
-    if (pos < 0) { pos = l.indexOf(terms[0]); len = terms[0].length; }
-    if (pos < 0) pos = 0;
-    var s = Math.max(0, pos - SEARCH_CTX), e = Math.min(x.length, pos + len + SEARCH_CTX);
-    var seg = x.slice(s, e), segl = l.slice(s, e), marks = [];
-    (at >= 0 ? [phrase] : []).concat(terms).forEach(function (t) {
-      for (var i = segl.indexOf(t); i >= 0 && t; i = segl.indexOf(t, i + t.length)) marks.push([i, i + t.length]);
+  /** 미리보기: 찾은 자리 앞뒤 SEARCH_CTX 자, 찾은 말은 <b>(공백을 건너 맞은 것도 본문 글자 범위대로). 글자 노드로만 */
+  function snippet(c, terms, phrase) {
+    var x = c.x, l = c.l, sp = spaceless(l);
+    var main = hitRanges(l, [phrase], sp, 0, 1)[0] || hitRanges(l, [terms[0]], sp, 0, 1)[0] || [0, 0];
+    var s = Math.max(0, main[0] - SEARCH_CTX), e = Math.min(x.length, main[1] + SEARCH_CTX);
+    var seg = x.slice(s, e), marks = [];
+    hitRanges(l, [phrase].concat(terms), sp).forEach(function (r) {
+      var a = Math.max(r[0], s), b = Math.min(r[1], e);
+      if (a < b) marks.push([a - s, b - s]);
     });
-    marks.sort(function (a, b) { return a[0] - b[0] || b[1] - a[1]; });
     var span = el("span", { class: "lp-s-snip" }), cur = 0;
     if (s > 0) span.appendChild(document.createTextNode("… "));
     marks.forEach(function (m) {
@@ -1302,10 +1343,15 @@
     var sb = $("#sidebar");
     if (sb && sb.classList.contains("open")) sb.classList.remove("open");
   }
-  function hitLink(r, q) {
+  function hitLink(r, q, cont) {
     var base = r.idx.base, file = r.page.f, anchor = r.chunk.a;
     var href = base + file + (anchor ? "#" + encodeURIComponent(anchor) : "");
-    var a = el("a", { class: "lp-s-hit", href: href }, [el("span", { class: "lp-s-title", text: r.page.t }), snippet(r.chunk, r.terms, r.phrase, r.at)]);
+    // 결과 제목: 「페이지 제목 › 가장 가까운 소제목」(소제목이 없거나 페이지 제목과 같으면 페이지 제목만).
+    // cont = 바로 위 결과와 같은 페이지: 페이지 제목은 위 결과에 맡기고 「› 소제목」만, 조금 들여 쓴다(순위는 그대로)
+    cont = cont && !!r.chunk.h;
+    var title = el("span", { class: "lp-s-title" }, cont ? [] : [document.createTextNode(r.page.t)]);
+    if (r.chunk.h) title.appendChild(el("span", { class: "lp-s-sub", text: (cont ? "› " : " › ") + r.chunk.h }));
+    var a = el("a", { class: "lp-s-hit" + (cont ? " lp-s-cont" : ""), href: href, title: r.page.t + (r.chunk.h ? " › " + r.chunk.h : "") }, [title, snippet(r.chunk, r.terms, r.phrase)]);
     a.addEventListener("click", safe(function (ev) {
       if (ev.button || ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) return; // 새 탭으로 열기는 그대로
       var hit = { book: r.idx.book, file: file, anchor: anchor, q: q, at: now() };
@@ -1360,10 +1406,11 @@
         res.sort(function (a, b) { return b.score - a.score || a.bi - b.bi || a.order - b.order; });
         var total = res.length, shown = res.slice(0, SEARCH_MAX);
         if (all) shown.sort(function (a, b) { return a.bi - b.bi || b.score - a.score || a.order - b.order; }); // 책 이름별로 묶는다(책 안에서는 점수 순)
-        var lastBook = -1;
+        var lastBook = -1, lastPage = null;
         shown.forEach(function (r) {
-          if (all && r.bi !== lastBook) { lastBook = r.bi; list.appendChild(el("li", { class: "lp-s-book", text: r.idx.shelfTitle })); }
-          list.appendChild(el("li", { class: "lp-s-item" }, [hitLink(r, raw)]));
+          if (all && r.bi !== lastBook) { lastBook = r.bi; lastPage = null; list.appendChild(el("li", { class: "lp-s-book", text: r.idx.shelfTitle })); }
+          list.appendChild(el("li", { class: "lp-s-item" }, [hitLink(r, raw, lastPage === r.page)]));
+          lastPage = r.page;
         });
         if (total > SEARCH_MAX) list.appendChild(el("li", { class: "lp-s-more", text: "더 있음: 모두 " + total + "곳 가운데 " + SEARCH_MAX + "곳만 보입니다. 낱말을 더 넣어 좁혀 보세요." }));
         list.hidden = false;
@@ -1480,6 +1527,13 @@
     var nq = normQuery(hit.q), terms = termsOf(nq);
     if (!terms.length) return false;
     var anchorEl = hit.anchor ? document.getElementById(hit.anchor) : null;
+    // 그대로 든 곳을 먼저, 없으면 공백을 건너 든 곳(본문 「트위디 공식」 ↔ 검색어 「트위디공식」): 둘 다 본문 글자 범위로
+    function locate(tm, needle, start) {
+      var sp = spaceless(tm.s);
+      return hitRanges(tm.s, [needle], sp, start, 1).filter(function (r) { return tm.s.slice(r[0], r[1]) === needle; })[0]
+        || hitRanges(tm.s, [needle], sp, start, 1)[0]
+        || (start ? locate(tm, needle, 0) : null);
+    }
     function find(scope, phraseOnly) {
       var tm = textMap(scope);
       var start = 0;
@@ -1489,17 +1543,15 @@
           if (nd === anchorEl || anchorEl.contains(nd) || (anchorEl.compareDocumentPosition(nd) & Node.DOCUMENT_POSITION_FOLLOWING)) { start = k; break; }
         }
       }
-      var at = tm.s.indexOf(nq, start);
-      if (at < 0) at = tm.s.indexOf(nq);
-      if (at >= 0) return wrapRange(tm, at, at + nq.length);
+      var at = locate(tm, nq, start);
+      if (at) return wrapRange(tm, at[0], at[1]);
       if (phraseOnly || terms.length < 2) return null;
-      // 구가 그대로는 없으면 낱말마다 앵커 뒤 첫 자리
+      // 구가 그대로는(공백 무시로도) 없으면 낱말마다 앵커 뒤 첫 자리
       var first = null;
       terms.forEach(function (t) {
         var tm2 = textMap(scope);
-        var i2 = tm2.s.indexOf(t, Math.min(start, tm2.s.length));
-        if (i2 < 0) i2 = tm2.s.indexOf(t);
-        if (i2 >= 0) { var m = wrapRange(tm2, i2, i2 + t.length); if (m && !first) first = m; }
+        var r2 = locate(tm2, t, Math.min(start, tm2.s.length));
+        if (r2) { var m = wrapRange(tm2, r2[0], r2[1]); if (m && !first) first = m; }
       });
       return first;
     }
