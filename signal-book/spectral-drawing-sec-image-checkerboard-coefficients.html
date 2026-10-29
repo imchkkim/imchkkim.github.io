@@ -744,7 +744,7 @@ s-109,-253,-109,-253c-72.7,-168,-109.3,-252,-110,-252c-10.7,8,-22,16.7,-34,26
 c-22,17.3,-33.3,26,-34,26s-26,-26,-26,-26s76,-59,76,-59s76,-60,76,-60z
 M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.305em;"><span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.3975em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
 <p>바둑판 물결 4096개는 서로 수직이고 길이가 1이다. 가로 물결끼리 수직이고 세로 물결끼리 수직이므로 곱도 수직이 되기 때문에, 최선 K항 근사의 계산이 그대로 통한다. 그림 조각을 코사인 무늬로 적는 2차원 이산 코사인 변환과 JPEG 의 쓰임은 디퓨전 책이 8칸짜리 손계산으로 다룬다.</p>
-<aside class="guide"><p class="guide-title">길잡이 · 『MLP에서 디퓨전 트랜스포머까지』 「푸리에 변환: 같은 그림을 무늬의 축으로 다시 적기」</p><p>8칸 줄 하나를 코사인 무늬로 손계산하고, 2차원 무늬와 JPEG 이 그림 조각마다 그 변환을 쓰는 법. <a href="https://lameproof.com/diffusion-book/spectrum-sec-fourier-transform.html">이어 읽기</a></p>
+<aside class="guide"><p class="guide-title">길잡이 · 『생성 모델: MLP에서 디퓨전 트랜스포머까지』 「푸리에 변환: 같은 그림을 무늬의 축으로 다시 적기」</p><p>8칸 줄 하나를 코사인 무늬로 손계산하고, 2차원 무늬와 JPEG 이 그림 조각마다 그 변환을 쓰는 법. <a href="https://lameproof.com/diffusion-book/spectrum-sec-fourier-transform.html">이어 읽기</a></p>
 </aside>
 <p>선생님 그림의 계수 가운데 가장 큰 것은 (<span class="sym" style="color:#0078e1">k</span><sub>x</sub>, <span class="sym" style="color:#0078e1">k</span><sub>y</sub>) = (2, 0), 가로로 반 물결 두 개가 드는 세로 줄무늬로, 가운데의 짙은 조끼와 양옆의 밝은 배경이 이루는 「밝음–어두움–밝음」이 혼자서 세기의 33.1%를 담는다. 다음은 위는 밝고 아래는 어두운 가로 줄무늬 (0, 1)(15.9%)로, 위쪽 배경과 아래쪽 조끼의 차이다. 그다음이 (2, 1)(9.0%), (6, 0)(3.1%) 순이다.</p>
 <p>계수를 큰 것부터 K개, 굵은 무늬부터(√(<span class="sym" style="color:#0078e1">k</span><sub>x</sub>² + <span class="sym" style="color:#0078e1">k</span><sub>y</sub>²)가 작은 것부터) K개 남겨 비교하면 다음과 같다.</p>
@@ -803,7 +803,7 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <h3 id="ml에서-굵은-무늬부터-그리는-생성-모델">ML에서: 굵은 무늬부터 그리는 생성 모델</h3>
 <p>왜 그림에서는 「큰 것부터」와 「굵은 무늬부터」가 비슷할까? 답은 그림의 파워 스펙트럼 모양에 있다. 선생님 그림에서 √(<span class="sym" style="color:#0078e1">k</span><sub>x</sub>² + <span class="sym" style="color:#0078e1">k</span><sub>y</sub>²)이 같은 구간마다 계수 제곱의 평균을 구해 로그 눈금에 그리면 기울기가 −2.47이다. 굵은 무늬일수록 거듭제곱 꼴로 세다. 딜레만은 앞의 블로그 글에서 사진 모음의 파워 스펙트럼이 지수 2 근처의 거듭제곱 꼴을 따른다고 적고(그가 쓴 사진 모음에서 맞춘 값은 2.454), 노이즈를 더하는 일이 가는 무늬부터 덮는다는 데서 그림 디퓨전 모델이 굵은 무늬부터 차례로 정해 간다고 설명했다.</p>
 <p>굵은 것부터 그리는 순서를 모델 구조에 직접 넣은 예도 있다. 톈(Keyu Tian)과 동료들의 VAR(「Visual Autoregressive Modeling」, 2024)은 언어 모델처럼 토큰을 하나씩 내놓는 대신, 작은 해상도의 그림 토큰을 먼저 내놓고 그것을 받아 더 큰 해상도의 토큰을 내놓는 「다음 크기 예측」으로 그림을 만들어, NeurIPS 2024의 최우수 논문상을 받았다. 노이즈가 어느 계수부터 덮는지는 아래 문제 6에서 선생님 그림으로 센다.</p>
-<aside class="guide"><p class="guide-title">길잡이 · 『MLP에서 디퓨전 트랜스포머까지』 「디퓨전: 대역별로 나눠 여러 번 디노이징」</p><p>노이즈 속에서 가장 좋은 디노이저가 주파수마다 얼마를 믿는지, 그래서 디퓨전이 왜 굵은 무늬부터 정하는지. <a href="https://lameproof.com/diffusion-book/ddpm.html">이어 읽기</a></p>
+<aside class="guide"><p class="guide-title">길잡이 · 『생성 모델: MLP에서 디퓨전 트랜스포머까지』 「디퓨전: 대역별로 나눠 여러 번 디노이징」</p><p>노이즈 속에서 가장 좋은 디노이저가 주파수마다 얼마를 믿는지, 그래서 디퓨전이 왜 굵은 무늬부터 정하는지. <a href="https://lameproof.com/diffusion-book/ddpm.html">이어 읽기</a></p>
 </aside>
 <div class="dialogue"><h3 id="prob-spectral-plaid-fabric-patterns">문제 4. 체크무늬 원단을 무늬판 몇 장으로<span id="문제-4-체크무늬-원단을-무늬판-몇-장으로" class="anchor-alias"></span></h3>
 <blockquote>
