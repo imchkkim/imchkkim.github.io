@@ -997,8 +997,15 @@
     var msg = el("div", { class: "lp-login-msg", "aria-live": "polite" });
     msg.hidden = true;
     addLoginMsg(msg);
-    acct.appendChild(el("p", { class: "lp-consent", text: CONSENT_TEXT }));
-    acct.appendChild(lazyGoogleButton(el("div", { class: "lp-gbtn" }), whenPanelOpen));
+    // 이메일 안내는 로그인 칸 안에 접어 둔다(2026-10-30 저자: 「이메일 안내 글은 로그인 ui 안쪽으로」)
+    var login = el("div", { class: "lp-login" }, [
+      lazyGoogleButton(el("div", { class: "lp-gbtn" }), whenPanelOpen),
+      el("details", { class: "lp-consent-box" }, [
+        el("summary", { text: "로그인하면 이메일 주소를 저장합니다" }),
+        el("p", { class: "lp-consent", text: CONSENT_TEXT })
+      ])
+    ]);
+    acct.appendChild(login);
     acct.appendChild(msg);
   }
   function renderPanel() {
@@ -1092,15 +1099,13 @@
     if (!chap) return;
     var title = el("div", { class: "lp-c-title", role: "heading", "aria-level": "2", text: "댓글" });
     var auth = el("div", { class: "lp-c-auth" });
-    var sec = el("section", { class: "lp-comments", "aria-label": "댓글" }, [
-      title,
-      el("p", { class: "lp-c-note", text: "남긴 댓글은 저자만 읽습니다. 다른 독자에게는 개수만 보입니다." }),
-      auth
-    ]);
+    var note = el("p", { class: "lp-c-note", text: "남긴 댓글은 저자만 읽습니다. 다른 독자에게는 개수만 보입니다." });
+    note.hidden = true; // 로그인한 뒤에만(로그인 전에는 「댓글은 로그인한 뒤 남길 수 있습니다」 한 줄만, 2026-10-30 저자)
+    var sec = el("section", { class: "lp-comments", "aria-label": "댓글" }, [title, note, auth]);
     var nav = $("main > nav.chapter-nav");
     if (nav && nav.parentNode === chap.parentNode) chap.parentNode.insertBefore(sec, nav);
     else after(chap, sec);
-    COMMENTS = { sec: sec, title: title, auth: auth, count: null };
+    COMMENTS = { sec: sec, title: title, auth: auth, note: note, count: null };
     document.addEventListener("selectionchange", function () {
       try {
         var s = window.getSelection();
@@ -1126,33 +1131,19 @@
       COMMENTS.title.classList.add("lp-c-offline");
     });
   }
-  function whenVisible(target) {
-    return function (go) {
-      if (typeof IntersectionObserver !== "function") { go(); return; }
-      var io = new IntersectionObserver(function (ents) {
-        if (ents.some(function (e) { return e.isIntersecting; })) { io.disconnect(); go(); }
-      }, { rootMargin: "200px" });
-      io.observe(target);
-    };
-  }
   function renderCommentAuth() {
     if (!COMMENTS) return;
     var box = COMMENTS.auth;
     box.textContent = "";
     var s = getSession();
+    COMMENTS.note.hidden = true;
     if (!loginAvailable()) return; // 설정을 못 받았거나 login:false 면 개수만(2.7절)
     if (!s) {
-      var msg = el("div", { class: "lp-login-msg", "aria-live": "polite" });
-      msg.hidden = true;
-      addLoginMsg(msg);
+      // 로그인 전에는 한 줄만(2026-10-30 저자: 「'댓글은 로그인한 뒤 남길 수 있습니다' 까지만 쓰고, 그 아래는 생략」). 로그인은 메뉴에서
       box.appendChild(el("p", { class: "lp-c-need", text: "댓글은 로그인한 뒤 남길 수 있습니다" }));
-      box.appendChild(el("p", { class: "lp-consent", text: CONSENT_TEXT }));
-      var g = el("div", { class: "lp-gbtn" });
-      box.appendChild(g);
-      box.appendChild(msg);
-      lazyGoogleButton(g, whenVisible(COMMENTS.sec));
       return;
     }
+    COMMENTS.note.hidden = false;
     var max = (CONFIG && CONFIG.limits && CONFIG.limits.commentMax) || 2000;
     var qmax = (CONFIG && CONFIG.limits && CONFIG.limits.quoteMax) || 500;
     var quote = "";
