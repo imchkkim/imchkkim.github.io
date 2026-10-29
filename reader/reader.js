@@ -131,7 +131,10 @@
     }
     p.last = best;
   }
-  /** 합치기 규칙(서버와 같다): 절 완료·정리 문제는 합집합(이른 시각), 위치는 책마다 최신 at */
+  /** 절 완료 값: +시각 = 읽음, −시각 = 안 읽음으로 되돌림. 0·없음 = 안 읽음 */
+  function isRead(v) { return typeof v === "number" && v > 0; }
+  /** 합치기 규칙(서버와 같다): 절 완료는 |시각| 이 큰 쪽(나중 동작이 이긴다), 정리 문제는 합집합(이른 시각),
+   *  위치는 책마다 최신 at */
   function mergeProg(dst, src) {
     if (!src || !src.books || typeof src.books !== "object") return dst;
     for (var b in src.books) {
@@ -142,8 +145,9 @@
         var m = s[f];
         if (!m || typeof m !== "object") return;
         for (var k in m) {
-          if (typeof m[k] !== "number") continue;
-          if (!(k in d[f]) || m[k] < d[f][k]) d[f][k] = m[k];
+          if (typeof m[k] !== "number" || !m[k]) continue;
+          var later = f === "pages" ? Math.abs(m[k]) > Math.abs(d[f][k] || 0) : m[k] < d[f][k];
+          if (!(k in d[f]) || later) d[f][k] = m[k];
         }
       });
       if (s.position && typeof s.position.at === "number" && (!d.position || s.position.at > d.position.at)) d.position = s.position;
@@ -157,7 +161,8 @@
     for (var b in p.books) {
       var x = p.books[b];
       if (!x) continue;
-      if (Object.keys(x.pages || {}).length || Object.keys(x.quizzes || {}).length || x.position) return true;
+      var pg = x.pages || {};
+      if (Object.keys(pg).some(function (k) { return isRead(pg[k]); }) || Object.keys(x.quizzes || {}).length || x.position) return true;
     }
     return false;
   }
@@ -337,7 +342,7 @@
     var out = { chapters: {}, done: 0, total: 0 };
     (idx.chapters || []).forEach(function (ch) {
       var d = 0, t = 0, qd = 0;
-      (ch.pages || []).forEach(function (pg) { t++; if (bp && bp.pages[pg.key]) d++; });
+      (ch.pages || []).forEach(function (pg) { t++; if (bp && isRead(bp.pages[pg.key])) d++; });
       (ch.quizzes || []).forEach(function (q) { t++; if (bp && bp.quizzes[q.id]) { d++; qd++; } });
       out.chapters[ch.id] = { done: d, total: t, quizDone: qd, quizTotal: (ch.quizzes || []).length };
       out.done += d; out.total += t;
@@ -422,7 +427,8 @@
     var shown = 0;
     var next = el("button", { type: "button", class: "lp-fold-next", text: "함께 풀기" });
     var all = el("button", { type: "button", class: "lp-fold-all", text: "모두 펼치기" });
-    var bar = el("div", { class: "lp-fold-bar" }, [next, all]);
+    var fold = el("button", { type: "button", class: "lp-fold-back", text: "다시 접기", hidden: "" });
+    var bar = el("div", { class: "lp-fold-bar" }, [next, all, fold]);
     var anchorEl = body.length ? body[body.length - 1].el : h;
     after(anchorEl, bar);
 
@@ -433,11 +439,10 @@
         shown++;
       }
       syncBoxes();
-      if (shown >= steps.length) { if (bar.parentNode) bar.parentNode.removeChild(bar); }
-      else {
-        after(last, bar); // 단추는 마지막으로 보인 걸음 바로 아래로 따라간다
-        next.textContent = "다음 (" + shown + "/" + steps.length + ")";
-      }
+      if (last) after(last, bar); // 단추는 마지막으로 보인 걸음 바로 아래로 따라간다
+      var end = shown >= steps.length;
+      next.hidden = end; all.hidden = end; fold.hidden = shown === 0;
+      if (!end) next.textContent = "다음 (" + shown + "/" + steps.length + ")";
       if (scroll && first) {
         var r = first.getBoundingClientRect();
         var bottom = shown < steps.length ? bar.getBoundingClientRect().bottom : r.bottom;
@@ -449,6 +454,18 @@
         }
       }
     }
+    /** 펼친 풀이를 처음처럼 접는다. 문제 머리가 화면 위로 넘어갔으면 그리로 올린다 */
+    function collapse() {
+      steps.forEach(function (st) { st.forEach(function (it) { it.el.classList.add("lp-fold-hidden"); }); });
+      shown = 0;
+      syncBoxes();
+      after(anchorEl, bar);
+      next.textContent = "함께 풀기";
+      next.hidden = false; all.hidden = false; fold.hidden = true;
+      var r = h.getBoundingClientRect();
+      if (r.top < 0) { try { h.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { h.scrollIntoView(); } }
+    }
+    fold.addEventListener("click", collapse);
     next.addEventListener("click", function () { reveal(1, true); });
     all.addEventListener("click", function () { reveal(steps.length, false); });
     GROUPS.push({
@@ -561,6 +578,40 @@
   }
 
   // ── 절 완료(2.8절) ──────────────────────────────────────────────────────
+  var NO_AUTO = {}; // 이번 방문에 손으로 안 읽음으로 돌린 절: 끝까지 내려가도 다시 읽음으로 치지 않는다
+  /** 손으로 읽음/안 읽음 바꾸기. 안 읽음은 −시각으로 남겨 다른 기기의 옛 「읽음」보다 나중 동작이 되게 한다 */
+  function setRead(key, read) {
+    if (!read) NO_AUTO[key] = true;
+    noteChange(function (p) { var b = bookOf(p, BOOK); b.pages[key] = read ? now() : -now(); });
+    renderPanel();
+    renderReadRow();
+  }
+  var READ_ROW = null;
+  function renderReadRow() {
+    if (!READ_ROW || !PAGE) return;
+    var b = PROG.books[BOOK], read = !!(b && b.pages && isRead(b.pages[PAGE.key]));
+    var undone = !read && NO_AUTO[PAGE.key];
+    READ_ROW.hidden = !read && !undone;
+    READ_ROW.msg.textContent = read ? "읽은 페이지" : "안 읽음으로 되돌렸습니다";
+    READ_ROW.btn.textContent = read ? "안 읽음으로 되돌리기" : "다시 읽음으로";
+    READ_ROW.root.classList.toggle("lp-read-on", read);
+  }
+  function initReadRow() {
+    if (!PAGE) return;
+    var chap = $("main > .chapter");
+    if (!chap) return;
+    var msg = el("span", { class: "lp-read-msg" });
+    var btn = el("button", { type: "button", class: "lp-read-btn" });
+    var root = el("div", { class: "lp-read-row" }, [msg, btn]);
+    var com = $("section.lp-comments", chap);
+    if (com) chap.insertBefore(root, com); else chap.appendChild(root);
+    READ_ROW = { root: root, msg: msg, btn: btn };
+    btn.addEventListener("click", safe(function () {
+      var b = PROG.books[BOOK];
+      setRead(PAGE.key, !(b && b.pages && isRead(b.pages[PAGE.key])));
+    }));
+    renderReadRow();
+  }
   function initCompletion() {
     if (!PAGE) return;
     var chap = $("main > .chapter");
@@ -569,14 +620,16 @@
     var end = el("div", { class: "lp-end", "aria-hidden": "true" });
     chap.appendChild(end);
     var b0 = PROG.books[BOOK];
-    if (b0 && b0.pages && b0.pages[key]) return;
+    if (b0 && b0.pages && isRead(b0.pages[key])) return;
     var fired = false;
     function mark() {
       if (fired) return;
       fired = true;
       setTimeout(safe(function () {
-        noteChange(function (p) { var b = bookOf(p, BOOK); if (!b.pages[key]) b.pages[key] = now(); });
+        if (NO_AUTO[key]) return;
+        noteChange(function (p) { var b = bookOf(p, BOOK); if (!isRead(b.pages[key])) b.pages[key] = now(); });
         renderPanel();
+        renderReadRow();
       }), Math.max(0, OPENED + 3000 - now()));
     }
     if (typeof IntersectionObserver === "function") {
@@ -897,7 +950,16 @@
     ch.pages.forEach(function (pg) { keyOf[pg.file] = pg.key; });
     $$("li > a", ul).forEach(function (a) {
       var k = keyOf[a.getAttribute("data-lp-file") || fileOfHref(a.getAttribute("href"))];
-      a.classList.toggle("lp-done", !!(k && bp && bp.pages[k]));
+      var done = !!(k && bp && isRead(bp.pages[k]));
+      a.classList.toggle("lp-done", done);
+      // 읽은 절은 체크 표시가 단추다: 누르면 안 읽음으로 되돌린다
+      var li = a.parentNode, tg = $("button.lp-unread", li);
+      if (done && k && !tg) {
+        tg = el("button", { type: "button", class: "lp-unread", title: "안 읽음으로 되돌리기", "aria-label": "안 읽음으로 되돌리기: " + (a.textContent || "") });
+        li.insertBefore(tg, a);
+        tg.addEventListener("click", safe(function (ev) { ev.preventDefault(); ev.stopPropagation(); setRead(k, false); }));
+      } else if (!done && tg) tg.parentNode.removeChild(tg);
+      a.classList.toggle("lp-tg", done);
     });
     if (ch.quizzes.length) {
       var ql = $("li.lp-quiz-line", ul);
@@ -1117,7 +1179,7 @@
     safe(checkJump)();
     safe(initPanel)();
     onAuthChange.push(renderAccount, renderCommentAuth);
-    afterSync.push(renderPanel, refreshQuizzes);
+    afterSync.push(renderPanel, refreshQuizzes, renderReadRow);
 
     loadIndex(BOOK, BASE).then(safe(function (idx) {
       INDEX = idx;
@@ -1126,6 +1188,7 @@
       safe(initCompletion)();
       safe(initPositionTracking)();
       safe(initComments)();
+      safe(initReadRow)();
       safe(renderCommentAuth)();
       safe(renderPanel)();
     }), warn);
@@ -1140,7 +1203,7 @@
 
   // 다른 탭에서 진도·로그인이 바뀌면 따라간다
   window.addEventListener("storage", safe(function (e) {
-    if (e.key === K.progress) { PROG = loadProg(); renderPanel(); refreshQuizzes(); }
+    if (e.key === K.progress) { PROG = loadProg(); renderPanel(); refreshQuizzes(); renderReadRow(); }
     else if (e.key === K.session) authChanged();
   }));
 
