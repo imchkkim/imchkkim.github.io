@@ -11,6 +11,8 @@
  *   - 이어 읽기: 마지막 위치 기록, 앱 첫 실행·다른 책 첫 화면에서 마지막 페이지로 넘기기(2.13절)
  *   - 대문 책 카드의 달성률 막대(2.14절)
  *   - 로그인(구글), 서버 합치기, 댓글 칸(2.7·2.15절)
+ *   - 책 안 낱말 검색: 목차 패널 맨 위·대문의 검색 칸, search-index.json 지연 로드, 도착한 페이지에서 찾은 말 표시
+ *     (계약서 끝 「변경 (책 안 검색)」 절)
  *
  * 지키는 것
  *   - 서버가 없거나 꺼져 있어도 진도·이어 읽기·함께 풀기·정리 문제는 브라우저 저장만으로 돈다.
@@ -39,7 +41,8 @@
     resume: "lp.reader.resume",
     launched: "lp.reader.launched",
     stay: "lp.reader.stay.",
-    config: "lp.reader.config"
+    config: "lp.reader.config",
+    search: "lp.reader.search"
   };
   var STATUS_LABEL = { open: "저자가 아직 읽지 않음", applied: "원고에 반영됨", held: "보류" };
   var HEAD_RE = /^\s*문제\s*\d+\s*[.:]/;
@@ -591,7 +594,21 @@
         renderPanel();
       }
     }
-    var entry = { id: id, solved: function () { return q.classList.contains("lp-q-solved"); }, setSolved: setSolved, reset: reset };
+    /** 검색으로 온 말이 어느 보기의 이유(고르기 전에는 화면에 없음) 안에 있으면 그 이유 칸을 펼쳐 돌려준다 */
+    function findWhy(terms, phrase) {
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        if (!it.ch.why) continue;
+        var tmp = document.createElement("div");
+        tmp.innerHTML = it.ch.why;
+        var t = normQuery(tmp.textContent || "");
+        if (t.indexOf(phrase) < 0 && !terms.every(function (x) { return t.indexOf(x) >= 0; })) continue;
+        if (it.why.hidden) showWhy(it, !!it.ch.correct);
+        return it.why;
+      }
+      return null;
+    }
+    var entry = { id: id, solved: function () { return q.classList.contains("lp-q-solved"); }, setSolved: setSolved, reset: reset, findWhy: findWhy };
     QUIZZES.push(entry);
     if (BOOK && PROG.books[BOOK] && PROG.books[BOOK].quizzes && isRead(PROG.books[BOOK].quizzes[id])) setSolved();
   }
@@ -1183,12 +1200,341 @@
     } else draw();
   }
 
+  // ── 책 안 검색(계약서 끝 「변경 (책 안 검색)」 절) ─────────────────────────
+  // 서버 없이 화면만으로: 배포 때 만든 <책>/search-index.json 을 처음 입력할 때 받아 부분 문자열로 찾는다.
+  // 결과·미리보기는 글자 노드로만 만든다(innerHTML 없음). 결과를 누르면 도착한 페이지에서 찾은 말을 표시한다
+  var SEARCH_MAX = 50;      // 결과 상한(넘으면 「더 있음」)
+  var SEARCH_CTX = 40;      // 미리보기 앞뒤 글자 수
+  var SIDX = {};            // 책 → Promise(색인)
+  var BOOKS_P = null;       // Promise([{id, title, base}])
+  function lowerSame(x) {
+    var l = x.toLowerCase();
+    if (l.length === x.length) return l;
+    // 소문자로 바꾸며 길이가 달라지는 글자(드묾)는 그대로 둔다: 미리보기 자리를 원문과 맞추려고
+    var out = "";
+    for (var i = 0; i < x.length; i++) { var c = x.charAt(i), d = c.toLowerCase(); out += d.length === 1 ? d : c; }
+    return out;
+  }
+  function normQuery(q) { return lowerSame(String(q || "")).replace(/\s+/g, " ").trim(); }
+  function termsOf(nq) {
+    var seen = {}, out = [];
+    nq.split(" ").forEach(function (t) { if (t && !seen[t]) { seen[t] = 1; out.push(t); } });
+    return out;
+  }
+  function loadSearchIndex(book, base) {
+    if (SIDX[book]) return SIDX[book];
+    SIDX[book] = fetch(base + "search-index.json", { credentials: "same-origin" })
+      .then(function (r) { if (!r.ok) throw new Error("search-index " + r.status); return r.json(); })
+      .then(function (j) {
+        if (!j || !Array.isArray(j.pages)) throw new Error("search-index 꼴");
+        var pages = [];
+        j.pages.forEach(function (p) {
+          if (!p || !okFile(p.f) || !Array.isArray(p.c)) return;
+          var t = typeof p.t === "string" ? p.t : p.f;
+          pages.push({ f: p.f, t: t, tl: lowerSame(t), c: p.c.filter(function (c) { return Array.isArray(c) && typeof c[1] === "string"; })
+            .map(function (c) { var x = c[1]; return { a: typeof c[0] === "string" ? c[0] : "", x: x, l: lowerSame(x) }; }) });
+        });
+        return { book: book, title: typeof j.title === "string" ? j.title : book, base: base, pages: pages };
+      });
+    return SIDX[book];
+  }
+  /** 「모든 책」 목록: 배포 저장소 루트 /reader/books.json. 못 받으면 대문 카드, 그것도 없으면 지금 책 하나 */
+  function loadBooks() {
+    if (BOOKS_P) return BOOKS_P;
+    var fallback = function () {
+      var out = $$("a.card[data-book]").map(function (c) {
+        var h = $("h3", c);
+        return { id: c.getAttribute("data-book"), title: h ? h.textContent : c.getAttribute("data-book"), base: c.getAttribute("data-base") || normBase(c.getAttribute("href")) };
+      });
+      if (!out.length && BOOK) out.push({ id: BOOK, title: (INDEX && INDEX.title) || BOOK, base: BASE });
+      return out;
+    };
+    BOOKS_P = fetch("/reader/books.json", { credentials: "same-origin" })
+      .then(function (r) { if (!r.ok) throw new Error("books " + r.status); return r.json(); })
+      .then(function (list) {
+        if (!Array.isArray(list)) throw new Error("books 꼴");
+        var out = list.filter(function (b) { return b && okBook(b.id) && typeof b.base === "string" && /^\/[A-Za-z0-9._\/-]*\/$/.test(b.base) && b.base.indexOf("//") < 0; })
+          .map(function (b) { return { id: b.id, title: typeof b.title === "string" ? b.title : b.id, base: b.base }; });
+        if (!out.length) throw new Error("books 빔");
+        return out;
+      })
+      .catch(fallback);
+    return BOOKS_P;
+  }
+  /** 한 책 색인에서 찾기. 모든 낱말이 들어 있는 덩이(AND), 붙여 쓴 구가 그대로 있으면 위로 */
+  function searchIn(idx, terms, phrase, out) {
+    idx.pages.forEach(function (p, pi) {
+      p.c.forEach(function (c, ci) {
+        for (var i = 0; i < terms.length; i++) if (c.l.indexOf(terms[i]) < 0) return;
+        var score = 0, pp = c.l.indexOf(phrase);
+        if (pp >= 0) score += 100; // 낱말 하나면 모두 여기
+        if (terms.every(function (t) { return p.tl.indexOf(t) >= 0; })) score += 20; // 페이지 제목에도 있음
+        if (ci === 0 && pp >= 0 && pp < 80) score += 5; // 절 첫머리(제목 근처)
+        out.push({ idx: idx, page: p, chunk: c, score: score, order: pi * 100000 + ci, at: pp });
+      });
+    });
+  }
+  /** 미리보기: 찾은 자리 앞뒤 SEARCH_CTX 자, 찾은 말은 <b>. 글자 노드로만 */
+  function snippet(c, terms, phrase, at) {
+    var x = c.x, l = c.l, pos = at, len = phrase.length;
+    if (pos < 0) { pos = l.indexOf(terms[0]); len = terms[0].length; }
+    if (pos < 0) pos = 0;
+    var s = Math.max(0, pos - SEARCH_CTX), e = Math.min(x.length, pos + len + SEARCH_CTX);
+    var seg = x.slice(s, e), segl = l.slice(s, e), marks = [];
+    (at >= 0 ? [phrase] : []).concat(terms).forEach(function (t) {
+      for (var i = segl.indexOf(t); i >= 0 && t; i = segl.indexOf(t, i + t.length)) marks.push([i, i + t.length]);
+    });
+    marks.sort(function (a, b) { return a[0] - b[0] || b[1] - a[1]; });
+    var span = el("span", { class: "lp-s-snip" }), cur = 0;
+    if (s > 0) span.appendChild(document.createTextNode("… "));
+    marks.forEach(function (m) {
+      if (m[1] <= cur) return;
+      var a = Math.max(m[0], cur);
+      if (a > cur) span.appendChild(document.createTextNode(seg.slice(cur, a)));
+      span.appendChild(el("b", { text: seg.slice(a, m[1]) }));
+      cur = m[1];
+    });
+    if (cur < seg.length) span.appendChild(document.createTextNode(seg.slice(cur)));
+    if (e < x.length) span.appendChild(document.createTextNode(" …"));
+    return span;
+  }
+  function closeSidebarOverlay() {
+    var sb = $("#sidebar");
+    if (sb && sb.classList.contains("open")) sb.classList.remove("open");
+  }
+  function hitLink(r, q) {
+    var base = r.idx.base, file = r.page.f, anchor = r.chunk.a;
+    var href = base + file + (anchor ? "#" + encodeURIComponent(anchor) : "");
+    var a = el("a", { class: "lp-s-hit", href: href }, [el("span", { class: "lp-s-title", text: r.page.t }), snippet(r.chunk, r.terms, r.phrase, r.at)]);
+    a.addEventListener("click", safe(function (ev) {
+      if (ev.button || ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) return; // 새 탭으로 열기는 그대로
+      var hit = { book: r.idx.book, file: file, anchor: anchor, q: q, at: now() };
+      ssSet(K.search, hit);
+      if (BOOK === r.idx.book && FILE === file) { // 같은 페이지: 넘어가지 않고 바로 표시
+        ev.preventDefault();
+        closeSidebarOverlay();
+        if (anchor && location.hash !== "#" + encodeURIComponent(anchor)) {
+          try { history.replaceState(null, "", "#" + encodeURIComponent(anchor)); } catch (e) { /* 그대로 */ }
+        }
+        applySearchHit();
+      }
+    }));
+    return a;
+  }
+  /** 검색 칸 하나. scopeAll 이면 「모든 책」만(대문) */
+  function makeSearchBox(rootOnly) {
+    var input = el("input", { type: "search", class: "lp-s-input", placeholder: rootOnly ? "모든 책에서 찾기" : "책에서 찾기", "aria-label": "책에서 낱말 찾기", title: "단축키: / 또는 Ctrl+K", autocomplete: "off", spellcheck: "false", enterkeyhint: "search" });
+    var scope = null;
+    if (!rootOnly) {
+      scope = el("select", { class: "lp-s-scope", "aria-label": "찾을 범위" }, [el("option", { value: "book", text: "이 책" }), el("option", { value: "all", text: "모든 책" })]);
+    }
+    var status = el("div", { class: "lp-s-status", "aria-live": "polite" });
+    var list = el("ol", { class: "lp-s-results" });
+    status.hidden = true; list.hidden = true;
+    var box = el("div", { class: "lp-search" + (rootOnly ? " lp-search-root" : ""), role: "search" }, [el("div", { class: "lp-s-row" }, [input, scope]), status, list]);
+    var seq = 0, timer = null;
+    function say(t) { status.textContent = t; status.hidden = !t; }
+    function clear() { list.textContent = ""; list.hidden = true; say(""); }
+    function run() {
+      var my = ++seq;
+      var raw = input.value, nq = normQuery(raw);
+      box.removeAttribute("data-done");
+      if (!nq) { clear(); return; }
+      var terms = termsOf(nq), phrase = nq;
+      var all = rootOnly || (scope && scope.value === "all");
+      var done = function () { if (my === seq) box.setAttribute("data-done", (all ? "all:" : "book:") + nq); }; // 다 그렸음(시험이 기다리는 표지)
+      var booksP = all ? loadBooks() : Promise.resolve([{ id: BOOK, title: (INDEX && INDEX.title) || "", base: BASE }]);
+      say("찾는 중…");
+      booksP.then(function (books) {
+        return Promise.all(books.map(function (b) {
+          return loadSearchIndex(b.id, b.base).then(function (ix) { ix.shelfTitle = b.title || ix.title; return ix; }, function () { return null; });
+        }));
+      }).then(safe(function (idxs) {
+        if (my !== seq) return; // 그새 글자가 바뀌었다
+        var got = idxs.filter(Boolean);
+        list.textContent = "";
+        if (!got.length) { list.hidden = true; say("검색 색인을 불러오지 못했습니다."); done(); return; }
+        var res = [];
+        got.forEach(function (ix, bi) { var part = []; searchIn(ix, terms, phrase, part); part.forEach(function (r) { r.bi = bi; r.terms = terms; r.phrase = phrase; res.push(r); }); });
+        if (!res.length) { list.hidden = true; say("찾은 것이 없습니다"); done(); return; }
+        res.sort(function (a, b) { return b.score - a.score || a.bi - b.bi || a.order - b.order; });
+        var total = res.length, shown = res.slice(0, SEARCH_MAX);
+        if (all) shown.sort(function (a, b) { return a.bi - b.bi || b.score - a.score || a.order - b.order; }); // 책 이름별로 묶는다(책 안에서는 점수 순)
+        var lastBook = -1;
+        shown.forEach(function (r) {
+          if (all && r.bi !== lastBook) { lastBook = r.bi; list.appendChild(el("li", { class: "lp-s-book", text: r.idx.shelfTitle })); }
+          list.appendChild(el("li", { class: "lp-s-item" }, [hitLink(r, raw)]));
+        });
+        if (total > SEARCH_MAX) list.appendChild(el("li", { class: "lp-s-more", text: "더 있음: 모두 " + total + "곳 가운데 " + SEARCH_MAX + "곳만 보입니다. 낱말을 더 넣어 좁혀 보세요." }));
+        list.hidden = false;
+        say(total > SEARCH_MAX ? "" : total + "곳");
+        done();
+      }));
+    }
+    input.addEventListener("input", function () { if (timer) clearTimeout(timer); timer = setTimeout(safe(run), 150); });
+    input.addEventListener("keydown", function (ev) {
+      if (ev.key === "Escape") { input.value = ""; clear(); input.blur(); }
+      else if (ev.key === "Enter") { ev.preventDefault(); var a = $("a.lp-s-hit", list); if (a) a.click(); }
+    });
+    if (scope) scope.addEventListener("change", safe(run));
+    return { box: box, input: input };
+  }
+  var SEARCH = null;
+  function initSearch() {
+    if (BOOK) {
+      var sb = $("#sidebar");
+      if (!sb) return;
+      SEARCH = makeSearchBox(false);
+      var header = $(".sidebar-header", sb);
+      if (header) after(header, SEARCH.box);
+      else sb.insertBefore(SEARCH.box, sb.firstChild);
+    } else {
+      if (!$$("a.card[data-book]").length) return;
+      SEARCH = makeSearchBox(true);
+      var hd = $("body > header");
+      if (hd) after(hd, SEARCH.box);
+      else document.body.insertBefore(SEARCH.box, document.body.firstChild);
+    }
+    // 「/」 또는 Ctrl+K(맥은 ⌘K) 로 검색 칸. 글을 쓰는 중이면 무시
+    document.addEventListener("keydown", function (ev) {
+      if (ev.defaultPrevented || ev.isComposing) return;
+      var slash = ev.key === "/" && !ev.ctrlKey && !ev.metaKey && !ev.altKey;
+      var ck = (ev.key === "k" || ev.key === "K") && (ev.ctrlKey || ev.metaKey) && !ev.altKey && !ev.shiftKey;
+      if (!slash && !ck) return;
+      var t = ev.target;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      ev.preventDefault();
+      var sb = $("#sidebar");
+      if (BOOK && sb && !sidebarShown(sb)) { var ob = $("#sidebar-open"); if (ob) ob.click(); else sb.classList.add("open"); }
+      setTimeout(function () { try { SEARCH.input.focus({ preventScroll: !BOOK }); SEARCH.input.select(); } catch (e) { SEARCH.input.focus(); } }, 0);
+    });
+  }
+
+  // 도착한 페이지에서 찾은 말 표시
+  var HIT_SKIP = ".katex, script, style, svg, figure.cast, figure.dlg-cast, .lp-search, .lp-fold-bar, .lp-q-hint";
+  /** root 아래 글자 노드를 이어 공백 정리·소문자로 만든 문자열과, 글자마다의 (노드, 자리) */
+  function textMap(root) {
+    var nodes = [], s = "", map = [], prevSpace = true;
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) { var p = n.parentElement; return p && p.closest(HIT_SKIP) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
+    });
+    for (var n = w.nextNode(); n; n = w.nextNode()) {
+      var v = n.nodeValue;
+      for (var i = 0; i < v.length; i++) {
+        var c = v.charAt(i);
+        if (/\s/.test(c)) { if (prevSpace) continue; c = " "; prevSpace = true; } else prevSpace = false;
+        var d = c.toLowerCase();
+        s += d.length === 1 ? d : c;
+        map.push([n, i]);
+      }
+      nodes.push(n);
+    }
+    return { s: s, map: map };
+  }
+  /** [from, to) 자리의 글자를 <mark class="lp-hit"> 로 감싼다(노드가 여럿이면 노드마다). 첫 mark 를 돌려준다 */
+  function wrapRange(tm, from, to) {
+    var parts = [], i = from;
+    while (i < to) {
+      var n = tm.map[i][0], a = tm.map[i][1], b = a, j = i;
+      while (j < to && tm.map[j][0] === n) { b = tm.map[j][1]; j++; }
+      parts.push([n, a, b + 1]);
+      i = j;
+    }
+    var first = null;
+    parts.reverse().forEach(function (p) { // 뒤에서부터 잘라야 앞 자리가 어긋나지 않는다
+      var n = p[0];
+      try {
+        var r = document.createRange();
+        r.setStart(n, p[1]); r.setEnd(n, p[2]);
+        var m = el("mark", { class: "lp-hit" });
+        r.surroundContents(m);
+        first = m;
+      } catch (e) { /* 그 조각은 건너뜀 */ }
+    });
+    return first;
+  }
+  function clearHits() {
+    $$("mark.lp-hit").forEach(function (m) {
+      var p = m.parentNode;
+      while (m.firstChild) p.insertBefore(m.firstChild, m);
+      p.removeChild(m);
+      p.normalize();
+    });
+  }
+  /** 정리 문제 이유(고르기 전에는 화면에 없음)에서 찾는다. 찾으면 그 보기의 이유 칸을 펼친다 */
+  function peekQuiz(terms, phrase) {
+    for (var i = 0; i < QUIZZES.length; i++) {
+      var w = QUIZZES[i].findWhy(terms, phrase);
+      if (w) return w;
+    }
+    return null;
+  }
+  function applySearchHit() {
+    var hit = ssGet(K.search);
+    if (!hit || hit.book !== BOOK || hit.file !== FILE) return false;
+    ssSet(K.search, null);
+    if (typeof hit.at !== "number" || now() - hit.at > 60000) return false; // 오래된 것은 버린다
+    var root = $("main > .chapter") || $("main");
+    if (!root) return false;
+    clearHits();
+    var nq = normQuery(hit.q), terms = termsOf(nq);
+    if (!terms.length) return false;
+    var anchorEl = hit.anchor ? document.getElementById(hit.anchor) : null;
+    function find(scope, phraseOnly) {
+      var tm = textMap(scope);
+      var start = 0;
+      if (anchorEl && scope.contains(anchorEl)) { // 앵커 뒤에서부터 찾고, 없으면 처음부터
+        for (var k = 0; k < tm.map.length; k++) {
+          var nd = tm.map[k][0];
+          if (nd === anchorEl || anchorEl.contains(nd) || (anchorEl.compareDocumentPosition(nd) & Node.DOCUMENT_POSITION_FOLLOWING)) { start = k; break; }
+        }
+      }
+      var at = tm.s.indexOf(nq, start);
+      if (at < 0) at = tm.s.indexOf(nq);
+      if (at >= 0) return wrapRange(tm, at, at + nq.length);
+      if (phraseOnly || terms.length < 2) return null;
+      // 구가 그대로는 없으면 낱말마다 앵커 뒤 첫 자리
+      var first = null;
+      terms.forEach(function (t) {
+        var tm2 = textMap(scope);
+        var i2 = tm2.s.indexOf(t, Math.min(start, tm2.s.length));
+        if (i2 < 0) i2 = tm2.s.indexOf(t);
+        if (i2 >= 0) { var m = wrapRange(tm2, i2, i2 + t.length); if (m && !first) first = m; }
+      });
+      return first;
+    }
+    // 구 그대로 본문 → 정리 문제 이유 → 낱말마다 본문 차례(이유 칸은 구나 낱말이 모두 들어 있을 때만 펼친다)
+    var mark = find(root, true), why = null;
+    if (!mark) { why = peekQuiz(terms, nq); if (why) mark = find(why, false); }
+    if (!mark) mark = find(root, false);
+    if (!mark) return false;
+    // 접힌 함께 풀기 칸 안이면 그 묶음을 편다
+    GROUPS.forEach(function (g) { if (g.contains(mark)) g.revealAll(); });
+    var moved = false;
+    var stop = function () { moved = true; };
+    ["wheel", "touchstart"].forEach(function (ev) { window.addEventListener(ev, stop, { passive: true, once: true }); });
+    var go = safe(function () {
+      if (moved || !mark.isConnected) return;
+      var r = mark.getBoundingClientRect();
+      var y = window.scrollY + r.top - Math.max(80, window.innerHeight / 3);
+      try { window.scrollTo({ top: Math.max(0, y), left: 0, behavior: "instant" }); } catch (e) { window.scrollTo(0, Math.max(0, y)); }
+    });
+    go();
+    if (document.readyState === "complete") setTimeout(go, 300);
+    else window.addEventListener("load", function () { go(); setTimeout(go, 800); });
+    document.documentElement.classList.add("lp-hit-on");
+    setTimeout(function () { $$("mark.lp-hit").forEach(function (m) { m.classList.add("lp-hit-fade"); }); }, 4000);
+    setTimeout(function () { if ($$("mark.lp-hit-fade").length) clearHits(); }, 9000);
+    return true;
+  }
+
   // ── 시작 ────────────────────────────────────────────────────────────────
   function start() {
     document.documentElement.classList.add("lp-reader-on");
     if (!BOOK) {
       safe(checkJump)();
       safe(initRootCards)();
+      safe(initSearch)();
       return;
     }
     safe(foldAll)();
@@ -1203,8 +1549,10 @@
         if (t) { try { t.scrollIntoView(); } catch (e) { /* 없음 */ } }
       }
     }
+    safe(applySearchHit)(); // 검색 결과를 눌러 왔으면 찾은 말을 표시(접힌 칸이면 편다)
     window.addEventListener("hashchange", safe(function () { revealForHash(true); }));
     safe(checkJump)();
+    safe(initSearch)();
     safe(initPanel)();
     onAuthChange.push(renderAccount, renderCommentAuth);
     afterSync.push(renderPanel, refreshQuizzes, renderReadRow);
