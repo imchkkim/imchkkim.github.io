@@ -6,6 +6,7 @@
  *
  * 하는 일
  *   - 「문제 N」 함께 풀기: 풀이 말칸을 접고 단추를 누를 때마다 하나씩 보인다(2.4·2.12절)
+ *     장 끝 「토론 N」도 같게 접고 첫 단추만 「토론 따라가기」(계약서 끝 「변경 (장 끝 토론)」 절)
  *   - 정리 문제(div.quiz): 객관식 화면, 오답이면 「아니다」와 다시 시도, 정답이면 진도에 더함(2.11절)
  *   - 절 완료(본문 끝까지 스크롤), 목차 패널의 장·절 진도, 책 달성률(2.8·2.9절)
  *   - 이어 읽기: 마지막 위치 기록, 앱 첫 실행·다른 책 첫 화면에서 마지막 페이지로 넘기기(2.13절)
@@ -45,7 +46,8 @@
     search: "lp.reader.search"
   };
   var STATUS_LABEL = { open: "저자가 아직 읽지 않음", applied: "원고에 반영됨", held: "보류" };
-  var HEAD_RE = /^\s*문제\s*\d+\s*[.:]/;
+  var HEAD_RE = /^\s*(?:문제|토론)\s*\d+\s*[.:]/; // 접는 묶음의 머리: 「문제 N.」「문제 N:」, 장 끝 「토론 N.」「토론 N:」
+  var TALK_RE = /^\s*토론\s*\d+\s*[.:]/;
 
   // ── 작은 도구 ────────────────────────────────────────────────────────────
   function warn(e) { try { console.warn("[lp-reader]", e); } catch (_) { /* 없음 */ } }
@@ -427,7 +429,8 @@
     syncBoxes();
 
     var shown = 0;
-    var next = el("button", { type: "button", class: "lp-fold-next", text: "함께 풀기" });
+    var startLabel = TALK_RE.test(h.textContent || "") ? "토론 따라가기" : "함께 풀기";
+    var next = el("button", { type: "button", class: "lp-fold-next", text: startLabel });
     var all = el("button", { type: "button", class: "lp-fold-all", text: "모두 펼치기" });
     var fold = el("button", { type: "button", class: "lp-fold-back", text: "다시 접기", hidden: "" });
     var bar = el("div", { class: "lp-fold-bar" }, [next, all, fold]);
@@ -462,7 +465,7 @@
       shown = 0;
       syncBoxes();
       after(anchorEl, bar);
-      next.textContent = "함께 풀기";
+      next.textContent = startLabel;
       next.hidden = false; all.hidden = false; fold.hidden = true;
       var r = h.getBoundingClientRect();
       if (r.top < 0) { try { h.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { h.scrollIntoView(); } }
@@ -883,6 +886,32 @@
     });
   }
 
+  /** 이 책 진행률 리셋(개발용, 2026-10-29 저자 지시). 읽음·정리 문제는 −시각으로 되돌리고(다른 기기의 옛 기록보다
+   *  나중 동작), 마지막 위치는 책 첫 쪽으로 옮긴다. 틀린 횟수(이 브라우저)도 지운다. 끄려면 LP_READER.reset = false */
+  function resetBook() {
+    if (!BOOK) return;
+    if (!window.confirm("이 책의 진행률(읽음 표시·정리 문제·마지막 읽던 위치)을 모두 지웁니다. 지울까요?")) return;
+    var t = now();
+    var first = INDEX && INDEX.chapters && INDEX.chapters[0] && INDEX.chapters[0].pages && INDEX.chapters[0].pages[0];
+    noteChange(function (p) {
+      var b = bookOf(p, BOOK);
+      for (var k in b.pages) if (isRead(b.pages[k])) b.pages[k] = -t;
+      for (var q in b.quizzes) if (isRead(b.quizzes[q])) b.quizzes[q] = -t;
+      b.position = first ? { page: first.key, file: first.file, anchor: null, offset: null, ratio: 0, at: t } : null;
+    });
+    var tr = lsGet(K.tries) || {}, pre = BOOK + ":", n = 0;
+    for (var k2 in tr) if (k2.indexOf(pre) === 0) { delete tr[k2]; n++; }
+    if (n) lsSet(K.tries, tr);
+    if (PAGE) NO_AUTO[PAGE.key] = true; // 지금 보는 쪽이 리셋 직후 다시 읽음으로 잡히지 않게
+    renderPanel();
+    QUIZZES.forEach(function (qz) { qz.reset(false); }); // 이 쪽의 정리 문제 화면도 처음으로(틀린 표시 포함)
+    renderReadRow();
+  }
+  function resetBtn() {
+    return el("button", { type: "button", class: "lp-link-btn lp-small lp-reset", text: "진행률 리셋", title: "이 책의 진행률을 지웁니다", onclick: safe(resetBook) });
+  }
+  var RESET_ON = !(window.LP_READER && window.LP_READER.reset === false);
+
   // ── 목차 패널(2.9절) ────────────────────────────────────────────────────
   var PANEL = null; // { box, acct, bar }
   function sidebarShown(sb) {
@@ -896,12 +925,14 @@
     var fill = el("span", { class: "lp-bar-fill" });
     var label = el("span", { class: "lp-bar-label", text: "이 책 0%" });
     var bar = el("div", { class: "lp-book-progress" }, [label, el("span", { class: "lp-bar" }, [fill])]);
-    var box = el("div", { class: "lp-reader-box" }, [acct, bar]);
+    var resetRow = el("div", { class: "lp-acct-actions lp-reset-row" });
+    resetRow.hidden = true;
+    var box = el("div", { class: "lp-reader-box" }, [acct, bar, resetRow]);
     var home = $("a.sidebar-home", sb), header = $(".sidebar-header", sb);
     if (home) after(home, box);
     else if (header) after(header, box);
     else sb.insertBefore(box, sb.firstChild);
-    PANEL = { sb: sb, box: box, acct: acct, fill: fill, label: label };
+    PANEL = { sb: sb, box: box, acct: acct, fill: fill, label: label, resetRow: resetRow };
     renderAccount();
   }
   function whenPanelOpen(go) {
@@ -920,15 +951,20 @@
     var acct = PANEL.acct;
     acct.textContent = "";
     var s = getSession();
+    var rr = PANEL.resetRow;
+    rr.textContent = "";
+    rr.hidden = true;
     if (s && (loginAvailable() || !CONFIG)) { // 서버가 잠깐 닿지 않아도 로그인한 사실은 보여 준다
       acct.hidden = false;
       acct.appendChild(el("div", { class: "lp-acct-email", text: s.email || "로그인함" }));
       acct.appendChild(el("div", { class: "lp-acct-actions" }, [
         el("button", { type: "button", class: "lp-link-btn", text: "로그아웃", onclick: safe(logout) }),
-        el("button", { type: "button", class: "lp-link-btn lp-small", text: "계정 지우기", onclick: safe(deleteAccount) })
+        el("button", { type: "button", class: "lp-link-btn lp-small", text: "계정 지우기", onclick: safe(deleteAccount) }),
+        RESET_ON && BOOK ? resetBtn() : null
       ]));
       return;
     }
+    if (RESET_ON && BOOK) { rr.appendChild(resetBtn()); rr.hidden = false; } // 로그인 전에도 이 브라우저의 진행률을 지울 수 있게
     if (!loginAvailable()) { acct.hidden = true; return; }
     acct.hidden = false;
     var msg = el("div", { class: "lp-login-msg", "aria-live": "polite" });
