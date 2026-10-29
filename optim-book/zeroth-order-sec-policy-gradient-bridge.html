@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>정책 그래디언트: 뽑기에서 끊긴 미분을 값으로 잇기 — 미분 없이: 0차 최적화 — 최적화: 경사하강에서 Muon 까지</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>@font-face{font-display:block;font-family:KaTeX_AMS;font-style:normal;font-weight:400;src:url(fonts/KaTeX_AMS-Regular.woff2) format("woff2"),url(fonts/KaTeX_AMS-Regular.woff) format("woff"),url(fonts/KaTeX_AMS-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Bold.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Regular.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Fraktur-Bold.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Bold.woff) format("woff"),url(fonts/KaTeX_Fraktur-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Fraktur-Regular.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Regular.woff) format("woff"),url(fonts/KaTeX_Fraktur-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Main-Bold.woff2) format("woff2"),url(fonts/KaTeX_Main-Bold.woff) format("woff"),url(fonts/KaTeX_Main-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Main-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Main-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Main-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Main-Italic.woff2) format("woff2"),url(fonts/KaTeX_Main-Italic.woff) format("woff"),url(fonts/KaTeX_Main-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Main-Regular.woff2) format("woff2"),url(fonts/KaTeX_Main-Regular.woff) format("woff"),url(fonts/KaTeX_Main-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Math-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Math-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Math-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Math-Italic.woff2) format("woff2"),url(fonts/KaTeX_Math-Italic.woff) format("woff"),url(fonts/KaTeX_Math-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:700;src:url(fonts/KaTeX_SansSerif-Bold.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Bold.woff) format("woff"),url(fonts/KaTeX_SansSerif-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:italic;font-weight:400;src:url(fonts/KaTeX_SansSerif-Italic.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Italic.woff) format("woff"),url(fonts/KaTeX_SansSerif-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:400;src:url(fonts/KaTeX_SansSerif-Regular.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Regular.woff) format("woff"),url(fonts/KaTeX_SansSerif-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Script;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Script-Regular.woff2) format("woff2"),url(fonts/KaTeX_Script-Regular.woff) format("woff"),url(fonts/KaTeX_Script-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size1;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size1-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size1-Regular.woff) format("woff"),url(fonts/KaTeX_Size1-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size2;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size2-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size2-Regular.woff) format("woff"),url(fonts/KaTeX_Size2-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size3;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size3-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size3-Regular.woff) format("woff"),url(fonts/KaTeX_Size3-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size4;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size4-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size4-Regular.woff) format("woff"),url(fonts/KaTeX_Size4-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Typewriter;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Typewriter-Regular.woff2) format("woff2"),url(fonts/KaTeX_Typewriter-Regular.woff) format("woff"),url(fonts/KaTeX_Typewriter-Regular.ttf) format("truetype")}.katex{font:normal 1.21em KaTeX_Main,Times New Roman,serif;line-height:1.2;position:relative;text-indent:0;text-rendering:auto}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.16.47"}.katex .katex-mathml{border:0;-webkit-clip-path:inset(50%);clip-path:inset(50%);height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.newline{display:block}.katex .base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .base,.katex .strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathboldfrak,.katex .textboldfrak{font-family:KaTeX_Fraktur;font-weight:700}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .mathsfit,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .hbox{width:100%}.katex .hbox,.katex .thinbox{display:inline-flex;flex-direction:row}.katex .thinbox{max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline,.katex .hline,.katex .mfrac .frac-line,.katex .overline .overline-line,.katex .rule,.katex .underline .underline-line{min-height:1px}.katex .mspace{display:inline-block}.katex .smash{display:inline;line-height:0}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.inner,.katex .llap>.inner,.katex .rlap>.inner{position:absolute}.katex .clap>.fix,.katex .llap>.fix,.katex .rlap>.fix{display:inline-block}.katex .llap>.inner{right:0}.katex .clap>.inner,.katex .rlap>.inner{left:0}.katex .clap>.inner>span{margin-left:-50%;margin-right:50%}.katex .rule{border:0 solid;display:inline-block;position:relative}.katex .hline,.katex .overline .overline-line,.katex .underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.root{margin-left:.2777777778em;margin-right:-.5555555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .sizing.reset-size2.size1{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .sizing.reset-size2.size3{font-size:1.1666666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .sizing.reset-size2.size4{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .sizing.reset-size2.size6{font-size:1.6666666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .sizing.reset-size2.size10{font-size:3.4566666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .sizing.reset-size2.size11{font-size:4.1466666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .sizing.reset-size3.size1{font-size:.7142857143em}.katex .fontsize-ensurer.reset-size3.size2,.katex .sizing.reset-size3.size2{font-size:.8571428571em}.katex .fontsize-ensurer.reset-size3.size3,.katex .sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .sizing.reset-size3.size4{font-size:1.1428571429em}.katex .fontsize-ensurer.reset-size3.size5,.katex .sizing.reset-size3.size5{font-size:1.2857142857em}.katex .fontsize-ensurer.reset-size3.size6,.katex .sizing.reset-size3.size6{font-size:1.4285714286em}.katex .fontsize-ensurer.reset-size3.size7,.katex .sizing.reset-size3.size7{font-size:1.7142857143em}.katex .fontsize-ensurer.reset-size3.size8,.katex .sizing.reset-size3.size8{font-size:2.0571428571em}.katex .fontsize-ensurer.reset-size3.size9,.katex .sizing.reset-size3.size9{font-size:2.4685714286em}.katex .fontsize-ensurer.reset-size3.size10,.katex .sizing.reset-size3.size10{font-size:2.9628571429em}.katex .fontsize-ensurer.reset-size3.size11,.katex .sizing.reset-size3.size11{font-size:3.5542857143em}.katex .fontsize-ensurer.reset-size4.size1,.katex .sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .sizing.reset-size5.size1{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .sizing.reset-size5.size2{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .sizing.reset-size5.size3{font-size:.7777777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .sizing.reset-size5.size4{font-size:.8888888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .sizing.reset-size5.size6{font-size:1.1111111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .sizing.reset-size5.size7{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .sizing.reset-size5.size10{font-size:2.3044444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .sizing.reset-size5.size11{font-size:2.7644444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .sizing.reset-size7.size1{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .sizing.reset-size7.size3{font-size:.5833333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .sizing.reset-size7.size4{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .sizing.reset-size7.size6{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .sizing.reset-size7.size10{font-size:1.7283333333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .sizing.reset-size7.size11{font-size:2.0733333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .sizing.reset-size8.size1{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .sizing.reset-size8.size2{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .sizing.reset-size8.size3{font-size:.4861111111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .sizing.reset-size8.size4{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .sizing.reset-size8.size6{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .sizing.reset-size8.size7{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .sizing.reset-size8.size10{font-size:1.4402777778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .sizing.reset-size8.size11{font-size:1.7277777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .sizing.reset-size9.size1{font-size:.2893518519em}.katex .fontsize-ensurer.reset-size9.size2,.katex .sizing.reset-size9.size2{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .sizing.reset-size9.size3{font-size:.4050925926em}.katex .fontsize-ensurer.reset-size9.size4,.katex .sizing.reset-size9.size4{font-size:.462962963em}.katex .fontsize-ensurer.reset-size9.size5,.katex .sizing.reset-size9.size5{font-size:.5208333333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .sizing.reset-size9.size6{font-size:.5787037037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .sizing.reset-size9.size7{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .sizing.reset-size9.size8{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .sizing.reset-size9.size10{font-size:1.2002314815em}.katex .fontsize-ensurer.reset-size9.size11,.katex .sizing.reset-size9.size11{font-size:1.4398148148em}.katex .fontsize-ensurer.reset-size10.size1,.katex .sizing.reset-size10.size1{font-size:.2410800386em}.katex .fontsize-ensurer.reset-size10.size2,.katex .sizing.reset-size10.size2{font-size:.2892960463em}.katex .fontsize-ensurer.reset-size10.size3,.katex .sizing.reset-size10.size3{font-size:.337512054em}.katex .fontsize-ensurer.reset-size10.size4,.katex .sizing.reset-size10.size4{font-size:.3857280617em}.katex .fontsize-ensurer.reset-size10.size5,.katex .sizing.reset-size10.size5{font-size:.4339440694em}.katex .fontsize-ensurer.reset-size10.size6,.katex .sizing.reset-size10.size6{font-size:.4821600771em}.katex .fontsize-ensurer.reset-size10.size7,.katex .sizing.reset-size10.size7{font-size:.5785920926em}.katex .fontsize-ensurer.reset-size10.size8,.katex .sizing.reset-size10.size8{font-size:.6943105111em}.katex .fontsize-ensurer.reset-size10.size9,.katex .sizing.reset-size10.size9{font-size:.8331726133em}.katex .fontsize-ensurer.reset-size10.size10,.katex .sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .sizing.reset-size10.size11{font-size:1.1996142719em}.katex .fontsize-ensurer.reset-size11.size1,.katex .sizing.reset-size11.size1{font-size:.2009646302em}.katex .fontsize-ensurer.reset-size11.size2,.katex .sizing.reset-size11.size2{font-size:.2411575563em}.katex .fontsize-ensurer.reset-size11.size3,.katex .sizing.reset-size11.size3{font-size:.2813504823em}.katex .fontsize-ensurer.reset-size11.size4,.katex .sizing.reset-size11.size4{font-size:.3215434084em}.katex .fontsize-ensurer.reset-size11.size5,.katex .sizing.reset-size11.size5{font-size:.3617363344em}.katex .fontsize-ensurer.reset-size11.size6,.katex .sizing.reset-size11.size6{font-size:.4019292605em}.katex .fontsize-ensurer.reset-size11.size7,.katex .sizing.reset-size11.size7{font-size:.4823151125em}.katex .fontsize-ensurer.reset-size11.size8,.katex .sizing.reset-size11.size8{font-size:.578778135em}.katex .fontsize-ensurer.reset-size11.size9,.katex .sizing.reset-size11.size9{font-size:.6945337621em}.katex .fontsize-ensurer.reset-size11.size10,.katex .sizing.reset-size11.size10{font-size:.8336012862em}.katex .fontsize-ensurer.reset-size11.size11,.katex .sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .accent .accent-body{position:relative}.katex .accent .accent-body:not(.accent-full){width:0}.katex .overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex svg{fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .stretchy:after,.katex .stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+</style>
+<style>/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-code: #f5f5f5;
+  --fg: #1a1a1a;
+  --fg-muted: #555;
+  --accent: #1565C0;
+  --border: #ddd;
+  --sidebar-bg: #fafafa;
+  --sidebar-width: 280px;
+  --chapter-gap: 3rem;
+  --max-width: 52rem;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1a2e;
+  --bg-code: #16213e;
+  --fg: #e0e0e0;
+  --fg-muted: #aaa;
+  --accent: #64b5f6;
+  --border: #333;
+  --sidebar-bg: #16213e;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.8;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ===== Main Content ===== */
+main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.chapter { margin-bottom: var(--chapter-gap); }
+
+hr.chapter-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: var(--chapter-gap) 0;
+}
+
+/* ===== Typography ===== */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+  font-weight: 700;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.3em; }
+h2 { font-size: 1.6rem; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+h3 { font-size: 1.3rem; }
+h4 { font-size: 1.1rem; }
+
+.chapter > h1:first-child,
+.chapter > h2:first-child,
+.chapter > h3:first-child { margin-top: 0; }
+
+p { margin: 0.8em 0; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+strong { font-weight: 700; }
+
+blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 0.5em 1em;
+  margin: 1em 0;
+  background: var(--bg-code);
+  color: var(--fg-muted);
+}
+
+/* 보법 노트: 본문 흐름 밖의 곁글 */
+aside.sidenote {
+  margin: 1.5em 0;
+  padding: 0.9em 1.2em;
+  border: 1px solid var(--border);
+  border-top: 3px solid #b8860b;
+  border-radius: 6px;
+  background: var(--bg-code);
+  font-size: 0.93em;
+}
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+[data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
+[data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
+
+/* 길잡이: 다른 권(이론 책 ↔ 응용 책)으로 잇는 안내. 곁글과 다르게 왼쪽 선 + 작은 글씨 */
+aside.guide {
+  margin: 1.2em 0;
+  padding: 0.6em 1em;
+  border-left: 3px solid #0093b8;
+  background: var(--bg-code);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.9em;
+}
+aside.guide p { margin: 0.2em 0; }
+aside.guide .guide-title { font-weight: 700; color: #0078a0; }
+[data-theme="dark"] aside.guide { border-left-color: #37a9be; }
+[data-theme="dark"] aside.guide .guide-title { color: #5cc4d8; }
+
+/* ===== Code ===== */
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9em;
+  background: var(--bg-code);
+  padding: 0.15em 0.3em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--bg-code);
+  padding: 1em 1.2em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1em 0;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85em;
+}
+
+/* ===== Tables ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: 0.95em;
+}
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.8em;
+  text-align: left;
+}
+th { background: var(--bg-code); font-weight: 600; }
+
+/* ===== Lists ===== */
+ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
+li { margin: 0.3em 0; }
+
+/* ===== SVG ===== */
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+}
+
+[data-theme="dark"] svg text { fill: var(--fg); }
+[data-theme="dark"] svg line,
+[data-theme="dark"] svg path { stroke: var(--fg-muted); }
+
+/* KaTeX 는 근호·긴 화살표를 SVG 로 그린다. 위 전역 규칙에서 빼낸다. */
+.katex svg {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: inherit;
+  max-width: none;
+  margin: 0;
+}
+[data-theme="dark"] .katex svg path { stroke: inherit; }
+
+/* ===== Images ===== */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+  border-radius: 6px;
+}
+
+/* ===== 따라 계산해 보기 / 연습문제 ===== */
+.worked, .exercises {
+  margin: 1.8em 0;
+  padding: 1em 1.3em;
+  border-left: 4px solid var(--accent);
+  background: var(--bg-code);
+  border-radius: 0 8px 8px 0;
+}
+.worked > :first-child, .exercises > :first-child { margin-top: 0; }
+.exercises ol { padding-left: 1.4em; }
+.exercises li { margin: 0.6em 0; }
+.exercises .level {
+  display: inline-block;
+  font-size: 0.75em;
+  padding: 0 0.5em;
+  margin-right: 0.4em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--fg-muted);
+  vertical-align: 0.1em;
+}
+details.answer { margin: 0.4em 0 0.2em; font-size: 0.95em; }
+details.answer summary { cursor: pointer; color: var(--accent); }
+
+/* ===== 같이 풀기 세션 (대화) ===== */
+.exercises + h4 {
+  margin-top: 1.2em;
+  font-size: 0.95em;
+  color: var(--fg-muted);
+  letter-spacing: 0.02em;
+}
+.exercises + h4::before { content: "💬 "; }
+/* 인물 색은 .turn 에도 둔다: 문제 밖 대화(16장 맺음 등)에서도 이름·선 색이 나오게 */
+.dialogue, .turn { --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; }
+.dialogue {
+  margin: 1.5em 0 2em;
+}
+[data-theme="dark"] :is(.dialogue, .turn) { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
+.turn {
+  display: flex;
+  gap: 0.9em;
+  align-items: flex-start;
+  margin: 0.7em 0;
+}
+.turn-body {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55em 0.95em;
+  border-radius: 10px;
+  background: var(--bg-code);
+}
+.turn-body p { margin: 0; font-weight: 350; }
+.turn-body strong { font-weight: 600; }
+
+/* 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨 */
+.dialogue blockquote {
+  background: #fff;
+  color: #111;
+  border: 1.5px solid #222;
+  border-radius: 4px;
+  padding: 0.9em 1.2em;
+  margin: 0.8em 0 1.4em;
+  font-size: 1.12em;
+  font-weight: 600;
+  line-height: 1.75;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.dialogue blockquote p { margin: 0; }
+.dialogue blockquote code { background: #eee; color: #111; }
+[data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+.turn-T { --who: var(--who-T); }
+.turn-M { --who: var(--who-M); }
+.turn-S { --who: var(--who-S); }
+.cast {
+  flex: 0 0 88px;
+  width: 88px;
+  margin: 0;
+}
+.cast img {
+  width: 88px; height: 88px;
+  object-fit: cover;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  float: none; box-shadow: none; max-width: none;
+}
+.cast figcaption {
+  margin-top: 0.25em;
+  text-align: center;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--who);
+}
+.cast-slot {
+  width: 88px; height: 88px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border: 1.5px dashed var(--who, var(--border));
+  border-radius: 12px;
+  color: var(--who);
+  font-size: 0.85em;
+  font-weight: 600;
+  opacity: 0.75;
+  line-height: 1.3;
+}
+.cast-slot small { font-weight: 400; font-size: 0.8em; color: var(--fg-muted); }
+/* 대화 사이의 수식·그림은 말풍선 폭에 맞춘다 */
+.dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: calc(88px + 0.9em); }
+@media (max-width: 600px) {
+  .cast, .cast img, .cast-slot { flex-basis: 56px; width: 56px; height: 56px; }
+  .cast-slot { font-size: 0.7em; }
+  .dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: 0; }
+}
+
+
+/* ===== KaTeX ===== */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}
+
+/* ===== Mermaid ===== */
+pre.mermaid {
+  background: transparent;
+  border: none;
+  text-align: center;
+  padding: 1em 0;
+}
+
+/* ===== Theme Toggle (목차 머리 안) ===== */
+#theme-toggle {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+#theme-toggle:hover { background: var(--border); }
+
+/* ===== Sidebar ===== */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 999;
+  transition: left 0.3s ease;
+  padding: 1rem;
+}
+#sidebar.open { left: 0; }
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-header h2 { font-size: 1.1rem; margin: 0; border: none; padding: 0; }
+.sidebar-actions { display: flex; align-items: center; gap: 0.4rem; }
+
+#sidebar-close {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: var(--fg);
+  padding: 0 0.3em;
+}
+
+#sidebar ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: chapter;
+}
+#sidebar li {
+  margin: 0.3em 0;
+}
+#sidebar a {
+  display: block;
+  padding: 0.4em 0.5em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--fg);
+}
+#sidebar a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+
+#sidebar-open {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 998;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#sidebar-open:hover { background: var(--border); }
+
+/* ===== Responsive ===== */
+@media (min-width: 1200px) {
+  #sidebar {
+    left: 0;
+    padding-top: 2rem;
+  }
+  #sidebar-open { display: none; }
+  #sidebar-close { display: none; }
+  main {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+@media (max-width: 600px) {
+  main { padding: 1rem 0.8rem 3rem; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  pre { font-size: 0.8em; padding: 0.8em; }
+}
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
+
+/* ===== Chapter Navigation ===== */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border);
+  gap: 1rem;
+}
+.chapter-nav a {
+  display: inline-block;
+  padding: 0.6em 1em;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9em;
+  color: var(--fg);
+  transition: background 0.2s;
+  max-width: 45%;
+}
+.chapter-nav a:hover {
+  background: var(--border);
+  text-decoration: none;
+}
+.chapter-nav-next { text-align: right; margin-left: auto; }
+.page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
+
+/* ===== 절 단위 페이지 ===== */
+.chapter-crumb { margin: 0 0 0.4em; font-size: 0.85em; }
+.chapter-crumb a { color: var(--fg-muted); }
+.chapter-paged > h2:first-of-type { margin-top: 0.4em; }
+#sidebar .sidebar-toc a.current { color: var(--accent); font-weight: 600; }
+
+/* ===== TOC Page ===== */
+.toc-page { padding-top: 1rem; }
+.toc-page h1 {
+  margin-bottom: 1.5rem;
+}
+/* 대문(교재 목록)으로 돌아가는 링크 */
+.site-nav { font-size: 0.9rem; }
+.site-nav a { color: var(--fg-muted); text-decoration: none; }
+.site-nav a:hover { color: var(--accent); }
+.site-nav + h1 { margin-top: 1rem; }
+@media print { .site-nav { display: none; } }
+.toc-list {
+  list-style: none;
+  padding: 0;
+  counter-reset: toc-ch;
+}
+.toc-list li {
+  margin: 0;
+}
+.toc-list a {
+  display: block;
+  padding: 0.7em 1em;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg);
+  font-size: 1.05em;
+  transition: background 0.2s;
+}
+.toc-list a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+/* 부 이름 줄(book.json 의 parts). 번호 없이 이름만 */
+.toc-list .toc-part {
+  margin-top: 1.6em;
+  padding: 0 1em 0.4em;
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+  border-bottom: 2px solid var(--border);
+}
+#sidebar .toc-part {
+  margin: 1.1em 0 0.2em;
+  padding: 0 0.5em;
+  font-size: 0.75em;
+  font-weight: 700;
+  color: var(--fg-muted);
+}
+
+/* ===== Sidebar Active ===== */
+#sidebar a.active {
+  background: var(--accent);
+  color: #fff;
+}
+#sidebar a.active:hover {
+  background: var(--accent);
+}
+
+/* ===== Print ===== */
+@media print {
+  #sidebar, #sidebar-open, #theme-toggle { display: none; }
+  main { margin: 0; max-width: none; }
+}
+
+/* ===== 그림과 캡션 ===== */
+figure.fig { margin: 1.8em auto; text-align: center; }
+figure.fig img { margin: 0 auto; }
+figure.fig figcaption {
+  margin-top: 0.5em;
+  font-size: 0.86em;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: center;
+}
+/* 초상화: 오른쪽에 작게 띄운다 */
+figure.fig-portrait {
+  float: right;
+  clear: right; /* 초상화가 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
+  width: 200px;
+  margin: 0.3em 0 1em 1.5em;
+  text-align: left;
+}
+figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
+/* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
+.portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
+.portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
+@media (max-width: 600px) {
+  figure.fig-portrait { float: none; width: 170px; margin: 1em auto; }
+  .portrait-row { gap: 1em; }
+  .portrait-row figure.fig-portrait { width: 140px; }
+}
+/* 다크모드에서 흰 바탕 그림이 눈부시지 않게 */
+[data-theme="dark"] figure.fig img { filter: brightness(0.92); }
+
+/* ===== 수식 ===== */
+.math-block { margin: 1.2em 0; }
+.math-block .katex-display { margin: 0; }
+.math-legend {
+  margin: -0.4em auto 1.6em;
+  padding: 0.2em 1em;
+  width: fit-content;
+  max-width: 100%;
+  border-left: 3px solid var(--border);
+  background: var(--bg-code);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.86em;
+}
+.math-legend .katex-display > .katex { text-align: left; }
+/* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
+[data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
+
+/* ===== 인터랙티브 위젯 ===== */
+.widget-embed {
+  margin: 1.8em 0 2.2em;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-code);
+}
+.widget-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3em 0.8em;
+  padding: 0.55em 1em;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9em;
+}
+.widget-tag {
+  font-size: 0.78em;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.03em;
+}
+.widget-label { font-weight: 600; flex: 1; min-width: 12em; }
+.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-embed iframe {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border: 0;
+  background: transparent;
+  color-scheme: normal;
+}
+.widget-embed noscript img { margin: 0; border-radius: 0; }
+
+/* ===== 장 안의 목차 (사이드바) ===== */
+.sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
+#sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
+.toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+
+/* 표지: 목차 페이지 첫머리. 그림의 원본과 그리는 스크립트는 ~/lameproof/shared/covers/ */
+.book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
+.book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
+@media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
+<script>
+(function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
+</script>
+<link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="/reader/reader.css?v=be5a456d" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"be5a456d"}</script>
+<script defer src="/reader/reader.js?v=be5a456d" data-lp-reader></script>
+</head>
+<body>
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="index.html" style="color:inherit;text-decoration:none">최적화: 경사하강에서 Muon 까지</a></h2>
+    <div class="sidebar-actions">
+      <button id="theme-toggle" aria-label="다크모드 전환">&#x1F319;</button>
+      <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
+    </div>
+  </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
+  <ol><li><a href="preface.html">머리말: 경사하강에서 Muon 까지</a></li>
+<li class="toc-part">미분과 근사</li>
+<li><a href="loss-landscape.html">손실 지형: 공을 굴려 손실의 바닥을 찾는 첫 실험</a></li>
+<li><a href="gradient-jacobian.html">그래디언트와 자코비안: 미분 가능성에서 연쇄법칙까지</a></li>
+<li><a href="taylor.html">테일러 전개: 0·1·2차 근사의 사다리</a></li>
+<li><a href="lipschitz.html">립시츠 연속: 함수가 얼마나 빨리 변할 수 있나</a></li>
+<li><a href="convexity.html">볼록이면 왜 쉬운가: 극소가 곧 최소</a></li>
+<li class="toc-part">0차 최적화</li>
+<li><a href="zeroth-order.html" class="active">미분 없이: 0차 최적화</a><ul class="sidebar-toc"><li><a href="zeroth-order.html">유한 차분: 두 번 재서 그래디언트 추정하기</a></li><li><a href="zeroth-order-sec-random-search-comparison.html">무작위 탐색: 값만 비교해서 내려가기</a></li><li><a href="zeroth-order-sec-simultaneous-perturbation.html">동시 섭동: 무작위 방향 하나로 그래디언트 추정하기</a></li><li><a href="zeroth-order-sec-gaussian-smoothing-gradient.html">가우시안 스무딩: 흐리게 한 함수의 그래디언트는 값의 가중 평균</a></li><li><a href="zeroth-order-sec-policy-gradient-bridge.html" class="current">정책 그래디언트: 뽑기에서 끊긴 미분을 값으로 잇기</a></li><li><a href="zeroth-order-sec-zeroth-order-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li><a href="evolution.html">진화 알고리즘: 개체군으로 하는 탐색</a></li>
+<li class="toc-part">1차 최적화</li>
+<li><a href="backprop.html">역전파: 자코비안 곱을 거꾸로</a></li>
+<li><a href="initialization.html">가중치 초기화: 신호가 커지지도 사라지지도 않게</a></li>
+<li><a href="gradient-descent.html">경사하강: 학습률은 어디까지 키울 수 있나</a></li>
+<li><a href="sgd.html">확률적 경사하강: 노이즈 섞인 그래디언트로 걷기</a></li>
+<li class="toc-part">2차 최적화</li>
+<li><a href="newton.html">뉴턴법과 헤시안: 곡률을 알면 한 번에</a></li>
+<li><a href="sharpness.html">샤프니스: 안정성의 가장자리</a></li>
+<li class="toc-part">2차의 근사와 큰 모델의 스텝</li>
+<li><a href="momentum.html">모멘텀: 무거운 공과 네스테로프 가속</a></li>
+<li><a href="adaptive.html">적응 학습률: AdaGrad 에서 AdamW 까지</a></li>
+<li><a href="curvature-approx.html">곡률 근사: 준뉴턴에서 K-FAC·Shampoo 까지</a></li>
+<li><a href="muon.html">Muon: 노름을 바꾸면 가장 가파른 방향이 바뀐다</a></li>
+<li><a href="mup.html">μP: 폭이 달라져도 같은 학습률로</a></li>
+<li class="toc-part">분포를 옮기는 최적화</li>
+<li><a href="optimal-transport.html">최적 수송: 흙을 가장 적게 나르는 짝짓기</a></li>
+<li><a href="wgan.html">WGAN: 최소최대와 1-립시츠 판별기</a></li>
+<li class="toc-part">최적화가 일반화를 만든다</li>
+<li><a href="implicit-bias.html">암묵적 편향: 옵티마이저가 고르는 해</a></li>
+<li><a href="double-descent.html">이중 하강: 외우고 나서도 나아진다</a></li>
+<li><a href="epilogue.html">맺음: 남은 물음</a></li></ol>
+</nav>
+<button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
+<main>
+<article class="chapter chapter-paged">
+<p class="chapter-crumb"><a href="zeroth-order.html">미분 없이: 0차 최적화</a></p>
+<h2 id="sec-policy-gradient-bridge">정책 그래디언트: 뽑기에서 끊긴 미분을 값으로 잇기<span id="정책-그래디언트-뽑기에서-끊긴-미분을-값으로-잇기" class="anchor-alias"></span></h2>
+<p>가우시안 스무딩에서 흐리게 한 함수의 그래디언트는 함숫값만으로 적혔고, 그 꼴은 「뽑은 점의 함숫값 × 그 점을 뽑을 로그 확률의 그래디언트」의 평균이라 강화학습의 REINFORCE 와 같았다. 그런데 함숫값만 쓰는 데는 값이 따랐다. 네스테로프와 스포코이니가 보였듯 0차 방법은 그래디언트를 쓰는 방법보다 대략 차원 수 배의 스텝이 들고, 신경망의 파라미터는 수백만 개다. 신경망은 다행히 식을 아는 함수라서, 보통은 역전파(그래디언트를 한 번의 거꾸로 계산으로 정확히 얻는 방법)로 그래디언트를 싸게 얻는다.</p>
+<p>곤란한 것은 신경망 한가운데에서 무언가를 확률로 뽑을 때다. 언어 모델은 다음 토큰을 확률에 따라 하나 뽑고, 큰 그림의 일부만 보는 모델은 다음에 볼 자리를 뽑는다. 파이토치에서 <code>torch.distributions.Categorical(logits=…).sample()</code> 로 칸 하나를 뽑아 보면 결과는 정수(<code>torch.int64</code>)이고 <code>grad_fn</code> 이 <code>None</code> 이라, <code>backward()</code> 가 거꾸로 보내는 신호는 그 자리에서 멈춘다. 뽑기 뒤의 계산도, 뽑기 앞에서 확률을 만드는 계산도 식을 다 아는데, 가운데 한 자리 때문에 앞쪽 파라미터를 모두 함숫값만으로 다뤄야 할까? 끊긴 자리만 값으로 추정하고 나머지는 역전파로 정확히 구해서, 0차와 1차 사이에 다리를 놓을 수는 없을까?</p>
+<h3 id="hist-karpathy-sampling-in-network" class="history" data-people="karpathy-andrej">역사: 카파시가 신경망 안의 뽑기를 정책 그래디언트로 넘자고 하다<span id="역사-카파시가-신경망-안의-뽑기를-정책-그래디언트로-넘자고-하다" class="anchor-alias"></span></h3>
+<p>2016년 5월 31일 안드레이 카파시(Andrej Karpathy)는 자기 블로그에 「심층 강화학습: 픽셀에서 퐁까지(Deep Reinforcement Learning: Pong from Pixels)」를 올렸다. 아타리 게임 퐁(공을 받아 넘기는 탁구 게임)의 화면 픽셀을 받아 라켓을 올릴 확률을 내는 2층 신경망을, 이긴 판의 행동은 확률을 올리고 진 판의 행동은 내리는 정책 그래디언트로 학습시키는 글이었다.</p>
+<p>글 끝 무렵 그는 게임과 관계없는 쓰임 하나를 따로 짚었는데, 「신경망 안의 미분할 수 없는 계산(Non-differentiable computation in Neural Networks)」이라는 대목이다. 본보기는 2014년 볼로디미르 므니(Volodymyr Mnih)와 동료들의 논문 「시각 어텐션의 순환 모델(Recurrent Models of Visual Attention)」이 「하드 어텐션」이라는 이름으로 널리 알린 모델이었다. 이 모델의 순환망은 그림을 한 번에 다 보지 않고, 스텝마다 그림의 작은 조각 하나를 받은 뒤 다음에 볼 자리를 확률분포에서 뽑는다. 카파시는 이 뽑기가 미분되지 않는 이유를 「다른 자리를 뽑았다면 무슨 일이 일어났을지 모르기 때문」이라고 적었다.</p>
+<figure class="fig "><img src="images/zeroth-order/h6_hard_attention.png" alt="하드 어텐션의 뽑기. 순환망이 볼 자리를 확률로 뽑고 그 둘레의 작은 조각만 받는다. 뽑은 자리 (5, 30) → (24, 50)은 카파시 글이 든 예이고, 그림 속 이미지는 이 책에서 무작위로 만든 것이다. 뽑지 않은 자리(점선)를 봤다면 손실이 어떻게 됐을지는 알 수 없다(sources/zeroth-order/figs_policy_gradient.py)" loading="lazy"><figcaption>하드 어텐션의 뽑기. 순환망이 볼 자리를 확률로 뽑고 그 둘레의 작은 조각만 받는다. 뽑은 자리 (5, 30) → (24, 50)은 카파시 글이 든 예이고, 그림 속 이미지는 이 책에서 무작위로 만든 것이다. 뽑지 않은 자리(점선)를 봤다면 손실이 어떻게 됐을지는 알 수 없다(sources/zeroth-order/figs_policy_gradient.py)</figcaption></figure>
+<p>그의 처방은 뽑기를 하는 부분을 「더 큰 신경망 안에 박힌 작은 확률적 정책」으로 보는 것이었다. 학습할 때 여러 번 뽑아 보고, 끝에서 잰 손실이 낮았던 뽑기를 북돋는다. 미분할 수 있는 화살표의 파라미터는 늘 하던 대로 역전파로 학습하고, 뽑기 화살표의 파라미터만 정책 그래디언트로 업데이트한다. 그는 이 생각이 1992년 윌리엄스의 논문에서 처음 나왔고, 2015년 존 슐먼(John Schulman)과 동료들의 논문 「확률적 계산 그래프를 이용한 그래디언트 추정(Gradient Estimation Using Stochastic Computation Graphs)」이 깔끔하게 정리했다고 덧붙였다.</p>
+<p>둘째 예는 메모리였다. 뉴럴 튜링 머신(Neural Turing Machine)은 바깥 메모리 테이프에 값을 쓰고 읽는데, 「i 번째 칸에 x 를 써라」라는 연산은 다른 칸 j 에 썼다면 손실이 어떻게 됐을지 알려 주는 신호가 없어 미분되지 않는다. 그래서 뉴럴 튜링 머신은 합이 1인 어텐션 분포 a 를 예측해 모든 칸에 m[i] ← a[i]·x 를 쓰는 소프트 쓰기를 한다. 미분은 되지만 한 칸에 쓰려고 모든 칸을 건드려야 해서, 카파시는 「컴퓨터의 대입문 하나하나가 램 전체를 건드려야 한다고 상상해 보라」고 적었다. 2015년 보이치에흐 자렘바(Wojciech Zaremba)와 일리야 수츠케버(Ilya Sutskever)의 RL-NTM 은 같은 분포에서 쓸 칸을 하나 뽑아 그 칸에만 쓰고, 그 뽑기를 정책 그래디언트로 학습했다. 다 만든 모델은 한 칸만 읽고 쓰면 되는 큰 이득이 있었지만, 카파시는 논문이 짚은 대로 이 방법은 뽑다가 우연히 제대로 돌아가는 알고리즘에 걸려들어야 해서 학습시키기가 무척 어렵다고 했다. 그리고 그때의 대체적인 생각은 정책 그래디언트가 고를 것이 몇 개뿐인 경우에만 잘 듣는다는 것이었다고 적었다.</p>
+<figure class="fig "><img src="images/zeroth-order/h7_soft_vs_sampled_write.png" alt="메모리 테이프 16칸에 값 하나를 쓰는 두 방법. 위: 소프트 쓰기는 어텐션 분포 a 의 무게대로 모든 칸을 조금씩 고친다(칸 위 숫자가 a). 아래: 뽑아서 쓰기는 같은 분포에서 뽑은 칸 하나만 고친다. 분포는 이 책에서 정한 그림용 예다(sources/zeroth-order/figs_policy_gradient.py)" loading="lazy"><figcaption>메모리 테이프 16칸에 값 하나를 쓰는 두 방법. 위: 소프트 쓰기는 어텐션 분포 a 의 무게대로 모든 칸을 조금씩 고친다(칸 위 숫자가 a). 아래: 뽑아서 쓰기는 같은 분포에서 뽑은 칸 하나만 고친다. 분포는 이 책에서 정한 그림용 예다(sources/zeroth-order/figs_policy_gradient.py)</figcaption></figure>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>뽑기가 미분이 안 되면 그냥 소프트 쓰기로 하면 되잖아요. 미분도 되고, 건드리는 칸이 좀 많아지는 것뿐인데요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>칸이 몇 개면 「좀」일까요? 카파시가 든 대입문 비유를 떠올려 봐요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아… 메모리가 백만 칸이면 한 칸 쓰는 데 백만 칸을 고치는 거네요. 학습할 때야 참는다 쳐도, 다 만든 모델을 쓸 때까지 그러면 곤란하겠어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 뽑아서 쓰는 쪽은 학습이 무척 어려웠다고 했잖아요. 칸이 많으면 좋은 칸을 우연히 뽑을 때까지 한참 걸릴 테니까요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래서 카파시도 「고를 것이 몇 개뿐일 때만 잘 듣는다」는 말을 그대로 적었어요. 미분이 되는 길은 비싸고, 싼 길은 학습이 잘 안 되는 사이에서 골라야 했던 거죠.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S05"><img src="images/cast/S05.webp" alt="이서연 S05" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>정책 그래디언트도 결국 가우시안 스무딩처럼 값으로 추정하는 거잖아요. 그 추정을 신경망 전체가 아니라 뽑는 자리 하나에만 쓰면 대가가 얼마나 줄어드는지, 칸이 몇 개 안 되는 작은 예로 직접 재 보고 싶어요.</p></div></div>
+<h3 id="네-칸-메모리에서-한-칸-읽기">네 칸 메모리에서 한 칸 읽기</h3>
+<p>뽑기 앞에도 뒤에도 학습할 파라미터가 있는 가장 작은 경우를 골라 보자. 칸이 넷뿐이면 네 경우를 모두 세어 평균을 정확히 계산할 수 있으므로, 뽑아서 얻은 추정값이 얼마나 맞는지 견줄 수 있다.</p>
+<p>에피소드마다 메모리 네 칸에 표준정규분포에서 뽑은 수 <span class="sym" style="color:#1b9e77">m</span>₁, <span class="sym" style="color:#1b9e77">m</span>₂, <span class="sym" style="color:#1b9e77">m</span>₃, <span class="sym" style="color:#1b9e77">m</span>₄ 가 새로 들어오고, 정답은 <span class="sym" style="color:#1b9e77">y</span> = 2<span class="sym" style="color:#1b9e77">m</span>₃ 이다. 모델은 이 규칙을 모른다. 뽑기 앞의 파라미터는 칸마다 하나씩인 로짓(소프트맥스에 넣기 전의 점수) <span class="sym" style="color:#665522">θ</span>₁, …, <span class="sym" style="color:#665522">θ</span>₄ 이고, 소프트맥스를 거쳐 칸을 고를 확률 <span class="sym" style="color:#c2408a">p</span>₁, …, <span class="sym" style="color:#c2408a">p</span>₄ 가 된다. 모델은 이 확률로 칸 <span class="sym" style="color:#008787">i</span> 를 하나 뽑아 그 칸의 값 <span class="sym" style="color:#1b9e77">m</span>ᵢ 만 읽고, 뽑기 뒤의 파라미터 <span class="sym" style="color:#665522">w</span> 를 곱해 ŷ = <span class="sym" style="color:#665522">w</span>·<span class="sym" style="color:#1b9e77">m</span>ᵢ 를 내놓는다. 손실은 <span class="sym" style="color:#d62728">𝓛</span> = (ŷ − <span class="sym" style="color:#1b9e77">y</span>)² 이고, 줄이고 싶은 것은 에피소드와 뽑기에 대한 평균 손실 <span class="sym" style="color:#d62728">J</span> 다. 3번 칸을 고르고 <span class="sym" style="color:#665522">w</span> = 2 로 두면 손실이 0 이 된다.</p>
+<p>출발은 <span class="sym" style="color:#665522">θ</span> = 0(네 칸을 1/4씩), <span class="sym" style="color:#665522">w</span> = 1 이다. 3번이 아닌 칸을 읽으면 ŷ − <span class="sym" style="color:#1b9e77">y</span> = <span class="sym" style="color:#665522">w</span><span class="sym" style="color:#1b9e77">m</span>ᵢ − 2<span class="sym" style="color:#1b9e77">m</span>₃ 은 서로 독립인 두 정규분포의 합이라 평균 손실이 <span class="sym" style="color:#665522">w</span>² + 4 = 5 이고, 3번 칸을 읽으면 (<span class="sym" style="color:#665522">w</span> − 2)² = 1 이다. 그래서 <span class="sym" style="color:#d62728">J</span> = 0.75 × 5 + 0.25 × 1 = 4 다.</p>
+<p><span class="sym" style="color:#665522">w</span> 쪽 그래디언트는 어렵지 않다. 칸이 뽑히고 나면 <span class="sym" style="color:#665522">w</span> 에서 손실까지는 보통의 식이라, 그 에피소드의 미분 2(<span class="sym" style="color:#665522">w</span><span class="sym" style="color:#1b9e77">m</span>ᵢ − <span class="sym" style="color:#1b9e77">y</span>)<span class="sym" style="color:#1b9e77">m</span>ᵢ 를 역전파로 정확히 얻고, 평균하면 1.0 이다. <span class="sym" style="color:#665522">θ</span> 쪽 그래디언트는 그렇게 얻을 수 없다. <span class="sym" style="color:#665522">θ</span>₃ 을 올리면 3번 칸이 더 자주 뽑혀 평균 손실이 줄 것은 분명하고, 네 경우를 다 세면 ∂<span class="sym" style="color:#d62728">J</span>/∂<span class="sym" style="color:#665522">θ</span>ₖ = <span class="sym" style="color:#c2408a">p</span>ₖ × (칸 k 의 평균 손실 − <span class="sym" style="color:#d62728">J</span>) 이므로 (0.25, 0.25, −0.75, 0.25) 다. 하지만 실제 학습에서는 뽑힌 칸의 손실 하나만 보이고, 「다른 칸을 뽑았다면」의 손실은 보이지 않는다. 여기서 가우시안 스무딩의 식을 그대로 쓴다. 뽑힌 칸의 손실에 그 칸을 뽑을 로그 확률의 그래디언트를 곱해 평균하면 되는데, 소프트맥스에서 log <span class="sym" style="color:#c2408a">p</span>ᵢ 를 <span class="sym" style="color:#665522">θ</span> 로 미분하면 뽑힌 칸 자리에만 1 이 있는 벡터 eᵢ 에서 확률 벡터 <span class="sym" style="color:#c2408a">p</span> 를 뺀 eᵢ − <span class="sym" style="color:#c2408a">p</span> 가 된다.</p>
+<div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#d62728"><mi>J</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#665522"><mi>θ</mi></mstyle><mo separator="true">,</mo><mstyle mathcolor="#665522"><mi>w</mi></mstyle><mo stretchy="false">)</mo><mo>=</mo><mi mathvariant="double-struck">E</mi><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">[</mo><mstyle mathcolor="#d62728"><mi mathvariant="script">L</mi></mstyle><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">]</mo><mo separator="true">,</mo><mspace width="2em"/><mstyle mathcolor="#b0892a"><msub><mi mathvariant="normal">∇</mi><mi>w</mi></msub><mi>J</mi></mstyle><mo>=</mo><mi mathvariant="double-struck">E</mi><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">[</mo><mstyle mathcolor="#b0892a"><msub><mi mathvariant="normal">∇</mi><mi>w</mi></msub><mi mathvariant="script">L</mi></mstyle><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">]</mo><mo separator="true">,</mo><mspace width="2em"/><mstyle mathcolor="#b0892a"><msub><mi mathvariant="normal">∇</mi><mi>θ</mi></msub><mi>J</mi></mstyle><mo>=</mo><mi mathvariant="double-struck">E</mi><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">[</mo><mo stretchy="false">(</mo><mstyle mathcolor="#d62728"><mi mathvariant="script">L</mi></mstyle><mo>−</mo><mstyle mathcolor="#87965a"><mi>b</mi></mstyle><mo stretchy="false">)</mo><mtext> </mtext><msub><mi mathvariant="normal">∇</mi><mstyle mathcolor="#665522"><mi>θ</mi></mstyle></msub><mi>log</mi><mo>⁡</mo><msub><mstyle mathcolor="#c2408a"><mi>p</mi></mstyle><mstyle mathcolor="#008787"><mi>i</mi></mstyle></msub><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">]</mo></mrow><annotation encoding="application/x-tex">\textcolor{#d62728}{J}(\textcolor{#665522}{\theta},\textcolor{#665522}{w}) = \mathbb{E}\big[\textcolor{#d62728}{\mathcal{L}}\big],
+\qquad
+\textcolor{#b0892a}{\nabla_{w} J} = \mathbb{E}\big[\textcolor{#b0892a}{\nabla_{w}\mathcal{L}}\big],
+\qquad
+\textcolor{#b0892a}{\nabla_{\theta} J} = \mathbb{E}\big[(\textcolor{#d62728}{\mathcal{L}}-\textcolor{#87965a}{b})\,\nabla_{\textcolor{#665522}{\theta}}\log \textcolor{#c2408a}{p}_{\textcolor{#008787}{i}}\big]
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0962em;color:#d62728;">J</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0278em;color:#665522;">θ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;color:#665522;">w</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mord mathbb">E</span><span class="mord"><span class="delimsizing size1">[</span></span><span class="mord mathcal" style="color:#d62728;">L</span><span class="mord"><span class="delimsizing size1">]</span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord" style="color:#b0892a;"><span class="mord" style="color:#b0892a;">∇</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#b0892a;"><span class="mord mtight" style="color:#b0892a;"><span class="mord mathnormal mtight" style="margin-right:0.0269em;color:#b0892a;">w</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.0962em;color:#b0892a;">J</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mord mathbb">E</span><span class="mord"><span class="delimsizing size1">[</span></span><span class="mord" style="color:#b0892a;"><span class="mord" style="color:#b0892a;">∇</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#b0892a;"><span class="mord mtight" style="color:#b0892a;"><span class="mord mathnormal mtight" style="margin-right:0.0269em;color:#b0892a;">w</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathcal" style="color:#b0892a;">L</span><span class="mord"><span class="delimsizing size1">]</span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord" style="color:#b0892a;"><span class="mord" style="color:#b0892a;">∇</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#b0892a;"><span class="mord mtight" style="color:#b0892a;"><span class="mord mathnormal mtight" style="margin-right:0.0278em;color:#b0892a;">θ</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.0962em;color:#b0892a;">J</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mord mathbb">E</span><span class="mord"><span class="delimsizing size1">[</span></span><span class="mopen">(</span><span class="mord mathcal" style="color:#d62728;">L</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mord mathnormal" style="color:#87965a;">b</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord">∇</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;color:#665522;">θ</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="color:#c2408a;">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="color:#008787;">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="delimsizing size1">]</span></span></span></span></span></span></div>
+<div class="math-block math-legend"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#665522"><mi>θ</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>뽑기 앞의 파라미터: 칸마다 하나인 로짓</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#665522"><mi>w</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>뽑기 뒤의 파라미터: 읽은 값에 곱하는 수</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#c2408a"><mi>p</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>칸을 고를 확률 (</mtext><mstyle mathcolor="#665522"><mi>θ</mi></mstyle><mtext>의 소프트맥스)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#008787"><mi>i</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>이번에 뽑힌 칸</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#d62728"><mi mathvariant="script">L</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>한 에피소드의 손실 (뽑힌 칸과 그 에피소드의 메모리에 따라 다르다)</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#d62728"><mi>J</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>평균 손실: 에피소드와 뽑기에 대한 평균</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#b0892a"><msub><mi mathvariant="normal">∇</mi><mi>w</mi></msub><mi>J</mi></mstyle><mo separator="true">,</mo><mtext> </mtext><mstyle mathcolor="#b0892a"><msub><mi mathvariant="normal">∇</mi><mi>θ</mi></msub><mi>J</mi></mstyle></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>평균 손실의 그래디언트</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#87965a"><mi>b</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>베이스라인: 모든 손실에서 똑같이 빼는 기준값</mtext></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{ll}
+\textcolor{#665522}{\theta} &amp; \text{뽑기 앞의 파라미터: 칸마다 하나인 로짓} \\
+\textcolor{#665522}{w} &amp; \text{뽑기 뒤의 파라미터: 읽은 값에 곱하는 수} \\
+\textcolor{#c2408a}{p} &amp; \text{칸을 고를 확률 (}\textcolor{#665522}{\theta}\text{의 소프트맥스)} \\
+\textcolor{#008787}{i} &amp; \text{이번에 뽑힌 칸} \\
+\textcolor{#d62728}{\mathcal{L}} &amp; \text{한 에피소드의 손실 (뽑힌 칸과 그 에피소드의 메모리에 따라 다르다)} \\
+\textcolor{#d62728}{J} &amp; \text{평균 손실: 에피소드와 뽑기에 대한 평균} \\
+\textcolor{#b0892a}{\nabla_{w} J},\ \textcolor{#b0892a}{\nabla_{\theta} J} &amp; \text{평균 손실의 그래디언트} \\
+\textcolor{#87965a}{b} &amp; \text{베이스라인: 모든 손실에서 똑같이 빼는 기준값}
+\end{array}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:9.6em;vertical-align:-4.55em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:5.05em;"><span style="top:-7.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;color:#665522;">θ</span></span></span><span style="top:-6.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0269em;color:#665522;">w</span></span></span><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#c2408a;">p</span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#008787;">i</span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathcal" style="color:#d62728;">L</span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0962em;color:#d62728;">J</span></span></span><span style="top:-0.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#b0892a;"><span class="mord" style="color:#b0892a;">∇</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#b0892a;"><span class="mord mtight" style="color:#b0892a;"><span class="mord mathnormal mtight" style="margin-right:0.0269em;color:#b0892a;">w</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.0962em;color:#b0892a;">J</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord" style="color:#b0892a;"><span class="mord" style="color:#b0892a;">∇</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#b0892a;"><span class="mord mtight" style="color:#b0892a;"><span class="mord mathnormal mtight" style="margin-right:0.0278em;color:#b0892a;">θ</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.0962em;color:#b0892a;">J</span></span></span><span style="top:1.19em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#87965a;">b</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:4.55em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:5.05em;"><span style="top:-7.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">뽑기</span><span class="mord"> </span><span class="mord hangul_fallback">앞의</span><span class="mord"> </span><span class="mord hangul_fallback">파라미터</span><span class="mord">: </span><span class="mord hangul_fallback">칸마다</span><span class="mord"> </span><span class="mord hangul_fallback">하나인</span><span class="mord"> </span><span class="mord hangul_fallback">로짓</span></span></span></span><span style="top:-6.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">뽑기</span><span class="mord"> </span><span class="mord hangul_fallback">뒤의</span><span class="mord"> </span><span class="mord hangul_fallback">파라미터</span><span class="mord">: </span><span class="mord hangul_fallback">읽은</span><span class="mord"> </span><span class="mord hangul_fallback">값에</span><span class="mord"> </span><span class="mord hangul_fallback">곱하는</span><span class="mord"> </span><span class="mord hangul_fallback">수</span></span></span></span><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">칸을</span><span class="mord"> </span><span class="mord hangul_fallback">고를</span><span class="mord"> </span><span class="mord hangul_fallback">확률</span><span class="mord"> (</span></span><span class="mord mathnormal" style="margin-right:0.0278em;color:#665522;">θ</span><span class="mord text"><span class="mord hangul_fallback">의</span><span class="mord"> </span><span class="mord hangul_fallback">소프트맥스</span><span class="mord">)</span></span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">이번에</span><span class="mord"> </span><span class="mord hangul_fallback">뽑힌</span><span class="mord"> </span><span class="mord hangul_fallback">칸</span></span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">한</span><span class="mord"> </span><span class="mord hangul_fallback">에피소드의</span><span class="mord"> </span><span class="mord hangul_fallback">손실</span><span class="mord"> (</span><span class="mord hangul_fallback">뽑힌</span><span class="mord"> </span><span class="mord hangul_fallback">칸과</span><span class="mord"> </span><span class="mord hangul_fallback">그</span><span class="mord"> </span><span class="mord hangul_fallback">에피소드의</span><span class="mord"> </span><span class="mord hangul_fallback">메모리에</span><span class="mord"> </span><span class="mord hangul_fallback">따라</span><span class="mord"> </span><span class="mord hangul_fallback">다르다</span><span class="mord">)</span></span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">평균</span><span class="mord"> </span><span class="mord hangul_fallback">손실</span><span class="mord">: </span><span class="mord hangul_fallback">에피소드와</span><span class="mord"> </span><span class="mord hangul_fallback">뽑기에</span><span class="mord"> </span><span class="mord hangul_fallback">대한</span><span class="mord"> </span><span class="mord hangul_fallback">평균</span></span></span></span><span style="top:-0.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">평균</span><span class="mord"> </span><span class="mord hangul_fallback">손실의</span><span class="mord"> </span><span class="mord hangul_fallback">그래디언트</span></span></span></span><span style="top:1.19em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">베이스라인</span><span class="mord">: </span><span class="mord hangul_fallback">모든</span><span class="mord"> </span><span class="mord hangul_fallback">손실에서</span><span class="mord"> </span><span class="mord hangul_fallback">똑같이</span><span class="mord"> </span><span class="mord hangul_fallback">빼는</span><span class="mord"> </span><span class="mord hangul_fallback">기준값</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:4.55em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
+<p>둘째 식은 역전파가 하는 일이고, 셋째 식은 가우시안 스무딩에서 본 「값 × 로그 확률의 그래디언트」다. <span class="sym" style="color:#87965a">b</span> 를 빼도 평균이 바뀌지 않는 것은 가우시안 스무딩에서 f(x) 를 빼도 됐던 것과 같은 이유로, eᵢ − <span class="sym" style="color:#c2408a">p</span> 의 평균이 0 이기 때문이다. 에피소드 16개로 한 번 추정하기를 2,000번 되풀이하면 다음과 같다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>그래디언트</th>
+<th>참값</th>
+<th>에피소드 16개로 한 번 추정(2,000번의 평균 ± 표준편차)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>∂<span class="sym" style="color:#d62728">J</span>/∂<span class="sym" style="color:#665522">θ</span>₃, 점수 함수</td>
+<td>−0.75</td>
+<td>−0.745 ± 0.450</td>
+</tr>
+<tr>
+<td>∂<span class="sym" style="color:#d62728">J</span>/∂<span class="sym" style="color:#665522">θ</span>₁, 점수 함수</td>
+<td>+0.25</td>
+<td>+0.235 ± 0.887</td>
+</tr>
+<tr>
+<td>∂<span class="sym" style="color:#d62728">J</span>/∂<span class="sym" style="color:#665522">w</span>, 역전파</td>
+<td>+1.00</td>
+<td>+0.959 ± 1.172</td>
+</tr>
+<tr>
+<td>∂<span class="sym" style="color:#d62728">J</span>/∂<span class="sym" style="color:#665522">w</span>, 값만으로(<span class="sym" style="color:#665522">w</span> 를 σ = 0.1 로 흔든 가우시안 스무딩)</td>
+<td>+1.00</td>
+<td>+1.024 ± 2.167</td>
+</tr>
+</tbody>
+</table></div>
+<p>넷 모두 평균이 참값 둘레에 있으니, <span class="sym" style="color:#665522">θ</span> 쪽은 손실의 값만 썼는데도 평균이 맞는다. <span class="sym" style="color:#665522">w</span> 쪽을 굳이 값만으로 추정하면, 같은 에피소드 16개를 쓰고 파라미터가 하나뿐인데도 표준편차가 1.17 에서 2.17 로 두 배 가까이 커진다.</p>
+<p>이렇게 신경망 안에서 확률로 고르는 부분을 정책으로 보고, 그 파라미터의 그래디언트를 「뽑힌 결과의 손실(에서 베이스라인을 뺀 값) × 그 결과를 뽑을 로그 확률의 그래디언트」의 평균으로 추정하는 것을 <strong>정책 그래디언트</strong> (뽑기 앞 파라미터의 그래디언트를 로그 확률로 추정하기 / policy gradient)라 한다. 정책은 강화학습에서 상황마다 행동을 고르는 확률 규칙을 부르는 말이고, 이 장난감에서는 어느 칸을 읽을지 고르는 확률 <span class="sym" style="color:#c2408a">p</span> 가 정책이다. 아래 그림의 가운데 줄처럼 끊긴 자리에서만 미분 대신 값 (<span class="sym" style="color:#d62728">𝓛</span> − <span class="sym" style="color:#87965a">b</span>) 를 거꾸로 보내고, 그 뒤와 앞은 역전파가 맡는다.</p>
+<figure class="fig "><img src="images/zeroth-order/a5_pg_bridge.png" alt="같은 계산을 그래디언트로 거슬러 가는 세 방법. 위: 가우시안 스무딩은 θ 와 w 를 모두 흔들어 손실 값만 잰다. 가운데: 정책 그래디언트는 뽑은 칸 i 에서만 미분 대신 값 (ℒ − b)를 거꾸로 보내고, w 쪽과 log pᵢ 쪽은 역전파한다. 아래: 칸을 뽑지 않고 네 칸의 평균을 읽으면 처음부터 끝까지 역전파된다(sources/zeroth-order/figs_policy_gradient.py)" loading="lazy"><figcaption>같은 계산을 그래디언트로 거슬러 가는 세 방법. 위: 가우시안 스무딩은 θ 와 w 를 모두 흔들어 손실 값만 잰다. 가운데: 정책 그래디언트는 뽑은 칸 i 에서만 미분 대신 값 (ℒ − b)를 거꾸로 보내고, w 쪽과 log pᵢ 쪽은 역전파한다. 아래: 칸을 뽑지 않고 네 칸의 평균을 읽으면 처음부터 끝까지 역전파된다(sources/zeroth-order/figs_policy_gradient.py)</figcaption></figure>
+<p>파이토치로는 손실 하나를 고쳐 적으면 <code>backward()</code> 한 번으로 두 그래디언트가 함께 나온다.</p>
+<pre><code class="language-python">dist = torch.distributions.Categorical(logits=theta)   # 칸을 고를 확률 p
+i = dist.sample()                     # 정수 하나, grad_fn 은 None: 여기서 끊긴다
+L = (w * m[i] - y) ** 2               # 뽑기 뒤는 보통의 계산
+surrogate = L + (L.detach() - b) * dist.log_prob(i)
+surrogate.backward()                  # w.grad 는 역전파, theta.grad 는 (L - b)(e_i - p)
+</code></pre>
+<p>둘째 항의 <code>L.detach()</code> 는 그래디언트가 흐르지 않는 숫자라 <span class="sym" style="color:#665522">θ</span> 쪽에는 (<span class="sym" style="color:#d62728">𝓛</span> − <span class="sym" style="color:#87965a">b</span>)∇log <span class="sym" style="color:#c2408a">p</span>ᵢ 만 흐른다. 씨앗 0 으로 한 번 돌리면 정답인 3번 칸이 뽑혔는데도 그 에피소드의 손실 <span class="sym" style="color:#d62728">𝓛</span> = 4.747 이 평균 4 보다 커서, <code>theta.grad</code> = (−0.187, −0.187, 0.560, −0.187) 은 <span class="sym" style="color:#665522">θ</span>₃ 을 내리라고 한다(손으로 계산한 (<span class="sym" style="color:#d62728">𝓛</span> − 4)(eᵢ − <span class="sym" style="color:#c2408a">p</span>) 와 같다). 한 번의 추정값은 이렇게 틀릴 수 있고 맞는 것은 평균이다. <code>surrogate</code> 의 값(3.711)은 <span class="sym" style="color:#d62728">𝓛</span> 과 달라서 손실 기록으로는 쓰지 않는다.</p>
+<p>스텝마다 에피소드 16개, 학습률 0.1 로 걸으면 38스텝째에 <span class="sym" style="color:#c2408a">p</span>₃ 이 0.9 를 넘고(씨앗 스무 개의 중앙값 35), 300스텝 뒤에는 <span class="sym" style="color:#665522">w</span> = 1.999, <span class="sym" style="color:#d62728">J</span> = 0.027 이다. 다섯 파라미터를 모두 값만으로(σ = 0.3 인 가우시안 스무딩) 걸으면 54스텝째에 0.9 를 넘는데, 파라미터가 다섯뿐이라 차이는 크지 않다.</p>
+<figure class="fig "><img src="images/zeroth-order/a6_pg_training.png" alt="네 칸 메모리 장난감의 학습(스텝마다 에피소드 16개, 학습률 0.1, 씨앗 23·24). 실선: 정책 그래디언트(θ 는 점수 함수, w 는 역전파). 점선: 다섯 파라미터를 모두 값만으로 추정한 가우시안 스무딩(σ = 0.3)(sources/zeroth-order/s5_policy_gradient.py)" loading="lazy"><figcaption>네 칸 메모리 장난감의 학습(스텝마다 에피소드 16개, 학습률 0.1, 씨앗 23·24). 실선: 정책 그래디언트(θ 는 점수 함수, w 는 역전파). 점선: 다섯 파라미터를 모두 값만으로 추정한 가우시안 스무딩(σ = 0.3)(sources/zeroth-order/s5_policy_gradient.py)</figcaption></figure>
+<h3 id="가우시안-스무딩과-같은-식-다른-목표">가우시안 스무딩과 같은 식, 다른 목표</h3>
+<p>그렇다면 정책 그래디언트는 0차와 1차 사이의 다리일까? 끊긴 자리에서는 그렇다고 할 수 있는데, <span class="sym" style="color:#665522">θ</span> 쪽 추정이 손실의 값만 쓰는 0차 추정이고 가우시안 스무딩과 식의 꼴도 같기 때문이다. 다만 <span class="sym" style="color:#665522">θ</span> 가 다른 신경망(입력을 보고 로짓을 내는 층들)의 출력이라면 ∇log <span class="sym" style="color:#c2408a">p</span>ᵢ 는 다시 그 층들을 거슬러 역전파된다. 끊긴 자리에서 거꾸로 보내야 할 미분 ∂<span class="sym" style="color:#d62728">𝓛</span>/∂<span class="sym" style="color:#008787">i</span> 가 없으니 그 자리에서만 숫자 (<span class="sym" style="color:#d62728">𝓛</span> − <span class="sym" style="color:#87965a">b</span>) 를 대신 거꾸로 보내고, 그 앞뒤는 1차 그대로 간다. 로그 확률의 그래디언트에 값을 곱하는 이 꼴은 진화 알고리즘의 자연 진화 전략에서도 다시 나온다.</p>
+<p>다른 점도 분명한데, 첫째는 무엇의 그래디언트를 겨누느냐다. 가우시안 스무딩의 정규분포는 우리가 일부러 씌운 것이어서, 추정한 것은 원래 함수가 아니라 흐리게 한 함수의 그래디언트였고, 한쪽이 가파른 V 를 흐리면 최소점이 완만한 쪽으로 옮겨 갔다. 정책 그래디언트의 뽑기는 모델 안에 원래 있는 계산이고 줄이려는 목표가 처음부터 뽑기에 대한 평균 손실 <span class="sym" style="color:#d62728">J</span> 라서, 추정값은 <span class="sym" style="color:#d62728">J</span> 의 그래디언트 자체를 겨누고, 흐림 폭처럼 따로 정해야 할 값도 없다. 둘째, 추정값의 분산은 그대로 남는다. 위 표에서 ∂<span class="sym" style="color:#d62728">J</span>/∂<span class="sym" style="color:#665522">θ</span>₃ 은 참값 −0.75 에 표준편차 0.45 였고, 고를 것이 많아지면 좋은 결과를 뽑기까지 시간이 오래 걸린다. 카파시가 RL-NTM 을 두고 쓴 「고를 것이 몇 개뿐일 때만」이 이 이야기다.</p>
+<p>셋째, 뽑기가 연속이면 더 조용한 길이 있다. 평균 μ, 표준편차 1 인 정규분포에서 z 를 뽑는다면 z = μ + ε(ε 는 표준정규 노이즈)로 고쳐 적어 노이즈를 바깥으로 빼내고, z 가 μ 에 매끄럽게 달린 식으로 보고 뽑기를 통과해 역전파할 수 있다. 이 고쳐 적기를 재파라미터화라 한다. E[z²] 를 μ = 1 에서 미분하는 예(참값 2)에서 샘플 하나짜리 추정값의 표준편차는 점수 함수 꼴이 5.45(평균값 2 를 빼면 4.21), 재파라미터화가 2.00 이었다. 칸 번호처럼 이산적인 뽑기는 이렇게 그대로 고쳐 적을 수 없어서, 그때 기본으로 남는 길이 정책 그래디언트다.</p>
+<aside class="guide"><p class="guide-title">길잡이 · 『MLP에서 디퓨전 트랜스포머까지』 「재파라미터화: 뽑기를 거쳐 미분하기」</p><p>정규분포에서 뽑은 잠재 변수를 평균 + 표준편차 × 노이즈로 고쳐 적어, VAE 의 인코더까지 그래디언트를 보내는 법. 노이즈를 바깥으로 빼면 뽑기가 왜 미분 가능한 계산이 되는지. <a href="https://lameproof.com/diffusion-book/autoencoder-vae-sec-vae-reparameterization.html">이어 읽기</a></p>
+</aside>
+<h3 id="ml에서-하드-어텐션에서-언어-모델의-보상까지">ML에서: 하드 어텐션에서 언어 모델의 보상까지</h3>
+<p>카파시의 글이 나온 뒤로 이 다리를 가장 크게 쓰는 곳은 언어 모델의 강화학습이다. 언어 모델은 응답의 토큰을 하나씩 뽑으므로, 보상 모델이나 채점 규칙이 응답 전체에 매긴 점수는 뽑기에서 끊긴 자리 너머에 있다. 그래서 점수는 값으로만 쓰고, 뽑힌 토큰들의 로그 확률을 트랜스포머 전체로 역전파한다. 장난감의 <span class="sym" style="color:#665522">θ</span> 넷이 수십억 개의 파라미터로 바뀌어도 값으로 대신하는 것은 끊긴 자리의 신호뿐이다. 보상 모델 자체는 미분 가능한 신경망이지만, 그 입력이 뽑힌 토큰이라 거기서 거꾸로 이어지지 않는다.</p>
+<aside class="guide"><p class="guide-title">길잡이 · 『생성모델의 강화학습』 「정책 그래디언트: 점수는 가중치일 뿐이다」</p><p>미분할 수 없는 점수를 올리려고 점수는 그대로 두고 뽑은 답의 로그확률만 미분하는 정책 그래디언트를, 답이 둘인 경우의 숫자에서 세운다. 윌리엄스의 REINFORCE 와 서튼의 정책 그래디언트 정리가 각각 어떤 막힘에서 나왔는지도. <a href="https://lameproof.com/genrl-book/vpg-sec-policy-gradient-score-weight.html">이어 읽기</a></p>
+</aside>
+<div class="dialogue"><h3 id="prob-zeroth-roulette-spice">문제 13. 돌림판과 맵기<span id="문제-13-돌림판과-맵기" class="anchor-alias"></span></h3>
+<blockquote>
+<p>친구들과 떡볶이 가게를 돌림판으로 정한다. A 가게 칸의 비율은 <span class="sym" style="color:#c2408a">p</span> = 0.7, B 가게는 1 − <span class="sym" style="color:#c2408a">p</span> 이고, 가게가 정해지면 맵기 단계 <span class="sym" style="color:#665522">s</span> 를 골라 주문한다. 만족도 <span class="sym" style="color:#d62728">S</span> 는 A 가게에서 8 − (<span class="sym" style="color:#665522">s</span> − 3)², B 가게에서 6 − (<span class="sym" style="color:#665522">s</span> − 1)² 이고 지금 <span class="sym" style="color:#665522">s</span> = 2 다. (가) A 가 나왔을 때와 B 가 나왔을 때 만족도를 <span class="sym" style="color:#665522">s</span> 로 미분하면 각각 얼마이고, 평균 만족도를 <span class="sym" style="color:#665522">s</span> 로 미분하면 얼마인가? (나) 평균 만족도를 <span class="sym" style="color:#c2408a">p</span> 로 미분하면 얼마인가? 돌림판을 한 번 돌려 나온 가게의 만족도에, 그 가게가 나올 로그 확률을 <span class="sym" style="color:#c2408a">p</span> 로 미분한 값을 곱해 평균하면 평균 만족도의 미분과 같은가? (다) (나)의 한 번짜리 추정값은 얼마나 흔들리는가? 만족도에서 평균 만족도를 빼고 곱하면 어떻게 되는가?</p>
+</blockquote>
+<figure class="fig "><img src="images/zeroth-order/p13_roulette.png" alt="A 가게 칸이 70%인 돌림판과 두 가게의 만족도 곡선, 지금 맵기 s = 2(sources/zeroth-order/figs_policy_gradient.py)" loading="lazy"><figcaption>A 가게 칸이 70%인 돌림판과 두 가게의 만족도 곡선, 지금 맵기 s = 2(sources/zeroth-order/figs_policy_gradient.py)</figcaption></figure>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p><span class="sym" style="color:#c2408a">p</span> 로 미분하라는 게 이상해요. <span class="sym" style="color:#c2408a">p</span> 를 0.701 로 바꿔도 돌림판은 거의 늘 같은 칸에 멈출 텐데, 한 번 돌린 결과로 보면 미분이 0 아니에요?</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>한 번 돌린 결과만 보면 그렇죠. 그런데 키우고 싶은 게 한 번의 만족도예요, 매주 돌리는 평균 만족도예요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>평균이요. 평균은 <span class="sym" style="color:#c2408a">p</span> × 7 + (1 − <span class="sym" style="color:#c2408a">p</span>) × 5 니까 지금 6.4 고, <span class="sym" style="color:#c2408a">p</span> 로 미분하면 7 − 5 = 2 네요. 평균은 <span class="sym" style="color:#c2408a">p</span> 에 따라 매끄럽게 움직이는구나.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(가)는 쉬운 쪽이야. 가게가 정해지면 만족도 식을 아니까 <span class="sym" style="color:#665522">s</span> 로 그냥 미분하면 돼. A 면 −2(2 − 3) = 2, B 면 −2(2 − 1) = −2, 평균은 0.7 × 2 + 0.3 × (−2) = 0.8.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 두 가게의 만족도를 미리 모르고, 매주 나온 가게에서만 먹어 볼 수 있다면 (나)는 어떻게 구하죠?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S05"><img src="images/cast/S05.webp" alt="이서연 S05" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>음, 그게 문제네요. 시키는 대로 해 볼게요. A 가 나오면 log <span class="sym" style="color:#c2408a">p</span> 를 <span class="sym" style="color:#c2408a">p</span> 로 미분한 1/0.7 에 7 을 곱해서 10. B 가 나오면 log(1 − <span class="sym" style="color:#c2408a">p</span>) 의 미분이 −1/0.3 이니까 5 를 곱해서 −16.67.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M03"><img src="images/cast/M03.webp" alt="김민준 M03" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>10 이랑 −16.7 이라니, 둘 다 2 랑 너무 다른데?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>평균을 내 봐야지. A 는 열 번에 일곱 번 나오니까 0.7 × 10 + 0.3 × (−16.67) = 7 − 5 = 2. 맞네.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(다)는요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>한 번 돌릴 때마다 10 아니면 −16.67 이니까 표준편차가 12.2 예요. 참값은 2 인데요. 이러면 몇 주를 먹어야 믿을 만해져요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>평균 만족도 6.4 를 빼고 곱하면 A 는 0.6/0.7 = 0.857, B 는 (−1.4) × (−1/0.3) = 4.67 이야. 평균은 그대로 2 고 표준편차는 1.75 로 줄어. 가우시안 스무딩에서 f(x) 를 빼던 것과 같은 거네.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>조별 과제 점수를 볼 때 85점이라는 숫자만 보지 않고 그 과목 평균보다 몇 점 높은지로 보는 거랑 같네요. 평균이 높은 과목이면 다들 잘한 것처럼 보이니까요.</p></div></div>
+</div><div class="dialogue"><h3 id="prob-zeroth-soft-hard-read">문제 14. 평균으로 읽기와 한 칸 읽기<span id="문제-14-평균으로-읽기와-한-칸-읽기" class="anchor-alias"></span></h3>
+<blockquote>
+<p>메모리 세 칸에 <span class="sym" style="color:#1b9e77">m</span> = (3, 1, −1) 이 들어 있고 정답은 <span class="sym" style="color:#1b9e77">y</span> = 1 이다. 칸을 고를 확률 <span class="sym" style="color:#c2408a">p</span> = (<span class="sym" style="color:#c2408a">p</span>₁, <span class="sym" style="color:#c2408a">p</span>₂, <span class="sym" style="color:#c2408a">p</span>₃) 은 로짓 <span class="sym" style="color:#665522">θ</span> 의 소프트맥스다. 평균으로 읽기는 ŷ = <span class="sym" style="color:#c2408a">p</span>₁<span class="sym" style="color:#1b9e77">m</span>₁ + <span class="sym" style="color:#c2408a">p</span>₂<span class="sym" style="color:#1b9e77">m</span>₂ + <span class="sym" style="color:#c2408a">p</span>₃<span class="sym" style="color:#1b9e77">m</span>₃ 을 내고 손실 (ŷ − <span class="sym" style="color:#1b9e77">y</span>)² 를 <span class="sym" style="color:#665522">θ</span> 로 역전파한다. 한 칸 읽기는 칸 <span class="sym" style="color:#008787">i</span> 를 뽑아 ŷ = <span class="sym" style="color:#1b9e77">m</span>ᵢ 를 내고, 평균 손실 Σ <span class="sym" style="color:#c2408a">p</span>ᵢ(<span class="sym" style="color:#1b9e77">m</span>ᵢ − <span class="sym" style="color:#1b9e77">y</span>)² 을 정책 그래디언트로 줄인다. (가) <span class="sym" style="color:#c2408a">p</span> = (1/3, 1/3, 1/3), (1/2, 0, 1/2), (0, 1, 0) 에서 두 손실을 각각 구하라. (나) <span class="sym" style="color:#665522">θ</span> = 0 에서 출발하면 평균으로 읽기의 학습은 어떻게 되는가? (다) 평균으로 읽기로 학습한 모델을 쓸 때 한 칸만 읽게 바꾸면 손실은 얼마인가? 한 칸 읽기를 정확한 정책 그래디언트(학습률 0.5)로 학습하면 어디로 가는가?</p>
+</blockquote>
+<figure class="fig "><img src="images/zeroth-order/p14_soft_hard_read.png" alt="고정된 세 칸 메모리 m = (3, 1, −1)과 정답 y = 1(sources/zeroth-order/figs_policy_gradient.py)" loading="lazy"><figcaption>고정된 세 칸 메모리 m = (3, 1, −1)과 정답 y = 1(sources/zeroth-order/figs_policy_gradient.py)</figcaption></figure>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>평균으로 읽으면 미분이 다 되니까 무조건 이쪽이 낫지 않아요? 정책 그래디언트처럼 흔들리지도 않고요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(가)부터 계산해 봐요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>고르게 1/3 이면 ŷ = (3 + 1 − 1)/3 = 1 이라 손실 0. (1/2, 0, 1/2) 도 (3 − 1)/2 = 1 이라 0. (0, 1, 0) 도 0. 다 0 이네요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>한 칸 읽기는 칸마다 (<span class="sym" style="color:#1b9e77">m</span>ᵢ − 1)² 가 4, 0, 4 야. 그러니까 고르게면 8/3 = 2.67, (1/2, 0, 1/2) 면 4, (0, 1, 0) 이면 0.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>두 손실이 0 이라고 하는 <span class="sym" style="color:#c2408a">p</span> 가 같나요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>음, 아니요. 평균으로 읽기는 1번 칸과 3번 칸을 같은 비율로 섞기만 하면 0 이에요. 3 과 −1 의 평균이 1 이라서, 정답이 든 2번 칸을 고르지 않아도 되는 거죠. 한 칸 읽기는 2번 칸만 골라야 0 이고요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 (나)는… 출발점 <span class="sym" style="color:#665522">θ</span> = 0 이 고르게 1/3 이니까 손실이 처음부터 0 이고, 그래디언트도 0 이에요. 꼼짝을 안 하네.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 모델을 쓸 때 한 칸만 읽게 하면요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>1번 칸이 뽑히면 3, 3번 칸이면 −1 이 나오니까 평균 손실 2.67 이요. 학습할 때는 0 이었는데.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>한 칸 읽기 쪽은 같은 출발점에서 어떻게 움직이죠?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>돌려 봤어요. 평균 손실 2.67 에서 출발해서 다섯 스텝 만에 2번 칸 확률이 0.9 를 넘고, 50스텝이면 0.993 이에요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>줄이는 목표가 달랐네요. 평균으로 읽기는 「읽은 값들의 평균」이 맞기를 바라고, 한 칸 읽기는 「읽은 값 하나하나」가 맞기를 바라요. 그럼 평균으로 읽은 손실은 늘 더 작게 나오나…</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>둘의 차이를 식으로 적어 볼래요? 고르게 1/3 일 때 2.67 − 0 이 무엇인지부터요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>음… 한 칸 읽기는 (<span class="sym" style="color:#1b9e77">m</span>ᵢ − <span class="sym" style="color:#1b9e77">y</span>)² 을 먼저 하고 평균을 내고, 평균으로 읽기는 평균을 먼저 내고 제곱하니까, (제곱의 평균) − (평균의 제곱)? 그건 분산인데요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>읽은 값 3, 1, −1 의 분산이면 (9 + 1 + 1)/3 − 1² = 2.67. 진짜 맞네.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>젠센 부등식이네요. 평균으로 읽은 손실은 한 칸 읽기의 평균 손실보다 늘 읽은 값의 분산만큼 작아서, 학습할 때 숫자가 낙관적으로 나와요.</p></div></div>
+</div><div class="dialogue"><h3 id="prob-zeroth-wide-downstream">문제 15. 뒤쪽 파라미터가 많을 때<span id="문제-15-뒤쪽-파라미터가-많을-때" class="anchor-alias"></span></h3>
+<blockquote>
+<p>네 칸 메모리 장난감에서 칸마다 수 하나 대신 <span class="sym" style="color:#3c4bff">d</span> 차원 벡터가 들어 있다고 하자(임베딩 벡터 넷 가운데 하나를 골라 읽는 모델처럼). 정답은 <span class="sym" style="color:#1b9e77">y</span> = <span class="sym" style="color:#1b9e77">v</span><em>·<span class="sym" style="color:#1b9e77">m</span>₃(<span class="sym" style="color:#1b9e77">v</span></em> 는 길이 1인 고정 벡터)이고, 모델은 칸 하나를 뽑아 ŷ = <span class="sym" style="color:#665522">w</span>·<span class="sym" style="color:#1b9e77">m</span>ᵢ 를 낸다. 뽑기 앞의 로짓은 넷, 뽑기 뒤의 <span class="sym" style="color:#665522">w</span> 는 <span class="sym" style="color:#3c4bff">d</span> 개다. <span class="sym" style="color:#665522">θ</span> = 0, <span class="sym" style="color:#665522">w</span> = <span class="sym" style="color:#1b9e77">v</span>*/2 에서 에피소드 16개로 그래디언트를 한 번 추정한다. (가) <span class="sym" style="color:#665522">w</span> 쪽을 역전파로 추정할 때와 같은 에피소드에서 <span class="sym" style="color:#665522">w</span> 를 흔들어 손실 값만으로(가우시안 스무딩, σ = 0.001) 추정할 때, 참 그래디언트 길이에 대한 오차의 비가 <span class="sym" style="color:#3c4bff">d</span> = 10, 100, 1000 에서 어떻게 달라지는가? (나) <span class="sym" style="color:#665522">θ</span> 쪽 점수 함수 추정의 오차는 <span class="sym" style="color:#3c4bff">d</span> 에 따라 어떻게 되는가? (다) 두 결과를 합치면 값으로 하는 추정을 끊긴 자리에만 쓰는 것이 왜 이득인가?</p>
+</blockquote>
+<figure class="fig "><img src="images/zeroth-order/p15_wide_downstream.png" alt="칸마다 d 차원 벡터가 든 네 칸 메모리. 뽑기 앞은 로짓 넷, 뽑기 뒤의 w 는 d 개(sources/zeroth-order/figs_policy_gradient.py)" loading="lazy"><figcaption>칸마다 d 차원 벡터가 든 네 칸 메모리. 뽑기 앞은 로짓 넷, 뽑기 뒤의 w 는 d 개(sources/zeroth-order/figs_policy_gradient.py)</figcaption></figure>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 돌려 봤어요. 오차를 참 그래디언트 길이로 나눈 값의 중앙값이 역전파로 <span class="sym" style="color:#3c4bff">d</span> = 10, 100, 1000 에서 2.97, 9.69, 30.7 이에요. 역전파인데 오차가 참값의 세 배, 서른 배라니 뭔가 틀린 것 같은데요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>역전파가 정확하다는 건 무엇에 대해서였죠?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>뽑힌 칸과 그 에피소드가 정해졌을 때의 미분이요. 음, 에피소드마다 <span class="sym" style="color:#1b9e77">m</span>ᵢ 가 <span class="sym" style="color:#3c4bff">d</span> 차원으로 제각각이니까 미분도 에피소드마다 다른 방향을 가리킬 거고… 16개로는 평균이 잘 안 잡히는 거네요. 미니배치 노이즈요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그래도 값만으로 한 쪽은 8.63, 89.1, 913 이에요. 역전파의 몇 배인지 나눠 보면 2.9, 9.2, 29.8 이고요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>오차를 제곱해서 견주면요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>8, 85, 886… 거의 <span class="sym" style="color:#3c4bff">d</span> 배네요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S05"><img src="images/cast/S05.webp" alt="이서연 S05" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>네스테로프와 스포코이니가 말한 「차원 수 배」가 여기서도 나와요. 값만 쓰면 <span class="sym" style="color:#3c4bff">d</span> 개 방향을 더듬는 값을 치러야 하니까요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(나)는요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M03"><img src="images/cast/M03.webp" alt="김민준 M03" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>점수 함수 쪽은 1.20, 1.22, 1.21 이에요. <span class="sym" style="color:#3c4bff">d</span> 를 백 배 키워도 그대로네요. 왜죠?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p><span class="sym" style="color:#665522">θ</span> 는 넷뿐이고, 점수 함수 추정에 들어가는 건 손실 값 하나랑 eᵢ − <span class="sym" style="color:#c2408a">p</span> 뿐이잖아. 손실 값이 흔들리는 정도는 <span class="sym" style="color:#665522">w</span> 와 <span class="sym" style="color:#1b9e77">v</span>* 의 길이로 정해지니까 <span class="sym" style="color:#3c4bff">d</span> 와는 상관이 없겠다.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 (다)는요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>값으로 추정하는 대가는 그렇게 추정하는 파라미터 수만큼 치르는데, 정책 그래디언트는 그 대가를 끊긴 자리의 로짓 넷에만 치르고 <span class="sym" style="color:#3c4bff">d</span> 개짜리 <span class="sym" style="color:#665522">w</span> 는 역전파로 받아요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>문제 13(돌림판과 맵기)에서 맵기는 미분하고 돌림판 비율만 먹어 본 값으로 추정했던 거랑 같은 구조네요. 언어 모델이면 뽑기 앞이 트랜스포머 전체인데, 거기도 log <span class="sym" style="color:#c2408a">p</span> 를 역전파하니까 값으로 대신하는 건 뽑기 자리의 신호 하나뿐이고요.</p></div></div>
+</div>
+</article>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="zeroth-order-sec-gaussian-smoothing-gradient.html">&larr; 가우시안 스무딩: 흐리게 한 함수의 그래디언트는 값의 가중 평균</a><span class="page-count">5 / 6</span><a class="chapter-nav-next" href="zeroth-order-sec-zeroth-order-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
+</main>
+<script type="module">
+const toggle = document.getElementById('theme-toggle');
+const frames = () => document.querySelectorAll('.widget-embed iframe');
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  toggle.textContent = t === 'dark' ? '\u2600\uFE0F' : '\u{1F319}';
+  frames().forEach(f => f.contentWindow && f.contentWindow.postMessage({ type: 'dyn-theme', theme: t }, '*'));
+}
+const curTheme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+setTheme(curTheme());
+toggle.addEventListener('click', () => {
+  const t = curTheme() === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('theme', t);
+  setTheme(t);
+  renderMermaid();
+});
+
+// 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  io.unobserve(e.target);
+  e.target.src = e.target.dataset.src + '&theme=' + curTheme();
+}), { rootMargin: '600px' });
+frames().forEach(f => io.observe(f));
+addEventListener('message', e => {
+  if (!e.data || e.data.type !== 'dyn-widget-height') return;
+  frames().forEach(f => { if (f.contentWindow === e.source) { f.style.height = e.data.h + 'px'; f.classList.add('ready'); } });
+});
+
+// 사이드바
+const sidebar = document.getElementById('sidebar');
+document.getElementById('sidebar-open').addEventListener('click', () => sidebar.classList.add('open'));
+document.getElementById('sidebar-close').addEventListener('click', () => sidebar.classList.remove('open'));
+sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', () => sidebar.classList.remove('open')));
+
+// 키보드 ←/→ 로 이전·다음 페이지
+addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  const a = document.querySelector(e.key === 'ArrowLeft' ? '.chapter-nav-prev' : e.key === 'ArrowRight' ? '.chapter-nav-next' : null);
+  if (a) location.href = a.href;
+});
+
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+</script>
+</body>
+</html>

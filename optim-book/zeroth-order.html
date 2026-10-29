@@ -654,6 +654,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="/reader/reader.css?v=be5a456d" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"be5a456d"}</script>
+<script defer src="/reader/reader.js?v=be5a456d" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -673,7 +676,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><a href="lipschitz.html">립시츠 연속: 함수가 얼마나 빨리 변할 수 있나</a></li>
 <li><a href="convexity.html">볼록이면 왜 쉬운가: 극소가 곧 최소</a></li>
 <li class="toc-part">0차 최적화</li>
-<li><a href="zeroth-order.html" class="active">미분 없이: 0차 최적화</a><ul class="sidebar-toc"><li><a href="zeroth-order.html" class="current">유한 차분: 두 번 재서 그래디언트 추정하기</a></li><li><a href="zeroth-order-sec-random-search-comparison.html">무작위 탐색: 값만 비교해서 내려가기</a></li><li><a href="zeroth-order-sec-simultaneous-perturbation.html">동시 섭동: 무작위 방향 하나로 그래디언트 추정하기</a></li><li><a href="zeroth-order-sec-gaussian-smoothing-gradient.html">가우시안 스무딩: 흐리게 한 함수의 그래디언트는 값의 가중 평균</a></li><li><a href="zeroth-order-sec-zeroth-order-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li><a href="zeroth-order.html" class="active">미분 없이: 0차 최적화</a><ul class="sidebar-toc"><li><a href="zeroth-order.html" class="current">유한 차분: 두 번 재서 그래디언트 추정하기</a></li><li><a href="zeroth-order-sec-random-search-comparison.html">무작위 탐색: 값만 비교해서 내려가기</a></li><li><a href="zeroth-order-sec-simultaneous-perturbation.html">동시 섭동: 무작위 방향 하나로 그래디언트 추정하기</a></li><li><a href="zeroth-order-sec-gaussian-smoothing-gradient.html">가우시안 스무딩: 흐리게 한 함수의 그래디언트는 값의 가중 평균</a></li><li><a href="zeroth-order-sec-policy-gradient-bridge.html">정책 그래디언트: 뽑기에서 끊긴 미분을 값으로 잇기</a></li><li><a href="zeroth-order-sec-zeroth-order-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="evolution.html">진화 알고리즘: 개체군으로 하는 탐색</a></li>
 <li class="toc-part">1차 최적화</li>
 <li><a href="backprop.html">역전파: 자코비안 곱을 거꾸로</a></li>
@@ -709,6 +712,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li>그래디언트를 아예 추정하지 않고, 값을 비교만 하면서 내려갈 수는 없을까? 하이퍼파라미터를 고를 때 격자로 빠짐없이 시험하는 것과 아무렇게나 뽑아 시험하는 것 가운데 어느 쪽이 나을까?</li>
 <li>파라미터가 백만 개면 하나씩 흔들어 재는 데만 함숫값 계산이 백만 번 넘게 든다. 몇 번만 재고도 내려갈 방향을 얻을 수 있을까? 그 대가는 무엇일까?</li>
 <li>정확도처럼 계단 모양이라 미분이 거의 어디서나 0인 목표, 작은 골짜기가 가득한 목표는 어떻게 내려갈까?</li>
+<li>신경망 한가운데에서 토큰이나 볼 자리를 확률로 하나 뽑으면 그 자리에서 미분이 끊긴다. 그 한 자리 때문에 신경망 전체를 값만으로 다뤄야 할까?</li>
 </ul>
 <h2 id="sec-finite-difference-gradient">유한 차분: 두 번 재서 그래디언트 추정하기<span id="유한-차분-두-번-재서-그래디언트-추정하기" class="anchor-alias"></span></h2>
 <p>값만 돌려주는 상자 앞에서 가장 먼저 떠오르는 방법은 고등학교에서 배운 미분의 정의다. 미분 <span class="sym" style="color:#b0892a">f′</span>(<span class="sym" style="color:#665522">x</span>)는 (f(x + h) − f(x))/h 에서 h 를 0으로 보낸 극한이었다. 컴퓨터는 극한을 계산할 수 없으니 h 를 아주 작은 수로 두고 두 번 재서 나누면 될 것 같은데, 그렇다면 h 는 얼마로 잡아야 할까? 작을수록 극한에 가까우니 컴퓨터가 다룰 수 있는 가장 작은 수를 고르면 될까?</p>
@@ -856,7 +860,7 @@ c-10,0,-16.667,5,-20,15z M188 15 H145 v585 v1200 v585 h43z"/></svg></span></span
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그래서 검사는 가중치 몇 개짜리 작은 모델로 하는 거구나. 큰 모델에서 매번 이렇게 그래디언트를 구하는 건 말이 안 되고.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="convexity-sec-convexity-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="zeroth-order-sec-random-search-comparison.html">무작위 탐색: 값만 비교해서 내려가기 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="convexity-sec-convexity-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="zeroth-order-sec-random-search-comparison.html">무작위 탐색: 값만 비교해서 내려가기 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');
