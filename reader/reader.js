@@ -131,10 +131,9 @@
     }
     p.last = best;
   }
-  /** 절 완료 값: +시각 = 읽음, −시각 = 안 읽음으로 되돌림. 0·없음 = 안 읽음 */
+  /** 절 완료·정리 문제 값: +시각 = 읽음/맞힘, −시각 = 되돌림(안 읽음/다시 풀기). 0·없음 = 아직 */
   function isRead(v) { return typeof v === "number" && v > 0; }
-  /** 합치기 규칙(서버와 같다): 절 완료는 |시각| 이 큰 쪽(나중 동작이 이긴다), 정리 문제는 합집합(이른 시각),
-   *  위치는 책마다 최신 at */
+  /** 합치기 규칙(서버와 같다): 절 완료·정리 문제는 |시각| 이 큰 쪽(나중 동작이 이긴다), 위치는 책마다 최신 at */
   function mergeProg(dst, src) {
     if (!src || !src.books || typeof src.books !== "object") return dst;
     for (var b in src.books) {
@@ -146,8 +145,7 @@
         if (!m || typeof m !== "object") return;
         for (var k in m) {
           if (typeof m[k] !== "number" || !m[k]) continue;
-          var later = f === "pages" ? Math.abs(m[k]) > Math.abs(d[f][k] || 0) : m[k] < d[f][k];
-          if (!(k in d[f]) || later) d[f][k] = m[k];
+          if (!(k in d[f]) || Math.abs(m[k]) > Math.abs(d[f][k] || 0)) d[f][k] = m[k];
         }
       });
       if (s.position && typeof s.position.at === "number" && (!d.position || s.position.at > d.position.at)) d.position = s.position;
@@ -162,7 +160,8 @@
       var x = p.books[b];
       if (!x) continue;
       var pg = x.pages || {};
-      if (Object.keys(pg).some(function (k) { return isRead(pg[k]); }) || Object.keys(x.quizzes || {}).length || x.position) return true;
+      var qz = x.quizzes || {};
+      if (Object.keys(pg).some(function (k) { return isRead(pg[k]); }) || Object.keys(qz).some(function (k) { return isRead(qz[k]); }) || x.position) return true;
     }
     return false;
   }
@@ -343,7 +342,7 @@
     (idx.chapters || []).forEach(function (ch) {
       var d = 0, t = 0, qd = 0;
       (ch.pages || []).forEach(function (pg) { t++; if (bp && isRead(bp.pages[pg.key])) d++; });
-      (ch.quizzes || []).forEach(function (q) { t++; if (bp && bp.quizzes[q.id]) { d++; qd++; } });
+      (ch.quizzes || []).forEach(function (q) { t++; if (bp && isRead(bp.quizzes[q.id])) { d++; qd++; } });
       out.chapters[ch.id] = { done: d, total: t, quizDone: qd, quizTotal: (ch.quizzes || []).length };
       out.done += d; out.total += t;
     });
@@ -529,9 +528,12 @@
       list.appendChild(item);
       return { ch: ch, item: item, btn: btn, why: why };
     });
-    var hint = el("p", { class: "lp-q-hint", text: "보기를 하나 고르세요. 틀려도 벌점 없이 다시 고를 수 있습니다." });
+    var HINT0 = "보기를 하나 고르세요. 틀려도 벌점 없이 다시 고를 수 있습니다.";
+    var hint = el("p", { class: "lp-q-hint", text: HINT0 });
+    var again = el("button", { type: "button", class: "lp-q-again", text: "다시 풀기", hidden: "" });
     ul.parentNode.replaceChild(list, ul);
     list.parentNode.insertBefore(hint, list);
+    after(list, again);
 
     function showWhy(it, ok) {
       it.why.innerHTML = "";
@@ -547,7 +549,28 @@
         if (it.ch.correct) { it.item.classList.add("lp-q-right"); showWhy(it, true); }
       });
       hint.textContent = "맞혔습니다. 이 장 진도에 더했습니다.";
+      again.hidden = false;
     }
+    /** 처음 상태로. record 면 진도에서도 뺀다(−시각, 다른 기기의 옛 「맞힘」보다 나중 동작) */
+    function reset(record) {
+      var was = q.classList.contains("lp-q-solved");
+      q.classList.remove("lp-q-solved");
+      items.forEach(function (it) {
+        it.btn.disabled = false;
+        it.item.classList.remove("lp-q-right", "lp-q-wrong");
+        it.why.hidden = true;
+        it.why.innerHTML = "";
+      });
+      hint.textContent = HINT0;
+      again.hidden = true;
+      var t = lsGet(K.tries) || {}, k = (BOOK || "") + ":" + id;
+      if (k in t) { delete t[k]; lsSet(K.tries, t); }
+      if (record && was && BOOK) {
+        noteChange(function (p) { bookOf(p, BOOK).quizzes[id] = -now(); });
+        renderPanel();
+      }
+    }
+    again.addEventListener("click", safe(function () { reset(true); }));
     function choose(i) {
       var it = items[i];
       if (q.classList.contains("lp-q-solved")) return;
@@ -555,6 +578,7 @@
         it.item.classList.add("lp-q-wrong");
         it.btn.disabled = true;
         showWhy(it, false);
+        again.hidden = false;
         var t = lsGet(K.tries) || {};
         var k = (BOOK || "") + ":" + id;
         t[k] = (Number(t[k]) || 0) + 1;
@@ -563,18 +587,22 @@
       }
       setSolved();
       if (BOOK) {
-        noteChange(function (p) { var b = bookOf(p, BOOK); if (!b.quizzes[id]) b.quizzes[id] = now(); });
+        noteChange(function (p) { var b = bookOf(p, BOOK); if (!isRead(b.quizzes[id])) b.quizzes[id] = now(); });
         renderPanel();
       }
     }
-    var entry = { id: id, solved: function () { return q.classList.contains("lp-q-solved"); }, setSolved: setSolved };
+    var entry = { id: id, solved: function () { return q.classList.contains("lp-q-solved"); }, setSolved: setSolved, reset: reset };
     QUIZZES.push(entry);
-    if (BOOK && PROG.books[BOOK] && PROG.books[BOOK].quizzes && PROG.books[BOOK].quizzes[id]) setSolved();
+    if (BOOK && PROG.books[BOOK] && PROG.books[BOOK].quizzes && isRead(PROG.books[BOOK].quizzes[id])) setSolved();
   }
   function refreshQuizzes() {
     if (!BOOK) return;
     var b = PROG.books[BOOK];
-    QUIZZES.forEach(function (qz) { if (b && b.quizzes && b.quizzes[qz.id] && !qz.solved()) qz.setSolved(); });
+    QUIZZES.forEach(function (qz) {
+      var v = b && b.quizzes ? b.quizzes[qz.id] : 0;
+      if (isRead(v) && !qz.solved()) qz.setSolved();
+      else if (v < 0 && qz.solved()) qz.reset(false); // 다른 탭·기기에서 다시 풀기로 되돌림
+    });
   }
 
   // ── 절 완료(2.8절) ──────────────────────────────────────────────────────
