@@ -654,9 +654,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b96c5c0f" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b96c5c0f"}</script>
-<script defer src="/reader/reader.js?v=b96c5c0f" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"70befe84"}</script>
+<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -752,7 +752,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </tr>
 </tbody>
 </table></div>
-<p>bfloat16 은 float32 와 같은 범위의 수를 담지만, 1 바로 위의 간격이 0.0078(2⁻⁷)이라 1 둘레에서는 소수 둘째 자리쯤까지만 가린다. 그래서 가중치 1.0 에 학습률 0.001짜리 스텝을 더하면 결과는 그대로 1.0 이다. 스텝이 간격의 절반보다 작아 반올림에 사라진 것이다. 스텝 0.0001 을 1000번 더해도 bfloat16 의 가중치는 1.0 에서 움직이지 않는다(참값은 1.1, float32 로 더하면 1.100017). 학습률이 작아 보이는 것이 아니라 아예 학습이 일어나지 않는다. float16 은 1 둘레를 더 곱게 가리지만 가장 큰 수가 65,504 라 곧잘 넘치고, 가장 작은 쪽도 2⁻²⁴(약 6 × 10⁻⁸)보다 작은 수는 0이 된다. 머리말에서 물었던 Adam 의 <code>eps</code> 0.00000001 은 float16 에 담으면 0 이다.</p>
+<p>bfloat16 은 float32 와 같은 범위의 수를 담지만, 1 바로 위의 간격이 0.0078(2⁻⁷)이라 1 둘레에서는 소수 둘째 자리쯤까지만 가린다. 그래서 가중치 1.0 에 학습률 0.001짜리 스텝을 더하면 결과는 그대로 1.0 이다. 스텝이 간격의 절반보다 작아 반올림에 사라진 것이다. 스텝 0.0001 을 1000번 더해도 bfloat16 의 가중치는 1.0 에서 움직이지 않는다(참값은 1.1, float32 로 더하면 1.100017). 학습률이 작아 보이는 것이 아니라 아예 학습이 일어나지 않는다. float16 은 1 둘레를 더 곱게 가리지만 가장 큰 수가 65,504 라 곧잘 넘치고, 가장 작은 쪽도 2⁻²⁴(약 6 × 10⁻⁸)의 절반보다 작은 수는 0이 된다. 머리말에서 물었던 Adam 의 <code>eps</code> 0.00000001 은 float16 에 담으면 0 이다.</p>
 <p>파울리우스 미치케비치우스(Paulius Micikevicius)와 동료들은 2018년 국제 학습 표현 학회(ICLR)에 낸 「혼합 정밀도 학습(Mixed Precision Training)」에서 세 가지 처방을 냈는데, 여기서는 그 가운데 둘을 본다(나머지 하나는 16비트 수의 곱을 더할 때 합을 32비트로 모으는 것이다). 논문이 다룬 형식은 float16 이지만 생각은 bfloat16 에도 그대로 통한다. 첫째는 가중치의 32비트 사본을 따로 두고 스텝을 그 사본에 모은 뒤, 계산할 때만 16비트로 내려 쓰는 것이다. 위의 스텝 0.0001 을 1000번 float32 사본에 모으면 1.100017 이 되고, 이것을 bfloat16 으로 내리면 1.101562 다. 스텝 하나하나는 16비트로 담을 수 없어도 모인 스텝은 남는다. 둘째는 손실을 큰 수로 곱해 그래디언트를 키운 뒤 계산하고 나중에 다시 나누는 것이다. 그래디언트 1 × 10⁻⁸ 은 float16 에서 0 이 되지만, 손실을 1024배 해서 담으면 1.025 × 10⁻⁵ 로 남고 다시 1024로 나누면 1.0012 × 10⁻⁸ 이 된다. 둘 다 숫자를 담는 그릇이 작을 때 작은 변화가 반올림에 묻히지 않게 따로 챙기는 방법이다. 정밀도는 튐의 여러 원인 가운데 하나일 뿐이지만, 스텝이 사라지거나 수가 넘치는 일은 학습 곡선에서 다른 원인의 튐과 비슷하게 보인다는 데서 원인을 가리기 어렵게 만든다.</p>
 
 </article>

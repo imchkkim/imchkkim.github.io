@@ -14,6 +14,9 @@
  *   - 로그인(구글), 서버 합치기, 댓글 칸(2.7·2.15절)
  *   - 책 안 낱말 검색: 목차 패널 맨 위·대문의 검색 칸, search-index.json 지연 로드, 도착한 페이지에서 찾은 말 표시
  *     (계약서 끝 「변경 (책 안 검색)」 절)
+ *   - 키보드·화면 읽기·휴대폰 다듬기: 함께 풀기·정리 문제 뒤 초점 유지, 목차 장 줄 읽기 글자, 본문 건너뛰기,
+ *     휴대폰 목차 패널(inert·aria-expanded·Escape·바깥 누름·열 때 초점), 패널을 지금 쪽 줄로 굴리기, ☰ 단추 숨기기,
+ *     테마 단추 aria-pressed (계약서 끝 「변경 (UX 다듬기, 2026-10-30)」 절)
  *
  * 지키는 것
  *   - 서버가 없거나 꺼져 있어도 진도·이어 읽기·함께 풀기·정리 문제는 브라우저 저장만으로 돈다.
@@ -437,8 +440,15 @@
     var anchorEl = body.length ? body[body.length - 1].el : h;
     after(anchorEl, bar);
 
+    /** 단추 줄을 DOM 에서 옮기면 그 안의 초점이 body 로 빠진다. 옮기기 전에 초점이 줄 안에 있었는지 본다 */
+    function focusInBar() { var a = document.activeElement; return !!(a && bar.contains(a)); }
+    /** 옮긴 뒤 초점을 돌려준다: 보이는 단추 가운데 want 먼저, 없으면 next → fold 차례(키보드로 이어 누르게, 2026-10-30) */
+    function refocus(want) {
+      var pick = [want, next, fold].filter(function (b) { return b && !b.hidden; })[0];
+      if (pick) { try { pick.focus({ preventScroll: true }); } catch (e) { pick.focus(); } }
+    }
     function reveal(n, scroll) {
-      var first = null, last = null;
+      var first = null, last = null, had = focusInBar() ? document.activeElement : null;
       while (n-- > 0 && shown < steps.length) {
         steps[shown].forEach(function (it) { it.el.classList.remove("lp-fold-hidden"); if (!first) first = it.el; last = it.el; });
         shown++;
@@ -448,6 +458,7 @@
       var end = shown >= steps.length;
       next.hidden = end; all.hidden = end; fold.hidden = shown === 0;
       if (!end) next.textContent = "다음 (" + shown + "/" + steps.length + ")";
+      if (had) refocus(end ? fold : had); // 끝 걸음이면 「다시 접기」로
       if (scroll && first) {
         var r = first.getBoundingClientRect();
         var bottom = shown < steps.length ? bar.getBoundingClientRect().bottom : r.bottom;
@@ -461,12 +472,14 @@
     }
     /** 펼친 풀이를 처음처럼 접는다. 문제 머리가 화면 위로 넘어갔으면 그리로 올린다 */
     function collapse() {
+      var had = focusInBar();
       steps.forEach(function (st) { st.forEach(function (it) { it.el.classList.add("lp-fold-hidden"); }); });
       shown = 0;
       syncBoxes();
       after(anchorEl, bar);
       next.textContent = startLabel;
       next.hidden = false; all.hidden = false; fold.hidden = true;
+      if (had) refocus(next);
       var r = h.getBoundingClientRect();
       if (r.top < 0) { try { h.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { h.scrollIntoView(); } }
     }
@@ -527,7 +540,8 @@
     var list = el("div", { class: "lp-q-choices", role: "group", "aria-label": "보기" });
     var items = choices.map(function (ch, i) {
       var btn = el("button", { type: "button", class: "lp-q-btn", html: ch.html });
-      var why = el("div", { class: "lp-q-why", "aria-live": "polite" });
+      // 이유 칸은 숨김 → 보임과 함께 글이 들어가 알림(aria-live)으로는 읽히지 않을 수 있다. 고른 뒤 초점을 이리로 옮겨 읽힌다
+      var why = el("div", { class: "lp-q-why", tabindex: "-1" });
       why.hidden = true;
       var item = el("div", { class: "lp-q-item" }, [btn, why]);
       btn.addEventListener("click", safe(function () { choose(i); }));
@@ -535,7 +549,7 @@
       return { ch: ch, item: item, btn: btn, why: why };
     });
     var HINT0 = "보기를 하나 고르세요. 틀려도 벌점 없이 다시 고를 수 있습니다.";
-    var hint = el("p", { class: "lp-q-hint", text: HINT0 });
+    var hint = el("p", { class: "lp-q-hint", text: HINT0, "aria-live": "polite" }); // 늘 있는 칸: 맞힘 알림은 여기서
     var again = el("button", { type: "button", class: "lp-q-again", text: "다시 풀기", hidden: "" });
     ul.parentNode.replaceChild(list, ul);
     list.parentNode.insertBefore(hint, list);
@@ -576,10 +590,21 @@
         renderPanel();
       }
     }
-    again.addEventListener("click", safe(function () { reset(true); }));
+    /** 고른 단추가 disabled 가 되면 초점이 body 로 빠진다. 초점이 이 문제 안에 있었으면 el 로 옮긴다 */
+    function moveFocus(had, to) {
+      if (!had || !to) return;
+      try { to.focus({ preventScroll: true }); } catch (e) { to.focus(); }
+    }
+    function focusHere() { var a = document.activeElement; return !!(a && q.contains(a)); }
+    again.addEventListener("click", safe(function () {
+      var had = focusHere();
+      reset(true);
+      moveFocus(had, items[0] && items[0].btn); // 「다시 풀기」는 숨는다 → 첫 보기로
+    }));
     function choose(i) {
       var it = items[i];
       if (q.classList.contains("lp-q-solved")) return;
+      var had = focusHere();
       if (!it.ch.correct) {
         it.item.classList.add("lp-q-wrong");
         it.btn.disabled = true;
@@ -589,9 +614,11 @@
         var k = (BOOK || "") + ":" + id;
         t[k] = (Number(t[k]) || 0) + 1;
         lsSet(K.tries, t);
+        moveFocus(had, it.why);
         return;
       }
       setSolved();
+      moveFocus(had, it.why);
       if (BOOK) {
         noteChange(function (p) { var b = bookOf(p, BOOK); if (!isRead(b.quizzes[id])) b.quizzes[id] = now(); });
         renderPanel();
@@ -991,8 +1018,14 @@
       var cs = st.chapters[ch.id];
       li.classList.add("lp-ch-li");
       var cnt = $(".lp-ch-count", a);
-      if (!cnt) { cnt = el("span", { class: "lp-ch-count" }); a.insertBefore(cnt, a.firstChild); } // 오른쪽 띄움이 첫 줄에 오게 맨 앞에
+      // 오른쪽 띄움이 첫 줄에 오게 맨 앞에. 화면 읽기에는 「0/81. DPO…」로 장 번호와 붙어 읽히니 숨기고,
+      // 링크 끝에 말로 쓴 진도를 보이지 않게 단다(2026-10-30)
+      if (!cnt) { cnt = el("span", { class: "lp-ch-count", "aria-hidden": "true" }); a.insertBefore(cnt, a.firstChild); }
       cnt.textContent = cs.done + "/" + cs.total;
+      var sr = $(".lp-ch-sr", a);
+      if (!sr) { sr = el("span", { class: "lp-sr lp-ch-sr" }); a.appendChild(sr); }
+      var pt = cs.total - cs.quizTotal, pd = cs.done - cs.quizDone;
+      sr.textContent = " (절 " + pt + "개 가운데 " + pd + "개 읽음" + (cs.quizTotal ? ", 정리 문제 " + cs.quizTotal + "개 가운데 " + cs.quizDone + "개 풂" : "") + ")";
       a.classList.toggle("lp-ch-done", cs.total > 0 && cs.done >= cs.total);
       a.classList.toggle("lp-ch-part", cs.done > 0 && cs.done < cs.total);
       var own = null, extra = null;
@@ -1427,39 +1460,69 @@
       var done = function () { if (my === seq) box.setAttribute("data-done", (all ? "all:" : "book:") + nq); }; // 다 그렸음(시험이 기다리는 표지)
       var booksP = all ? loadBooks() : Promise.resolve([{ id: BOOK, title: (INDEX && INDEX.title) || "", base: BASE }]);
       say("찾는 중…");
+      // 책마다 색인이 도착하는 대로 그린다(「모든 책」은 여덟 권을 다 받는 데 느린 망에서 10초 넘게 걸린다, 2026-10-30).
+      // 책 하나의 찾은 결과는 한 번만 셈하고(parts), 다 받으면 data-done 을 단다(시험이 기다리는 표지)
       booksP.then(function (books) {
-        return Promise.all(books.map(function (b) {
-          return loadSearchIndex(b.id, b.base).then(function (ix) { ix.shelfTitle = b.title || ix.title; return ix; }, function () { return null; });
-        }));
-      }).then(safe(function (idxs) {
-        if (my !== seq) return; // 그새 글자가 바뀌었다
-        var got = idxs.filter(Boolean);
-        list.textContent = "";
-        if (!got.length) { list.hidden = true; say("검색 색인을 불러오지 못했습니다."); done(); return; }
-        var res = [];
-        got.forEach(function (ix, bi) { var part = []; searchIn(ix, terms, phrase, part); part.forEach(function (r) { r.bi = bi; r.terms = terms; r.phrase = phrase; res.push(r); }); });
-        if (!res.length) { list.hidden = true; say("찾은 것이 없습니다"); done(); return; }
-        res.sort(function (a, b) { return b.score - a.score || a.bi - b.bi || a.order - b.order; });
-        var total = res.length, shown = res.slice(0, SEARCH_MAX);
-        if (all) shown.sort(function (a, b) { return a.bi - b.bi || b.score - a.score || a.order - b.order; }); // 책 이름별로 묶는다(책 안에서는 점수 순)
-        var lastBook = -1, lastPage = null;
-        shown.forEach(function (r) {
-          if (all && r.bi !== lastBook) { lastBook = r.bi; lastPage = null; list.appendChild(el("li", { class: "lp-s-book", text: r.idx.shelfTitle })); }
-          list.appendChild(el("li", { class: "lp-s-item" }, [hitLink(r, raw, lastPage === r.page)]));
-          lastPage = r.page;
+        if (my !== seq) return;
+        var n = books.length, parts = new Array(n), idxs = new Array(n), arrived = 0;
+        var draw = safe(function () {
+          if (my !== seq) return; // 그새 글자가 바뀌었다
+          var final = arrived >= n;
+          var progress = n > 1 && !final ? "찾는 중… " + arrived + "/" + n + "권" : "";
+          var res = [], nGot = 0;
+          for (var bi = 0; bi < n; bi++) {
+            if (!idxs[bi]) continue;
+            nGot++;
+            Array.prototype.push.apply(res, parts[bi]);
+          }
+          list.textContent = "";
+          if (final && !nGot) { list.hidden = true; say("검색 색인을 불러오지 못했습니다."); done(); return; }
+          if (!res.length) { list.hidden = true; say(final ? "찾은 것이 없습니다" : progress || "찾는 중…"); if (final) done(); return; }
+          res.sort(function (a, b) { return b.score - a.score || a.bi - b.bi || a.order - b.order; });
+          var total = res.length, shown = res.slice(0, SEARCH_MAX);
+          if (all) shown.sort(function (a, b) { return a.bi - b.bi || b.score - a.score || a.order - b.order; }); // 책 이름별로 묶는다(책 안에서는 점수 순)
+          var lastBook = -1, lastPage = null;
+          shown.forEach(function (r) {
+            if (all && r.bi !== lastBook) { lastBook = r.bi; lastPage = null; list.appendChild(el("li", { class: "lp-s-book", text: r.idx.shelfTitle })); }
+            list.appendChild(el("li", { class: "lp-s-item" }, [hitLink(r, raw, lastPage === r.page)]));
+            lastPage = r.page;
+          });
+          if (total > SEARCH_MAX) list.appendChild(el("li", { class: "lp-s-more", text: "더 있음: 모두 " + total + "곳 가운데 " + SEARCH_MAX + "곳만 보입니다. 낱말을 더 넣어 좁혀 보세요." }));
+          list.hidden = false;
+          say(progress || (total > SEARCH_MAX ? "" : total + "곳"));
+          if (final) done();
         });
-        if (total > SEARCH_MAX) list.appendChild(el("li", { class: "lp-s-more", text: "더 있음: 모두 " + total + "곳 가운데 " + SEARCH_MAX + "곳만 보입니다. 낱말을 더 넣어 좁혀 보세요." }));
-        list.hidden = false;
-        say(total > SEARCH_MAX ? "" : total + "곳");
-        done();
-      }));
+        books.forEach(function (b, bi) {
+          loadSearchIndex(b.id, b.base).then(function (ix) {
+            ix.shelfTitle = b.title || ix.title;
+            if (my !== seq) return;
+            var part = [];
+            searchIn(ix, terms, phrase, part);
+            part.forEach(function (r) { r.bi = bi; r.terms = terms; r.phrase = phrase; });
+            idxs[bi] = ix; parts[bi] = part;
+          }, function () { /* 그 책은 빈다 */ }).then(function () { arrived++; draw(); });
+        });
+        if (!n) draw();
+      });
     }
+    /** 검색 칸에 초점이 오면 색인을 미리 받기 시작한다(입력 전에는 받지 않는 원칙은 그대로: 초점 = 찾으려는 뜻) */
+    function prefetch() {
+      var all = rootOnly || (scope && scope.value === "all");
+      var booksP = all ? loadBooks() : Promise.resolve(BOOK ? [{ id: BOOK, base: BASE }] : []);
+      booksP.then(function (books) {
+        books.forEach(function (b) { loadSearchIndex(b.id, b.base).catch(function () { /* 찾을 때 다시 말한다 */ }); });
+      }).catch(function () { /* 없음 */ });
+    }
+    input.addEventListener("focus", safe(prefetch));
     input.addEventListener("input", function () { if (timer) clearTimeout(timer); timer = setTimeout(safe(run), 150); });
     input.addEventListener("keydown", function (ev) {
-      if (ev.key === "Escape") { input.value = ""; clear(); input.blur(); }
+      if (ev.key === "Escape") {
+        if (input.value) ev.stopPropagation(); // 글이 있으면 지우기만. 빈 칸에서 한 번 더 누르면 목차 패널이 닫힌다(휴대폰)
+        input.value = ""; clear(); input.blur();
+      }
       else if (ev.key === "Enter") { ev.preventDefault(); var a = $("a.lp-s-hit", list); if (a) a.click(); }
     });
-    if (scope) scope.addEventListener("change", safe(run));
+    if (scope) scope.addEventListener("change", safe(function () { prefetch(); run(); }));
     return { box: box, input: input };
   }
   var SEARCH = null;
@@ -1616,6 +1679,125 @@
     return true;
   }
 
+  // ── 키보드·화면 읽기·휴대폰 다듬기(계약서 끝 「변경 (UX 다듬기, 2026-10-30)」 절) ─────────
+  // 책 HTML(build.cjs)은 건드리지 않고, 여덟 권이 같은 꼴로 그리는 #sidebar·#sidebar-open·#sidebar-close·#theme-toggle 에 덧붙인다
+  /** 목차 패널이 본문 위에 겹쳐 뜨는 폭인가(☰ 단추가 보이는 폭. 책 CSS 는 1199px 이하) */
+  function panelOverlay() {
+    var ob = $("#sidebar-open");
+    if (!ob) return false;
+    try { return window.getComputedStyle(ob).display !== "none"; } catch (e) { return false; }
+  }
+  /** 목차 패널을 지금 읽는 쪽 줄이 보이게 패널 안에서만 스크롤한다(쪽 전체는 움직이지 않는다) */
+  var panelTouched = false; // 독자가 패널을 손으로 굴렸으면 처음 그린 뒤의 다시 맞추기는 하지 않는다
+  function scrollPanelToCurrent() {
+    var sb = $("#sidebar");
+    if (!sb || !visible(sb)) return;
+    var a = $("#sidebar .sidebar-toc a.current") || $("#sidebar a.active");
+    if (!a || !visible(a)) return;
+    var s = sb.getBoundingClientRect(), r = a.getBoundingClientRect();
+    if (r.top >= s.top + 24 && r.bottom <= s.bottom - 24) return; // 이미 보인다
+    sb.scrollTop += (r.top - s.top) - Math.max(0, (sb.clientHeight - r.height) / 2);
+  }
+  function initPanelKeys() {
+    var sb = $("#sidebar"), ob = $("#sidebar-open"), cb = $("#sidebar-close");
+    if (!sb) return;
+    ["wheel", "touchstart"].forEach(function (ev) { sb.addEventListener(ev, function () { panelTouched = true; }, { passive: true }); });
+    if (!ob) { scrollPanelToCurrent(); return; }
+    if (sb.id) ob.setAttribute("aria-controls", sb.id);
+    if (!sb.hasAttribute("tabindex")) sb.setAttribute("tabindex", "-1"); // 열 때 초점을 받는 자리(본문 Tab 차례에는 안 든다)
+    var linkAt = 0; // 패널 안 링크를 누른 때: 그 링크로 닫힌 것이면 초점을 ☰ 로 되돌리지 않는다(쪽 안 앵커로 간 자리 유지)
+    sb.addEventListener("click", function (ev) { if (ev.target && ev.target.closest && ev.target.closest("a[href]")) linkAt = now(); }, true);
+    var wasOpen = null;
+    var sync = safe(function () {
+      var ov = panelOverlay(), open = sb.classList.contains("open");
+      var inside = sb.contains(document.activeElement) && document.activeElement !== document.body;
+      // 닫힌 패널(화면 왼쪽 밖)은 Tab 차례·화면 읽기에서 뺀다. inert 가 없는 옛 브라우저는 CSS(visibility)로
+      var shut = ov && !open;
+      try { sb.inert = shut; } catch (e) { /* 없음 */ }
+      sb.classList.toggle("lp-sb-shut", shut);
+      if (ov) ob.setAttribute("aria-expanded", open ? "true" : "false"); else ob.removeAttribute("aria-expanded");
+      if (wasOpen !== null && ov && open !== wasOpen) {
+        if (open) {
+          ob.classList.remove("lp-menu-hide");
+          scrollPanelToCurrent();
+          if (!inside) { try { sb.focus({ preventScroll: true }); } catch (e) { sb.focus(); } }
+        } else if (inside && now() - linkAt > 600) {
+          try { ob.focus({ preventScroll: true }); } catch (e) { ob.focus(); }
+        }
+      }
+      wasOpen = open;
+    });
+    function close() {
+      if (cb && !cb.hidden) cb.click(); else sb.classList.remove("open");
+      sb.classList.remove("open");
+    }
+    if (typeof MutationObserver === "function") new MutationObserver(sync).observe(sb, { attributes: true, attributeFilter: ["class"] });
+    var rt = null;
+    window.addEventListener("resize", function () { if (rt) clearTimeout(rt); rt = setTimeout(sync, 150); });
+    sync();
+    if (!panelOverlay()) scrollPanelToCurrent();
+    // Escape 로 닫기
+    document.addEventListener("keydown", function (ev) {
+      if (ev.key !== "Escape" || ev.defaultPrevented || !panelOverlay() || !sb.classList.contains("open")) return;
+      var inside = sb.contains(document.activeElement);
+      close();
+      if (!inside) { try { ob.focus({ preventScroll: true }); } catch (e) { ob.focus(); } }
+    });
+    // 패널 바깥을 누르면 닫기. 그 누름은 뒤의 본문에 가지 않게 막는다(덮인 링크를 잘못 누르지 않게)
+    document.addEventListener("click", function (ev) {
+      if (!panelOverlay() || !sb.classList.contains("open")) return;
+      var t = ev.target;
+      if (!t || !t.nodeType || sb.contains(t) || ob.contains(t)) return;
+      if (t.closest && t.closest(".lp-jump")) return; // 이어 읽기 띠의 「처음부터 보기」는 그대로
+      ev.preventDefault();
+      ev.stopPropagation();
+      close();
+    }, true);
+  }
+  /** 휴대폰의 고정 ☰ 단추가 본문 글자를 가린다: 아래로 굴릴 때 숨기고 위로 올리거나 맨 위면 다시 보인다 */
+  function initMenuAutoHide() {
+    var ob = $("#sidebar-open");
+    if (!ob) return;
+    var lastY = window.scrollY || 0, ticking = false;
+    window.addEventListener("scroll", function () {
+      if (ticking) return;
+      ticking = true;
+      var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 16); };
+      raf(function () {
+        ticking = false;
+        var y = window.scrollY || 0, dy = y - lastY;
+        if (y <= 80) { ob.classList.remove("lp-menu-hide"); lastY = y; return; }
+        if (Math.abs(dy) < 12) return; // 손 떨림 정도는 모아서 본다
+        var sb = $("#sidebar");
+        ob.classList.toggle("lp-menu-hide", dy > 0 && !(sb && sb.classList.contains("open")));
+        lastY = y;
+      });
+    }, { passive: true });
+  }
+  /** 「본문으로 건너뛰기」: 초점을 받을 때만 보인다. 목차 링크 수십 개를 Tab 으로 지나지 않게 */
+  function initSkipLink() {
+    var main = $("main");
+    if (!main || !document.body) return;
+    var a = el("a", { class: "lp-skip", href: "#", text: "본문으로 건너뛰기" });
+    a.addEventListener("click", function (ev) {
+      ev.preventDefault(); // 주소에 해시를 남기지 않는다(이어 읽기·해시 펼침과 엇갈리지 않게)
+      if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
+      try { main.focus({ preventScroll: true }); } catch (e) { main.focus(); }
+      var h = $("h1", main) || main;
+      try { h.scrollIntoView({ block: "start" }); } catch (e) { /* 없음 */ }
+    });
+    document.body.insertBefore(a, document.body.firstChild);
+  }
+  /** 테마 단추: 이름은 늘 「다크모드 전환」이라, 지금 어두운 화면인지 aria-pressed 로 알린다 */
+  function initThemeButton() {
+    var t = $("#theme-toggle");
+    if (!t) return;
+    var html = document.documentElement;
+    var sync = function () { t.setAttribute("aria-pressed", html.getAttribute("data-theme") === "dark" ? "true" : "false"); };
+    sync();
+    if (typeof MutationObserver === "function") new MutationObserver(sync).observe(html, { attributes: true, attributeFilter: ["data-theme"] });
+  }
+
   // ── 시작 ────────────────────────────────────────────────────────────────
   function start() {
     document.documentElement.classList.add("lp-reader-on");
@@ -1623,6 +1805,7 @@
       safe(checkJump)();
       safe(initRootCards)();
       safe(initSearch)();
+      safe(initThemeButton)();
       return;
     }
     safe(foldAll)();
@@ -1642,6 +1825,10 @@
     safe(checkJump)();
     safe(initSearch)();
     safe(initPanel)();
+    safe(initSkipLink)();
+    safe(initThemeButton)();
+    safe(initMenuAutoHide)();
+    safe(initPanelKeys)(); // 검색 칸·독자 칸을 넣은 뒤(패널 안 자리가 정해진 뒤) 지금 쪽 줄로 굴린다
     onAuthChange.push(renderAccount, renderCommentAuth);
     afterSync.push(renderPanel, refreshQuizzes, renderReadRow);
 
@@ -1655,6 +1842,7 @@
       safe(initReadRow)();
       safe(renderCommentAuth)();
       safe(renderPanel)();
+      if (!panelTouched && !panelOverlay()) safe(scrollPanelToCurrent)(); // 진도 숫자·절 목록이 들어가 줄 자리가 바뀌었다
     }), warn);
 
     loadConfig().then(safe(function (cfg) {
