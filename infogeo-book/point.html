@@ -100,7 +100,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -266,6 +266,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -516,6 +521,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -598,7 +606,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -678,9 +686,9 @@ blockquote.person-story::after { content: ""; display: block; clear: both; }
 (function(){var s=null;try{s=localStorage.getItem('theme')}catch(e){}if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/infogeo-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/infogeo-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="정보기하학"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"infogeo-book","base":"/infogeo-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"infogeo-book","base":"/infogeo-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -709,7 +717,7 @@ blockquote.person-story::after { content: ""; display: block; clear: both; }
 <li><a href="convergence.html">수렴</a></li>
 <li><a href="full-map.html">전체 지도</a></li>
 <li><a href="transition-3.html">전환: 도구를 들고 세계로</a></li>
-<li><a href="diffusion.html">디퓨전</a></li>
+<li><a href="diffusion.html">생성의 기하학</a></li>
 <li><a href="flow-matching.html">플로우 매칭</a></li>
 <li><a href="broadening-narrowing.html">넓히기와 좁히기</a></li>
 <li><a href="scaling.html">자연 그래디언트</a></li>
@@ -757,10 +765,10 @@ blockquote.person-story::after { content: ""; display: block; clear: both; }
 <p>왜 공간을 바꾸면 분류가 쉬워지는 걸까? &quot;운이 좋아서&quot;가 아니라, 거기에는 구조적인 이유가 있다.</p>
 <p>64×64 RGB 이미지의 공간은 12,288차원이다. 이 공간의 점을 하나 무작위로 찍어보자. 12,288개의 숫자를 각각 0에서 255 사이에서 랜덤하게 뽑는다. 화면에 표시하면? 노이즈다. 텔레비전의 지직거림. 개도 아니고, 고양이도 아니고, 그 어떤 의미 있는 이미지도 아니다.</p>
 <p>12,288차원 공간은 광대하다. 그런데 &quot;개 사진&quot;이라고 부를 수 있는 것들은 그 광대한 공간의 극히 일부에만 존재한다. 랜덤으로 점을 찍어서 개 사진이 나올 확률은 사실상 0이다.</p>
-<p>개든 고양이든 풍경이든, 실제 이미지들은 12,288차원 공간 전체에 퍼져 있지 않다. 그 안의 훨씬 낮은 차원의 얇은 시트 위에 몰려 있다. 구겨지고 접힌 시트. 수학에서는 이것을 매니폴드(manifold)라고 부른다.</p>
-<p>좋은 공간이 존재할 수 있는 이유가 여기에 있다. 데이터가 애초에 저차원 시트 위에 살고 있으니까, 그 시트를 찾아서 펼치면 구조가 드러난다. CNN이 하는 일도 이 시트를 찾아 펼치는 일이다. 접혀 있어서 개와 고양이가 뒤엉켜 보이던 시트를 펼쳐 놓으면, 원래 다른 곳에 살고 있던 것들이 양쪽으로 갈라진다.</p>
-<p>이 관찰을 <strong>매니폴드 가설</strong>이라 부른다: 실제 데이터는 고차원 공간 전체가 아니라, 그 안의 저차원 매니폴드 위에 집중되어 있다.</p>
-<p>매니폴드라는 단어를 정식으로 다루려면 준비가 더 필요하다. 지금은 감각만 가져가자: <strong>데이터가 사는 진짜 공간은 우리가 보는 것보다 훨씬 작고, 그 작은 공간을 찾아내는 것이 기계학습의 핵심 문제 중 하나다.</strong></p>
+<p>실제 사진들은 공간 전체에 퍼져 있지 않고 그 안의 훨씬 낮은 차원의 얇은 판 근처에 몰려 있다고 보는 생각을 매니폴드 가설이라 부른다. 무작위로 찍은 점들이 상자 전체를 고르게 채우는 공이라면, 실제 사진들은 상자를 비스듬히 지나는 휜 얇은 판 근처에 모인다(공 대 얇은 판). 증명된 정리가 아니라 「가설」이고, 판이 몇 차원인지, 한 장인지 여러 조각인지는 자료마다 따로 재야 한다.</p>
+<p>좋은 공간이 존재할 수 있는 이유가 여기에 있다. 데이터가 애초에 얇은 판 위에 살고 있으니까, 그 판을 찾아서 펼치면 구조가 드러난다. CNN이 하는 일도 이 판을 찾아 펼치는 일이다. 구겨지고 접혀 있어서 개와 고양이가 뒤엉켜 보이던 판을 펼쳐 놓으면, 원래 다른 곳에 살고 있던 것들이 양쪽으로 갈라진다. 매니폴드(manifold)라는 단어를 정식으로 다루려면 준비가 더 필요하니, 지금은 감각만 가져가자: <strong>데이터가 사는 진짜 공간은 우리가 보는 것보다 훨씬 작고, 그 작은 공간을 찾아내는 것이 기계학습의 핵심 문제 중 하나다.</strong></p>
+<aside class="guide"><p class="guide-title">길잡이 · 『압축은 이해인가: 예측, 코드 길이, 낮은 차원』 「매니폴드 가설: 그럴듯한 그림은 얇은 판 위에 있다」</p><p>1,024칸 흑백 그림에서 인물 그림 70장과 무작위 칸 그림 70장의 차원을 직접 재어 견주는 실험과 공 대 얇은 판 그림, 칸은 많아도 따로 정할 숫자는 몇 개뿐인 이유를 묻는 토론. <a href="https://lameproof.com/compression-book/low-dimension-sec-manifold-hypothesis.html">이어 읽기</a></p>
+</aside>
 <h3 id="파이썬">파이썬</h3>
 <pre><code class="language-python">import numpy as np
 
@@ -853,11 +861,11 @@ print(&quot;3 ↔ 8           :&quot;, round(dist(a, b), 2))
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래서 원래 채점 코드는 물음에 쓴 세 낱말을 후보에서 빼요. 빼면요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>일본이요. 이제 맞네요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그건 규칙이 답을 도와준 거잖아요. 규칙을 빼면 얼마나 맞히는지도 봐야 하지 않아요?</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>실제로 그걸 잰 연구가 있어요. 2020년 학술지에 실린 한 논문이 구글 뉴스 단어 벡터로 표준 유추 시험을 다시 채점했더니, 규칙을 빼자 정답률이 0.74에서 0.21로 떨어졌어요. 틀린 답은 대부분 물음의 둘째 낱말, 여기로 치면 한국이었어요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>실제로 그걸 잰 연구가 있어요. 2020년 학술지 『Computational Linguistics』에 실린 니심(Malvina Nissim) 등의 논문이 구글 뉴스 단어 벡터로 표준 유추 시험을 다시 채점했더니, 규칙을 빼자 정답률이 0.74에서 0.21로 떨어졌어요. 틀린 답은 대부분 물음의 둘째 낱말, 여기로 치면 한국이었어요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>&quot;방향이 뜻을 가진다&quot;는 말은 맞는데, 그 방향만으로 답이 나온 건 아니었네요. 물음의 세 낱말을 빼는 채점 규칙이 정답률을 0.21에서 0.74로 올려 줬어요. 빈 종이가 3에 더 가까웠던 것처럼, 가장 가깝다는 것만으로 답이 되지는 않아요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="why-infogeo-sec-cramer-rao-inequality.html">&larr; 크라메르-라오 부등식: 정보와 기하학이 만난 자리</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="point-sec-distributions-as-points.html">확률분포는 점이다: 두 숫자로 분포 전체를 되살린다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="why-infogeo-sec-why-infogeo-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 4</span><a class="chapter-nav-next" href="point-sec-distributions-as-points.html">확률분포는 점이다: 두 숫자로 분포 전체를 되살린다 &rarr;</a></nav>
 </main>
 <script>
 (function () {

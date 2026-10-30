@@ -100,7 +100,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -266,6 +266,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -516,6 +521,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -598,7 +606,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -678,9 +686,9 @@ blockquote.person-story::after { content: ""; display: block; clear: both; }
 (function(){var s=null;try{s=localStorage.getItem('theme')}catch(e){}if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/infogeo-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/infogeo-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="정보기하학"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"infogeo-book","base":"/infogeo-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"infogeo-book","base":"/infogeo-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -709,7 +717,7 @@ blockquote.person-story::after { content: ""; display: block; clear: both; }
 <li><a href="convergence.html">수렴</a></li>
 <li><a href="full-map.html">전체 지도</a></li>
 <li><a href="transition-3.html">전환: 도구를 들고 세계로</a></li>
-<li><a href="diffusion.html">디퓨전</a></li>
+<li><a href="diffusion.html">생성의 기하학</a></li>
 <li><a href="flow-matching.html">플로우 매칭</a></li>
 <li><a href="broadening-narrowing.html">넓히기와 좁히기</a></li>
 <li><a href="scaling.html" class="active">자연 그래디언트</a></li>
@@ -886,9 +894,46 @@ for n in [64, 256, 1024, 4096]:
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>유클리드 길이로는 얼마씩 잘리는 건데?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>알아서 0.05 와 0.025 가 되지. 문제 1(두 오븐)에서 칸 대신 온도로 지시한 것처럼, 자르는 기준을 피셔 길이로 바꾸니 폭마다 다시 맞출 일이 없어졌어.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>유클리드 길이로만 자르는 클리핑은, 택배를 상자 크기로만 제한하는 것과 같네요. 같은 크기 상자에 솜을 넣든 쇳덩이를 넣든 통과하니까, 트럭이 실제로 버티는지는 무게로 재야 알죠. 상자 크기가 유클리드 길이, 무게가 피셔 길이예요.</p></div></div>
+</div><h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-scaling-1">
+<p><strong>물음.</strong> 폭 <span class="sym" style="color:#a05000">n</span>인 층 <span class="sym" style="color:#506890">y</span> = <span class="sym" style="color:#2e9e6e">w</span>·<span class="sym" style="color:#6f8fa6">x</span>(입력 좌표 ±1)에 같은 학습률로 경사하강 한 스텝을 걷는다. 한 스텝 뒤 출력의 변화는 폭에 따라 어떻게 되는가?</p>
+<ul>
+<li>[ ] 그래디언트의 좌표 하나하나가 작으니 폭이 커도 비슷하다 〔틀림: 좌표마다의 변화가 입력과 같은 방향으로 늘어서서, 폭만큼 한꺼번에 더해진다.〕</li>
+<li>[x] 폭에 비례해 커진다 〔맞음: 그래서 학습률 0.01이 폭 64에서는 알맞고, 폭 4096에서는 목표를 크게 지나친다.〕</li>
+</ul>
 </div>
+<div class="quiz" data-id="q-scaling-2">
+<p><strong>물음.</strong> 같은 손실을 <span class="sym" style="color:#2e9e6e">σ</span> 좌표와 <span class="sym" style="color:#2e9e6e">s</span> = log <span class="sym" style="color:#2e9e6e">σ</span> 좌표에서 같은 학습률로 한 스텝씩 내려간다. 맞는 말은?</p>
+<ul>
+<li>[ ] 손실과 학습률이 같으니 보통 경사하강도 두 좌표에서 같은 <span class="sym" style="color:#2e9e6e">σ</span>에 간다 〔틀림: 계산하면 0.56과 0.515로 갈린다. 두 좌표의 한 칸이 분포로 얼마인지가 다르다.〕</li>
+<li>[x] 보통 경사하강은 좌표에 따라 다른 곳에 가고, 자연 그래디언트는 작은 스텝에서 두 좌표가 같은 분포로 간다 〔맞음: 자연 그래디언트는 스텝을 분포가 달라지는 정도로 재므로, 좌표를 무엇으로 적든 거의 같은 곳에 닿는다.〕</li>
+<li>[ ] 자연 그래디언트는 스텝 크기와 상관없이 두 좌표에서 정확히 같은 점에 간다 〔틀림: 휘어진 좌표 위를 곧게 걸어 스텝의 제곱 크기만 한 차이가 남는다. 스텝이 작아지면 두 좌표 사이의 어긋남은 스텝보다 빨리 사라진다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-scaling-3">
+<p><strong>물음.</strong> 폭 <span class="sym" style="color:#a05000">n</span> = 1024와 <span class="sym" style="color:#a05000">n</span> = 4096인 층에서 스텝을 입력 방향 그대로 두고 유클리드 길이 0.05로 잘랐다. 두 스텝이 출력을 움직이는 양은?</p>
+<ul>
+<li>[ ] 길이가 같으니 같다 〔틀림: 유클리드 길이는 스텝이 출력을 얼마나 움직이는지 알려 주지 않는다.〕</li>
+<li>[x] 폭 4096 쪽이 두 배다 〔맞음: 입력 벡터의 길이가 폭의 제곱근인 32와 64라서, 출력은 1.6과 3.2만큼 움직인다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-scaling-4">
+<p><strong>물음.</strong> 1500짜리 두 선수가 같은 세 판을 두었다. 한 사람은 RD 200, 다른 사람은 RD 30이다. 글리코 방식으로 레이팅을 고치면?</p>
+<ul>
+<li>[ ] 엘로처럼 두 사람이 같은 만큼 움직인다 〔틀림: 엘로는 레이팅의 칸 수로 스텝을 정해서 RD와 상관없이 9.9점씩 움직인다. 글리코는 RD를 본다.〕</li>
+<li>[x] RD 200인 선수가 훨씬 크게 움직인다 〔맞음: 글리코는 그래디언트를 그 판들의 피셔 정보와 쌓인 믿음의 정밀도를 더한 값으로 나눈다. 믿음이 흐린 선수는 36점, 확실한 선수는 1.4점 고친다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-scaling-5">
+<p><strong>물음.</strong> 신경망 파라미터 위의 피셔 행렬에 대해 맞는 말은?</p>
+<ul>
+<li>[ ] 첸초프의 정리에 따라 파라미터 위에서도 하나뿐인 계량이고, 늘 역행렬이 있다 〔틀림: 서로 다른 가중치가 같은 분포를 내는 일이 흔해서, 파라미터 공간은 분포의 공간이 아니다.〕</li>
+<li>[x] 분포 공간의 피셔 계량을 파라미터로 끌어온 것이라 역행렬이 없을 수 있고, 그때는 대각선에 작은 값을 더해 푼다 〔맞음: 뉴런의 순서를 바꾸는 것처럼 분포를 바꾸지 않는 방향에서는 피셔로 잰 길이가 0이다.〕</li>
+</ul>
+</div>
+
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="broadening-narrowing-sec-entropy-collapse-rare-answers.html">&larr; 엔트로피 붕괴: 너무 좁히면 드문 정답을 잃는다</a><a class="chapter-nav-next" href="epilogue.html">에필로그 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="broadening-narrowing-sec-broadening-narrowing-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><a class="chapter-nav-next" href="epilogue.html">에필로그 &rarr;</a></nav>
 </main>
 <script>
 (function () {
