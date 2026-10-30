@@ -686,6 +686,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li class="toc-part">0차 최적화</li>
 <li><a href="zeroth-order.html">미분 없이: 0차 최적화</a></li>
 <li><a href="evolution.html">진화 알고리즘: 개체군으로 하는 탐색</a></li>
+<li><a href="structured-search.html">구조를 쓰는 탐색: 값만 잴 때 무엇을 더 알면 덜 재나</a></li>
 <li class="toc-part">1차 최적화</li>
 <li><a href="backprop.html" class="active">역전파: 자코비안 곱을 거꾸로</a><ul class="sidebar-toc"><li><a href="backprop.html" class="current">순방향 모드: 입력 하나에 대한 방향 미분을 앞으로 실어 나른다</a></li><li><a href="backprop-sec-credit-assignment.html">크레딧 할당: 끝의 숫자 하나를 누구에게 나눠 주나</a></li><li><a href="backprop-sec-reverse-mode-backpropagation.html">역전파: 출력 하나의 그래디언트를 뒤로 나눠 준다</a></li><li><a href="backprop-sec-automatic-differentiation-code.html">자동미분: 식이 아니라 코드를 미분한다</a></li><li><a href="backprop-sec-gradient-checkpointing.html">체크포인팅: 활성값을 다 남기지 않고 다시 계산한다</a></li><li><a href="backprop-sec-backprop-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="initialization.html">가중치 초기화: 신호가 커지지도 사라지지도 않게</a></li>
@@ -706,6 +707,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li class="toc-part">최적화가 일반화를 만든다</li>
 <li><a href="implicit-bias.html">암묵적 편향: 옵티마이저가 고르는 해</a></li>
 <li><a href="double-descent.html">이중 하강: 외우고 나서도 나아진다</a></li>
+<li class="toc-part">부록</li>
+<li><a href="dimuon.html">Dimuon: LoRA 에 맞춰 다시 짠 Muon</a></li>
 <li><a href="epilogue.html">맺음: 남은 물음</a></li></ol>
 </nav>
 <button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
@@ -713,7 +716,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <h1>역전파: 자코비안 곱을 거꾸로</h1>
 <h2 id="q-backprop">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
-<p>파이토치로 신경망을 학습시킬 때 그래디언트는 <code>loss.backward()</code> 한 줄로 얻는다. 파라미터(학습으로 고치는 숫자들)가 백만 개든 십억 개든 이 줄 하나가 파라미터마다 손실의 그래디언트를 채워 넣고, 걸리는 시간은 손실을 한 번 계산하는 시간과 자릿수가 같다. 그런데 미분 없이 손실값만 써서 그래디언트를 근사하던 0차 방법(파라미터 하나를 조금 바꿔 손실이 얼마나 변하는지 보는 유한 차분)은 파라미터 하나마다 손실을 한 번씩 더 계산해야 했다. 파라미터가 백만 개면 손실을 백만 번 넘게 계산한다. 같은 그래디언트인데 유한 차분은 손실 계산의 백만 배가 들고 <code>loss.backward()</code>는 몇 배로 끝난다. 두 방법의 비용 차이는 어디서 올까?</p>
+<p>파이토치로 신경망을 학습시킬 때 그래디언트는 <code>loss.backward()</code> 한 줄로 얻는다. 파라미터(학습으로 고치는 숫자들)가 백만 개든 십억 개든 이 줄 하나가 파라미터마다 손실의 그래디언트를 채워 넣고, 걸리는 시간은 손실을 한 번 계산하는 시간과 자릿수가 같다. 그런데 미분 없이 손실값만 써서 그래디언트를 근사하던 0차 방법(파라미터 하나를 조금 바꿔 손실이 얼마나 변하는지 보는 유한 차분)은 파라미터 하나마다 손실을 한 번씩 더 계산해야 했다. 파라미터가 백만 개면 손실을 백만 번 넘게 계산한다. 같은 그래디언트인데 유한 차분은 손실 계산의 백만 배가 들고 <code>loss.backward()</code>는 몇 배로 끝난다. 두 방법의 비용 차이는 어디서 올까? 길찾기의 표 채우기가 길마다 다시 더하던 뒷부분을 한 번만 계산해 다시 쓴 것처럼, 그래디언트에서도 같은 계산을 다시 쓰는 일이 일어나는 걸까?</p>
 <p>미분을 할 줄 안다고 해서 저절로 싸지는 것도 아니다. 손실은 층을 여럿 거친 함수라서, 함수를 이어 붙이면 미분은 단계마다의 미분을 곱한 것이라는 연쇄법칙을 쓰게 된다. 곱셈은 순서를 바꿔도 답이 같은데, 그렇다면 어느 쪽 끝부터 곱하느냐는 상관이 없을까?</p>
 <p>그리고 학습을 해 본 사람은 다른 것도 겪는다. 같은 모델로 답을 내기만 할 때는 넉넉하던 GPU 메모리가 학습을 시작하면 모자라서, 미니배치(한 스텝에 쓰는 데이터 묶음)를 줄여야 하는 일이 흔하다. 그래디언트를 구하는 일이 왜 메모리를 그렇게 많이 먹을까?</p>
 <p>이 장은 다음 물음에 차례로 답한다.</p>
@@ -859,7 +862,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그런 방법이 있어요. 그 전에, 손실 하나가 파라미터마다 무엇을 알려 줘야 하는지부터 따져 보죠.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="evolution-sec-evolution-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="backprop-sec-credit-assignment.html">크레딧 할당: 끝의 숫자 하나를 누구에게 나눠 주나 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="structured-search-sec-structured-search-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 6</span><a class="chapter-nav-next" href="backprop-sec-credit-assignment.html">크레딧 할당: 끝의 숫자 하나를 누구에게 나눠 주나 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A*와 가지치기: 하한으로 안 볼 곳 고르기 — 구조를 쓰는 탐색: 값만 잴 때 무엇을 더 알면 덜 재나 — 최적화: 경사하강에서 Muon 까지</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>@font-face{font-display:block;font-family:KaTeX_AMS;font-style:normal;font-weight:400;src:url(fonts/KaTeX_AMS-Regular.woff2) format("woff2"),url(fonts/KaTeX_AMS-Regular.woff) format("woff"),url(fonts/KaTeX_AMS-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Bold.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Regular.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Fraktur-Bold.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Bold.woff) format("woff"),url(fonts/KaTeX_Fraktur-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Fraktur-Regular.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Regular.woff) format("woff"),url(fonts/KaTeX_Fraktur-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Main-Bold.woff2) format("woff2"),url(fonts/KaTeX_Main-Bold.woff) format("woff"),url(fonts/KaTeX_Main-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Main-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Main-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Main-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Main-Italic.woff2) format("woff2"),url(fonts/KaTeX_Main-Italic.woff) format("woff"),url(fonts/KaTeX_Main-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Main-Regular.woff2) format("woff2"),url(fonts/KaTeX_Main-Regular.woff) format("woff"),url(fonts/KaTeX_Main-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Math-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Math-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Math-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Math-Italic.woff2) format("woff2"),url(fonts/KaTeX_Math-Italic.woff) format("woff"),url(fonts/KaTeX_Math-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:700;src:url(fonts/KaTeX_SansSerif-Bold.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Bold.woff) format("woff"),url(fonts/KaTeX_SansSerif-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:italic;font-weight:400;src:url(fonts/KaTeX_SansSerif-Italic.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Italic.woff) format("woff"),url(fonts/KaTeX_SansSerif-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:400;src:url(fonts/KaTeX_SansSerif-Regular.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Regular.woff) format("woff"),url(fonts/KaTeX_SansSerif-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Script;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Script-Regular.woff2) format("woff2"),url(fonts/KaTeX_Script-Regular.woff) format("woff"),url(fonts/KaTeX_Script-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size1;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size1-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size1-Regular.woff) format("woff"),url(fonts/KaTeX_Size1-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size2;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size2-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size2-Regular.woff) format("woff"),url(fonts/KaTeX_Size2-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size3;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size3-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size3-Regular.woff) format("woff"),url(fonts/KaTeX_Size3-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size4;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size4-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size4-Regular.woff) format("woff"),url(fonts/KaTeX_Size4-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Typewriter;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Typewriter-Regular.woff2) format("woff2"),url(fonts/KaTeX_Typewriter-Regular.woff) format("woff"),url(fonts/KaTeX_Typewriter-Regular.ttf) format("truetype")}.katex{font:normal 1.21em KaTeX_Main,Times New Roman,serif;line-height:1.2;position:relative;text-indent:0;text-rendering:auto}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.16.47"}.katex .katex-mathml{border:0;-webkit-clip-path:inset(50%);clip-path:inset(50%);height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.newline{display:block}.katex .base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .base,.katex .strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathboldfrak,.katex .textboldfrak{font-family:KaTeX_Fraktur;font-weight:700}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .mathsfit,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .hbox{width:100%}.katex .hbox,.katex .thinbox{display:inline-flex;flex-direction:row}.katex .thinbox{max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline,.katex .hline,.katex .mfrac .frac-line,.katex .overline .overline-line,.katex .rule,.katex .underline .underline-line{min-height:1px}.katex .mspace{display:inline-block}.katex .smash{display:inline;line-height:0}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.inner,.katex .llap>.inner,.katex .rlap>.inner{position:absolute}.katex .clap>.fix,.katex .llap>.fix,.katex .rlap>.fix{display:inline-block}.katex .llap>.inner{right:0}.katex .clap>.inner,.katex .rlap>.inner{left:0}.katex .clap>.inner>span{margin-left:-50%;margin-right:50%}.katex .rule{border:0 solid;display:inline-block;position:relative}.katex .hline,.katex .overline .overline-line,.katex .underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.root{margin-left:.2777777778em;margin-right:-.5555555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .sizing.reset-size2.size1{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .sizing.reset-size2.size3{font-size:1.1666666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .sizing.reset-size2.size4{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .sizing.reset-size2.size6{font-size:1.6666666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .sizing.reset-size2.size10{font-size:3.4566666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .sizing.reset-size2.size11{font-size:4.1466666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .sizing.reset-size3.size1{font-size:.7142857143em}.katex .fontsize-ensurer.reset-size3.size2,.katex .sizing.reset-size3.size2{font-size:.8571428571em}.katex .fontsize-ensurer.reset-size3.size3,.katex .sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .sizing.reset-size3.size4{font-size:1.1428571429em}.katex .fontsize-ensurer.reset-size3.size5,.katex .sizing.reset-size3.size5{font-size:1.2857142857em}.katex .fontsize-ensurer.reset-size3.size6,.katex .sizing.reset-size3.size6{font-size:1.4285714286em}.katex .fontsize-ensurer.reset-size3.size7,.katex .sizing.reset-size3.size7{font-size:1.7142857143em}.katex .fontsize-ensurer.reset-size3.size8,.katex .sizing.reset-size3.size8{font-size:2.0571428571em}.katex .fontsize-ensurer.reset-size3.size9,.katex .sizing.reset-size3.size9{font-size:2.4685714286em}.katex .fontsize-ensurer.reset-size3.size10,.katex .sizing.reset-size3.size10{font-size:2.9628571429em}.katex .fontsize-ensurer.reset-size3.size11,.katex .sizing.reset-size3.size11{font-size:3.5542857143em}.katex .fontsize-ensurer.reset-size4.size1,.katex .sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .sizing.reset-size5.size1{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .sizing.reset-size5.size2{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .sizing.reset-size5.size3{font-size:.7777777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .sizing.reset-size5.size4{font-size:.8888888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .sizing.reset-size5.size6{font-size:1.1111111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .sizing.reset-size5.size7{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .sizing.reset-size5.size10{font-size:2.3044444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .sizing.reset-size5.size11{font-size:2.7644444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .sizing.reset-size7.size1{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .sizing.reset-size7.size3{font-size:.5833333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .sizing.reset-size7.size4{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .sizing.reset-size7.size6{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .sizing.reset-size7.size10{font-size:1.7283333333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .sizing.reset-size7.size11{font-size:2.0733333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .sizing.reset-size8.size1{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .sizing.reset-size8.size2{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .sizing.reset-size8.size3{font-size:.4861111111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .sizing.reset-size8.size4{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .sizing.reset-size8.size6{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .sizing.reset-size8.size7{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .sizing.reset-size8.size10{font-size:1.4402777778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .sizing.reset-size8.size11{font-size:1.7277777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .sizing.reset-size9.size1{font-size:.2893518519em}.katex .fontsize-ensurer.reset-size9.size2,.katex .sizing.reset-size9.size2{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .sizing.reset-size9.size3{font-size:.4050925926em}.katex .fontsize-ensurer.reset-size9.size4,.katex .sizing.reset-size9.size4{font-size:.462962963em}.katex .fontsize-ensurer.reset-size9.size5,.katex .sizing.reset-size9.size5{font-size:.5208333333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .sizing.reset-size9.size6{font-size:.5787037037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .sizing.reset-size9.size7{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .sizing.reset-size9.size8{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .sizing.reset-size9.size10{font-size:1.2002314815em}.katex .fontsize-ensurer.reset-size9.size11,.katex .sizing.reset-size9.size11{font-size:1.4398148148em}.katex .fontsize-ensurer.reset-size10.size1,.katex .sizing.reset-size10.size1{font-size:.2410800386em}.katex .fontsize-ensurer.reset-size10.size2,.katex .sizing.reset-size10.size2{font-size:.2892960463em}.katex .fontsize-ensurer.reset-size10.size3,.katex .sizing.reset-size10.size3{font-size:.337512054em}.katex .fontsize-ensurer.reset-size10.size4,.katex .sizing.reset-size10.size4{font-size:.3857280617em}.katex .fontsize-ensurer.reset-size10.size5,.katex .sizing.reset-size10.size5{font-size:.4339440694em}.katex .fontsize-ensurer.reset-size10.size6,.katex .sizing.reset-size10.size6{font-size:.4821600771em}.katex .fontsize-ensurer.reset-size10.size7,.katex .sizing.reset-size10.size7{font-size:.5785920926em}.katex .fontsize-ensurer.reset-size10.size8,.katex .sizing.reset-size10.size8{font-size:.6943105111em}.katex .fontsize-ensurer.reset-size10.size9,.katex .sizing.reset-size10.size9{font-size:.8331726133em}.katex .fontsize-ensurer.reset-size10.size10,.katex .sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .sizing.reset-size10.size11{font-size:1.1996142719em}.katex .fontsize-ensurer.reset-size11.size1,.katex .sizing.reset-size11.size1{font-size:.2009646302em}.katex .fontsize-ensurer.reset-size11.size2,.katex .sizing.reset-size11.size2{font-size:.2411575563em}.katex .fontsize-ensurer.reset-size11.size3,.katex .sizing.reset-size11.size3{font-size:.2813504823em}.katex .fontsize-ensurer.reset-size11.size4,.katex .sizing.reset-size11.size4{font-size:.3215434084em}.katex .fontsize-ensurer.reset-size11.size5,.katex .sizing.reset-size11.size5{font-size:.3617363344em}.katex .fontsize-ensurer.reset-size11.size6,.katex .sizing.reset-size11.size6{font-size:.4019292605em}.katex .fontsize-ensurer.reset-size11.size7,.katex .sizing.reset-size11.size7{font-size:.4823151125em}.katex .fontsize-ensurer.reset-size11.size8,.katex .sizing.reset-size11.size8{font-size:.578778135em}.katex .fontsize-ensurer.reset-size11.size9,.katex .sizing.reset-size11.size9{font-size:.6945337621em}.katex .fontsize-ensurer.reset-size11.size10,.katex .sizing.reset-size11.size10{font-size:.8336012862em}.katex .fontsize-ensurer.reset-size11.size11,.katex .sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .accent .accent-body{position:relative}.katex .accent .accent-body:not(.accent-full){width:0}.katex .overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex svg{fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .stretchy:after,.katex .stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+</style>
+<style>/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-code: #f5f5f5;
+  --fg: #1a1a1a;
+  --fg-muted: #555;
+  --accent: #1565C0;
+  --border: #ddd;
+  --sidebar-bg: #fafafa;
+  --sidebar-width: 280px;
+  --chapter-gap: 3rem;
+  --max-width: 52rem;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1a2e;
+  --bg-code: #16213e;
+  --fg: #e0e0e0;
+  --fg-muted: #aaa;
+  --accent: #64b5f6;
+  --border: #333;
+  --sidebar-bg: #16213e;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.8;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ===== Main Content ===== */
+main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.chapter { margin-bottom: var(--chapter-gap); }
+
+hr.chapter-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: var(--chapter-gap) 0;
+}
+
+/* ===== Typography ===== */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+  font-weight: 700;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.3em; }
+h2 { font-size: 1.6rem; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+h3 { font-size: 1.3rem; }
+h4 { font-size: 1.1rem; }
+
+.chapter > h1:first-child,
+.chapter > h2:first-child,
+.chapter > h3:first-child { margin-top: 0; }
+
+p { margin: 0.8em 0; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+strong { font-weight: 700; }
+
+blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 0.5em 1em;
+  margin: 1em 0;
+  background: var(--bg-code);
+  color: var(--fg-muted);
+}
+
+/* 보법 노트: 본문 흐름 밖의 곁글 */
+aside.sidenote {
+  margin: 1.5em 0;
+  padding: 0.9em 1.2em;
+  border: 1px solid var(--border);
+  border-top: 3px solid #b8860b;
+  border-radius: 6px;
+  background: var(--bg-code);
+  font-size: 0.93em;
+}
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
+[data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
+[data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
+
+/* 길잡이: 다른 권(이론 책 ↔ 응용 책)으로 잇는 안내. 곁글과 다르게 왼쪽 선 + 작은 글씨 */
+aside.guide {
+  margin: 1.2em 0;
+  padding: 0.6em 1em;
+  border-left: 3px solid #0093b8;
+  background: var(--bg-code);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.9em;
+}
+aside.guide p { margin: 0.2em 0; }
+aside.guide .guide-title { font-weight: 700; color: #0078a0; }
+[data-theme="dark"] aside.guide { border-left-color: #37a9be; }
+[data-theme="dark"] aside.guide .guide-title { color: #5cc4d8; }
+
+/* ===== Code ===== */
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9em;
+  background: var(--bg-code);
+  padding: 0.15em 0.3em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--bg-code);
+  padding: 1em 1.2em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1em 0;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85em;
+}
+
+/* ===== Tables ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: 0.95em;
+}
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.8em;
+  text-align: left;
+}
+th { background: var(--bg-code); font-weight: 600; }
+
+/* ===== Lists ===== */
+ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
+li { margin: 0.3em 0; }
+
+/* ===== SVG ===== */
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+}
+
+[data-theme="dark"] svg text { fill: var(--fg); }
+[data-theme="dark"] svg line,
+[data-theme="dark"] svg path { stroke: var(--fg-muted); }
+
+/* KaTeX 는 근호·긴 화살표를 SVG 로 그린다. 위 전역 규칙에서 빼낸다. */
+.katex svg {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: inherit;
+  max-width: none;
+  margin: 0;
+}
+[data-theme="dark"] .katex svg path { stroke: inherit; }
+
+/* ===== Images ===== */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+  border-radius: 6px;
+}
+
+/* ===== 따라 계산해 보기 / 연습문제 ===== */
+.worked, .exercises {
+  margin: 1.8em 0;
+  padding: 1em 1.3em;
+  border-left: 4px solid var(--accent);
+  background: var(--bg-code);
+  border-radius: 0 8px 8px 0;
+}
+.worked > :first-child, .exercises > :first-child { margin-top: 0; }
+.exercises ol { padding-left: 1.4em; }
+.exercises li { margin: 0.6em 0; }
+.exercises .level {
+  display: inline-block;
+  font-size: 0.75em;
+  padding: 0 0.5em;
+  margin-right: 0.4em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--fg-muted);
+  vertical-align: 0.1em;
+}
+details.answer { margin: 0.4em 0 0.2em; font-size: 0.95em; }
+details.answer summary { cursor: pointer; color: var(--accent); }
+
+/* ===== 같이 풀기 세션 (대화) ===== */
+.exercises + h4 {
+  margin-top: 1.2em;
+  font-size: 0.95em;
+  color: var(--fg-muted);
+  letter-spacing: 0.02em;
+}
+.exercises + h4::before { content: "💬 "; }
+/* 인물 색은 .turn 에도 둔다: 문제 밖 대화(16장 맺음 등)에서도 이름·선 색이 나오게 */
+.dialogue, .turn { --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; }
+.dialogue {
+  margin: 1.5em 0 2em;
+}
+[data-theme="dark"] :is(.dialogue, .turn) { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
+.turn {
+  display: flex;
+  gap: 0.9em;
+  align-items: flex-start;
+  margin: 0.7em 0;
+}
+.turn-body {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55em 0.95em;
+  border-radius: 10px;
+  background: var(--bg-code);
+}
+.turn-body p { margin: 0; font-weight: 350; }
+.turn-body strong { font-weight: 600; }
+
+/* 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨 */
+.dialogue blockquote {
+  background: #fff;
+  color: #111;
+  border: 1.5px solid #222;
+  border-radius: 4px;
+  padding: 0.9em 1.2em;
+  margin: 0.8em 0 1.4em;
+  font-size: 1.12em;
+  font-weight: 600;
+  line-height: 1.75;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.dialogue blockquote p { margin: 0; }
+.dialogue blockquote code { background: #eee; color: #111; }
+[data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
+.turn-T { --who: var(--who-T); }
+.turn-M { --who: var(--who-M); }
+.turn-S { --who: var(--who-S); }
+.cast {
+  flex: 0 0 88px;
+  width: 88px;
+  margin: 0;
+}
+.cast img {
+  width: 88px; height: 88px;
+  object-fit: cover;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  float: none; box-shadow: none; max-width: none;
+}
+.cast figcaption {
+  margin-top: 0.25em;
+  text-align: center;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--who);
+}
+.cast-slot {
+  width: 88px; height: 88px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border: 1.5px dashed var(--who, var(--border));
+  border-radius: 12px;
+  color: var(--who);
+  font-size: 0.85em;
+  font-weight: 600;
+  opacity: 0.75;
+  line-height: 1.3;
+}
+.cast-slot small { font-weight: 400; font-size: 0.8em; color: var(--fg-muted); }
+/* 대화 사이의 수식·그림은 말풍선 폭에 맞춘다 */
+.dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: calc(88px + 0.9em); }
+@media (max-width: 600px) {
+  .cast, .cast img, .cast-slot { flex-basis: 56px; width: 56px; height: 56px; }
+  .cast-slot { font-size: 0.7em; }
+  .dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: 0; }
+}
+
+
+/* ===== KaTeX ===== */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}
+
+/* ===== Mermaid ===== */
+pre.mermaid {
+  background: transparent;
+  border: none;
+  text-align: center;
+  padding: 1em 0;
+}
+
+/* ===== Theme Toggle (목차 머리 안) ===== */
+#theme-toggle {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+#theme-toggle:hover { background: var(--border); }
+
+/* ===== Sidebar ===== */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 999;
+  transition: left 0.3s ease;
+  padding: 1rem;
+}
+#sidebar.open { left: 0; }
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-header h2 { font-size: 1.1rem; margin: 0; border: none; padding: 0; }
+.sidebar-actions { display: flex; align-items: center; gap: 0.4rem; }
+
+#sidebar-close {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: var(--fg);
+  padding: 0 0.3em;
+}
+
+#sidebar ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: chapter;
+}
+#sidebar li {
+  margin: 0.3em 0;
+}
+#sidebar a {
+  display: block;
+  padding: 0.4em 0.5em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--fg);
+}
+#sidebar a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+
+#sidebar-open {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 998;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#sidebar-open:hover { background: var(--border); }
+
+/* ===== Responsive ===== */
+@media (min-width: 1200px) {
+  #sidebar {
+    left: 0;
+    padding-top: 2rem;
+  }
+  #sidebar-open { display: none; }
+  #sidebar-close { display: none; }
+  main {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+@media (max-width: 600px) {
+  main { padding: 1rem 0.8rem 3rem; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  pre { font-size: 0.8em; padding: 0.8em; }
+}
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
+
+/* ===== Chapter Navigation ===== */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border);
+  gap: 1rem;
+}
+.chapter-nav a {
+  display: inline-block;
+  padding: 0.6em 1em;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9em;
+  color: var(--fg);
+  transition: background 0.2s;
+  max-width: 45%;
+}
+.chapter-nav a:hover {
+  background: var(--border);
+  text-decoration: none;
+}
+.chapter-nav-next { text-align: right; margin-left: auto; }
+.page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
+
+/* ===== 절 단위 페이지 ===== */
+.chapter-crumb { margin: 0 0 0.4em; font-size: 0.85em; }
+.chapter-crumb a { color: var(--fg-muted); }
+.chapter-paged > h2:first-of-type { margin-top: 0.4em; }
+#sidebar .sidebar-toc a.current { color: var(--accent); font-weight: 600; }
+
+/* ===== TOC Page ===== */
+.toc-page { padding-top: 1rem; }
+.toc-page h1 {
+  margin-bottom: 1.5rem;
+}
+/* 대문(교재 목록)으로 돌아가는 링크 */
+.site-nav { font-size: 0.9rem; }
+.site-nav a { color: var(--fg-muted); text-decoration: none; }
+.site-nav a:hover { color: var(--accent); }
+.site-nav + h1 { margin-top: 1rem; }
+@media print { .site-nav { display: none; } }
+.toc-list {
+  list-style: none;
+  padding: 0;
+  counter-reset: toc-ch;
+}
+.toc-list li {
+  margin: 0;
+}
+.toc-list a {
+  display: block;
+  padding: 0.7em 1em;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg);
+  font-size: 1.05em;
+  transition: background 0.2s;
+}
+.toc-list a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+/* 부 이름 줄(book.json 의 parts). 번호 없이 이름만 */
+.toc-list .toc-part {
+  margin-top: 1.6em;
+  padding: 0 1em 0.4em;
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+  border-bottom: 2px solid var(--border);
+}
+#sidebar .toc-part {
+  margin: 1.1em 0 0.2em;
+  padding: 0 0.5em;
+  font-size: 0.75em;
+  font-weight: 700;
+  color: var(--fg-muted);
+}
+
+/* ===== Sidebar Active ===== */
+#sidebar a.active {
+  background: var(--accent);
+  color: #fff;
+}
+#sidebar a.active:hover {
+  background: var(--accent);
+}
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
+
+/* ===== Print ===== */
+@media print {
+  #sidebar, #sidebar-open, #theme-toggle { display: none; }
+  main { margin: 0; max-width: none; }
+}
+
+/* ===== 그림과 캡션 ===== */
+figure.fig { margin: 1.8em auto; text-align: center; }
+figure.fig img { margin: 0 auto; }
+figure.fig figcaption {
+  margin-top: 0.5em;
+  font-size: 0.86em;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: center;
+}
+/* 초상화: 오른쪽에 작게 띄운다 */
+figure.fig-portrait {
+  float: right;
+  clear: right; /* 초상화가 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
+  width: 200px;
+  margin: 0.3em 0 1em 1.5em;
+  text-align: left;
+}
+figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
+/* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
+.portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
+.portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
+@media (max-width: 600px) {
+  figure.fig-portrait { float: none; width: 170px; margin: 1em auto; }
+  .portrait-row { gap: 1em; }
+  .portrait-row figure.fig-portrait { width: 140px; }
+}
+/* 다크모드에서 흰 바탕 그림이 눈부시지 않게 */
+[data-theme="dark"] figure.fig img { filter: brightness(0.92); }
+
+/* ===== 수식 ===== */
+.math-block { margin: 1.2em 0; }
+.math-block .katex-display { margin: 0; }
+.math-legend {
+  margin: -0.4em auto 1.6em;
+  padding: 0.2em 1em;
+  width: fit-content;
+  max-width: 100%;
+  border-left: 3px solid var(--border);
+  background: var(--bg-code);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.86em;
+}
+.math-legend .katex-display > .katex { text-align: left; }
+/* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
+[data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
+
+/* ===== 인터랙티브 위젯 ===== */
+.widget-embed {
+  margin: 1.8em 0 2.2em;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-code);
+}
+.widget-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3em 0.8em;
+  padding: 0.55em 1em;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9em;
+}
+.widget-tag {
+  font-size: 0.78em;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.03em;
+}
+.widget-label { font-weight: 600; flex: 1; min-width: 12em; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
+.widget-embed iframe {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border: 0;
+  background: transparent;
+  color-scheme: normal;
+}
+.widget-embed noscript img { margin: 0; border-radius: 0; }
+
+/* ===== 장 안의 목차 (사이드바) ===== */
+.sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
+#sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
+.toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+
+/* 표지: 목차 페이지 첫머리. 그림의 원본과 그리는 스크립트는 ~/lameproof/shared/covers/ */
+.book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
+.book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
+@media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
+<script>
+(function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
+</script>
+<link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
+</head>
+<body>
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="index.html" style="color:inherit;text-decoration:none">최적화: 경사하강에서 Muon 까지</a></h2>
+    <div class="sidebar-actions">
+      <button id="theme-toggle" aria-label="다크모드 전환">&#x1F319;</button>
+      <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
+    </div>
+  </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
+  <ol><li><a href="preface.html">머리말: 경사하강에서 Muon 까지</a></li>
+<li class="toc-part">미분과 근사</li>
+<li><a href="loss-landscape.html">손실 지형: 공을 굴려 손실의 바닥을 찾는 첫 실험</a></li>
+<li><a href="gradient-jacobian.html">그래디언트와 자코비안: 미분 가능성에서 연쇄법칙까지</a></li>
+<li><a href="taylor.html">테일러 전개: 0·1·2차 근사의 사다리</a></li>
+<li><a href="lipschitz.html">립시츠 연속: 함수가 얼마나 빨리 변할 수 있나</a></li>
+<li><a href="convexity.html">볼록이면 왜 쉬운가: 극소가 곧 최소</a></li>
+<li class="toc-part">0차 최적화</li>
+<li><a href="zeroth-order.html">미분 없이: 0차 최적화</a></li>
+<li><a href="evolution.html">진화 알고리즘: 개체군으로 하는 탐색</a></li>
+<li><a href="structured-search.html" class="active">구조를 쓰는 탐색: 값만 잴 때 무엇을 더 알면 덜 재나</a><ul class="sidebar-toc"><li><a href="structured-search.html">밸런스 패치: 수치를 돌려 풀리는 것과 아닌 것</a></li><li><a href="structured-search-sec-dynamic-programming-reuse.html">동적 계획법: 쪼개서 다시 쓰기</a></li><li><a href="structured-search-sec-ant-colony-memory.html">개미 군집: 좋았던 길을 분포로 기억하기</a></li><li><a href="structured-search-sec-astar-lower-bound-pruning.html" class="current">A*와 가지치기: 하한으로 안 볼 곳 고르기</a></li><li><a href="structured-search-sec-structured-search-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li class="toc-part">1차 최적화</li>
+<li><a href="backprop.html">역전파: 자코비안 곱을 거꾸로</a></li>
+<li><a href="initialization.html">가중치 초기화: 신호가 커지지도 사라지지도 않게</a></li>
+<li><a href="gradient-descent.html">경사하강: 학습률은 어디까지 키울 수 있나</a></li>
+<li><a href="sgd.html">확률적 경사하강: 노이즈 섞인 그래디언트로 걷기</a></li>
+<li class="toc-part">2차 최적화</li>
+<li><a href="newton.html">뉴턴법과 헤시안: 곡률을 알면 한 번에</a></li>
+<li><a href="sharpness.html">샤프니스: 안정성의 가장자리</a></li>
+<li class="toc-part">2차의 근사와 큰 모델의 스텝</li>
+<li><a href="momentum.html">모멘텀: 무거운 공과 네스테로프 가속</a></li>
+<li><a href="adaptive.html">적응 학습률: AdaGrad 에서 AdamW 까지</a></li>
+<li><a href="curvature-approx.html">곡률 근사: 준뉴턴에서 K-FAC·Shampoo 까지</a></li>
+<li><a href="muon.html">Muon: 노름을 바꾸면 가장 가파른 방향이 바뀐다</a></li>
+<li><a href="mup.html">μP: 폭이 달라져도 같은 학습률로</a></li>
+<li class="toc-part">분포를 옮기는 최적화</li>
+<li><a href="optimal-transport.html">최적 수송: 흙을 가장 적게 나르는 짝짓기</a></li>
+<li><a href="wgan.html">WGAN: 최소최대와 1-립시츠 판별기</a></li>
+<li class="toc-part">최적화가 일반화를 만든다</li>
+<li><a href="implicit-bias.html">암묵적 편향: 옵티마이저가 고르는 해</a></li>
+<li><a href="double-descent.html">이중 하강: 외우고 나서도 나아진다</a></li>
+<li class="toc-part">부록</li>
+<li><a href="dimuon.html">Dimuon: LoRA 에 맞춰 다시 짠 Muon</a></li>
+<li><a href="epilogue.html">맺음: 남은 물음</a></li></ol>
+</nav>
+<button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
+<main>
+<article class="chapter chapter-paged">
+<p class="chapter-crumb"><a href="structured-search.html">구조를 쓰는 탐색: 값만 잴 때 무엇을 더 알면 덜 재나</a></p>
+<h2 id="sec-astar-lower-bound-pruning">A*와 가지치기: 하한으로 안 볼 곳 고르기<span id="a-와-가지치기-하한으로-안-볼-곳-고르기" class="anchor-alias"></span></h2>
+<p>개미 군집은 좋았던 길을 냄새로 기억해 좋은 답을 빨리 모으지만, 그 답이 가장 짧다고 보증하지는 않는다. 보증까지 받으려면 다시 한 칸씩 확정해 나가야 한다. 동적 계획법처럼 출발점에서 가까운 칸부터 「여기까지 오는 가장 싼 비용」을 확정해 나가면 가장 싼 길을 틀림없이 찾는다. 그런데 이 방법은 도착점이 어느 방향에 있는지 모르는 채로 사방으로 고르게 퍼져서, 서울에서 부산으로 가는 길을 찾는데 강릉과 인천 방향의 길까지 똑같이 열심히 따진다. 사람은 부산이 남동쪽에 있고 거기까지 직선으로도 300 km 넘게 남았다는 것을 알기 때문에 북쪽 길은 처음부터 보지 않는다. 도착점까지 남은 비용을 조금이라도 알면 볼 곳을 줄일 수 있을 것 같은데, 남은 비용을 「대충」 알아도 될까? 대충 아는 값을 믿고 어떤 길을 버렸다가 그 길이 사실 가장 싼 길이었다면 어떻게 될까?</p>
+<h3 id="hist-hart-nilsson-raphael-shakey" class="history" data-people="hart-peter nilsson-nils raphael-bertram">역사: 셰이키의 길찾기와 하트·닐슨·라파엘의 1968년 논문<span id="역사-셰이키의-길찾기와-하트-닐슨-라파엘의-1968년-논문" class="anchor-alias"></span></h3>
+<p>1966년 미국 스탠퍼드 연구소(Stanford Research Institute, 지금의 SRI 인터내셔널)의 인공지능 그룹은 카메라를 달고 바퀴로 움직이는 로봇을 만들기 시작했다. 방 안을 보고 무엇이 어디 있는지 알아낸 뒤, 스스로 계획을 세워 목적지까지 움직이는 로봇이었다. 계획을 이끈 찰스 로젠(Charles Rosen)은 이름을 한 달쯤 고민하던 끝에, 그룹의 한 사람이 「몹시 흔들리며 돌아다니니 그냥 셰이키(Shakey)라고 부르자」고 했다고 회고했다. 셰이키 사업은 1972년까지 이어졌고, 셰이키는 지금 미국 컴퓨터 역사 박물관에 있다.</p>
+<figure class="fig "><img src="images/structured-search/s3_h1_shakey.jpg" alt="셰이키(1966~1972 스탠퍼드 연구소). 위에 카메라를 얹은 바퀴 달린 로봇이다. 미국 컴퓨터 역사 박물관 전시. 사진: The wub, 출처: Wikimedia Commons(SRI Shakey robot, 1969, Computer History Museum.jpg), CC BY-SA 4.0" loading="lazy"><figcaption>셰이키(1966~1972 스탠퍼드 연구소). 위에 카메라를 얹은 바퀴 달린 로봇이다. 미국 컴퓨터 역사 박물관 전시. 사진: The wub, 출처: Wikimedia Commons(SRI Shakey robot, 1969, Computer History Museum.jpg), CC BY-SA 4.0</figcaption></figure>
+<p>셰이키가 장애물을 피해 방을 건너려면 갈 수 있는 자리들을 점으로, 오갈 수 있는 곳을 선으로 이은 그래프에서 가장 짧은 길을 찾아야 했다. 같은 그룹의 피터 하트(Peter Hart), 닐스 닐슨(Nils Nilsson), 버트럼 라파엘(Bertram Raphael)은 1967년 11월에 보낸 원고를 1968년 7월 『IEEE 시스템 과학과 사이버네틱스 회보』에 실었다(「최소 비용 경로를 휴리스틱으로 정하는 일의 형식적 기초」). 논문 머리말은 당시의 길찾기 방법을 두 가지 접근으로 나눴다. 그래프의 성질을 따지는 수학적 방법은 어떤 그래프에서도 가장 짧은 길을 찾는다는 보장이 있었지만, 계산을 해낼 수 있는지보다 답에 닿는지를 더 따졌다. 1959년 에츠허르 다익스트라(Edsger Dijkstra)가 세 쪽짜리 글로 낸, 출발점에서 가까운 점부터 거리를 확정해 나가는 방법도 이런 방법이다. 문제에 대해 아는 것을 써서 빨리 찾는 휴리스틱 방법(경험에서 나온 요령으로 찾는 방법)들은 효율은 좋았지만 가장 짧은 길을 찾는다는 보장이 없었다.</p>
+<p>전해지는 이야기로는, 닐슨이 처음 셰이키에 쓰자고 한 방법은 그래프 트래버서(Graph Traverser)라는 방법으로, 도착점까지 남은 거리의 추정값만 보고 다음에 볼 점을 골랐다. 라파엘이 거기에 출발점에서 이미 온 거리를 더해서 고르자고 했고, 하트가 그렇게 해도 가장 짧은 길을 놓치지 않으려면 추정값이 지켜야 할 조건을 세웠다고 한다. 남은 거리만 보면 왜 모자란지는 도시 다섯 개로 그려 보면 바로 보인다.</p>
+<figure class="fig "><img src="images/structured-search/s3_h2_two_rules.png" alt="도시 다섯과 도로(도로 길이는 이 책이 정한 값이고 늘 직선거리 이상이다). 왼쪽: 도착 G 까지 남은 직선거리만 보면 G 에 가까운 P 를 먼저 열고, P 에서 G 로 가는 14.5 를 찾고 멈춘다. 오른쪽: 이미 온 도로 길이와 남은 직선거리를 더해 고르면 Q, R 을 거쳐 13.6 을 찾는다(sources/structured-search/s3_figs.py, 숫자는 s3_astar.py)" loading="lazy"><figcaption>도시 다섯과 도로(도로 길이는 이 책이 정한 값이고 늘 직선거리 이상이다). 왼쪽: 도착 G 까지 남은 직선거리만 보면 G 에 가까운 P 를 먼저 열고, P 에서 G 로 가는 14.5 를 찾고 멈춘다. 오른쪽: 이미 온 도로 길이와 남은 직선거리를 더해 고르면 Q, R 을 거쳐 13.6 을 찾는다(sources/structured-search/s3_figs.py, 숫자는 s3_astar.py)</figcaption></figure>
+<p>논문은 두 접근을 하나로 묶었다. 논문이 든 예는 도시와 도로였다. 도시 사이의 가장 짧은 도로는 두 도시 사이의 항공 거리(직선거리)보다 짧을 수 없다는 지식을 쓰면, 따져 봐야 할 도시의 수를 줄이면서도 가장 짧은 길을 놓치지 않는다는 것이다. 논문은 이렇게 고른 방법을 「A*」(에이 스타)라 불렀고, 가벼운 가정 아래에서 같은 정보를 받은 방법들 가운데 가장 짧은 길을 보장하는 데 필요한 만큼만 점을 연다는 것을 증명했다.</p>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>지도 앱이 1초 만에 길을 찾아 주는 걸 보면, 남은 직선거리를 더하는 건 누구나 떠올릴 생각 같은데요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>1968년 논문 머리말을 다시 볼까요. 그때 길찾기 방법은 두 가지 접근으로 나뉘었다고 했죠. 각 접근은 무엇을 갖고 무엇이 없었어요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>수학 쪽은 가장 짧은 길이라는 보장이 있었지만 계산량은 덜 따졌고, 휴리스틱 쪽은 빨랐지만 보장이 없었어요. 둘 다 가진 방법이 없었던 거네요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>셰이키는 방을 건널 때마다 그 계산을 직접 해야 하는 로봇이었어요. 빨리 찾는 요령이 엉뚱한 길을 내놓아도, 그게 엉뚱한지 알려 줄 기준이 없었고요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M03"><img src="images/cast/M03.webp" alt="김민준 M03" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 하트가 세운 조건이 그 기준이에요? 남은 거리를 더하는 건 라파엘 생각이었다면서요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>더하기만 하면 언제 맞는지는 모르죠. 「이 요령을 쓰면 무엇을 버려도 괜찮은가」를 증명으로 말해 준 게 논문의 일이었어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>논문의 예가 직선거리였으니까 조건은 「직선거리처럼 실제보다 길게 나오지 않는다」쯤일 것 같은데요. 실제보다 길게 나오는 추정을 쓰면 정말 길을 놓쳐요?</p></div></div>
+<h3 id="20-12-격자에서-진흙-연못-돌아가기">20 × 12 격자에서 진흙 연못 돌아가기</h3>
+<p>추정값이 실제보다 길게 나오면 어떻게 되는지는, 가장 짧은 길이 직선에서 크게 벗어나는 지도에서 시험하는 것이 좋다. 가로 20칸, 세로 12칸 격자에서 위아래·좌우로만 움직이고, 보통 칸은 지나는 데 1분, 가운데 8 × 8 칸을 차지한 진흙 연못 칸은 3분이 걸린다. 출발 칸은 왼쪽 (1, 6), 도착 칸은 오른쪽 (18, 6)이라 그 사이에 연못이 가로놓여 있다. 연못을 곧장 건너면 33분이고, 아래로 돌아가면 25분이다.</p>
+<p>칸을 「연다」는 것은 그 칸까지 오는 가장 싼 비용을 확정하고, 그 칸의 이웃들로 가는 비용을 계산하는 일이다. 탐색은 아직 열지 않은 칸 가운데 하나를 골라 여는 일을 도착 칸을 열 때까지 되풀이한다. 다음에 열 칸은 「출발에서 그 칸까지 이미 온 비용」에 「그 칸에서 도착까지 남은 비용의 추정값」을 더한 수가 가장 작은 칸으로 고른다(같으면 이미 온 비용이 큰 칸을 먼저). 추정값으로 세 가지를 써 보았다. 0을 쓰면 다익스트라 알고리즘이 되고, 맨해튼 거리(도착 칸까지 남은 가로 칸 수와 세로 칸 수의 합)를 쓰면 A*, 맨해튼 거리의 두 배를 쓰면 부풀린 추정이다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>남은 비용의 추정값</th>
+<th>연 칸 (240칸 가운데)</th>
+<th>찾은 길</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 (다익스트라)</td>
+<td>232</td>
+<td>25분 (아래로 돌아감)</td>
+</tr>
+<tr>
+<td>맨해튼 거리</td>
+<td>74</td>
+<td>25분 (아래로 돌아감)</td>
+</tr>
+<tr>
+<td>맨해튼 거리 × 2</td>
+<td>43</td>
+<td>33분 (연못을 건넘)</td>
+</tr>
+</tbody>
+</table></div>
+<figure class="fig "><img src="images/structured-search/s3_t1_grid_open.png" alt="같은 격자에서 세 탐색이 연 칸(푸른 칠)과 찾은 길. 왼쪽: 다익스트라는 240칸 가운데 232칸을 열었다. 가운데: A* 는 74칸만 열고 같은 25분짜리 길을 찾았다. 오른쪽: 추정값을 두 배로 부풀리면 43칸만 열지만 연못을 건너는 33분짜리 길에서 멈춘다(sources/structured-search/s3_figs.py, 숫자는 s3_astar.py)" loading="lazy"><figcaption>같은 격자에서 세 탐색이 연 칸(푸른 칠)과 찾은 길. 왼쪽: 다익스트라는 240칸 가운데 232칸을 열었다. 가운데: A* 는 74칸만 열고 같은 25분짜리 길을 찾았다. 오른쪽: 추정값을 두 배로 부풀리면 43칸만 열지만 연못을 건너는 33분짜리 길에서 멈춘다(sources/structured-search/s3_figs.py, 숫자는 s3_astar.py)</figcaption></figure>
+<p>맨해튼 거리는 남은 칸을 모두 1분짜리 보통 칸으로 지난다고 친 값이라 어느 칸에서도 실제로 남은 비용보다 크지 않다. 출발 칸에서 맨해튼 거리는 17분이고 실제로 남은 비용은 25분이다. 두 배로 부풀린 추정은 출발 칸에서 34분이 되어 실제 25분을 넘는다. 탐색은 아래로 돌아가는 칸들을 「거기로 가면 비싸다」고 믿어 열지 않았고, 도착 칸에 33분으로 먼저 닿자 33분을 답으로 내놓았다. 연 칸 수는 다익스트라 232, A* 74, 부풀린 추정 43으로 줄었지만, 부풀린 추정이 열지 않은 칸 가운데 정답 길의 칸이 들어 있었다.</p>
+<p>A* 가 칸을 고르는 수는 이미 온 비용과 남은 비용의 추정값을 더한 것이다.</p>
+<div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#008787"><mi>g</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#87965a"><mi>n</mi></mstyle><mo stretchy="false">)</mo><mo>+</mo><mstyle mathcolor="#874b0f"><mi>h</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#87965a"><mi>n</mi></mstyle><mo stretchy="false">)</mo><mo separator="true">,</mo><mspace width="2em"/><mn>0</mn><mtext>  </mtext><mo>≤</mo><mtext>  </mtext><mstyle mathcolor="#874b0f"><mi>h</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#87965a"><mi>n</mi></mstyle><mo stretchy="false">)</mo><mtext>  </mtext><mo>≤</mo><mtext>  </mtext><mstyle mathcolor="#874b0f"><msup><mi>h</mi><mo lspace="0em" rspace="0em">∗</mo></msup></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#87965a"><mi>n</mi></mstyle><mo stretchy="false">)</mo><mspace width="1em"/><mo stretchy="false">(</mo><mtext>모든 칸 </mtext><mstyle mathcolor="#87965a"><mi>n</mi></mstyle><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\textcolor{#008787}{g}(\textcolor{#87965a}{n}) + \textcolor{#874b0f}{h}(\textcolor{#87965a}{n}), \qquad 0 \;\le\; \textcolor{#874b0f}{h}(\textcolor{#87965a}{n}) \;\le\; \textcolor{#874b0f}{h^{*}}(\textcolor{#87965a}{n}) \quad (\text{모든 칸 } \textcolor{#87965a}{n})
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;color:#008787;">g</span><span class="mopen">(</span><span class="mord mathnormal" style="color:#87965a;">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="color:#874b0f;">h</span><span class="mopen">(</span><span class="mord mathnormal" style="color:#87965a;">n</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="color:#874b0f;">h</span><span class="mopen">(</span><span class="mord mathnormal" style="color:#87965a;">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord" style="color:#874b0f;"><span class="mord mathnormal" style="color:#874b0f;">h</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7387em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#874b0f;"><span class="mord mtight" style="color:#874b0f;"><span class="mord mtight" style="color:#874b0f;">∗</span></span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="color:#87965a;">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:1em;"></span><span class="mopen">(</span><span class="mord text"><span class="mord hangul_fallback">모든</span><span class="mord"> </span><span class="mord hangul_fallback">칸</span><span class="mord"> </span></span><span class="mord mathnormal" style="color:#87965a;">n</span><span class="mclose">)</span></span></span></span></span></div>
+<div class="math-block math-legend"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#87965a"><mi>n</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>고를 후보인 칸</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#008787"><mi>g</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#87965a"><mi>n</mi></mstyle><mo stretchy="false">)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>출발에서 </mtext><mstyle mathcolor="#87965a"><mi>n</mi></mstyle><mtext> 까지 지금까지 찾은 가장 싼 비용</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#874b0f"><mi>h</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#87965a"><mi>n</mi></mstyle><mo stretchy="false">)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#87965a"><mi>n</mi></mstyle><mtext> 에서 도착까지 남은 비용의 추정값 (맨해튼 거리)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#874b0f"><msup><mi>h</mi><mo lspace="0em" rspace="0em">∗</mo></msup></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#87965a"><mi>n</mi></mstyle><mo stretchy="false">)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#87965a"><mi>n</mi></mstyle><mtext> 에서 도착까지 실제로 남은 가장 싼 비용</mtext></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{ll}
+\textcolor{#87965a}{n} &amp; \text{고를 후보인 칸} \\
+\textcolor{#008787}{g}(\textcolor{#87965a}{n}) &amp; \text{출발에서 } \textcolor{#87965a}{n} \text{ 까지 지금까지 찾은 가장 싼 비용} \\
+\textcolor{#874b0f}{h}(\textcolor{#87965a}{n}) &amp; \textcolor{#87965a}{n} \text{ 에서 도착까지 남은 비용의 추정값 (맨해튼 거리)} \\
+\textcolor{#874b0f}{h^{*}}(\textcolor{#87965a}{n}) &amp; \textcolor{#87965a}{n} \text{ 에서 도착까지 실제로 남은 가장 싼 비용}
+\end{array}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:4.8em;vertical-align:-2.15em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.65em;"><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#87965a;">n</span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#008787;">g</span><span class="mopen">(</span><span class="mord mathnormal" style="color:#87965a;">n</span><span class="mclose">)</span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#874b0f;">h</span><span class="mopen">(</span><span class="mord mathnormal" style="color:#87965a;">n</span><span class="mclose">)</span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#874b0f;"><span class="mord mathnormal" style="color:#874b0f;">h</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6887em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:#874b0f;"><span class="mord mtight" style="color:#874b0f;"><span class="mord mtight" style="color:#874b0f;">∗</span></span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="color:#87965a;">n</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.15em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.65em;"><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">고를</span><span class="mord"> </span><span class="mord hangul_fallback">후보인</span><span class="mord"> </span><span class="mord hangul_fallback">칸</span></span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">출발에서</span><span class="mord"> </span></span><span class="mord mathnormal" style="color:#87965a;">n</span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">까지</span><span class="mord"> </span><span class="mord hangul_fallback">지금까지</span><span class="mord"> </span><span class="mord hangul_fallback">찾은</span><span class="mord"> </span><span class="mord hangul_fallback">가장</span><span class="mord"> </span><span class="mord hangul_fallback">싼</span><span class="mord"> </span><span class="mord hangul_fallback">비용</span></span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#87965a;">n</span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">에서</span><span class="mord"> </span><span class="mord hangul_fallback">도착까지</span><span class="mord"> </span><span class="mord hangul_fallback">남은</span><span class="mord"> </span><span class="mord hangul_fallback">비용의</span><span class="mord"> </span><span class="mord hangul_fallback">추정값</span><span class="mord"> (</span><span class="mord hangul_fallback">맨해튼</span><span class="mord"> </span><span class="mord hangul_fallback">거리</span><span class="mord">)</span></span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#87965a;">n</span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">에서</span><span class="mord"> </span><span class="mord hangul_fallback">도착까지</span><span class="mord"> </span><span class="mord hangul_fallback">실제로</span><span class="mord"> </span><span class="mord hangul_fallback">남은</span><span class="mord"> </span><span class="mord hangul_fallback">가장</span><span class="mord"> </span><span class="mord hangul_fallback">싼</span><span class="mord"> </span><span class="mord hangul_fallback">비용</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.15em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
+<p>오른쪽 부등식처럼 어느 칸에서도 실제로 남은 비용을 넘지 않는 추정값을 <strong>허용 가능한 휴리스틱</strong> (남은 비용의 하한이 되는 추정 / admissible heuristic)이라 한다. 추정값이 하한이면 <span class="sym" style="color:#008787">g</span> + <span class="sym" style="color:#874b0f">h</span> 는 「이 칸을 거쳐 가는 길은 아무리 싸도 이만큼 든다」는 하한이 된다. 도착 칸을 연 순간 그 비용은 아직 열지 않은 모든 칸의 하한보다 작거나 같으므로, 열지 않은 칸을 거치는 길 가운데 더 싼 것은 있을 수 없다. 열지 않은 칸을 버려도 되는 것은 그 칸의 하한이 이미 찾은 답보다 높기 때문이고, 이렇게 하한으로 볼 필요 없는 곳을 잘라 내는 일을 가지치기라 부른다. 하한이 0이면 아무것도 잘라 내지 못해 다익스트라 알고리즘처럼 사방으로 퍼지고, 하한이 실제 남은 비용에 가까울수록 많이 잘라 낸다. 다만 추정값이 하한이 아니면 잘라 낸 곳에 답이 있을 수 있다.</p>
+<p>남은 비용의 하한을 직선으로 재는 줄자를 떠올리면 기억하기 쉽다. 도로가 아무리 구불구불해도 두 점 사이를 팽팽하게 당긴 줄자보다 짧을 수는 없으니, 줄자로 잰 값은 언제나 하한이다. 줄자 대신 「대충 이 정도 걸리겠지」 하는 눈대중을 쓰면 그 눈대중이 실제보다 길게 나오는 순간 좋은 길을 버린다.</p>
+<figure class="fig "><img src="images/structured-search/s3_a1_tape.png" alt="앵커 그림: 직선거리 줄자. 왼쪽: 지금 칸 n 에서 도착까지 어느 도로로 가도 줄자로 잰 직선거리보다 짧지 않으니, 줄자 값 h(n) 은 남은 비용 h*(n) 의 하한이다. 오른쪽: 값만 재는 최적화에서는 잰 점 하나가 기울기 L 인 줄자 두 개를 아래로 내려 그어 하한을 준다(그림용 함수 0.5 sin 2.5x + 0.15x, L = 1.4). 비유가 깨지는 곳: 줄자는 늘 직선 하나로 재지만, 하한은 실제를 넘지 않기만 하면 직선거리가 아니어도 되고(격자의 맨해튼 거리), 실제에 가까울수록 많이 잘라 낸다(sources/structured-search/s3_figs.py)" loading="lazy"><figcaption>앵커 그림: 직선거리 줄자. 왼쪽: 지금 칸 n 에서 도착까지 어느 도로로 가도 줄자로 잰 직선거리보다 짧지 않으니, 줄자 값 h(n) 은 남은 비용 h*(n) 의 하한이다. 오른쪽: 값만 재는 최적화에서는 잰 점 하나가 기울기 L 인 줄자 두 개를 아래로 내려 그어 하한을 준다(그림용 함수 0.5 sin 2.5x + 0.15x, L = 1.4). 비유가 깨지는 곳: 줄자는 늘 직선 하나로 재지만, 하한은 실제를 넘지 않기만 하면 직선거리가 아니어도 되고(격자의 맨해튼 거리), 실제에 가까울수록 많이 잘라 낸다(sources/structured-search/s3_figs.py)</figcaption></figure>
+<h3 id="0차로-돌아오기-립시츠-상수가-주는-하한">0차로 돌아오기: 립시츠 상수가 주는 하한</h3>
+<p>값만 재는 0차 최적화에도 줄자가 있을까? 길찾기의 줄자가 「도로는 직선보다 짧을 수 없다」는 지식에서 나왔듯이, 함수에서 줄자를 만들어 주는 지식은 립시츠 연속이다. 두 점 사이 기울기가 립시츠 상수 <span class="sym" style="color:#c45a00">L</span> 을 넘지 않는 함수라면, 곡선 위 한 점에 기울기 ±<span class="sym" style="color:#c45a00">L</span> 인 두 직선을 그은 원뿔(옆에서 보면 X자) 안에 곡선 전체가 들어 있다. 원뿔의 아래 반쪽만 쓰면, 한 번 잰 점 <span class="sym" style="color:#665522">x</span>ᵢ 에서 거리 |<span class="sym" style="color:#665522">x</span> − <span class="sym" style="color:#665522">x</span>ᵢ| 만큼 떨어진 곳의 값은 <span class="sym" style="color:#d62728">f</span>(<span class="sym" style="color:#665522">x</span>ᵢ) − <span class="sym" style="color:#c45a00">L</span>|<span class="sym" style="color:#665522">x</span> − <span class="sym" style="color:#665522">x</span>ᵢ| 보다 낮을 수 없다. 여러 점을 쟀으면 그 가운데 가장 높은 하한을 쓴다.</p>
+<div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#d62728"><mi>f</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#665522"><mi>x</mi></mstyle><mo stretchy="false">)</mo><mtext>  </mtext><mo>≥</mo><mtext>  </mtext><mstyle mathcolor="#1e694b"><mi mathvariant="normal">ℓ</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#665522"><mi>x</mi></mstyle><mo stretchy="false">)</mo><mtext>  </mtext><mo>=</mo><mtext>  </mtext><munder><mrow><mi>max</mi><mo>⁡</mo></mrow><mi>i</mi></munder><mtext> </mtext><mo fence="true" stretchy="true" minsize="1.2em" maxsize="1.2em">[</mo><mtext> </mtext><mstyle mathcolor="#d62728"><mi>f</mi></mstyle><mo stretchy="false">(</mo><msub><mstyle mathcolor="#665522"><mi>x</mi></mstyle><mi>i</mi></msub><mo stretchy="false">)</mo><mo>−</mo><mstyle mathcolor="#c45a00"><mi>L</mi></mstyle><mtext> </mtext><mo stretchy="false">∣</mo><mstyle mathcolor="#665522"><mi>x</mi></mstyle><mo>−</mo><msub><mstyle mathcolor="#665522"><mi>x</mi></mstyle><mi>i</mi></msub><mo stretchy="false">∣</mo><mtext> </mtext><mo fence="true" stretchy="true" minsize="1.2em" maxsize="1.2em">]</mo></mrow><annotation encoding="application/x-tex">\textcolor{#d62728}{f}(\textcolor{#665522}{x}) \;\ge\; \textcolor{#1e694b}{\ell}(\textcolor{#665522}{x}) \;=\; \max_{i}\,\bigl[\, \textcolor{#d62728}{f}(\textcolor{#665522}{x}_i) - \textcolor{#c45a00}{L}\,\lvert \textcolor{#665522}{x} - \textcolor{#665522}{x}_i \rvert \,\bigr]
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1076em;color:#d62728;">f</span><span class="mopen">(</span><span class="mord mathnormal" style="color:#665522;">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord" style="color:#1e694b;">ℓ</span><span class="mopen">(</span><span class="mord mathnormal" style="color:#665522;">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.5777em;vertical-align:-0.7277em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.4306em;"><span style="top:-2.3723em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">max</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7277em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen"><span class="delimsizing size1">[</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.1076em;color:#d62728;">f</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="color:#665522;">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="color:#c45a00;">L</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">∣</span><span class="mord mathnormal" style="color:#665522;">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mord"><span class="mord mathnormal" style="color:#665522;">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">∣</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mclose"><span class="delimsizing size1">]</span></span></span></span></span></span></div>
+<div class="math-block math-legend"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#665522"><mi>x</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>아직 재지 않은 자리</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mstyle mathcolor="#665522"><mi>x</mi></mstyle><mi>i</mi></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>이미 잰 자리 </mtext><mo stretchy="false">(</mo><mi>i</mi><mo>=</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mo>…</mo><mtext> </mtext><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#d62728"><mi>f</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>값만 돌려주는 함수</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#c45a00"><mi>L</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>립시츠 상수: 두 점 사이 기울기의 상한</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mstyle mathcolor="#1e694b"><mi mathvariant="normal">ℓ</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#665522"><mi>x</mi></mstyle><mo stretchy="false">)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>잰 점들이 주는 하한 (톱니 모양)</mtext></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{ll}
+\textcolor{#665522}{x} &amp; \text{아직 재지 않은 자리} \\
+\textcolor{#665522}{x}_i &amp; \text{이미 잰 자리 } (i = 1, 2, \dots) \\
+\textcolor{#d62728}{f} &amp; \text{값만 돌려주는 함수} \\
+\textcolor{#c45a00}{L} &amp; \text{립시츠 상수: 두 점 사이 기울기의 상한} \\
+\textcolor{#1e694b}{\ell}(\textcolor{#665522}{x}) &amp; \text{잰 점들이 주는 하한 (톱니 모양)}
+\end{array}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:6em;vertical-align:-2.75em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#665522;">x</span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="color:#665522;">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1076em;color:#d62728;">f</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#c45a00;">L</span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="color:#1e694b;">ℓ</span><span class="mopen">(</span><span class="mord mathnormal" style="color:#665522;">x</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">아직</span><span class="mord"> </span><span class="mord hangul_fallback">재지</span><span class="mord"> </span><span class="mord hangul_fallback">않은</span><span class="mord"> </span><span class="mord hangul_fallback">자리</span></span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">이미</span><span class="mord"> </span><span class="mord hangul_fallback">잰</span><span class="mord"> </span><span class="mord hangul_fallback">자리</span><span class="mord"> </span></span><span class="mopen">(</span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mclose">)</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">값만</span><span class="mord"> </span><span class="mord hangul_fallback">돌려주는</span><span class="mord"> </span><span class="mord hangul_fallback">함수</span></span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">립시츠</span><span class="mord"> </span><span class="mord hangul_fallback">상수</span><span class="mord">: </span><span class="mord hangul_fallback">두</span><span class="mord"> </span><span class="mord hangul_fallback">점</span><span class="mord"> </span><span class="mord hangul_fallback">사이</span><span class="mord"> </span><span class="mord hangul_fallback">기울기의</span><span class="mord"> </span><span class="mord hangul_fallback">상한</span></span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">잰</span><span class="mord"> </span><span class="mord hangul_fallback">점들이</span><span class="mord"> </span><span class="mord hangul_fallback">주는</span><span class="mord"> </span><span class="mord hangul_fallback">하한</span><span class="mord"> (</span><span class="mord hangul_fallback">톱니</span><span class="mord"> </span><span class="mord hangul_fallback">모양</span><span class="mord">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
+<p>하한 <span class="sym" style="color:#1e694b">ℓ</span>(<span class="sym" style="color:#665522">x</span>) 가 지금까지 잰 가장 작은 값보다 높은 구간에는 더 작은 값이 있을 수 없으니 재지 않아도 된다. A* 와 같은 가지치기다. 어디를 다음에 잴지도 A* 처럼 정할 수 있는데, 하한이 가장 낮은 자리가 「아직 가장 작은 값이 숨어 있을 수 있는 곳」이므로 거기를 잰다. 재고 나면 그 자리의 하한이 실제 값으로 올라가고, 지금까지 잰 가장 작은 값과 하한의 가장 낮은 값의 차이가 정한 크기 아래로 줄면 멈춘다. 그때는 아무 데도 재지 않고도 「가장 작은 값은 이것보다 0.01 넘게 작지 않다」고 보증할 수 있다. 소련 쿠이비셰프(지금의 사마라)의 S. A. 피야브스키(S. A. Piyavskii)가 1970년 4월에 투고해 1972년 『계산수학과 수리물리학 저널』에 실은 논문과, 같은 해 미국 『SIAM 수치해석 저널』에 실린 B. O. 슈버트(B. O. Shubert)의 논문이 각자 이 방법을 냈다.</p>
+<p>구간 [0, 4] 에서 이 책이 지은 함수 <span class="sym" style="color:#d62728">f</span>(<span class="sym" style="color:#665522">x</span>) = 0.5 sin 2.5<span class="sym" style="color:#665522">x</span> + 0.15<span class="sym" style="color:#665522">x</span> − 1.5 exp(−((<span class="sym" style="color:#665522">x</span> − 3.2)/0.15)²) 로 시험해 보자. <span class="sym" style="color:#665522">x</span> ≈ 1.84 에 넓은 골짜기(값 −0.221)가 있고, <span class="sym" style="color:#665522">x</span> = 3.2 에 폭이 좁지만 더 깊은 골짜기(값 −0.525)가 있다. 가장 가파른 곳의 기울기가 8.28 이므로 <span class="sym" style="color:#c45a00">L</span> = 8.3 으로 둔다. 양 끝 두 점에서 시작해 하한이 가장 낮은 곳을 열두 번째 점까지 재면, 구간의 30% 쯤은 하한이 지금까지 잰 가장 작은 값 −0.212 보다 높아 더 볼 필요가 없어진다. 끝까지 이어 가면 55번 재고 <span class="sym" style="color:#665522">x</span> = 3.200 의 −0.5253 에서 멈추고, 55번 가운데 23번은 좁은 골짜기 [3.0, 3.4] 안에서 잰다. 같은 보증을 고른 간격의 격자로 얻으려면 어느 자리도 가장 가까운 격자점에서 0.01/<span class="sym" style="color:#c45a00">L</span> = 0.0012 안에 있어야 하므로, 간격 0.0024 로 1,661 점을 재야 한다.</p>
+<figure class="fig "><img src="images/structured-search/s3_l1_lower_bound_search.png" alt="왼쪽: 열두 번 잰 뒤의 하한 ℓ(x)(L = 8.3, 톱니 모양 선)과 지금까지 잰 가장 작은 값(점선). 회색 구간은 하한이 그 값보다 높아 더 재지 않아도 된다. 오른쪽: 가장 낮은 값을 0.01 안으로 보증할 때까지 잰 횟수. L 을 실제의 두 배, 세 배로 크게 잡으면 횟수가 105, 163으로 늘고, 고른 격자는 1,661 점이 든다(sources/structured-search/s3_figs.py, 숫자는 s3_lipschitz.py)" loading="lazy"><figcaption>왼쪽: 열두 번 잰 뒤의 하한 ℓ(x)(L = 8.3, 톱니 모양 선)과 지금까지 잰 가장 작은 값(점선). 회색 구간은 하한이 그 값보다 높아 더 재지 않아도 된다. 오른쪽: 가장 낮은 값을 0.01 안으로 보증할 때까지 잰 횟수. L 을 실제의 두 배, 세 배로 크게 잡으면 횟수가 105, 163으로 늘고, 고른 격자는 1,661 점이 든다(sources/structured-search/s3_figs.py, 숫자는 s3_lipschitz.py)</figcaption></figure>
+<p><span class="sym" style="color:#c45a00">L</span> 을 크게 잡을수록 하한은 안전해지지만 낮아져서, 잘라 내는 구간이 줄고 잰 횟수가 늘어난다. 길찾기에서 추정값을 0으로 두면 다익스트라 알고리즘처럼 사방을 다 보는 것과 같다. 그런데 실제 문제에서는 <span class="sym" style="color:#c45a00">L</span> 을 모르는 일이 많다. 1993년 도널드 존스(Donald R. Jones), C. D. 페르투넨(C. D. Perttunen), B. E. 스터크먼(B. E. Stuckman)은 「립시츠 상수 없는 립시츠 최적화」라는 논문에서 DIRECT(DIviding RECTangles, 직사각형 나누기)를 냈다. 그들은 <span class="sym" style="color:#c45a00">L</span> 을 「구간 전체를 고르게 볼지, 좋아 보이는 곳 둘레를 자세히 볼지」의 무게로 읽었다. 하나의 <span class="sym" style="color:#c45a00">L</span> 을 고르는 대신, 가능한 모든 <span class="sym" style="color:#c45a00">L</span> 가운데 어느 하나로라도 하한이 가장 낮아지는 직사각형들을 한꺼번에 나눠 잰다.</p>
+<h3 id="ml에서-하이퍼파라미터-탐색에서-재지-않을-곳-고르기">ML에서: 하이퍼파라미터 탐색에서 재지 않을 곳 고르기</h3>
+<p>학습률이나 정규화 세기를 고를 때 한 번 재는 데는 학습 한 번이 든다. 세드리크 말레르브(Cédric Malherbe)와 니콜라 바야티스(Nicolas Vayatis)는 2017년 논문 「립시츠 함수의 전역 최적화」에서 학습 시스템의 하이퍼파라미터 맞추기를 이런 문제의 예로 들고, LIPO 라는 방법을 냈다. 후보 자리를 무작위로 뽑되, 지금까지 잰 점들로 만든 립시츠 경계가 「여기서는 지금까지의 최선보다 나아질 수 없다」고 말하는 자리는 재지 않고 버린다. <span class="sym" style="color:#c45a00">L</span> 을 모르는 경우를 위해 잰 값에서 <span class="sym" style="color:#c45a00">L</span> 을 함께 추정해 가는 판도 냈다. 실제 학습률 탐색에서 어느 범위를 버릴 수 있는지는 아래 문제 14에서 직접 계산해 본다.</p>
+<div class="dialogue"><h3 id="prob-structured-house-commute-bound">문제 11. 이사할 집 고르기<span id="문제-11-이사할-집-고르기" class="anchor-alias"></span></h3>
+<blockquote>
+<p>이사할 집 후보가 다섯 곳이고, 회사까지 직선거리는 가 20 km, 나 15 km, 다 24 km, 라 30 km, 마 19 km 다. 가는 이미 출근길을 재 보아 32분이 걸렸다. 이 도시에서는 어떤 길로 가도 직선거리로 따져 시속 40 km 보다 빨리 갈 수 없다고 하자. (가) 출근길을 재 보지 않고도 가보다 빠를 수 없다고 말할 수 있는 집은 어디인가? (나) 친구가 「이 도시 출퇴근 평균 속도는 시속 25 km 쯤이니 그 속도로 계산하는 게 더 현실적」이라며 그 계산으로 32분이 넘는 집을 거르자고 한다. 그렇게 거르면 무엇을 놓칠 수 있는가?</p>
+</blockquote>
+<figure class="fig "><img src="images/structured-search/s3_p1_houses.png" alt="회사(가운데 네모)와 집 다섯 곳까지의 직선거리. 출근길을 재 본 집은 가(32분) 하나다(sources/structured-search/s3_figs.py)" loading="lazy"><figcaption>회사(가운데 네모)와 집 다섯 곳까지의 직선거리. 출근길을 재 본 집은 가(32분) 하나다(sources/structured-search/s3_figs.py)</figcaption></figure>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)부터 할게요. 시속 40 km 면 1 km 에 1.5분이니까, 아무리 빨라도 나 22.5분, 다 36분, 라 45분, 마 28.5분이 걸려요. 가가 32분이었으니까 다와 라는 재 볼 필요가 없고, 나와 마는 재 봐야 해요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 시속 40 km 는 너무 빠르잖아. 출근 시간엔 막히는데. 평균 시속 25 km 로 하면 나 36분, 마 45.6분이니까 둘 다 32분을 넘어. 그럼 더 재 볼 것 없이 가로 정하면 되겠다.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>가를 같은 평균 속도로 계산하면 몇 분이 나오죠?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S04"><img src="images/cast/S04.webp" alt="이서연 S04" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>20 km 를 시속 25 km 로… 48분이요. 그런데 실제로 재 보니 32분이었으니까, 가에서는 평균 속도 계산이 16분이나 길게 나왔네요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>가가 지하철역 바로 앞이라 그랬을 수도 있겠다. 나도 역 가까이 있으면 평균보다 훨씬 빠를 수 있잖아.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>실제로 재 보니 나는 28분, 마는 35분이었어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>평균 속도로 걸렀으면 가장 빠른 나를 재 보지도 않고 버렸겠네요. 평균은 집마다 실제보다 짧게도 길게도 나오는데, 길게 나온 집을 버리는 데 쓰면 안 되는 거예요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 집마다 보면 덜 현실적인 시속 40 km 계산을, 버릴 때는 오히려 써야 하는 거예요?</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 버리는 근거로 쓰는 계산은 어느 집에서도 실제보다 길게 나오면 안 돼요. 시속 40 km 계산은 어디서도 실제보다 길지 않으니, 그걸로 버린 다와 라에는 가보다 빠른 집이 있을 수 없어요. 그 대가로 나와 마는 직접 재야 하고요. 「아무리 운이 좋아도 이만큼은 걸린다」는 값으로만 버리고, 그 값이 실제보다 많이 낮으면 재 볼 집이 조금 늘어날 뿐이에요.</p></div></div>
+</div><div class="dialogue"><h3 id="prob-structured-inflated-heuristic">문제 12. 추정값 하나를 부풀리면<span id="문제-12-추정값-하나를-부풀리면" class="anchor-alias"></span></h3>
+<blockquote>
+<p>점 S 에서 G 로 가는 그래프가 있다. 길과 비용은 S→A 2, S→B 1, A→G 4, B→C 2, C→G 2 이고, 남은 비용의 추정값 <span class="sym" style="color:#874b0f">h</span> 는 S 4, A 3, B 3, C 2, G 0 이다. (가) 모든 <span class="sym" style="color:#874b0f">h</span> 가 실제로 남은 비용을 넘지 않는지 확인하고, A* 가 점을 여는 순서와 찾는 길을 구하라(같은 수면 이미 온 비용이 큰 점을 먼저 연다). (나) <span class="sym" style="color:#874b0f">h</span>(B) 만 6으로 바꾸면 어떻게 되는가? (다) <span class="sym" style="color:#874b0f">h</span> 를 모두 0으로 두면 몇 개의 점을 여는가?</p>
+</blockquote>
+<figure class="fig "><img src="images/structured-search/s3_p2_graph.png" alt="다섯 점 그래프. 화살표 위 숫자는 그 길의 비용, 점 곁의 h 는 G 까지 남은 비용의 추정값 h(sources/structured-search/s3_figs.py)" loading="lazy"><figcaption>다섯 점 그래프. 화살표 위 숫자는 그 길의 비용, 점 곁의 h 는 G 까지 남은 비용의 추정값 h(sources/structured-search/s3_figs.py)</figcaption></figure>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>실제로 남은 비용부터 뒤에서 거꾸로 셀게요. C 는 2, B 는 B→C→G 로 4, A 는 4, S 는 B 를 거쳐 5예요. 주어진 <span class="sym" style="color:#874b0f">h</span> 는 4, 3, 3, 2, 0 이라 모두 실제 값 이하네요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 A* 를 손으로 돌려 봐요. S 를 열면 무엇이 후보가 되죠?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>A 는 이미 온 비용 2에 <span class="sym" style="color:#874b0f">h</span> 3을 더해 5, B 는 1 + 3 = 4 라 B 를 먼저 열어요. B 를 열면 C 가 3 + 2 = 5 가 되는데, A 도 5 라서 같아요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>같으면 이미 온 비용이 큰 점을 먼저 연다고 했으니까 C(3)가 A(2)보다 먼저야. C 를 열면 G 가 5 + 0 = 5 로 올라오고, 다음에 G 를 열어서 끝. S, B, C, G 순서로 열고 S–B–C–G 로 5 예요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(나)는요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p><span class="sym" style="color:#874b0f">h</span>(B) 가 6이면 B 의 수가 1 + 6 = 7 이 돼서 A(5)가 먼저 열려요. A 를 열면 G 가 2 + 4 = 6 으로 올라오고, 6이 B 의 7보다 작으니까 G 를 열고 끝나요. S–A–G, 비용 6이요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>가장 싼 길은 5인데 6을 내놓았어요. 탐색이 G 를 여는 순간, 그게 틀린 답이라는 걸 알 수 있었을까요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>음… 없었겠네요. B 의 7을 「B 를 거쳐 가면 적어도 7이 든다」는 하한으로 믿었으니까, 6을 찾은 순간 B 는 볼 필요가 없다고 판단한 거예요. 그 7이 하한이 아니라 실제 4보다 부풀린 값이었고요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(다)는 <span class="sym" style="color:#874b0f">h</span> 가 모두 0이니까 이미 온 비용만 봐요. B(1), A(2), C(3), G(5) 순서라 S 를 포함해 다섯 점을 다 열어요. 주어진 <span class="sym" style="color:#874b0f">h</span> 로는 가장 싼 길 위의 넷만 열었는데요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>점이 다섯뿐이라 하나 차이지만, 칸이 수백 개인 격자에서는 연 칸 수가 232 대 74 처럼 크게 벌어져요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.webp" alt="김민준 M08" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>문제 11(이사할 집 고르기)이랑 같은 구조네요. 추정이 너무 낮으면 열어 볼 점이 늘고, 실제보다 높으면 가장 좋은 점을 열어 보지도 않고 버려요.</p></div></div>
+</div><div class="dialogue"><h3 id="prob-structured-underestimated-lipschitz">문제 13. 잰 점들의 기울기로 L 을 정하면<span id="문제-13-잰-점들의-기울기로-l-을-정하면" class="anchor-alias"></span></h3>
+<blockquote>
+<p>구간 [0, 4] 에서 값만 돌려주는 함수 <span class="sym" style="color:#d62728">f</span> 를 0.5 간격으로 아홉 번 재서 0.00, 0.55, 0.45, −0.06, −0.18, 0.36, 0.67, 0.81, 0.33 을 얻었다. 립시츠 상수를 모르므로, 이웃한 두 점 사이 기울기 가운데 가장 큰 값을 <span class="sym" style="color:#c45a00">L</span> 로 쓰기로 했다. (가) 그 <span class="sym" style="color:#c45a00">L</span> 은 얼마인가? (나) 그 <span class="sym" style="color:#c45a00">L</span> 로 하한 탐색을 이어 가면 열다섯 번 더 잰 뒤 <span class="sym" style="color:#665522">x</span> = 1.834 근처에서 「가장 작은 값 −0.221 을 0.01 안으로 보증했다」며 멈춘다. 이 보증을 믿어도 되는가? (다) 잰 점들의 기울기로 <span class="sym" style="color:#c45a00">L</span> 을 정하는 방법은 언제나 어느 방향으로 틀리는가?</p>
+</blockquote>
+<figure class="fig "><img src="images/structured-search/s3_p3_nine_points.png" alt="구간 [0, 4] 를 0.5 간격으로 아홉 번 잰 값. 점 사이의 값은 모른다(sources/structured-search/s3_figs.py)" loading="lazy"><figcaption>구간 [0, 4] 를 0.5 간격으로 아홉 번 잰 값. 점 사이의 값은 모른다(sources/structured-search/s3_figs.py)</figcaption></figure>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>이웃 기울기를 다 계산해 봤어요. 0에서 0.5 사이가 0.549/0.5 = 1.10 으로 가장 커요. (나)는 하한 탐색이 보증한다고 했으니까 믿어도 되지 않을까요? 열다섯 번이나 더 쟀고요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>3.0 과 3.5 사이를 볼까요. 그 <span class="sym" style="color:#c45a00">L</span> 로 하한을 그리면 그 사이 어디까지 내려갈 수 있다고 나와요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>두 값이 0.67, 0.81 이니까 두 V 가 만나는 곳은 평균 0.74 에서 1.10 × 0.25 를 뺀 0.46 쯤이에요. 그 구간에서 −0.221 보다 작은 값은 없다는 거죠.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그 0.46 은 3.0 과 3.5 사이 기울기가 어디서도 1.10 을 넘지 않는다고 믿어서 나온 거잖아. 그런데 그 사이를 잰 적은 없는데.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 사이에 폭이 0.3 쯤인 좁고 깊은 골짜기가 있다고 해 봐요. 아홉 점의 기울기에 그 골짜기가 드러날까요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아… 3.0 과 3.5 에서 잰 값은 둘 다 골짜기 밖이니까 그 사이 기울기는 0.29 밖에 안 나와요. 골짜기가 있어도 없어도 같은 숫자예요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>실제로 이 함수는 <span class="sym" style="color:#665522">x</span> = 3.2 에서 −0.525 예요. 그 사이 가장 가파른 기울기는 8.28 이고요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 (다)는… 두 점 사이 기울기는 그 사이 어딘가의 미분값이랑 같으니까(평균값 정리), 잰 점들의 기울기는 가장 가파른 곳의 기울기를 넘을 수가 없어요. 그 가운데 가장 큰 것을 <span class="sym" style="color:#c45a00">L</span> 로 쓰면 실제 <span class="sym" style="color:#c45a00">L</span> 보다 작거나 같게만 나와요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p><span class="sym" style="color:#c45a00">L</span> 이 작으면 하한이 높게 나오니까, 문제 12에서 <span class="sym" style="color:#874b0f">h</span> 를 부풀린 거랑 같은 실수네요. 하한이 실제보다 높으면 답이 있는 곳을 버려요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그래서 DIRECT 가 <span class="sym" style="color:#c45a00">L</span> 하나를 믿지 않고 가능한 <span class="sym" style="color:#c45a00">L</span> 을 모두 한꺼번에 따졌던 거구나. <span class="sym" style="color:#c45a00">L</span> 을 크게 잡고 보면 3.0 과 3.5 사이는 넓고 아직 잘 모르는 구간이니까 나눠서 재 보게 되고요.</p></div></div>
+</div><div class="dialogue"><h3 id="prob-structured-learning-rate-pruning">문제 14. 학습률을 몇 번 더 재야 하나<span id="문제-14-학습률을-몇-번-더-재야-하나" class="anchor-alias"></span></h3>
+<blockquote>
+<p>학습률 10⁻⁵, 10⁻³, 10⁻¹ 로 한 번씩 학습해 검증 손실 2.30, 0.62, 1.85 를 얻었다. <span class="sym" style="color:#665522">x</span> = log₁₀(학습률) 로 두고, 검증 손실 <span class="sym" style="color:#d62728">f</span>(<span class="sym" style="color:#665522">x</span>) 가 립시츠 상수 <span class="sym" style="color:#c45a00">L</span> = 1.0 을 넘지 않는다고 하자(학습률을 10배 바꿔도 손실은 많아야 1.0 바뀐다). (가) 0.62 보다 낮은 손실이 나올 수 있는 학습률의 범위는? (나) 같은 학습률로 다시 학습하면 검증 손실이 ±0.05 쯤 달라진다면 그 범위는 어떻게 바뀌는가? (다) 이 가정이 깨질 만한 곳은 어디인가?</p>
+</blockquote>
+<figure class="fig "><img src="images/structured-search/s3_p4_learning_rates.png" alt="학습률 셋으로 한 번씩 학습해 잰 검증 손실(가로축은 로그 눈금)(sources/structured-search/s3_figs.py)" loading="lazy"><figcaption>학습률 셋으로 한 번씩 학습해 잰 검증 손실(가로축은 로그 눈금)(sources/structured-search/s3_figs.py)</figcaption></figure>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>하한을 직접 그려 볼게. 10⁻⁵ 의 2.30 에서 기울기 1로 내려오면 0.62 에 닿는 건 <span class="sym" style="color:#665522">x</span> = −5 + 1.68 = −3.32 에서고, 10⁻¹ 의 1.85 에서 내려오면 −1 − 1.23 = −2.23 이에요. 그 사이에서만 하한이 0.62 보다 낮으니까, 학습률 4.8 × 10⁻⁴ 에서 5.9 × 10⁻³ 사이만 재 보면 돼요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>10⁻³ 에서 잰 0.62 에서 내려오는 V 는 안 따져도 돼요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그 V 는 꼭짓점이 0.62 라 어디서든 0.62 보다 낮아서 아무것도 못 버려요. 버리는 건 높게 잰 두 점이 해 주네요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(나)는 잰 값을 그대로 믿을 수 없다는 거니까, 높게 잰 두 점은 0.05 낮을 수도 있고 지금 최선 0.62 는 0.05 높을 수도 있다고 봐야겠다. 그럼 2.25 와 1.80 에서 내려온 V 가 0.67 보다 낮은 곳을 찾으면 되니까, 양쪽 끝이 0.1 씩 밖으로 밀려서 −3.42 에서 −2.13 까지예요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>노이즈가 있으면 덜 버리게 되는군요. (다)는 어때요? 학습률을 키우다 보면 어떤 일이 생기죠?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>어느 학습률을 넘으면 손실이 갑자기 치솟아요. 학습률을 두 배만 키워도 0.6 이던 손실이 발산하기도 하고요. 그럼 그 근처에선 기울기가 1.0 을 훨씬 넘겠네요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S05"><img src="images/cast/S05.webp" alt="이서연 S05" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그러면 10⁻¹ 의 1.85 가 문제예요. 만약 10⁻¹ 이 이미 손실이 치솟은 자리고 그 바로 앞, 예를 들어 10<sup>−1.5</sup> 에서는 손실이 낮다면, 1.85 에서 기울기 1로 내려온 하한이 그 좋은 학습률까지 「1.35 보다 낮을 수 없다」며 버려 버려요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 손실이 갑자기 치솟는 곳은 립시츠 가정이 깨지는 곳이고, 그 너머에서 잰 높은 값이 바로 앞의 좋은 학습률까지 가려 버릴 수 있어요. 그래서 발산했거나 거의 발산한 학습률에서 잰 값으로는 이웃을 버리지 않는 게 안전해요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.webp" alt="김민준 M08" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>문제 13(잰 점들의 기울기로 L 을 정하면)에서 <span class="sym" style="color:#c45a00">L</span> 을 실제보다 작게 잡아 하한이 너무 높아진 것과 같네요. 버리는 근거가 진짜 하한일 때만 버린 곳에 답이 없다고 말할 수 있고요.</p></div></div>
+</div>
+</article>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="structured-search-sec-ant-colony-memory.html">&larr; 개미 군집: 좋았던 길을 분포로 기억하기</a><span class="page-count">4 / 5</span><a class="chapter-nav-next" href="structured-search-sec-structured-search-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
+</main>
+<script type="module">
+const toggle = document.getElementById('theme-toggle');
+const frames = () => document.querySelectorAll('.widget-embed iframe');
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  toggle.textContent = t === 'dark' ? '\u2600\uFE0F' : '\u{1F319}';
+  frames().forEach(f => f.contentWindow && f.contentWindow.postMessage({ type: 'dyn-theme', theme: t }, '*'));
+}
+const curTheme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+setTheme(curTheme());
+toggle.addEventListener('click', () => {
+  const t = curTheme() === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('theme', t);
+  setTheme(t);
+  renderMermaid();
+});
+
+// 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  io.unobserve(e.target);
+  e.target.src = e.target.dataset.src + '&theme=' + curTheme();
+}), { rootMargin: '600px' });
+frames().forEach(f => io.observe(f));
+addEventListener('message', e => {
+  if (!e.data || e.data.type !== 'dyn-widget-height') return;
+  frames().forEach(f => { if (f.contentWindow === e.source) { f.style.height = e.data.h + 'px'; f.classList.add('ready'); } });
+});
+
+// 사이드바
+const sidebar = document.getElementById('sidebar');
+document.getElementById('sidebar-open').addEventListener('click', () => sidebar.classList.add('open'));
+document.getElementById('sidebar-close').addEventListener('click', () => sidebar.classList.remove('open'));
+sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', () => sidebar.classList.remove('open')));
+
+// 키보드 ←/→ 로 이전·다음 페이지
+addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  const a = document.querySelector(e.key === 'ArrowLeft' ? '.chapter-nav-prev' : e.key === 'ArrowRight' ? '.chapter-nav-next' : null);
+  if (a) location.href = a.href;
+});
+
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+</script>
+</body>
+</html>
