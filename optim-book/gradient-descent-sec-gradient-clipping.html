@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -717,7 +725,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>벽이 그렇게 좁으면 학습 내내 몇 번 안 닿겠네. 그런데 한 번 닿으면 끝이고.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>평지에 맞춘 학습률로 가다가 벽에 닿으면 숫자가 실제로 어떻게 되는지, 가중치 하나짜리 순환 신경망으로 따라가 볼 수 있을까요?</p></div></div>
 <h3 id="되먹임-가중치-하나짜리-순환-신경망">되먹임 가중치 하나짜리 순환 신경망</h3>
-<p>파스카누와 동료들이 분석에 쓴 가장 단순한 경우를 숫자로 따라가 보자. 입력 없이 은닉 상태 <span class="sym" style="color:#a5003c">h</span> 하나가 스텝마다 같은 가중치 <span class="sym" style="color:#665522">w</span>를 곱받으므로, <span class="sym" style="color:#a5003c">h</span>₀ = 1에서 시작하면 <span class="sym" style="color:#a67a63">t</span>스텝 뒤 <span class="sym" style="color:#a5003c">h</span>ₜ = <span class="sym" style="color:#665522">w</span>ᵗ이다. 30스텝 뒤의 값이 2가 되게 <span class="sym" style="color:#665522">w</span>를 학습시키자. 손실은 <span class="sym" style="color:#d62728">f</span>(<span class="sym" style="color:#665522">w</span>) = ½(<span class="sym" style="color:#665522">w</span>³⁰ − 2)²이고, 답은 <span class="sym" style="color:#665522">w</span>* = 2^(1/30) = 1.02337이다(길이 30, 목표 2, 출발점 0.9는 이 책에서 고른 값이다). 손실과 그래디언트를 몇 곳에서 재 보면 지형이 한쪽으로 기울어 있다.</p>
+<p>파스카누와 동료들이 분석에 쓴 가장 단순한 경우를 숫자로 따라가 보자. 입력 없이 은닉 상태 <span class="sym" style="color:#a5003c">h</span> 하나가 스텝마다 같은 가중치 <span class="sym" style="color:#665522">w</span>를 곱받으므로, <span class="sym" style="color:#a5003c">h</span>₀ = 1에서 시작하면 <span class="sym" style="color:#a67a63">t</span>스텝 뒤 <span class="sym" style="color:#a5003c">h</span>ₜ = <span class="sym" style="color:#665522">w</span>ᵗ이다. 30스텝 뒤의 값이 2가 되게 <span class="sym" style="color:#665522">w</span>를 학습시키자. 손실은 <span class="sym" style="color:#d62728">f</span>(<span class="sym" style="color:#665522">w</span>) = ½(<span class="sym" style="color:#665522">w</span>³⁰ − 2)²이고, 답은 <span class="sym" style="color:#665522">w</span>* = 2<sup>1/30</sup> = 1.02337이다(길이 30, 목표 2, 출발점 0.9는 이 책에서 고른 값이다). 손실과 그래디언트를 몇 곳에서 재 보면 지형이 한쪽으로 기울어 있다.</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>

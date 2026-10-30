@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -823,6 +831,56 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>변수가 여럿이면 편미분을 모은 벡터가 그래디언트 ∇f다. 미분 가능한 점에서는 어느 방향 e의 방향 미분도 ∇f · e로 정해지므로, 그래디언트 방향이 가장 가파른 오르막이고 그 방향의 방향 미분값은 |∇f|다. 그래디언트는 등고선에 수직이고, 등고선이 길쭉하면 꼭대기를 곧장 가리키지 않는다. 기호 ∇는 해밀턴의 누운 삼각형에서 시작해 테이트가 굳혔고, 하프에서 온 이름 「나블라」가 붙었다. 신경망에서 그래디언트의 칸 수는 파라미터 수와 같다.</p>
 <p>출력이 여럿이면 출력마다의 그래디언트를 한 줄씩 쌓은 자코비안 J가 미분이다. J는 입력의 작은 움직임을 출력의 움직임으로 옮기고, 작은 네모를 평행사변형으로 바꾸며, 그 넓이 배율인 행렬식이 0이면 출력들이 서로 기대어 움직인다. 야코비가 1841년에 이 행렬식을 정리했고 실베스터가 그 이름을 붙였다. tanh 층의 자코비안은 diag(1 − h²)W, 소프트맥스의 자코비안은 diag(p) − ppᵀ다.</p>
 <p>합성 함수의 자코비안은 합성에 들어간 함수마다의 자코비안을 그 함수가 받는 입력 자리에서 재어 차례로 곱한 것이다. 이 규칙이 연쇄법칙이고, 그래디언트로 적으면 앞 함수 자코비안의 전치를 곱한다. 넓이 배율도 곱해지며, 신경망 전체의 자코비안은 층 자코비안들의 곱이다. 손실이 숫자 하나일 때는 손실 쪽의 가로줄부터 곱해 나가는 편이 자코비안 행렬을 만드는 것보다 훨씬 싸기 때문에, 파이토치는 「벡터와 자코비안의 곱」만 계산한다.</p>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-gradient-jacobian-1">
+<p><strong>물음.</strong> 한 점에서 함수가 미분 가능한지는 무엇으로 가리는가?</p>
+<ul>
+<li>[ ] 식에 절댓값이 없는지를 본다 〔틀림: 절댓값이 들어 있어도 미분 가능한 함수가 있다. 식의 모양보다 직선 근사가 얼마나 잘 맞는지를 본다.〕</li>
+<li>[ ] 그래프가 꺾이지만 않으면 미분 가능하다 〔틀림: 꺾임 말고도 양쪽 할선의 기울기가 끝없이 커지는 수직 벽 같은 모양이 있다.〕</li>
+<li>[ ] 연속이면 거의 어디서나 미분 가능하다 〔틀림: 19세기 초까지는 그렇게 믿었지만, 1872년 바이어슈트라스가 어디서도 미분할 수 없는 연속 함수를 보였다.〕</li>
+<li>[x] 직선 하나로 근사한 오차가 움직인 거리보다 빨리 0으로 줄어드는지 본다 〔맞음: 확대할수록 곡선이 직선과 구별되지 않는다는 뜻이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-gradient-jacobian-2">
+<p><strong>물음.</strong> ReLU 는 입력 0에서 꺾인다. 이 점에 대해 옳은 것은 어느 것인가?</p>
+<ul>
+<li>[x] 0에서 미분 가능하지 않아서, 자동 미분 라이브러리는 약속한 값 하나(파이토치는 0)를 돌려준다 〔맞음: 왼쪽 기울기 0과 오른쪽 기울기 1이 달라 값 하나로 정해지지 않으니 약속으로 정해 둔다.〕</li>
+<li>[ ] 꺾인 점에도 「한 단위 더」 움직일 때의 변화율이 하나 있다 〔틀림: 왼쪽과 오른쪽 기울기가 달라서, 어느 방향으로 움직이는지 알아야 값이 정해진다.〕</li>
+<li>[ ] 꺾인 점에서 어느 값을 약속해도 학습에는 상관없다 〔틀림: 입력이 정확히 0에 놓이면(모두 0으로 초기화했을 때처럼) 약속 하나가 학습을 멈추게 할 수 있다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-gradient-jacobian-3">
+<p><strong>물음.</strong> 등고선이 길쭉한 언덕의 중턱에 서 있다. 가장 가파른 오르막은 어느 방향인가?</p>
+<ul>
+<li>[ ] 꼭대기를 곧장 가리키는 방향 〔틀림: 등고선이 길쭉하면 꼭대기 방향과 가장 가파른 방향이 다르다.〕</li>
+<li>[x] 그래디언트 방향(등고선에 수직인 방향) 〔맞음: 미분 가능한 점에서는 그래디언트 방향의 방향 미분이 가장 크고, 그 방향 미분값이 그래디언트의 크기다.〕</li>
+<li>[ ] 등고선을 따라가는 방향 〔틀림: 등고선을 따라가면 높이가 바뀌지 않는다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-gradient-jacobian-4">
+<p><strong>물음.</strong> 미분 가능한 점에서 동쪽과 북쪽, 두 방향의 기울기만 쟀다. 북동쪽 방향의 기울기는 어떻게 되는가?</p>
+<ul>
+<li>[ ] 방향은 끝없이 많으니 두 방향만으로는 알 수 없다 〔틀림: 미분 가능하면 방향 미분이 방향에 대한 일차식이라, 두 방향이 그래디언트를 정하고 나머지 방향도 모두 정해진다.〕</li>
+<li>[ ] 두 기울기를 더한 값이다 〔틀림: 북동쪽으로 1만큼 가면 동쪽과 북쪽으로는 각각 1보다 짧게 간다. 그만큼 줄여서 더해야 한다.〕</li>
+<li>[x] 두 기울기를 더해 √2로 나눈 값이다 〔맞음: 두 기울기가 그래디언트를 세우고, 어느 방향의 기울기든 그래디언트와 그 방향의 단위 벡터의 내적이다. 북동쪽의 단위 벡터는 (1/√2, 1/√2)이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-gradient-jacobian-5">
+<p><strong>물음.</strong> 산을 100 m 오를 때마다 기온이 0.6도 내리고, 기온이 1도 내릴 때마다 핫초코가 5잔 더 팔린다. 100 m 더 높은 가게에서는 핫초코가 몇 잔 더 팔리는가?</p>
+<ul>
+<li>[ ] 5.6잔 〔틀림: 이어지는 변화율은 더하지 않고 곱한다. 더하면 단위가 맞지 않는다.〕</li>
+<li>[x] 3잔 〔맞음: 기온 변화율과 판매 변화율을 곱한다. 단위의 「도」가 약분되어 「잔 / 100 m」가 남는다.〕</li>
+<li>[ ] 8잔쯤 〔틀림: 5를 0.6으로 나눈 값이다. 앞 변화율에 뒤 변화율을 곱해야 한다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-gradient-jacobian-6">
+<p><strong>물음.</strong> 신경망의 손실은 숫자 하나다. 파이토치가 전체 자코비안 행렬을 만들지 않고 「벡터와 자코비안의 곱」만 계산하는 것은 왜인가?</p>
+<ul>
+<li>[ ] 연쇄법칙은 층 자코비안을 더해 나가는 규칙이라 행렬이 필요 없어서 〔틀림: 층 자코비안은 차례로 곱한다. 신경망 전체의 자코비안은 층 자코비안들의 곱이다.〕</li>
+<li>[ ] 전체 자코비안을 먼저 만들어 두는 편이 비싸도 결과가 더 정확해서 〔틀림: 곱하는 순서만 다를 뿐 결과는 같다. 다른 것은 곱셈 횟수다.〕</li>
+<li>[x] 손실 쪽 가로줄부터 곱해 나가면 층마다 벡터와 행렬의 곱 한 번이라 훨씬 싸서 〔맞음: 출력이 숫자 하나면 그 가로줄 하나만 들고 층을 거꾸로 지나가면 된다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>이 장은 미분을 직선, 평면, 평행사변형 같은 일차 근사로만 보았는데, 일차 근사는 움직임이 작을 때만 맞았다. 한 샘플의 로지스틱 회귀에서도 학습률 0.1의 한 스텝은 1차 근사가 말한 0.125만큼이 아니라 0.1172만큼만 손실을 줄였다. 2차 미분(그래디언트가 자리에 따라 바뀌는 정도)까지 넣어 근사하면 얼마나 더 정확해질까? 그리고 2차 미분을 알면 한 스텝을 얼마나 멀리 내디뎌도 되는지 미리 말할 수 있을까?</p>
 <p>연쇄법칙은 층마다의 자코비안을 곱하라고 했다. tanh가 1 가까이 차오르면 그 출력에 해당하는 자코비안의 줄이 0.19배로 작아지는 것도 보았다. 층이 수십 개면 그런 배율이 수십 번 곱해질 텐데, 맨 앞 층에 닿는 그래디언트는 사라지지 않고 남아 있을까? 남게 하려면 무엇을 조심해야 할까?</p>

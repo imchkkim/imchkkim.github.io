@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -706,7 +714,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p class="chapter-crumb"><a href="zeroth-order.html">미분 없이: 0차 최적화</a></p>
 <h2 id="sec-zeroth-order-summary">혼동하기 쉬운 점과 요약<span id="혼동하기-쉬운-점과-요약" class="anchor-alias"></span></h2>
 <div class="dialogue"><h3 id="talk-zeroth-shorter-gap">토론 1. 기울기를 재는 간격은 짧을수록 정확한가<span id="토론-1-기울기를-재는-간격은-짧을수록-정확한가" class="anchor-alias"></span></h3>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>학습 기록에서 1000스텝째 손실이 얼마나 빨리 줄고 있는지 알고 싶어요. 참 손실 곡선은 2e^(−k/1000)이라 그 자리의 기울기는 스텝당 −0.000736인데, 기록된 미니배치 손실은 잴 때마다 많게는 0.01씩 틀려요. 1000스텝째와 그 뒤 Δ스텝째의 손실 차를 Δ로 나눠 기울기를 잰다면, Δ를 얼마로 할까요?</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>학습 기록에서 1000스텝째 손실이 얼마나 빨리 줄고 있는지 알고 싶어요. 참 손실 곡선은 2e<sup>−k/1000</sup>이라 그 자리의 기울기는 스텝당 −0.000736인데, 기록된 미니배치 손실은 잴 때마다 많게는 0.01씩 틀려요. 1000스텝째와 그 뒤 Δ스텝째의 손실 차를 Δ로 나눠 기울기를 잰다면, Δ를 얼마로 할까요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>순간 기울기니까 바로 다음 스텝, Δ = 1이 가장 정확하겠죠. 곡선이 휘어 봐야 한 스텝 사이엔 거의 안 휘니까요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>두 손실이 각각 0.01씩 반대로 틀리면요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>차이가 0.02 어긋나고, 그걸 1로 나누니까 기울기가 0.02 틀려요. 참값 0.000736의 27배네요. 줄고 있는지 늘고 있는지도 못 믿겠어요.</p></div></div>
@@ -812,11 +820,60 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </table></div>
 <h3 id="요약">요약</h3>
 <p>이 장에서는 값만 돌려주는 상자를 내려가는 방법 넷을 차례로 보았는데, 첫째인 유한 차분은 두 점의 함숫값 차이를 간격으로 나눠 미분을 근사한다. 간격이 크면 곡선이 휜 것이 섞이고(간격에 비례하는 자름 오차), 작으면 함숫값의 반올림 오차가 간격으로 나뉘어 커진다(간격에 반비례). 그래서 오차는 U 자를 그리고, float64 전진 차분에서 가장 좋은 간격은 10⁻⁸ 근처다. 1952년 키퍼와 울포위츠가 노이즈 섞인 실험에서 같은 고민을 했고, 오늘날 이 방법은 역전파 코드를 검사하는 데 쓰인다. 다만 변수가 d 개면 그래디언트 하나에 함숫값이 d + 1 번 든다.</p>
-<p>무작위 탐색은 그래디언트를 추정하지 않고 아무 방향이나 시험해서 낮아지면 옮긴다. 넬더와 미드의 단체법처럼 비교만 하는 방법은 단순하고 노이즈와 계단에 강하다. 변수가 둘이면 그래디언트 방법에 크게 뒤지지 않지만, 차원이 커지면 낮아진 스텝도 대부분 옆으로 걸은 것이 되어 함숫값 계산 횟수가 차원에 비례해 는다. 하이퍼파라미터처럼 몇 개만 중요한 문제에서는 격자보다 무작위로 뽑는 편이 같은 횟수로 더 많은 값을 시험한다.</p>
+<p>무작위 탐색은 그래디언트를 추정하지 않고 아무 방향이나 시험해서 낮아지면 옮긴다. 넬더와 미드의 심플렉스법처럼 비교만 하는 방법은 단순하고 노이즈와 계단에 강하다. 변수가 둘이면 그래디언트 방법에 크게 뒤지지 않지만, 차원이 커지면 낮아진 스텝도 대부분 옆으로 걸은 것이 되어 함숫값 계산 횟수가 차원에 비례해 는다. 하이퍼파라미터처럼 몇 개만 중요한 문제에서는 격자보다 무작위로 뽑는 편이 같은 횟수로 더 많은 값을 시험한다.</p>
 <p>동시 섭동은 모든 변수를 무작위 부호로 한꺼번에 흔들어 앞뒤 함숫값 두 번으로 그래디언트를 추정한다. 추정값 하나에는 다른 칸의 그래디언트가 섞여 노이즈의 제곱이 참 그래디언트 제곱의 d − 1 배쯤이지만, 평균은 참 그래디언트다. 스텝이 쌓이며 노이즈가 지워지므로 거친 추정값으로 작은 스텝을 많이 걷되, 학습률은 d 쯤으로 나눠야 하고 스텝 수는 d 배쯤 는다. MeZO 는 이 방법으로 역전파 없이 큰 언어 모델을 파인튜닝한다.</p>
 <p>가우시안 스무딩은 함수를 가우스 노이즈로 흐린 f<sub>σ</sub> 를 다룬다. f<sub>σ</sub> 의 그래디언트는 f 의 미분 없이 함숫값에 무게 u/σ 를 매긴 평균으로 적히고, 흔드는 크기를 크게 둔 동시 섭동 추정은 f<sub>σ</sub> 의 그래디언트를 추정한다. 흐리면 작은 골짜기가 지워지고 계단 모양 목표에도 그래디언트가 생긴다. 그 무게는 정규분포의 점수 함수이고, 같은 식이 강화학습의 REINFORCE 다.</p>
 <p>점수 함수의 꼴을 신경망 한가운데의 뽑기에 쓰면 정책 그래디언트가 된다. 뽑기 뒤의 파라미터와 확률을 만드는 앞쪽 계산은 역전파로 정확히 미분하고, 미분이 끊긴 뽑기 자리에서만 손실의 값에서 베이스라인을 뺀 (𝓛 − b) 를 거꾸로 보낸다. 2016년 카파시는 하드 어텐션과 메모리 쓰기를 이렇게 학습할 수 있다고 정리했고, 오늘날 언어 모델의 강화학습이 같은 다리를 쓴다. 가우시안 스무딩과 달리 뽑기는 모델 안의 계산이라 추정값이 겨누는 것은 평균 손실 자체지만, 한 번의 추정값은 크게 흔들리고 고를 것이 많을수록 학습이 어렵다. 뽑기가 연속이면 노이즈를 바깥으로 빼는 재파라미터화가 더 조용한 길이다.</p>
 <p>칸을 고르는 뽑기도 로짓에 검벨 노이즈를 더하고 온도 τ 의 소프트맥스로 누그러뜨리면 역전파할 수 있다(검벨 소프트맥스). 2016년 매디슨 팀과 장 팀이 하루 차이로 내놓았고, DALL·E 는 그림을 토큰으로 바꾸는 인코더를 이렇게 학습했다. 표준편차가 주는 대신 섞어 읽은 손실의 그래디언트라 편향이 생기고, τ 를 낮추면 편향은 줄고 표준편차가 커진다. 어느 온도가 나은지는 편향² + 분산/N 으로 비교하는데, 한 스텝에 모으는 에피소드 수 N 이 클수록 낮은 온도가, 아주 크면 편향이 없는 점수 함수가 이긴다.</p>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-zeroth-order-1">
+<p><strong>물음.</strong> float64 로 전진 차분을 써서 미분을 근사한다. 간격을 고르는 법으로 옳은 것은?</p>
+<ul>
+<li>[ ] 간격은 짧을수록 정확하다 〔틀림: 간격이 짧으면 함숫값의 반올림 오차가 간격으로 나뉘어 커진다.〕</li>
+<li>[ ] 간격은 길수록 정확하다 〔틀림: 간격이 길면 곡선이 휜 만큼이 섞인다. 이 자름 오차는 간격에 비례해 커진다.〕</li>
+<li>[x] 자름 오차와 반올림 오차가 맞먹는 가운데 간격(10⁻⁸ 근처)이 가장 좋다 〔맞음: 간격에 따른 오차는 U 자를 그리고, 오차가 가장 작은 간격에서 두 오차가 비슷해진다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-zeroth-order-2">
+<p><strong>물음.</strong> float32 로 계산한 차분 그래디언트가 자동 미분이 준 값과 많이 다르다. 먼저 해 볼 일은?</p>
+<ul>
+<li>[ ] 자동 미분 코드가 틀렸다고 보고 고친다 〔틀림: float32 에서는 반올림 오차가 커서 차분 쪽이 틀리기 쉽다.〕</li>
+<li>[x] float64 로 다시 검사하거나, float32 라면 간격을 10⁻² 쯤으로 키운다 〔맞음: 반올림 오차는 간격에 반비례하므로, 자릿수를 늘리거나 간격을 키우면 줄어든다.〕</li>
+<li>[ ] 간격을 더 줄여 다시 잰다 〔틀림: 간격을 줄이면 반올림 오차가 더 커진다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-zeroth-order-3">
+<p><strong>물음.</strong> 하이퍼파라미터 셋 가운데 실제로 중요한 것은 하나뿐이다. 시도 27번을 3 × 3 × 3 격자로 쓰는 것과 무작위로 뽑는 것을 견주면?</p>
+<ul>
+<li>[ ] 격자가 범위를 빈틈없이 덮으니 더 낫다 〔틀림: 격자는 중요한 하이퍼파라미터의 값을 3가지만 시험하고, 나머지 24번은 같은 값을 되풀이한다.〕</li>
+<li>[x] 무작위 뽑기가 중요한 하이퍼파라미터의 값을 27가지 시험한다 〔맞음: 무작위로 뽑으면 시도마다 다른 값이 나와, 같은 횟수로 더 많은 값을 본다.〕</li>
+<li>[ ] 둘은 시도 횟수가 같으니 결과도 비슷하다 〔틀림: 횟수가 같아도 중요한 하이퍼파라미터에서 본 값의 가짓수가 3과 27로 다르다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-zeroth-order-4">
+<p><strong>물음.</strong> 동시 섭동은 모든 변수를 한꺼번에 흔들어 함숫값 두 번으로 그래디언트를 추정한다. 이 추정값으로 경사하강을 할 때 옳은 것은?</p>
+<ul>
+<li>[ ] 추정값 하나가 변수마다의 효과를 알려 준다 〔틀림: 추정값 하나에는 다른 칸의 그래디언트가 섞여 있다. 맞는 것은 평균이다.〕</li>
+<li>[ ] 평균이 참 그래디언트이니 학습률도 경사하강과 같게 쓰면 된다 〔틀림: 한 스텝의 길이가 너무 길어져 터진다.〕</li>
+<li>[x] 학습률을 변수 수쯤으로 나누고, 스텝 수가 그만큼 는다 〔맞음: 스텝이 쌓이며 섞인 노이즈가 지워지므로, 거친 추정값으로 작은 스텝을 많이 걷는다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-zeroth-order-5">
+<p><strong>물음.</strong> 거의 모든 곳에서 그래디언트가 0인 계단 모양 목표가 있다. 가우스 노이즈로 흐린 목표를 다루면 어떻게 되는가?</p>
+<ul>
+<li>[ ] 그래디언트가 여전히 0이라 내려갈 수 없다 〔틀림: 흐린 목표의 기댓값은 매끄러워서 그래디언트가 생긴다.〕</li>
+<li>[x] 그래디언트가 생기지만, 흐림 폭이 너무 좁거나 너무 넓으면 작다 〔맞음: 폭이 좁으면 계단이 거의 그대로이고, 넓으면 너무 밋밋해진다.〕</li>
+<li>[ ] 흐려도 바닥의 자리는 그대로다 〔틀림: 바닥 양옆이 대칭일 때만 그렇다. 한쪽이 가파르면 바닥이 완만한 쪽으로 옮겨 간다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-zeroth-order-6">
+<p><strong>물음.</strong> 칸 뽑기가 낀 모델에서 편향이 없는 점수 함수 추정과 편향이 있는 검벨 소프트맥스 가운데 하나를 고른다. 옳은 것은?</p>
+<ul>
+<li>[ ] 편향이 없는 점수 함수가 늘 참값에 더 가깝다 〔틀림: 한 번의 추정값이 참값에서 떨어진 정도는 편향과 분산이 함께 정한다. 에피소드가 적으면 분산이 커서 질 수 있다.〕</li>
+<li>[ ] 검벨 소프트맥스는 평균 손실의 그래디언트를 그대로 준다 〔틀림: 섞어 읽은 손실의 그래디언트라 온도만큼 편향이 있다.〕</li>
+<li>[x] 한 스텝에 모으는 에피소드가 많을수록 낮은 온도가, 아주 많으면 점수 함수가 낫다 〔맞음: 에피소드를 모으면 분산은 에피소드 수로 나뉘어 줄지만 편향은 그대로 남기 때문이다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>이 장의 방법들은 모두 한 점 x 둘레를 흔들어 보는 데서 출발했고, 흐림 폭 σ 는 우리가 정해 주었으며 흔드는 방향은 어느 쪽이든 똑같이 뽑았다. 그런데 울퉁불퉁한 그릇에서 보았듯 σ 는 처음에는 크고 바닥 근처에서는 작아야 할 것 같고, 한쪽이 가파른 V 처럼 방향마다 알맞은 흐림 폭이 다를 수도 있다. 시험해 본 점들의 결과를 보고 흔드는 폭과 방향, 더 나아가 점을 뽑는 분포 자체를 고쳐 갈 수는 없을까? 점 하나를 옮기는 대신 점 여러 개를 한꺼번에 뽑아 좋은 것을 남기는 생물의 진화 같은 방법은 어떨까?</p>
 <p>그리고 차원 수만큼 느려진다는 결론도 마음에 걸린다. 정책 그래디언트에서 뽑기 뒤를 맡긴 역전파는 파라미터가 몇 개든 그래디언트를 정확히 준다고 했는데, 식을 안다는 것을 어떻게 쓰면 함숫값 몇 번 계산할 값으로 그래디언트 전체를 얻을 수 있을까?</p>

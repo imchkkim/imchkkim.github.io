@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -707,11 +715,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h2 id="sec-compute-optimal-scaling">스케일링 법칙: 계산량이 정해지면 모델과 데이터를 얼마나<span id="스케일링-법칙-계산량이-정해지면-모델과-데이터를-얼마나" class="anchor-alias"></span></h2>
 <p>μTransfer 로 크기마다 학습률을 다시 찾는 비용은 덜었지만, 모델 크기 자체를 무엇으로 정하느냐는 물음이 남는다. 학습에 쓸 수 있는 계산은 정해져 있는데, 파라미터를 <span class="sym" style="color:#3c4bff">N</span>개, 학습 토큰을 <span class="sym" style="color:#008787">D</span>개로 하면 계산량은 대략 <span class="sym" style="color:#874b0f">C</span> ≈ 6<span class="sym" style="color:#3c4bff">N</span><span class="sym" style="color:#008787">D</span>다. 토큰 하나가 앞으로 지나갈 때 파라미터 하나마다 곱셈과 덧셈이 한 번씩, 역전파에서 그 두 배가 들기 때문이다. 같은 <span class="sym" style="color:#874b0f">C</span>로 큰 모델을 적은 토큰으로 학습할 수도, 작은 모델을 많은 토큰으로 학습할 수도 있다. 모델이 너무 작으면 데이터를 다 담지 못하고 너무 크면 한 번도 제대로 학습되지 못하는데, 그 사이 어디가 가장 좋을까? 그리고 그것을 큰 모델을 실제로 학습하기 전에 알 수 있을까?</p>
 <h3 id="hist-kaplan-chinchilla-scaling" class="history" data-people="kaplan-jared hoffmann-jordan">역사: 캐플런의 0.73, 친칠라의 0.5<span id="역사-캐플런의-0-73-친칠라의-0-5" class="anchor-alias"></span></h3>
-<p>2020년 1월 OpenAI 의 재러드 캐플런(Jared Kaplan)과 동료들은 「신경 언어 모델의 스케일링 법칙(Scaling Laws for Neural Language Models)」에서 언어 모델의 손실이 파라미터 수, 데이터 양, 계산량에 대해 일곱 자릿수가 넘는 범위에서 거듭제곱 법칙을 따른다고 보고했다. 폭이냐 깊이냐 같은 설계의 세부는 넓은 범위에서 거의 상관이 없었다. 그들은 계산량이 늘 때 가장 좋은 모델 크기는 <span class="sym" style="color:#874b0f">C</span>^0.73, 토큰 수는 <span class="sym" style="color:#874b0f">C</span>^0.27 로 키우라고 했다. 계산을 열 배 늘리면 모델은 5.4배, 데이터는 1.9배다. 큰 모델을 적당한 데이터로 학습하고 수렴하기 훨씬 전에 멈추는 것이 계산을 가장 잘 쓰는 길이라는 결론이었다. 그 뒤 GPT-3 를 비롯한 큰 모델 여럿이 토큰 3,000억 개 언저리로 학습되었다.</p>
+<p>2020년 1월 OpenAI 의 재러드 캐플런(Jared Kaplan)과 동료들은 「신경 언어 모델의 스케일링 법칙(Scaling Laws for Neural Language Models)」에서 언어 모델의 손실이 파라미터 수, 데이터 양, 계산량에 대해 일곱 자릿수가 넘는 범위에서 거듭제곱 법칙을 따른다고 보고했다. 폭이냐 깊이냐 같은 설계의 세부는 넓은 범위에서 거의 상관이 없었다. 그들은 계산량이 늘 때 가장 좋은 모델 크기는 <span class="sym" style="color:#874b0f">C</span><sup>0.73</sup>, 토큰 수는 <span class="sym" style="color:#874b0f">C</span><sup>0.27</sup> 로 키우라고 했다. 계산을 열 배 늘리면 모델은 5.4배, 데이터는 1.9배다. 큰 모델을 적당한 데이터로 학습하고 수렴하기 훨씬 전에 멈추는 것이 계산을 가장 잘 쓰는 길이라는 결론이었다. 그 뒤 GPT-3 를 비롯한 큰 모델 여럿이 토큰 3,000억 개 언저리로 학습되었다.</p>
 <p>2022년 3월 딥마인드의 조던 호프만(Jordan Hoffmann)과 동료들은 「계산 최적 큰 언어 모델 학습하기(Training Compute-Optimal Large Language Models)」에서 다른 답을 냈다. 파라미터 7,000만 개에서 160억 개가 넘는 모델 400 개 이상을 토큰 50억 개에서 5,000억 개로 학습해 보니, 모델 크기와 토큰 수를 같은 비율로 키워야 했다. 모델을 두 배로 하면 토큰도 두 배다. 그들은 이 결론대로 파라미터 700억 개 모델을 토큰 1.4조 개로 학습해 친칠라(Chinchilla)라 불렀다. 계산량은 파라미터 2,800억 개, 토큰 3,000억 개의 고퍼(Gopher)와 같은데, 친칠라가 고퍼, GPT-3, 5,300억 개짜리 MT-NLG 를 여러 태스크에서 앞섰고 MMLU 평균 정확도는 67.5% 로 고퍼보다 7점 넘게 높았다.</p>
 <figure class="fig "><img src="images/mup/h5_tokens.png" alt="친칠라 논문 표 1 의 여섯 모델. 가로축은 파라미터 수, 세로축은 학습 토큰 수(두 축 모두 로그 눈금). 친칠라만 「토큰 = 파라미터 × 20」 선 위에 있고, 나머지는 파라미터를 키우고 토큰은 3,000억 개 언저리에 두었다. 논문 숫자를 다시 그렸다(sources/mup/figs.py)" loading="lazy"><figcaption>친칠라 논문 표 1 의 여섯 모델. 가로축은 파라미터 수, 세로축은 학습 토큰 수(두 축 모두 로그 눈금). 친칠라만 「토큰 = 파라미터 × 20」 선 위에 있고, 나머지는 파라미터를 키우고 토큰은 3,000억 개 언저리에 두었다. 논문 숫자를 다시 그렸다(sources/mup/figs.py)</figcaption></figure>
 <p>두 연구의 답이 갈린 것은 학습률 스케줄 때문이기도 했다. 친칠라 논문에 따르면 캐플런 팀은 모든 모델에 같은 토큰 수와 같은 학습률 스케줄을 썼다. 1,300억 토큰에 맞춘 코사인 일정(학습률을 코사인 곡선 모양으로 줄여 가는 일정)으로 학습하는 도중의 손실을 「더 적은 토큰으로 학습한 모델의 손실」로 읽으면, 그 토큰 수에 맞춘 일정으로 끝까지 학습했을 때보다 손실이 높게 잡힌다. 그래서 작은 모델을 데이터를 더 써서 학습하는 쪽의 효과를 낮게 보았고, 모델을 데이터보다 빨리 키우라는 결론으로 기울었다. 친칠라 팀은 일정의 길이를 학습 토큰 수에 맞추는 것이 모델 크기와 상관없이 가장 좋았다고 적었다. 학습률을 잘못 다루면 무엇을 키울지에 대한 판단까지 틀어진 것이다.</p>
-<figure class="fig "><img src="images/mup/h5b_two_laws.png" alt="계산량이 늘 때 가장 좋은 모델 크기. 파란 선은 캐플런 외(2020) 표 5 의 식 N = 1.3·10⁹ × (C/PF-day)^0.73(임베딩을 뺀 파라미터 수), 초록 점은 호프만 외(2022) 표 3 의 예상값이다. 두 선은 10¹⁹ 언저리에서 만나지만 고퍼·친칠라의 계산량(약 6 × 10²³)에서는 열 배 넘게 벌어진다. 마름모의 계산량은 C ≈ 6ND 로 셈했다. 두 논문의 숫자를 다시 그렸다(sources/mup/h_history.py)" loading="lazy"><figcaption>계산량이 늘 때 가장 좋은 모델 크기. 파란 선은 캐플런 외(2020) 표 5 의 식 N = 1.3·10⁹ × (C/PF-day)^0.73(임베딩을 뺀 파라미터 수), 초록 점은 호프만 외(2022) 표 3 의 예상값이다. 두 선은 10¹⁹ 언저리에서 만나지만 고퍼·친칠라의 계산량(약 6 × 10²³)에서는 열 배 넘게 벌어진다. 마름모의 계산량은 C ≈ 6ND 로 셈했다. 두 논문의 숫자를 다시 그렸다(sources/mup/h_history.py)</figcaption></figure>
+<figure class="fig "><img src="images/mup/h5b_two_laws.png" alt="계산량이 늘 때 가장 좋은 모델 크기. 파란 선은 캐플런 외(2020) 표 5 의 식 N = 1.3·10⁹ × (C/PF-day)^(0.73)(임베딩을 뺀 파라미터 수), 초록 점은 호프만 외(2022) 표 3 의 예상값이다. 두 선은 10¹⁹ 언저리에서 만나지만 고퍼·친칠라의 계산량(약 6 × 10²³)에서는 열 배 넘게 벌어진다. 마름모의 계산량은 C ≈ 6ND 로 셈했다. 두 논문의 숫자를 다시 그렸다(sources/mup/h_history.py)" loading="lazy"><figcaption>계산량이 늘 때 가장 좋은 모델 크기. 파란 선은 캐플런 외(2020) 표 5 의 식 N = 1.3·10⁹ × (C/PF-day)<sup>0.73</sup>(임베딩을 뺀 파라미터 수), 초록 점은 호프만 외(2022) 표 3 의 예상값이다. 두 선은 10¹⁹ 언저리에서 만나지만 고퍼·친칠라의 계산량(약 6 × 10²³)에서는 열 배 넘게 벌어진다. 마름모의 계산량은 C ≈ 6ND 로 셈했다. 두 논문의 숫자를 다시 그렸다(sources/mup/h_history.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>학습 도중의 손실을 읽어서 결론을 냈다는 거죠? 토큰 수마다 따로 끝까지 학습했으면 간단했을 텐데요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>모델 크기마다, 토큰 수마다 처음부터 끝까지 학습하면 실험 수가 곱으로 늘어요. 친칠라 팀은 그렇게 해서 모델 400 개 넘게 학습했고요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그러면 도중의 손실을 읽는 건 계산을 아끼는 지름길이었네요. 실행 하나에서 토큰 수가 다른 점을 여러 개 얻으니까요.</p></div></div>
@@ -787,10 +795,10 @@ A,\ B,\ \alpha,\ \beta &amp; \text{실험에 맞춘 상수}
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>한 달 식비로 쌀이랑 반찬을 살 때, 한쪽만 몰아 사면 손해죠. 계산이 식비고, 모델과 데이터가 쌀과 반찬이에요.</p></div></div>
 </div><div class="dialogue"><h3 id="prob-mup-exponent-origin">문제 13. 지수는 어디서 오는가<span id="문제-13-지수는-어디서-오는가" class="anchor-alias"></span></h3>
 <blockquote>
-<p>손실 식 <span class="sym" style="color:#d62728">𝓛</span> = E + A/<span class="sym" style="color:#3c4bff">N</span>^α + B/<span class="sym" style="color:#008787">D</span>^β 에서 <span class="sym" style="color:#874b0f">C</span> = 6<span class="sym" style="color:#3c4bff">N</span><span class="sym" style="color:#008787">D</span>를 고정한다. (가) <span class="sym" style="color:#008787">D</span>를 <span class="sym" style="color:#3c4bff">N</span>으로 나타내 손실을 <span class="sym" style="color:#3c4bff">N</span> 하나의 함수로 쓰고, 미분이 0 인 곳에서 <span class="sym" style="color:#3c4bff">N</span><sub>opt</sub> ∝ <span class="sym" style="color:#874b0f">C</span>^(β/(α+β)) 임을 보여라. (나) 친칠라 논문 본문 값(α = 0.34, β = 0.28)과 α = β = 0.3 에서 계산을 10배 늘릴 때 <span class="sym" style="color:#3c4bff">N</span>과 <span class="sym" style="color:#008787">D</span>는 몇 배가 되는가? 다시 맞춘 값에서 나온 <span class="sym" style="color:#3c4bff">N</span> × 3.26, <span class="sym" style="color:#008787">D</span> × 3.07 과 비교하라. (다) 계산이 늘 때 모델을 더 빨리 키우라는 답이 나오려면 α와 β 가운데 어느 쪽이 커야 하는가? 뜻은 무엇인가?</p>
+<p>손실 식 <span class="sym" style="color:#d62728">𝓛</span> = E + A/<span class="sym" style="color:#3c4bff">N</span><sup>α</sup> + B/<span class="sym" style="color:#008787">D</span><sup>β</sup> 에서 <span class="sym" style="color:#874b0f">C</span> = 6<span class="sym" style="color:#3c4bff">N</span><span class="sym" style="color:#008787">D</span>를 고정한다. (가) <span class="sym" style="color:#008787">D</span>를 <span class="sym" style="color:#3c4bff">N</span>으로 나타내 손실을 <span class="sym" style="color:#3c4bff">N</span> 하나의 함수로 쓰고, 미분이 0 인 곳에서 <span class="sym" style="color:#3c4bff">N</span><sub>opt</sub> ∝ <span class="sym" style="color:#874b0f">C</span><sup>β/(α+β)</sup> 임을 보여라. (나) 친칠라 논문 본문 값(α = 0.34, β = 0.28)과 α = β = 0.3 에서 계산을 10배 늘릴 때 <span class="sym" style="color:#3c4bff">N</span>과 <span class="sym" style="color:#008787">D</span>는 몇 배가 되는가? 다시 맞춘 값에서 나온 <span class="sym" style="color:#3c4bff">N</span> × 3.26, <span class="sym" style="color:#008787">D</span> × 3.07 과 비교하라. (다) 계산이 늘 때 모델을 더 빨리 키우라는 답이 나오려면 α와 β 가운데 어느 쪽이 커야 하는가? 뜻은 무엇인가?</p>
 </blockquote>
 <p><img src="images/mup/p13_two_terms.png" alt="계산량을 C = 10²² 로 고정했을 때 파라미터 수 N 에 따른 손실의 두 항(다시 맞춘 상수)">
-<strong>김민준:</strong> (가)는 <span class="sym" style="color:#008787">D</span> = <span class="sym" style="color:#874b0f">C</span>/(6<span class="sym" style="color:#3c4bff">N</span>)을 넣으면 B/<span class="sym" style="color:#008787">D</span>^β = B(6<span class="sym" style="color:#3c4bff">N</span>/<span class="sym" style="color:#874b0f">C</span>)^β 니까, 손실이 A<span class="sym" style="color:#3c4bff">N</span>^(−α) + B(6/<span class="sym" style="color:#874b0f">C</span>)^β <span class="sym" style="color:#3c4bff">N</span>^β 예요. <span class="sym" style="color:#3c4bff">N</span>으로 미분해 0 으로 놓으면 αA<span class="sym" style="color:#3c4bff">N</span>^(−α−1) = βB(6/<span class="sym" style="color:#874b0f">C</span>)^β <span class="sym" style="color:#3c4bff">N</span>^(β−1), 정리하면 <span class="sym" style="color:#3c4bff">N</span>^(α+β) ∝ <span class="sym" style="color:#874b0f">C</span>^β. 그래서 <span class="sym" style="color:#3c4bff">N</span><sub>opt</sub> ∝ <span class="sym" style="color:#874b0f">C</span>^(β/(α+β)) 이요.</p>
+<strong>김민준:</strong> (가)는 <span class="sym" style="color:#008787">D</span> = <span class="sym" style="color:#874b0f">C</span>/(6<span class="sym" style="color:#3c4bff">N</span>)을 넣으면 B/<span class="sym" style="color:#008787">D</span><sup>β</sup> = B(6<span class="sym" style="color:#3c4bff">N</span>/<span class="sym" style="color:#874b0f">C</span>)<sup>β</sup> 니까, 손실이 A<span class="sym" style="color:#3c4bff">N</span><sup>−α</sup> + B(6/<span class="sym" style="color:#874b0f">C</span>)<sup>β</sup> <span class="sym" style="color:#3c4bff">N</span><sup>β</sup> 예요. <span class="sym" style="color:#3c4bff">N</span>으로 미분해 0 으로 놓으면 αA<span class="sym" style="color:#3c4bff">N</span><sup>−α−1</sup> = βB(6/<span class="sym" style="color:#874b0f">C</span>)<sup>β</sup> <span class="sym" style="color:#3c4bff">N</span><sup>β−1</sup>, 정리하면 <span class="sym" style="color:#3c4bff">N</span><sup>α+β</sup> ∝ <span class="sym" style="color:#874b0f">C</span><sup>β</sup>. 그래서 <span class="sym" style="color:#3c4bff">N</span><sub>opt</sub> ∝ <span class="sym" style="color:#874b0f">C</span><sup>β/(α+β)</sup> 이요.</p>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(나)는 본문 값이 β/(α + β) = 0.452 라 <span class="sym" style="color:#3c4bff">N</span> × 2.83, <span class="sym" style="color:#008787">D</span> × 3.53. α = β 면 둘 다 3.16 이야. 다시 맞춘 값(0.513)은 <span class="sym" style="color:#3c4bff">N</span> 쪽이 조금 빠른데, 본문 값은 거꾸로 <span class="sym" style="color:#008787">D</span> 쪽이 빨라.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>본문 값으로는 데이터를 더 빨리 키우라고 나오고, 다시 맞춘 값으로는 거의 같은 비율이네요. 지수 차이가 0.06 쯤인데 결론이 그렇게 갈릴까요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>10배에서는 2.83 과 3.26 정도 차이라 작아 보여요. 그런데 친칠라처럼 가장 큰 실험의 수천 배까지 늘이면…</p></div></div>

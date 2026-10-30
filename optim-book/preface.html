@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -831,7 +839,7 @@ c100.7 8.3 195.3 44 280 108 55.3 42 101.7 93 139 153l9 14c2.7-4 5.7-8.7 9-14
   m[&quot;μP&lt;br/&gt;폭이 달라질 때 스텝의 크기&quot;] -. 규칙 .-&gt; a
 </pre>
 <h3 id="ml에서-기본값-다시-보기">ML에서: 기본값 다시 보기</h3>
-<p>이 책을 다 읽고 나면 <code>torch.optim.AdamW(model.parameters())</code> 한 줄이 다르게 보인다. 학습률 0.001은 「손실이 줄어든다고 장담할 수 있는 상한」 아래의 어디쯤을 고른 값이고, 그 상한은 손실이 가장 가파르게 휜 방향이 정한다(「경사하강」). <code>betas</code> 의 0.9는 모멘텀이 지난 스텝을 얼마나 이어 가느냐, 0.999는 축마다의 휨을 추정하는 그래디언트 제곱의 평균을 얼마나 길게 기억하느냐다. 0.00000001이라는 <code>eps</code> 는 그래디언트가 거의 0인 축에서 나눗셈이 터지지 않게 분모에 더한 작은 수이고, <code>weight_decay</code> 0.01은 파라미터를 스텝마다 조금씩 0 쪽으로 당기는 세기다(「적응 학습률」). 폭을 넓힌 모델에서 같은 학습률이 왜 듣지 않는지와 그 처방은 「μP」에서, Muon 의 <code>ns_steps</code> 5와 세 계수가 무엇을 하는지는 「Muon」에서 직접 계산한다.</p>
+<p>이 책을 다 읽고 나면 <code>torch.optim.AdamW(model.parameters())</code> 한 줄이 다르게 보인다. 학습률 0.001은, 경사하강이라면 「손실이 줄어든다고 장담할 수 있는 상한」 아래의 어디쯤을 고른 값이고, 그 상한은 손실이 가장 가파르게 휜 방향이 정한다(「경사하강」). <code>betas</code> 의 0.9는 모멘텀이 지난 스텝을 얼마나 이어 가느냐, 0.999는 축마다의 휨을 추정하는 그래디언트 제곱의 평균을 얼마나 길게 기억하느냐다. 0.00000001이라는 <code>eps</code> 는 그래디언트가 거의 0인 축에서 나눗셈이 터지지 않게 분모에 더한 작은 수이고, <code>weight_decay</code> 0.01은 파라미터를 스텝마다 조금씩 0 쪽으로 당기는 세기다(「적응 학습률」). 폭을 넓힌 모델에서 같은 학습률이 왜 듣지 않는지와 그 처방은 「μP」에서, Muon 의 <code>ns_steps</code> 5와 세 계수가 무엇을 하는지는 「Muon」에서 직접 계산한다.</p>
 <p>그렇다고 기본값을 바꾸지 말라는 말은 아니다. 기본값이 무엇을 가정하고 정해졌는지 알면, 학습이 무너졌을 때 어느 숫자를 왜 바꿀지를 짐작이 아닌 근거로 먼저 떠올릴 수 있다.</p>
 <h2 id="sec-book-structure">이 책의 짜임<span id="이-책의-짜임" class="anchor-alias"></span></h2>
 <p>이 책의 뼈대는 테일러 사다리를 아래에서 위로 오르는 순서이고, 맨 먼저 사다리를 세우는 데 쓰는 도구를 갖춘다. 손실을 지형으로 보는 눈, 그래디언트와 자코비안, 테일러 전개 자체, 그리고 「얼마나 빨리 변할 수 있나」를 숫자 하나로 묶는 립시츠 연속과, 극소가 곧 최소가 되는 좋은 경우인 볼록성이다(<strong>미분과 근사</strong>). 그다음 값만 쓰는 방법(<strong>0차 최적화</strong>), 그래디언트를 쓰는 방법과 그 그래디언트를 얻는 역전파·초기화(<strong>1차 최적화</strong>), 휨을 쓰는 방법(<strong>2차 최적화</strong>), 휨을 흉내 내는 방법과 큰 모델의 스텝(<strong>2차의 근사와 큰 모델의 스텝</strong>)으로 오른다. 그 뒤 두 부는 사다리를 다른 곳에 써 본다. 점 하나가 아니라 분포를 옮기는 최적화(<strong>분포를 옮기는 최적화</strong>)와, 옵티마이저가 손실이 0에 가까운 여러 자리 가운데 어느 것을 고르느냐가 처음 보는 데이터에서의 성능을 정한다는 이야기(<strong>최적화가 일반화를 만든다</strong>)다.</p>

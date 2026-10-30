@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -823,6 +831,55 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>GAN 은 생성기와 판별기를 맞붙인 최소최대 문제다. 판별기가 가장 잘 가를 때 생성기가 줄이는 값은 JS 발산인데, 진짜와 가짜가 겹치지 않으면 JS 는 거리와 상관없이 log 2 에 붙어 생성기에게 그래디언트를 주지 못한다. 진짜 사진과 만든 그림의 분포는 낮은 차원에 모여 있어 이런 일이 흔하다.</p>
 <p>바서슈타인 거리 W₁ 은 떨어진 만큼 자란다. 칸토로비치와 루빈슈타인이 보인 쌍대 덕분에, W₁ 은 그래디언트 길이가 1을 넘지 않는 판별기로 잰 진짜와 가짜의 평균 점수 차 가운데 가장 큰 값으로 잴 수 있다. 1-립시츠라는 제약만 지키면 판별기 신경망이 W₁ 을 추정하고, 생성기는 그 판별기의 그래디언트를 따라 내려간다. 제약의 상한이 1이 아닌 K 여도 점수 차가 K 배 될 뿐 방향은 같다.</p>
 <p>제약을 신경망에 지키는 법은 셋이 나왔다. 가중치 자르기는 가중치를 [−c, c] 로 묶는 단순한 방법이지만, 가중치가 경계로 몰려 판별기가 단순해지고 깊이에 따라 그래디언트가 사라지거나 터진다. 그래디언트 페널티는 진짜와 가짜를 잇는 선분 위에서 그래디언트 길이가 1에서 벗어난 만큼 벌한다. 판별기가 가장 좋은 모양에 가장 가까웠지만, 페널티라 그래디언트 길이가 1을 조금 넘고 스텝마다 역전파를 한 번 더 한다. 스펙트럼 정규화는 층마다 가중치를 가장 큰 특잇값으로 나눠 어디서나 립시츠 상수를 1 이하로 장담한다. 값싸지만 곱셈 부등식이 느슨해 실제 그래디언트 길이는 1보다 작다.</p>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-wgan-1">
+<p><strong>물음.</strong> θ·φ 놀이에서 한쪽은 값을 줄이고 다른 쪽은 같은 값을 키운다. 두 쪽이 동시에 그래디언트 스텝을 밟으면 어떻게 되는가?</p>
+<ul>
+<li>[ ] 학습률만 작게 하면 안장점에 닿는다 〔틀림: 학습률이 작아도 스텝마다 안장점에서의 거리가 조금씩 늘어난다. 차례로 밟는 교대 업데이트도 맴돌 뿐 다가가지 않는다.〕</li>
+<li>[x] 안장점 둘레를 감으며 바깥으로 멀어진다 〔맞음: 안장점이 있다는 것과 그래디언트로 그 점에 닿는다는 것은 다르다. 안장점 쪽으로 끌어당기는 항이 있어야 닿는다.〕</li>
+<li>[ ] 두 쪽이 서로 맞추어 가므로 저절로 평형에 간다 〔틀림: 생성기와 판별기도 평형 근처에서는 이 놀이와 같다. 끌어당기는 항이 없으면 맴돌거나 멀어진다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-wgan-2">
+<p><strong>물음.</strong> GAN 의 판별기를 끝까지 학습시켜 진짜와 가짜를 완벽하게 가르게 했다. 생성기는 어떤 신호를 받는가?</p>
+<ul>
+<li>[ ] 가장 정확한 신호를 받아 가장 잘 배운다 〔틀림: 완벽한 판별기는 가짜에 모두 0을 매겨 「얼마나 먼지」를 지운다.〕</li>
+<li>[x] 그래디언트를 거의 받지 못한다 〔맞음: 가짜 쪽에서 판별기의 점수가 평평하니, 생성기가 조금 움직여도 손실이 바뀌지 않는다.〕</li>
+<li>[ ] 생성기 손실을 포화하지 않는 꼴로 바꾸면 이 문제는 모두 풀린다 〔틀림: 풀리는 것은 시그모이드의 포화뿐이다. 판별기의 점수가 생성기 쪽에서 평평하면 그래디언트는 여전히 0이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-wgan-3">
+<p><strong>물음.</strong> 진짜 데이터는 한 점에, 가짜 데이터는 거기서 1만큼 떨어진 한 점에 있다. 가짜를 10만큼 떨어진 곳으로 옮기면 JS 발산과 바서슈타인 거리는 어떻게 되는가?</p>
+<ul>
+<li>[ ] 둘 다 커진다. 멀리 떨어질수록 두 분포가 더 다르므로 〔틀림: 겹치지 않으면 JS 발산은 거리와 상관없이 같은 값에 붙는다.〕</li>
+<li>[x] JS 발산은 그대로이고, 바서슈타인 거리는 10배가 된다 〔맞음: 바서슈타인 거리는 떨어진 만큼 자라서, 생성기에게 어느 쪽으로 가까워지는지 알려 준다.〕</li>
+<li>[ ] 둘 다 그대로다. 겹치지 않으면 어느 거리도 차이를 보지 못한다 〔틀림: 바서슈타인 거리는 흙을 옮기는 거리라 떨어진 만큼 커진다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-wgan-4">
+<p><strong>물음.</strong> WGAN 은 판별기의 그래디언트 길이를 1 이하로 묶는다(1-립시츠). 왜 묶는가?</p>
+<ul>
+<li>[ ] 학습을 안전하게 하려는 장치일 뿐이다. 상한을 풀면 거리를 더 잘 잰다 〔틀림: 묶지 않으면 점수 차가 끝없이 커져 「얼마나 먼지」를 잃는다.〕</li>
+<li>[x] 그래디언트 길이가 1 이하인 판별기로 잰 평균 점수 차의 최댓값이 바서슈타인 거리이므로 〔맞음: 칸토로비치와 루빈슈타인의 쌍대다. 상한을 2로 두어도 점수 차가 2배 될 뿐 방향은 같다.〕</li>
+<li>[ ] 직선 판별기만 쓰려고. 직선이면 두 분포를 다 구별한다 〔틀림: 직선은 평균 차만 본다. 분산이 다른 두 분포는 꺾인 판별기라야 구별한다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-wgan-5">
+<p><strong>물음.</strong> 판별기의 가중치를 작은 구간 안으로 잘라 립시츠 제약을 지키려 한다. 맞는 말은?</p>
+<ul>
+<li>[ ] 자르는 문턱은 작을수록 안전하다 〔틀림: 층마다 곱해지는 배율이 작아져, 깊을수록 그래디언트가 사라진다.〕</li>
+<li>[ ] 문턱만 잘 고르면 가장 좋은 판별기를 얻는다 〔틀림: 가중치가 경계의 두 값으로 몰려 판별기가 단순해진다. 문턱을 바꿔도 눈금을 맞춘 추정값이 참값의 70~80%에 머물렀다.〕</li>
+<li>[x] 문턱이 작으면 그래디언트가 사라지고 크면 터지며, 가중치가 경계로 몰린다 〔맞음: 단순한 방법이지만 판별기의 모양을 망가뜨린다. 그래서 그래디언트 페널티와 스펙트럼 정규화가 나왔다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-wgan-6">
+<p><strong>물음.</strong> 판별기를 묶는 그래디언트 페널티와 스펙트럼 정규화에 대해 맞는 말은?</p>
+<ul>
+<li>[ ] 그래디언트 페널티를 쓰면 판별기의 그래디언트 길이가 늘 1이 된다 〔틀림: 페널티는 벌금이라 이익과 벌금이 맞서는 자리, 1을 조금 넘는 곳에서 멈춘다.〕</li>
+<li>[ ] 스펙트럼 정규화로 층마다 1로 나누면 판별기 전체의 그래디언트 길이도 1이다 〔틀림: 층마다의 곱은 상한일 뿐이다. 층의 방향이 어긋나면 전체 그래디언트 길이는 1보다 작다.〕</li>
+<li>[x] 스펙트럼 정규화는 어디서나 립시츠 상수가 1 이하임을 장담하지만, 실제 그래디언트 길이는 1보다 작다 〔맞음: 값싸고 안전한 대신 눈금이 느슨하다. 생성기에게 중요한 것은 값보다 쓸모 있는 그래디언트다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>판별기를 묶어서 생성기가 받는 그래디언트는 쓸모 있게 되었다. 그러나 생성기와 판별기가 함께 움직이는 한 이것은 여전히 최소최대 문제이고, θ·φ 놀이가 보여 준 맴돌기는 그대로 남아 있다. 판별기를 생성기보다 다섯 배 더 학습시키는 관습이나 R1 페널티가 맴돌기를 얼마나 막는지는 장난감에서만 보았다. 수억 개의 파라미터를 가진 두 신경망의 놀이가 언제 평형에 닿는지는 이 장의 언어로는 답할 수 없다.</p>
 <p>그리고 더 근본적인 물음도 있다. 생성기가 학습 데이터의 분포와의 거리를 0에 가깝게 줄였다면, 그것은 학습 사진들을 그대로 외운 것일까, 아니면 처음 보는 얼굴도 만들 줄 알게 된 것일까? 손실을 잘 줄이는 것과 처음 보는 데이터에도 통하는 것은 같은 일일까? 옵티마이저가 많은 답 가운데 어느 답을 고르느냐가 외우는 것과 처음 보는 데이터에도 통하는 것의 차이를 정할 수 있을까?</p>

@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -831,7 +839,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <tr>
 <td>립시츠 속도장에서도 두 샘플이 한 점으로 만날 수 있다고 봄</td>
 <td>18</td>
-<td>간격은 e^(−Lt)배 아래로 줄지 않는다. 서로 다른 출발점의 길은 만나지도 엇갈리지도 않는다</td>
+<td>간격은 e<sup>−Lt</sup>배 아래로 줄지 않는다. 서로 다른 출발점의 길은 만나지도 엇갈리지도 않는다</td>
 </tr>
 </tbody>
 </table></div>
@@ -840,7 +848,56 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>그래디언트 자체가 L-립시츠인 함수가 L-매끄러운 함수다. 그러면 손실은 접선 위에 (L/2) × 거리²을 얹은 덮개 아래에 눌려 있고, 접선 근사의 오차는 거리의 제곱으로 자란다. 로지스틱 손실은 1/4-매끄럽고, |x|와 ReLU는 미분값이 한 점에서 뛰어 L-매끄럽지 않다. 이 L이 한 스텝의 크기를 얼마나 키워도 되는지를 정한다.</p>
 <p>행렬은 돌리기 · 축마다 늘이기 · 돌리기로 쪼개진다(특잇값 분해, 벨트라미 1873·조르당 1874). 늘이는 배율이 특잇값이고, 가장 큰 특잇값이 행렬의 립시츠 상수, 곧 스펙트럼 노름이다. 넓이 배율은 특잇값의 곱이고, 고윳값과 특잇값은 다를 수 있다. 큰 특잇값 몇 개만 남긴 근사가 같은 랭크의 행렬 가운데 원래 행렬에 가장 가깝다(에커트–영 1936, 그보다 앞서 슈미트 1907). 층을 쌓은 신경망의 립시츠 상수는 층마다의 스펙트럼 노름의 곱을 넘지 않지만, 늘이는 방향이 층마다 어긋나 실제는 훨씬 작은 경우가 많다. 세게디와 동료들은 이 곱으로 적대적 예제의 불안정을 쟀고, 스펙트럼 정규화는 층마다 노름을 1로 나눠 이 곱을 1로 묶는다.</p>
 <p>립시츠 상수가 1보다 작은 함수가 축약 사상이다. 공간을 자기 안으로 보내는 축약 사상은 고정점을 꼭 하나 가지고, 어디서 출발하든 되풀이하면 그 점으로 간다(바나흐 1922). 오차는 스텝마다 L배 이하로 줄고, 몇 스텝이면 충분한지 답을 몰라도 미리 계산할 수 있다. 계산기의 cos 단추가 0.739…에 멈추는 것, 평형 층이 고정점을 찾는 것이 이 정리의 예다.</p>
-<p>속도장이 립시츠 연속이면 출발점마다 길이 꼭 하나다(피카르–린델뢰프 정리). 피카르의 되풀이는 길을 길로 보내는 축약 사상이고, 두 길의 간격은 e^(−Lt)배와 e^(Lt)배 사이에 머문다. √|x|처럼 립시츠가 깨지는 점에서는 같은 출발점에서 여러 길이 갈라진다. 플로우 매칭의 속도장이 립시츠이면 서로 다른 노이즈의 길은 만나지도 엇갈리지도 않는다.</p>
+<p>속도장이 립시츠 연속이면 출발점마다 길이 꼭 하나다(피카르–린델뢰프 정리). 피카르의 되풀이는 길을 길로 보내는 축약 사상이고, 두 길의 간격은 e<sup>−Lt</sup>배와 e<sup>Lt</sup>배 사이에 머문다. √|x|처럼 립시츠가 깨지는 점에서는 같은 출발점에서 여러 길이 갈라진다. 플로우 매칭의 속도장이 립시츠이면 서로 다른 노이즈의 길은 만나지도 엇갈리지도 않는다.</p>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-lipschitz-1">
+<p><strong>물음.</strong> 어떤 함수에서 두 점을 몇 쌍 골라 기울기(함숫값 차이 ÷ 거리)를 쟀더니 가장 큰 것이 3이었다. 이 함수의 립시츠 상수에 대해 말할 수 있는 것은?</p>
+<ul>
+<li>[ ] 립시츠 상수는 3이다 〔틀림: 몇 쌍으로는 하한만 얻는다. 재지 않은 쌍에서 더 가파를 수 있다.〕</li>
+<li>[x] 립시츠 상수가 있다면 3 이상이다 〔맞음: 립시츠 상수는 모든 쌍의 기울기를 넘지 않는 상한이라, 잰 기울기보다 작을 수 없다.〕</li>
+<li>[ ] 어디서나 미분 가능한 함수라면 립시츠 상수가 꼭 있다 〔틀림: 제곱 함수는 미분 가능하지만 수직선 전체에서는 기울기가 끝없이 커져 상수가 없다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-lipschitz-2">
+<p><strong>물음.</strong> 분류기의 점수 함수가 립시츠 상수 2로 묶이고, 지금 입력에서 점수가 1이다(0을 넘으면 답이 그대로). 옳은 것은 어느 것인가?</p>
+<ul>
+<li>[x] 크기가 0.5보다 작은 노이즈는 어떤 것도 답을 뒤집지 못한다 〔맞음: 노이즈가 점수를 바꾸는 양은 노이즈 크기의 2배를 넘지 않으므로, 점수 1을 다 깎으려면 크기가 0.5는 되어야 한다.〕</li>
+<li>[ ] 크기가 2보다 작은 노이즈는 답을 뒤집지 못한다 〔틀림: 곱하지 않고 나눈다. 점수를 립시츠 상수로 나눈 0.5가 지켜지는 크기다.〕</li>
+<li>[ ] 칸마다 0.5보다 작게만 바꾸면 칸이 아무리 많아도 답이 그대로다 〔틀림: 칸마다의 작은 변화가 모두 같은 방향으로 더해지면, 길이로 잰 노이즈의 크기는 칸이 많을수록 커진다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-lipschitz-3">
+<p><strong>물음.</strong> 그래디언트가 립시츠 연속인 함수를 매끄러운 함수라 한다. 다음 가운데 매끄럽지 않은 것은?</p>
+<ul>
+<li>[ ] 로지스틱 손실 〔틀림: 로지스틱 손실은 그래디언트의 립시츠 상수가 1/4이라 매끄럽다.〕</li>
+<li>[ ] 후버 손실 〔틀림: 후버 손실은 절댓값의 꺾인 점을 둥글려 만든 것이라 상수가 생긴다.〕</li>
+<li>[x] ReLU 〔맞음: 미분값이 0에서 한 번에 뛴다. 꺾인 점 옆에서는 필요한 상수가 끝없이 커져, 큰 상수 하나로도 덮을 수 없다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-lipschitz-4">
+<p><strong>물음.</strong> 밀기 행렬은 고윳값이 둘 다 1이다. 이 행렬이 입력을 늘이는 배율에 대해 옳은 것은?</p>
+<ul>
+<li>[ ] 고윳값이 1이니 아무것도 늘이지 않는다 〔틀림: 늘이는 배율은 고윳값이 아니라 특잇값이 정한다. 이 밀기 행렬은 가장 크게 1.618배 늘인다.〕</li>
+<li>[ ] 넓이는 두 특잇값을 더한 만큼 늘어난다 〔틀림: 넓이 배율은 두 특잇값의 곱이고 행렬식의 크기와 같다. 밀기 행렬은 넓이를 바꾸지 않는다.〕</li>
+<li>[x] 가장 큰 특잇값만큼 늘일 수 있고, 그 특잇값이 행렬의 립시츠 상수다 〔맞음: 행렬은 돌리기, 축마다 늘이기, 돌리기로 쪼개지고, 가장 큰 늘이기 배율이 스펙트럼 노름이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-lipschitz-5">
+<p><strong>물음.</strong> 공간을 자기 안으로 보내는 함수를 되풀이해 적용한다. 고정점이 꼭 하나 있고 어디서 출발해도 그 점으로 간다고 장담할 수 있는 것은 언제인가?</p>
+<ul>
+<li>[ ] 모든 두 점 사이의 거리를 줄이기만 하면 된다 〔틀림: 줄어드는 비율이 1에 끝없이 다가가면 고정점이 없을 수 있다.〕</li>
+<li>[ ] 장담할 수 없다. 고정점은 우연히 맞아야 생긴다 〔틀림: 축약 사상이면 고정점이 반드시 생긴다(바나흐 1922).〕</li>
+<li>[x] 줄어드는 비율 모두를 1보다 작은 수 하나로 묶을 수 있을 때 〔맞음: 그런 함수가 축약 사상이다. 계산기의 cos 단추를 거듭 누르면 0.739…에 멈추는 것이 그 예다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-lipschitz-6">
+<p><strong>물음.</strong> 속도장이 립시츠 연속인 미분방정식에서 서로 다른 두 출발점을 따라간다. 두 길은 어떻게 되는가?</p>
+<ul>
+<li>[ ] 시간이 지나면 한 점에서 만날 수 있다 〔틀림: 두 길의 간격은 줄어들 수는 있어도 0이 되지는 않는다.〕</li>
+<li>[x] 만나지도 엇갈리지도 않는다 〔맞음: 출발점마다 길이 꼭 하나라서(피카르–린델뢰프 정리), 두 길이 한 점에서 만나면 그 점을 지나는 길이 둘이 되어 정리에 어긋난다. 플로우 매칭의 노이즈 길이 엇갈리지 않는 것도 이 때문이다.〕</li>
+<li>[ ] 속도장이 립시츠이든 아니든 출발점마다 길은 하나다 〔틀림: 빈 물통처럼 립시츠가 깨지는 점에서는 같은 자리에서 여러 길이 갈라진다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>이 장은 립시츠 상수 L을 안다고 놓았다. 그러나 큰 신경망에서는 층마다의 스펙트럼 노름을 곱한 상한이 실제보다 수백 배 클 수 있고, 무작위 입력에서 잰 값은 하한 추정일 뿐이라, 참값은 그 사이 어딘가에 있다. 손실의 L도 마찬가지인데, L을 모르는 채로 한 스텝을 얼마나 크게 디뎌도 손실이 줄어든다고 말할 수 있을까?</p>
 <p>그리고 L-매끄러움은 위쪽 덮개만 준다. 손실이 접선 위로 너무 많이 휘지 않는다는 것만 말할 뿐, 아래로 충분히 휘어 있어서 손실의 바닥이 하나뿐인지는 말하지 않는다. 골짜기 바닥이 여럿이거나 평평하게 길게 이어져 있으면, 바닥을 찾았다는 것을 어떻게 알 수 있을까? 손실이 아래로도 휘어 있다는 약속이 있으면 무엇이 더 쉬워질까?</p>

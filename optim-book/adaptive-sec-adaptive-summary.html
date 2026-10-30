@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -840,6 +848,55 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>힌턴이 2012년 강의에서 소개한 RMSProp 은 합을 이동 평균으로 바꿔, 오래된 그래디언트가 β 배씩 잊히므로 손실의 바닥이 옮겨 가도 곧 따라간다. 대신 스텝이 학습률 크기로 남아 학습률을 따로 줄여야 바닥에 앉는다. 킹마와 바의 Adam 은 여기에 그래디언트의 이동 평균(모멘텀)을 더하고, 두 평균이 0에서 시작한 편향을 1 − βᵏ 로 나눠 바로잡았다. Adam 의 한 스텝은 대략 학습률 크기이고, 그래디언트가 ε 근처로 작아질 때만 빼면 그래디언트의 크기에 무디다.</p>
 <p>β₂ 는 그래디언트 제곱의 기억 길이 1/(1 − β₂)를 정한다. 레디와 동료들은 기억이 짧은 Adam 이 드물게 오는 큰 그래디언트를 잊어 볼록한 문제에서도 가장 나쁜 자리로 갈 수 있음을 보이고, 지나온 v 의 최댓값으로 나누는 AMSGrad 를 냈다. 큰 언어 모델은 반대로 β₂ 를 0.95로 줄여 튄 그래디언트를 빨리 잊는 설정을 골랐다. 가중치 감쇠를 Adam 의 그래디언트에 더하면(L2) 감쇠도 √v 로 나뉘어 지나온 그래디언트가 큰 가중치는 덜, 작은 가중치는 더 줄어든다. 로시칠로프와 후터의 AdamW 는 감쇠를 그래디언트에서 떼어 파라미터에 직접 곱해, 모든 가중치를 스텝마다 1 − ηλ 배로 줄인다.</p>
 <p>Adam 의 v 는 데이터의 정답으로 만든 그래디언트 제곱 평균, 곧 경험적 피셔의 대각선이다. 손실의 바닥 근처에서는 곡률을 따라가지만 바닥에서 먼 동안은 곡률과 거리가 섞이고, Adam 은 그 제곱근으로 나누므로 조건수를 1이 아니라 그 제곱근 정도로 줄인다. 또 대각선만 보므로 곡률이 좌표축에서 어긋나면 잡지 못하니, Adam 은 곡률을 흉내 내지만, 반쯤만, 조건이 맞을 때만 흉내 낸다.</p>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-adaptive-1">
+<p><strong>물음.</strong> 곡률이 1과 100인 그릇에서 AdaGrad 로 첫 스텝을 디딘다. 두 좌표는 얼마나 움직이나?</p>
+<ul>
+<li>[ ] 곡률이 100인 좌표가 100배 크게 움직인다 〔틀림: 그래디언트는 곡률과 거리의 곱이라, 지나온 그래디언트의 크기로 나누면 곡률이 지워진다.〕</li>
+<li>[x] 두 좌표 모두 학습률만큼 고르게 움직인다 〔맞음: 좌표마다 지나온 크기로 나누므로 첫 스텝이 모든 좌표에서 학습률만큼 나온다. 경사하강이 688스텝 걸리던 그릇을 AdaGrad 는 열세 스텝에 끝냈다.〕</li>
+<li>[ ] 경사하강과 똑같이 움직인다 〔틀림: 경사하강은 가장 예민한 좌표가 학습률의 상한을 정하고 둔한 좌표는 기어간다. AdaGrad 는 좌표마다 따로 나눈다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-adaptive-2">
+<p><strong>물음.</strong> AdaGrad 를 오래 돌릴 때 생기는 문제는?</p>
+<ul>
+<li>[ ] 비탈이 가파른 곳에서 더 멀리 가 버린다 〔틀림: AdaGrad 의 스텝은 그래디언트의 크기와 상관없이 스텝 수의 제곱근에 반비례해 준다.〕</li>
+<li>[ ] 튄 그래디언트를 곧 잊어 학습률이 금방 돌아온다 〔틀림: 지나온 제곱을 모두 더한 합은 줄지 않는다. AdaGrad 의 학습률은 튄 그래디언트 이전으로 영영 돌아오지 않는다.〕</li>
+<li>[x] 합이 줄지 않아 학습률이 줄기만 하고, 처음의 큰 그래디언트를 끝까지 기억한다 〔맞음: RMSProp 은 그 합을 이동 평균으로 바꿔, 오래된 그래디언트를 조금씩 잊게 했다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-adaptive-3">
+<p><strong>물음.</strong> Adam 의 두 이동 평균은 모두 0에서 시작한다. 편향 보정을 어떻게 해야 하나?</p>
+<ul>
+<li>[ ] 필요 없다. 둘 다 0에서 시작하니 나눌 때 편향이 지워진다 〔틀림: 기억 길이가 다르면 분모가 늦게 차올라 나눈 값이 커진다. 비율을 같게 두어도 분모에 제곱근이 씌워져 편향이 남는다.〕</li>
+<li>[ ] 빼도 처음 몇 스텝만 조금 클 뿐이다 〔틀림: 제곱의 이동 평균 비율이 0.999면 보정 없는 스텝은 12스텝째 학습률의 6.57배까지 커지고, 1.1배 아래로 내려오는 데 1751스텝이 걸린다.〕</li>
+<li>[x] 두 이동 평균을 각각 따로 바로잡는다 〔맞음: 킹마와 바의 Adam 은 두 이동 평균을 각각 따로 나눠, 0에서 시작한 편향을 바로잡았다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-adaptive-4">
+<p><strong>물음.</strong> Adam 의 한 스텝 크기를 바르게 말한 것은?</p>
+<ul>
+<li>[ ] 그래디언트의 크기에 비례한다 〔틀림: Adam 은 그래디언트를 지나온 크기로 나누므로 그래디언트가 열 배여도 스텝은 거의 그대로다.〕</li>
+<li>[ ] 그래디언트의 크기와 언제나 무관하다 〔틀림: 그래디언트가 ε 근처로 작아지면 스텝이 줄어든다.〕</li>
+<li>[x] 대략 학습률 크기이고, 그래디언트가 ε 근처로 작아질 때만 줄어든다 〔맞음: ε는 이보다 작은 그래디언트는 작게 걷는 문턱 구실을 한다. 큰 모델에서는 그래디언트의 크기가 기본값에 닿기도 한다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-adaptive-5">
+<p><strong>물음.</strong> Adam 에 가중치 감쇠를 넣는다. 맞는 것은?</p>
+<ul>
+<li>[ ] 손실에 L2 페널티를 더해 그 그래디언트를 Adam 에 넣는 것과 AdamW 는 같다 〔틀림: L2 를 Adam 안에 넣으면 감쇠도 지나온 그래디언트 크기로 나뉜다. 지나온 그래디언트가 작던 가중치는 과하게, 컸던 가중치는 덜 줄어든다.〕</li>
+<li>[x] AdamW 는 감쇠를 그래디언트에서 떼어 파라미터에 직접 곱해, 모든 가중치를 스텝마다 같은 비율로 줄인다 〔맞음: 로시칠로프와 후터가 감쇠를 Adam 의 나누기 밖으로 꺼냈다.〕</li>
+<li>[ ] 파이토치 AdamW 의 weight decay 0.1은 스텝마다 가중치를 10%씩 줄인다 〔틀림: 파이토치의 AdamW 는 감쇠에 학습률을 곱한다. 학습률 0.0003이면 한 스텝에 0.003%만 준다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-adaptive-6">
+<p><strong>물음.</strong> 「Adam 은 대각 피셔로 나눈 자연 그래디언트다」라는 말을 읽었다. 맞는 평가는?</p>
+<ul>
+<li>[ ] 그대로 맞다. Adam 의 v는 피셔 정보의 대각선이다 〔틀림: Adam 은 제곱근으로 나누고, 그 v는 데이터의 정답으로 만든 경험적 피셔다. 피셔 정보와 같아지는 것은 손실의 바닥 근처뿐이다.〕</li>
+<li>[x] 반쯤만 맞다. Adam 은 곡률을 흉내 내지만, 반쯤만, 조건이 맞을 때만 흉내 낸다 〔맞음: 제곱근으로 나누니 조건수를 그 제곱근 정도로만 줄이고, 대각선만 보니 곡률이 좌표축에서 어긋나면 잡지 못한다.〕</li>
+<li>[ ] 그릇을 돌려도 Adam 의 스텝 수가 같으니 맞다 〔틀림: Adam 은 좌표마다 따로 나눈다. 그릇을 45° 돌리면 223스텝이 2820스텝이 된다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>돌린 그릇에서 Adam 이 놓친 것은 헤시안의 대각선 밖 값이었다. 두치와 동료들은 처음에 지나온 그래디언트로 행렬 전체를 만들었다가, d × d 행렬의 제곱근을 스텝마다 구할 수 없어 대각선만 남겼다. 파라미터가 1억 개면 행렬은 10¹⁶ 칸이다. 대각선 하나보다는 많이, 그러나 행렬 전체보다는 훨씬 적게 담아서 곡률이 좌표축과 어긋난 방향까지 잡을 수는 없을까? 신경망의 층 하나는 원래 행렬 모양의 가중치이니, 그 모양을 살려 작은 행렬 몇 개로 나눠 담을 수는 없을까?</p>
 <p>그리고 경험적 피셔와 피셔 정보의 차이도 남는다. 데이터의 정답으로 만든 그래디언트 제곱이 곡률을 닮지 않았다면, 곡률을 값싸게 추정하는 다른 재료는 무엇일까? 지나온 그래디언트들이 바뀌어 온 모양에서 곡률을 거꾸로 읽어 낼 수는 없을까?</p>

@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -794,6 +802,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </aside>
 <h3 id="ml에서-겹치지-않는-두-분포">ML에서: 겹치지 않는 두 분포</h3>
 <p>진짜 사진과 가짜 그림의 분포가 정말 이렇게 겹치지 않을까? 마르틴 아르좁스키(Martin Arjovsky)와 레옹 보투(Léon Bottou)는 2017년 1월에 「생성적 적대 신경망을 원리대로 학습시키는 방법을 향하여」를 공개했다. 그들은 진짜 사진들이 픽셀 공간 안의 훨씬 낮은 차원의 곡면 가까이에 모여 있고 생성기도 낮은 차원의 노이즈에서 그림을 만들기 때문에, 두 분포가 거의 겹치지 않는 일이 흔하다고 따졌다. 그러면 판별기는 거의 완벽하게 가를 수 있고, 좁은 봉우리의 표처럼 생성기에게 가는 그래디언트가 사라진다. 굿펠로와 동료들이 권한 처방은 생성기의 손실을 바꾸는 것이었는데, 그것으로 충분한지는 아래 문제 6에서 따져 본다.</p>
+<p>그럴듯한 그림이 픽셀 공간 전체에 고루 퍼져 있지 않고 훨씬 낮은 차원의 얇은 판 가까이에 모여 있다는 이 생각을 매니폴드 가설(manifold hypothesis)이라 부른다. 두 분포가 저마다 얇은 판 위에 있으면, 두 판이 비스듬히 스치기만 해도 겹치는 부분은 거의 없다.</p>
+<aside class="guide"><p class="guide-title">길잡이 · 『압축은 이해인가: 예측, 코드 길이, 낮은 차원』 「매니폴드 가설: 그럴듯한 그림은 얇은 판 위에 있다」</p><p>무작위 칸 그림은 큰 상자 안에 고루 흩어지고 그럴듯한 그림은 휜 얇은 판 위에 모인다는 「공 대 얇은 판」 그림과, 표정 그림 70장의 차원을 직접 재어 본 결과. <a href="https://lameproof.com/compression-book/low-dimension-sec-manifold-hypothesis.html">이어 읽기</a></p>
+</aside>
 <div class="dialogue"><h3 id="prob-wgan-perfect-discriminator">문제 4. 너무 잘 가려내는 감식반<span id="문제-4-너무-잘-가려내는-감식반" class="anchor-alias"></span></h3>
 <blockquote>
 <p>위조지폐범이 잉크 농도를 진짜(0)에 맞추려 한다. 지금 위조지폐 A의 잉크 농도는 1, 위조지폐 B는 30이다(단위는 마음대로). 감식반은 농도 <span class="sym" style="color:#1b9e77">x</span>에서 진짜일 확률을 <span class="sym" style="color:#2ca02c">D</span>(<span class="sym" style="color:#1b9e77">x</span>) = sigmoid(<span class="sym" style="color:#2ca02c">a</span> − <span class="sym" style="color:#2ca02c">b</span>|<span class="sym" style="color:#1b9e77">x</span>|)로 매긴다. (가) 아주 잘 가려내는 감식반(<span class="sym" style="color:#2ca02c">a</span> = 6, <span class="sym" style="color:#2ca02c">b</span> = 12)이 A와 B에 매기는 확률은? (나) 위조범이 잉크를 조금 바꿀 때 점수가 바뀌는 빠르기 |d<span class="sym" style="color:#2ca02c">D</span>/d<span class="sym" style="color:#1b9e77">x</span>|는 A와 B에서 각각 얼마인가? (다) 덜 날카로운 감식반(<span class="sym" style="color:#2ca02c">a</span> = 0.5, <span class="sym" style="color:#2ca02c">b</span> = 0.2)이면?</p>

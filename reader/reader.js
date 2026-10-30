@@ -786,7 +786,8 @@
       return window.matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || navigator.standalone === true;
     } catch (e) { return false; }
   }
-  /** 넘기기 1.5초 전에 「처음부터 보기」 띠를 띄운다 */
+  /** 넘기기 4초 전에 「처음부터 보기」 띠를 띄운다(1.5초였던 것을 2026-10-30 저자 답 「4초 뒤 저절로 넘김」으로) */
+  var JUMP_MS = 4000;
   function jumpWithBanner(book, base, pos, onStay) {
     if (!okBook(book) || !pos || !okFile(pos.file)) return;
     var label = el("span", { class: "lp-jump-text", text: "마지막으로 읽던 곳으로 갑니다" });
@@ -800,7 +801,7 @@
     var timer = setTimeout(function () {
       ssSet(K.resume, { book: book, page: pos.page, file: pos.file, anchor: pos.anchor, offset: pos.offset, ratio: pos.ratio });
       location.replace(base + pos.file);
-    }, 1500);
+    }, JUMP_MS);
     stay.addEventListener("click", function () {
       clearTimeout(timer);
       if (onStay) safe(onStay)();
@@ -1403,15 +1404,19 @@
     var sb = $("#sidebar");
     if (sb && sb.classList.contains("open")) sb.classList.remove("open");
   }
-  function hitLink(r, q, cont) {
+  /** 바로 위 결과와 같은 자리(같은 페이지·같은 소제목·같은 앵커)인가: 한 줄로 묶는다(2026-10-30 저자 답) */
+  function sameSpot(a, b) { return !!a && !!b && a.page === b.page && a.chunk.a === b.chunk.a && a.chunk.h === b.chunk.h; }
+  function hitLink(r, q, cont, n) {
     var base = r.idx.base, file = r.page.f, anchor = r.chunk.a;
     var href = base + file + (anchor ? "#" + encodeURIComponent(anchor) : "");
     // 결과 제목: 「페이지 제목 › 가장 가까운 소제목」(소제목이 없거나 페이지 제목과 같으면 페이지 제목만).
     // cont = 바로 위 결과와 같은 페이지: 페이지 제목은 위 결과에 맡기고 「› 소제목」만, 조금 들여 쓴다(순위는 그대로)
+    // n = 이 줄에 묶인 곳 수(같은 소제목이 잇달아 나온 것). 2 이상이면 제목 끝에 「n곳」, 미리보기는 첫 곳 것
     cont = cont && !!r.chunk.h;
     var title = el("span", { class: "lp-s-title" }, cont ? [] : [document.createTextNode(r.page.t)]);
     if (r.chunk.h) title.appendChild(el("span", { class: "lp-s-sub", text: (cont ? "› " : " › ") + r.chunk.h }));
-    var a = el("a", { class: "lp-s-hit" + (cont ? " lp-s-cont" : ""), href: href, title: r.page.t + (r.chunk.h ? " › " + r.chunk.h : "") }, [title, snippet(r.chunk, r.terms, r.phrase)]);
+    if (n > 1) title.appendChild(el("span", { class: "lp-s-n", text: n + "곳" }));
+    var a = el("a", { class: "lp-s-hit" + (cont ? " lp-s-cont" : ""), href: href, "data-n": n > 1 ? String(n) : null, title: r.page.t + (r.chunk.h ? " › " + r.chunk.h : "") + (n > 1 ? " (" + n + "곳)" : "") }, [title, snippet(r.chunk, r.terms, r.phrase)]);
     a.addEventListener("click", safe(function (ev) {
       if (ev.button || ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) return; // 새 탭으로 열기는 그대로
       var hit = { book: r.idx.book, file: file, anchor: anchor, q: q, at: now() };
@@ -1472,10 +1477,19 @@
           res.sort(function (a, b) { return b.score - a.score || a.bi - b.bi || a.order - b.order; });
           var total = res.length, shown = res.slice(0, SEARCH_MAX);
           if (all) shown.sort(function (a, b) { return a.bi - b.bi || b.score - a.score || a.order - b.order; }); // 책 이름별로 묶는다(책 안에서는 점수 순)
-          var lastBook = -1, lastPage = null;
+          // 같은 자리(페이지·소제목·앵커)가 잇달아 나오면 한 줄로 묶고 「n곳」(2026-10-30 저자 답 「한 줄로 묶고 「2곳」처럼 표시」).
+          // 묶는 것은 화면 줄뿐: 상한(50곳)·「N곳」·순위는 곳 수 그대로
+          var rows = [];
           shown.forEach(function (r) {
+            var last = rows[rows.length - 1];
+            if (last && last.r.bi === r.bi && sameSpot(last.r, r)) last.n++;
+            else rows.push({ r: r, n: 1 });
+          });
+          var lastBook = -1, lastPage = null;
+          rows.forEach(function (row) {
+            var r = row.r;
             if (all && r.bi !== lastBook) { lastBook = r.bi; lastPage = null; list.appendChild(el("li", { class: "lp-s-book", text: r.idx.shelfTitle })); }
-            list.appendChild(el("li", { class: "lp-s-item" }, [hitLink(r, raw, lastPage === r.page)]));
+            list.appendChild(el("li", { class: "lp-s-item" }, [hitLink(r, raw, lastPage === r.page, row.n)]));
             lastPage = r.page;
           });
           if (total > SEARCH_MAX) list.appendChild(el("li", { class: "lp-s-more", text: "더 있음: 모두 " + total + "곳 가운데 " + SEARCH_MAX + "곳만 보입니다. 낱말을 더 넣어 좁혀 보세요." }));
@@ -1789,6 +1803,64 @@
     if (typeof MutationObserver === "function") new MutationObserver(sync).observe(html, { attributes: true, attributeFilter: ["data-theme"] });
   }
 
+  // ── 가로로 넘치는 수식·표: 오른쪽 끝 옅은 그림자 (2026-10-30 저자 답 「오른쪽 끝에 옅은 그림자로 「더 있음」 표시」) ──
+  // 휴대폰에서 넓은 수식·표·코드는 그 상자만 가로로 민다(책 style.css 의 overflow-x:auto). 더 밀 것이 남았으면
+  // 상자 오른쪽 끝에 그림자 띠(span.lp-xs-shade)를 둔다. 상자를 다른 요소로 감싸지 않는다(접기 묶음·검색 표시가 형제 요소를 보므로):
+  // 띠는 상자 안의 마지막 자식, position:absolute 로 「지금 보이는 오른쪽 끝」에 둔다(굴릴 때마다 left 를 고침).
+  // 끝까지 밀면 띠가 사라진다. 넘치지 않는 상자에는 아무것도 붙이지 않는다. 처음에 접혀 있던 상자는 펼쳐져 크기가 생길 때 본다
+  var XS_SEL = "main .katex-display, main .table-wrap, main .table-scroll, main pre";
+  var XS_W = 18; // 그림자 띠 폭(px)
+  function xsTone(e) {
+    // 상자가 놓인 바탕이 어두운가: body 아래에서 처음 만나는 칠한 바탕(흰 문제 상자·말풍선 등). 없으면 테마로.
+    // body 는 테마를 바꿀 때 0.3초 동안 색이 바뀌는 중이라 읽지 않는다
+    for (var p = e; p && p !== document.body && p.nodeType === 1; p = p.parentElement) {
+      var m = (getComputedStyle(p).backgroundColor || "").match(/[\d.]+/g);
+      if (m && m.length >= 3 && (m.length < 4 || +m[3] > 0.5)) return 0.299 * m[0] + 0.587 * m[1] + 0.114 * m[2] < 128;
+    }
+    return document.documentElement.getAttribute("data-theme") === "dark";
+  }
+  function xsPlace(e) {
+    var s = e.__lpShade;
+    if (!s || !e.classList.contains("lp-xs")) return;
+    e.classList.toggle("lp-xs-more", e.scrollLeft + e.clientWidth < e.scrollWidth - 2);
+    s.style.left = Math.max(0, e.scrollLeft + e.clientWidth - XS_W) + "px";
+  }
+  function xsCheck(e) {
+    var s = e.__lpShade;
+    if (s) s.style.display = "none"; // 띠 자신이 넓이 재기에 끼지 않게
+    var over = visible(e) && /auto|scroll/.test(getComputedStyle(e).overflowX) && e.scrollWidth - e.clientWidth > 2;
+    if (s) s.style.display = "";
+    if (!over) { e.classList.remove("lp-xs", "lp-xs-more"); return; }
+    if (!s) {
+      s = e.__lpShade = el("span", { class: "lp-xs-shade", "aria-hidden": "true" });
+      e.appendChild(s);
+      e.addEventListener("scroll", function () { xsPlace(e); }, { passive: true });
+    }
+    e.classList.add("lp-xs");
+    e.classList.toggle("lp-xs-dark", xsTone(e));
+    xsPlace(e);
+  }
+  function initScrollShade() {
+    var boxes = $$(XS_SEL).filter(function (e) { return !e.parentElement || !e.parentElement.closest(XS_SEL); }); // 겹친 상자는 바깥 것만
+    if (!boxes.length) return;
+    var all = function () { boxes.forEach(safe(xsCheck)); };
+    if (typeof ResizeObserver === "function") {
+      // 창 폭이 바뀌거나, 접혀 있던 상자가 펼쳐지거나, 글꼴·수식이 늦게 자리 잡을 때
+      var ro = new ResizeObserver(function (ents) { ents.forEach(function (en) { safe(xsCheck)(en.target); }); });
+      boxes.forEach(function (e) { ro.observe(e); });
+    } else {
+      var t = null;
+      window.addEventListener("resize", function () { clearTimeout(t); t = setTimeout(all, 150); });
+      document.addEventListener("click", function () { setTimeout(all, 50); }); // 함께 풀기로 펼친 상자
+    }
+    all();
+    if (document.readyState !== "complete") window.addEventListener("load", all);
+    // 테마를 바꾸면 띠 색(밝은 바탕 = 그림자, 어두운 바탕 = 옅은 빛)을 다시 고른다
+    if (typeof MutationObserver === "function") {
+      new MutationObserver(function () { setTimeout(all, 0); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    }
+  }
+
   // ── 시작 ────────────────────────────────────────────────────────────────
   function start() {
     document.documentElement.classList.add("lp-reader-on");
@@ -1819,6 +1891,7 @@
     safe(initSkipLink)();
     safe(initThemeButton)();
     safe(initMenuAutoHide)();
+    safe(initScrollShade)();
     safe(initPanelKeys)(); // 검색 칸·독자 칸을 넣은 뒤(패널 안 자리가 정해진 뒤) 지금 쪽 줄로 굴린다
     onAuthChange.push(renderAccount, renderCommentAuth);
     afterSync.push(renderPanel, refreshQuizzes, renderReadRow);

@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -748,6 +756,11 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <td>오차의 제곱 평균은 편향²(평균 자리의 빗나감²)과 분산(흩어짐)의 합이다. 모여 있어도 평균 자리가 멀면 나쁘다</td>
 </tr>
 <tr>
+<td>오차를 낳는 설정이 U자를 그리면 모두 같은 편향–분산 트레이드오프라고 봄</td>
+<td>개념 다지기</td>
+<td>유한 차분의 간격처럼 둘째 오차가 다시 재도 같게 나오는 경우는 모양만 같다. 배치 크기는 계산을 정해 둘 때만 맞바꿈이 된다. 무엇을 정해 두었는지부터 묻는다</td>
+</tr>
+<tr>
 <td>편향이 0인 추정이 언제나 가장 좋다고 봄</td>
 <td>2</td>
 <td>분산이 크면 편향을 조금 받아들이고 줄여 말한 추정값의 오차가 더 작다. 얼마나 줄일지는 문제마다 다르다</td>
@@ -795,10 +808,60 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </tbody>
 </table></div>
 <h3 id="요약">요약</h3>
-<p>이 장에서 한 일을 정리해 보자. 시험 오차의 평균은 평균 예측이 정답에서 빗나간 정도의 제곱(편향²)과 예측이 데이터마다 흔들리는 정도(분산)의 합으로 쪼개진다. 1992년 게만, 비넨스톡, 두르사가 신경망에 들이댄 이 쪼개기가 「모델이 커지면 편향은 줄고 분산은 는다」는 U자 곡선을 낳았고, 검증 손실로 크기와 멈출 때를 고르는 습관의 근거가 되었다.</p>
+<p>이 장에서 한 일을 정리해 보자. 시험 오차의 평균은 평균 예측이 정답에서 빗나간 정도의 제곱(편향²)과 예측이 데이터마다 흔들리는 정도(분산)의 합으로 쪼개진다. 1992년 게만, 비넨스톡, 두르사가 신경망에 들이댄 이 쪼개기가 「모델이 커지면 편향은 줄고 분산은 는다」는 U자 곡선을 낳았고, 검증 손실로 크기와 멈출 때를 고르는 습관의 근거가 되었다. 편향을 줄이면 분산이 늘고 분산을 줄이면 편향이 느는 이 맞바꿈이 편향–분산 트레이드오프이고, 「과녁과 화살」로 그리면 좁게 모였지만 비켜 난 화살과 넓게 흩어졌지만 한가운데를 둘러싼 화살이다. 다만 학습은 과녁의 한가운데를 보지 못해서, 흩어진 폭은 재도 비켜 난 거리는 직접 재지 못한다.</p>
 <p>그 곡선의 오른쪽 끝 너머에서 시험 오차는 다시 내려간다. 기록 40개를 언덕 p개로 맞춘 장난감에서 시험 오차는 p = 29에서 0.0086으로 U자의 최저점을 찍고, 언덕 수가 기록 수에 닿는 p = 40 언저리에서 2.08까지 치솟았다가, p = 400에서 0.0070으로 U자의 최저점보다 낮아졌다. 벨킨 팀은 2018년에 이것을 이중 하강이라 불렀고, 나키란 팀은 같은 봉우리가 심층 신경망의 너비, 학습 에포크, 데이터 수를 따라서도 생긴다는 것을 보였다.</p>
 <p>봉우리는 특징 행렬의 가장 작은 특잇값 때문에 생긴다. 최소 노름 해는 기록의 성분을 방향마다 특잇값으로 나누므로 노이즈가 1/σₘᵢₙ배로 부풀고, σₘᵢₙ은 행렬이 정사각형이 되는 보간 문턱에서 가장 작다. 문턱을 넘으면 점을 다 지나는 해가 많아져 노름이 작은 얌전한 해를 고를 수 있다. 능형 회귀는 배율을 1/(2√λ) 아래로 묶어 봉우리를 없애고, 스텝 수가 모자란 경사하강도 약한 방향을 아직 맞추지 못해 비슷하게 군다.</p>
 <p>학습 데이터를 다 맞힌 뒤에도 학습을 계속하면 일반화가 한참 늦게 올 수 있다. 59로 나눈 나머지 덧셈에서 작은 신경망은 100스텝 만에 학습 쌍을 다 맞혔지만, 처음 보는 쌍을 99% 맞히기까지는 가중치 감쇠 1, 0.3, 0.1에서 1,800, 6,000, 19,900스텝이 걸렸다. 손실이 0에 가까운 동안에도 감쇠가 파라미터를 노름이 작은 쪽으로 끌고 가고, 스텝마다 노름에 곱해지는 비율이 1 − ηλ라서 걸리는 스텝이 감쇠에 반비례한다. 다 외운 뒤에 늦게 오는 이 일반화가 그로킹이다.</p>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-double-descent-1">
+<p><strong>물음.</strong> 잴 때마다 늘 같은 값을 읽는 체온계가 있다. 이 체온계에 대해 맞는 말은?</p>
+<ul>
+<li>[ ] 흩어짐이 없으니 정확하다 〔틀림: 오차의 제곱 평균은 편향의 제곱과 분산의 합이다. 모여 있어도 평균 자리가 멀면 오차가 크다.〕</li>
+<li>[x] 분산은 0이지만 편향은 클 수 있다 〔맞음: 흩어짐이 없다는 것은 분산 쪽만 말해 준다. 평균 자리가 참값에서 얼마나 빗나갔는지는 따로 봐야 한다.〕</li>
+<li>[ ] 편향이 0인 체온계는 언제나 이 체온계보다 낫다 〔틀림: 편향이 0이어도 분산이 크면 오차의 제곱 평균이 더 클 수 있다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-double-descent-2">
+<p><strong>물음.</strong> 날씨 앱 하나의 제곱 오차는 5다. 그 가운데 1은 모든 앱이 같은 자료를 써서 함께 빗나가는 부분이고, 4는 앱마다 따로 노는 부분이다. 앱 100개의 예측을 평균하면 제곱 오차는?</p>
+<ul>
+<li>[ ] 0.05. 100개를 평균했으니 100분의 1이 된다 〔틀림: 100분의 1로 주는 것은 서로 독립인 부분뿐이다. 함께 빗나가는 부분은 앱 수로 지워지지 않는다.〕</li>
+<li>[x] 약 1.04 〔맞음: 따로 노는 4만 100분의 1로 줄고, 함께 빗나가는 1은 그대로 남는다. 평균은 분산만 줄이고 편향은 남긴다.〕</li>
+<li>[ ] 5 그대로. 같은 자료를 쓰니 평균해도 줄지 않는다 〔틀림: 앱마다 따로 노는 부분은 평균하면 준다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-double-descent-3">
+<p><strong>물음.</strong> 기록 40개를 언덕 여러 개의 합으로 맞추며, 언덕 수를 늘려 가며 시험 오차를 그렸다. 맞는 말은?</p>
+<ul>
+<li>[ ] U자의 최저점을 지나면 시험 오차는 오르기만 한다 〔틀림: 언덕 수가 기록 수를 넘어 400개가 되자 시험 오차는 U자의 최저점보다 낮아졌다.〕</li>
+<li>[x] 언덕 수가 기록 수에 닿는 곳에서 봉우리가 서고, 그 너머에서 다시 내려간다 〔맞음: 이것이 이중 하강이다. 봉우리가 서는 곳을 보간 문턱이라 한다.〕</li>
+<li>[ ] 기록에 노이즈가 없으면 봉우리도 서지 않는다 〔틀림: 노이즈가 0이어도 점을 꼭 지나야 하는 문턱에서는 점 사이가 출렁인다. 노이즈는 봉우리를 키울 뿐이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-double-descent-4">
+<p><strong>물음.</strong> 보간 문턱에서 시험 오차가 치솟는 원인은 무엇인가?</p>
+<ul>
+<li>[ ] 미지수가 늘면서 최소 노름 해의 노름도 계속 커지기 때문이다 〔틀림: 옛 해에 0을 붙인 것도 새 해라 최소 노름은 늘 수 없다. 문턱을 넘으면 특징을 늘릴수록 오히려 준다.〕</li>
+<li>[x] 문턱에서 특징 행렬의 가장 작은 특잇값이 가장 작아, 그 방향에 실린 노이즈가 크게 부풀기 때문이다 〔맞음: 최소 노름 해는 성분을 방향마다 특잇값으로 나눈다. 작은 특잇값으로 나누면 크게 불어난다.〕</li>
+<li>[ ] 오차가 클 때만 문제가 되고, 오차가 실린 방향은 상관없다 〔틀림: 같은 크기의 오차라도 약한 방향에 실리면 훨씬 크게 불어난다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-double-descent-5">
+<p><strong>물음.</strong> 특징 수가 정해진 모델에 학습 기록을 조금씩 늘려 간다. 맞는 말은?</p>
+<ul>
+<li>[ ] 데이터가 늘면 시험 오차는 언제나 준다 〔틀림: 기록 수가 특징 수에 닿는 곳에서 봉우리가 선다. 기록을 늘렸더니 오히려 나빠질 수 있다.〕</li>
+<li>[x] 기록 수가 특징 수 가까이 오면 시험 오차가 치솟을 수 있고, 더 늘리면 문턱을 지나 다시 준다 〔맞음: 봉우리의 자리는 기록 수와 특징 수가 같아지는 곳이 정한다.〕</li>
+<li>[ ] 봉우리를 없애려면 특징 수를 줄이는 수밖에 없다 〔틀림: 능형 회귀가 배율을 묶어 봉우리를 없앤다. 스텝 수가 모자란 경사하강도 비슷하게 군다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-double-descent-6">
+<p><strong>물음.</strong> 59로 나눈 나머지 덧셈을 배우는 작은 신경망이 100스텝 만에 학습 쌍을 다 맞혔다. 가중치 감쇠 1에서는 처음 보는 쌍을 99% 맞히기까지 1,800스텝이 걸렸다. 감쇠를 0.1로 줄이면?</p>
+<ul>
+<li>[ ] 학습 손실이 이미 0에 가까우니 파라미터는 더 바뀌지 않고, 일반화는 오지 않는다 〔틀림: 가중치 감쇠는 손실이 신경 쓰지 않는 방향을 계속 줄인다. 시험 성능은 그 뒤에 바뀔 수 있다.〕</li>
+<li>[ ] 끌어당기는 힘이 약해 덜 방해받으니 더 빨리 온다 〔틀림: 노름을 작은 쪽으로 끄는 것이 감쇠다. 약해지면 일반화도 늦게 온다.〕</li>
+<li>[x] 열 배쯤 더 오래 걸린다(실험에서는 19,900스텝) 〔맞음: 스텝마다 노름이 줄어드는 비율이 감쇠에 비례해서, 걸리는 스텝은 감쇠에 반비례한다.〕</li>
+<li>[ ] 감쇠가 작아지면 원리상 일반화할 수 없다 〔틀림: 감쇠를 줄이면 늦게 올 뿐이다. 감쇠가 없을 때도 이 실험의 예산 안에서 오지 않았다는 데까지만 말할 수 있다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>이 장의 설명은 모두 「노름이 작은 해가 일반화한다」에 기대었다. 언덕 맞추기에서는 최소 노름 해가 매끈했고, 나머지 덧셈에서는 감쇠가 노름을 줄이는 동안 일반화가 왔다. 그러나 노름이 작다는 것이 왜 처음 보는 데이터를 맞힌다는 뜻이어야 할까? 노름은 좌표를 어떻게 잡느냐에 따라 바뀌는데, 신경망의 파라미터를 다르게 적으면 「작은 노름」이 가리키는 해도 달라지지 않을까? 그리고 규칙으로 맞히는 해가 외워서 맞히는 해보다 노름이 작다는 것은 이 실험에서 우연히 그랬을 뿐일까, 아니면 「짧게 적을 수 있는 설명이 더 잘 들어맞는다」는 더 일반적인 원리가 뒤에 있을까? 「일반화란 무엇인가」는 아직 열려 있다.</p>
 

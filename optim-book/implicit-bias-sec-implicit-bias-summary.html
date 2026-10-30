@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -764,7 +772,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <tr>
 <td>점수 차이만큼만 그래디언트 무게가 차이 난다고 봄</td>
 <td>5</td>
-<td>가중치 길이 s가 커지면 무게 비는 e^(−s × 점수 차이)로 벌어져, 경계에 가장 가까운 점만 남는다</td>
+<td>가중치 길이 s가 커지면 무게 비는 e<sup>−s × 점수 차이</sup>로 벌어져, 경계에 가장 가까운 점만 남는다</td>
 </tr>
 <tr>
 <td>같은 손실을 0으로 보내면 옵티마이저와 상관없이 같은 해에 닿는다고 봄</td>
@@ -799,7 +807,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <tr>
 <td>노이즈가 있으면 늘 깊은 골짜기가 이긴다고 봄</td>
 <td>11</td>
-<td>e^(Δ/T)와 폭의 비가 겨룬다. Δ = 0.5면 T = 0.3607보다 뜨거울 때 넓은 골짜기가 이긴다</td>
+<td>e<sup>Δ/T</sup>와 폭의 비가 겨룬다. Δ = 0.5면 T = 0.3607보다 뜨거울 때 넓은 골짜기가 이긴다</td>
 </tr>
 <tr>
 <td>같은 함수면 샤프니스도 같다고 봄</td>
@@ -814,6 +822,56 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>분리 가능한 데이터의 로지스틱 회귀에서는 가중치 길이가 끝없이 자라고, 방향은 마진이 가장 넓은 SVM 방향으로 모인다. 길이가 커질수록 경계에서 먼 점의 그래디언트 무게가 지수로 사라지고 가장 가까운 점만 남기 때문이다. 방향이 모이는 속도는 스텝 수의 로그 꼴로 느려서, 점 여섯 개에서 백만 스텝 뒤에도 2.54°가 남았다. 옵티마이저가 스텝을 재는 노름을 바꾸면 마진을 재는 노름도 바뀌어, 부호 경사하강은 최대 노름으로 잰 마진이 가장 넓은 방향으로 간다.</p>
 <p>일찍 멈추기는 스텝 수로 거는 정규화다. 경사하강은 헤시안의 고윳값이 큰 방향부터 채우고, 노이즈를 외우는 데 쓰이는 작은 방향은 가장 늦게 채운다. k스텝에서 멈춘 해는 α = 1/(ηk)인 능형 회귀의 해와 거의 같은 비율로 방향마다 성분을 남긴다. 검증 데이터로 멈출 곳을 고르고, 성능은 따로 잰다.</p>
 <p>손실이 같은 골짜기가 여럿이면, 학습률이 2/곡률을 넘는 좁은 골짜기에는 머물 수 없고, 노이즈는 폭 √(T/λ)이 넓은 골짜기에 더 오래 머물게 한다. 곡률 16과 1의 두 골짜기에서 넓은 골짜기에 머무는 사람의 비율은 80%였다. 그러나 샤프니스는 파라미터를 적는 방식에 따라 바뀌므로, 평평함이 곧 일반화라고 말하려면 조심해야 한다.</p>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-implicit-bias-1">
+<p><strong>물음.</strong> 데이터보다 파라미터가 많아 학습 손실을 0으로 만드는 해가 수없이 많은 선형 회귀가 있다. 0에서 출발한 경사하강은 어느 해에 닿는가?</p>
+<ul>
+<li>[ ] 고친 항목 수가 가장 적은 해 〔틀림: 경사하강이 줄이는 것은 항목 수가 아니라 바꾼 양의 제곱합이다.〕</li>
+<li>[x] 길이(제곱합)가 가장 짧은 해, 최소 노름 해 〔맞음: 그래디언트는 늘 데이터 줄들을 섞은 것이라, 데이터를 바꾸지 않는 방향으로는 한 번도 움직이지 않는다.〕</li>
+<li>[ ] 해가 많으니 어느 해에 닿을지는 운에 달려 있다 〔틀림: 출발점이 정해지면 도착 해도 하나로 정해진다. 출발점에서 해의 집합에 수선을 내린 자리다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-implicit-bias-2">
+<p><strong>물음.</strong> 같은 선형 회귀를 경사하강으로 학습 손실 0까지 학습시킨다. 맞는 말은?</p>
+<ul>
+<li>[ ] 학습 손실이 0이 되면 출발점이 어디였는지는 잊힌다 〔틀림: 데이터를 바꾸지 않는 방향의 처음 성분은 경사하강이 건드리지 않아 끝까지 남는다. 큰 초기화는 시험 오차를 키운다.〕</li>
+<li>[ ] 파라미터를 다른 단위로 적어도 0에서 출발하면 같은 해에 닿는다 〔틀림: 최소 노름은 파라미터로 삼은 숫자의 길이를 잰다. 단위를 바꾸면 「가장 짧은 해」가 바뀐다.〕</li>
+<li>[x] 출발점도, 파라미터를 적는 단위도 도착하는 해를 바꾼다 〔맞음: 손실은 해들을 가리지 않고, 고르는 것은 옵티마이저와 옵티마이저가 길이를 재는 방식이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-implicit-bias-3">
+<p><strong>물음.</strong> 분리 가능한 데이터로 로지스틱 회귀를 경사하강으로 오래 학습시킨다. 가중치는 어떻게 되는가?</p>
+<ul>
+<li>[ ] 두 묶음의 평균 사이 한가운데를 가르는 경계로 간다 〔틀림: 멀리 있는 점 하나가 평균을 끌어 가까운 점을 잘못 가를 수 있다.〕</li>
+<li>[x] 길이는 끝없이 자라고, 방향은 마진이 가장 넓은 경계 쪽으로 모인다 〔맞음: 길이가 커질수록 경계에서 먼 점의 그래디언트 무게가 지수로 사라지고, 가장 가까운 점만 남는다.〕</li>
+<li>[ ] 손실이 0으로 가니 어떤 옵티마이저로 학습해도 같은 방향에 닿는다 〔틀림: 마진도 스텝을 재는 노름으로 잰다. 부호 경사하강은 최대 노름으로 잰 마진이 가장 넓은 다른 방향으로 간다.〕</li>
+<li>[ ] 방향은 몇 백 스텝이면 다 모인다 〔틀림: 방향이 모이는 속도는 스텝 수의 로그 꼴로 느리다. 점 여섯 개에서 백만 스텝 뒤에도 2.54°가 남았다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-implicit-bias-4">
+<p><strong>물음.</strong> 노이즈가 섞인 데이터를 경사하강으로 학습시키며 검증 오차가 가장 낮은 스텝에서 멈췄다. 맞는 말은?</p>
+<ul>
+<li>[ ] 일찍 멈춘 것은 손해다. 오래 학습할수록 데이터를 더 잘 반영한다 〔틀림: 빨리 배우는 패턴과 늦게 배우는 노이즈가 갈리는 동안 멈춰야 노이즈를 덜 외운다.〕</li>
+<li>[ ] 멈춘 스텝의 검증 오차를 그대로 모델 성능으로 보고하면 된다 〔틀림: 검증 데이터로 고른 최솟값은 운 좋은 쪽으로 치우친다. 성능은 고르는 데 쓰지 않은 시험 데이터로 잰다.〕</li>
+<li>[x] 일찍 멈추기는 스텝 수로 거는 정규화라 능형 회귀와 거의 같은 일을 한다 〔맞음: 경사하강은 고윳값이 큰 방향부터 채우고, 노이즈를 외우는 데 쓰이는 작은 방향을 가장 늦게 채운다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-implicit-bias-5">
+<p><strong>물음.</strong> 깊이가 같은 두 골짜기의 바닥 곡률이 16과 1이다. 노이즈가 있는 경사하강으로 사람 여럿이 오래 걸으면, 넓은 골짜기(곡률 1)에 머무는 비율은?</p>
+<ul>
+<li>[ ] 50%. 깊이가 같으니 반반이다 〔틀림: 노이즈는 폭이 넓은 골짜기에 더 오래 머물게 한다.〕</li>
+<li>[ ] 약 94%. 곡률이 16배 차이 나니 16 : 1이다 〔틀림: 골짜기의 폭은 곡률이 아니라 곡률의 제곱근에 반비례한다.〕</li>
+<li>[x] 80%. 폭의 비가 4 : 1이다 〔맞음: 곡률 16의 제곱근은 4라 넓은 골짜기의 폭이 4배다. 4를 5로 나누면 80%다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-implicit-bias-6">
+<p><strong>물음.</strong> 두 가중치가 모두 1인 층 두 개짜리 선형 모델에서, 첫 층 가중치를 2배로, 둘째 층 가중치를 절반으로 바꿔도 모델이 나타내는 함수는 그대로다. 바꾼 뒤의 샤프니스는?</p>
+<ul>
+<li>[ ] 그대로다. 같은 함수이니 손실 지형도 같다 〔틀림: 같은 함수라도 파라미터를 적는 방식이 바뀌면 곡률이 바뀐다. 이 경우 샤프니스는 2에서 4.25로 커진다.〕</li>
+<li>[x] 바뀐다. 그래서 평평함만으로 일반화를 설명하기는 어렵다 〔맞음: 같은 함수는 시험 성적도 같은데 샤프니스는 다르다. 평평함이 곧 일반화라고 말하려면 조심해야 한다.〕</li>
+<li>[ ] 커진다. 그러니 바꾼 쪽은 처음 것보다 일반화가 나쁜 해다 〔틀림: 두 파라미터는 같은 함수라 시험 성적도 같다. 샤프니스의 차이가 일반화의 차이를 뜻하지 않는다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>이 장의 이야기는 모두 「학습 손실이 0인 해들 가운데 어느 것을 고르나」였지만, 그 해들이 시험 데이터에서 얼마나 좋은지는 따로 물어야 한다. 곡선 맞추기에서 최소 노름 해는 시험 오차가 7,599였다. 데이터를 정확히 맞히는 해 가운데 가장 짧은 해도 이렇게 나쁠 수 있다면, 파라미터를 데이터보다 훨씬 더 많이 늘리면 가장 짧은 해는 어떻게 될까? 파라미터 수를 데이터 수 근처에서 그 너머로 늘려 가며 시험 오차를 그리면, 오버피팅으로 오르기만 할까, 아니면 어딘가에서 다시 내려올까?</p>
 <p>그리고 이 장은 「옵티마이저가 어느 해를 고르는가」에 답했을 뿐, 「왜 그 해가 처음 보는 데이터에 통하는가」에는 답하지 않았다. 최소 노름도, 최대 마진도, 평평함도 일반화를 미리 알려 주는 잣대로는 반례가 있었다. 학습한 것이 처음 보는 데이터에도 통한다는 것은 결국 무엇을 뜻할까?</p>

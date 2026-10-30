@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -785,6 +793,23 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>신경망의 <span class="sym" style="color:#c45a00">L</span>은 미리 알 수 없어서, 실무에서는 경계를 실험으로 찾는다. 레슬리 스미스(Leslie Smith)는 2017년 논문 「신경망 학습을 위한 주기적 학습률」에서 짧은 학습을 한 번 돌리면서 학습률을 아주 작은 값에서 큰 값으로 조금씩 키우고, 성능이 오르기 시작하는 곳과 흔들리거나 나빠지기 시작하는 곳을 읽어 학습률의 범위를 정하자고 했다. 그는 이것을 「학습률 범위 시험(LR range test)」이라 불렀고, 같은 생각이 여러 학습 도구에 「학습률 찾기」 기능으로 들어가 있다.</p>
 <p>선형 회귀(입력 10개, 샘플 200개)에서 학습률만 바꿔 가며 50스텝씩 돌려 보면 그 벼랑이 보인다. 이 문제의 <span class="sym" style="color:#c45a00">L</span>은 헤시안(2차 편미분을 모은 행렬)의 가장 큰 고윳값, 곧 손실이 가장 가파르게 휜 방향의 곡률로 4.149이고 2/<span class="sym" style="color:#c45a00">L</span> = 0.482다. 50스텝 뒤의 손실은 학습률을 키울수록 고르게 줄다가, 0.447(1.85/<span class="sym" style="color:#c45a00">L</span>)에서 가장 작고, 바로 다음 칸인 0.501(2.08/<span class="sym" style="color:#c45a00">L</span>)에서 처음 손실 7.15보다 커진 31.7로 뛴다. 손실이 가장 낮은 학습률이 무너지는 학습률 바로 옆에 붙어 있기 때문에 학습률을 고르기가 까다롭다. 학습률 찾기에서 벼랑 바로 앞 값이 아니라 그보다 몇 배 작은 값을 고르라고 권하는 것도 이 때문이다.</p>
 <figure class="fig "><img src="images/gradient-descent/m1_lr_sweep.png" alt="같은 선형 회귀를 학습률만 바꿔 50스텝씩 돌린 뒤의 손실(두 축 모두 로그 눈금). 2/L(굵은 점선)을 넘자마자 손실이 처음보다 커지고, 그 너머에서는 10⁶ 넘게 폭발한다(sources/gradient-descent/s2_step_limit.py)" loading="lazy"><figcaption>같은 선형 회귀를 학습률만 바꿔 50스텝씩 돌린 뒤의 손실(두 축 모두 로그 눈금). 2/L(굵은 점선)을 넘자마자 손실이 처음보다 커지고, 그 너머에서는 10⁶ 넘게 폭발한다(sources/gradient-descent/s2_step_limit.py)</figcaption></figure>
+<p>같은 숫자를 땅의 모양으로 바꿔 그리면 이 경계가 어떤 자리인지 한눈에 보인다. 가로축은 그대로 학습률이고, 땅의 높이는 「50스텝 동안 손실을 처음의 몇 분의 일로 줄였나」를 로그로 잰 값이다. 학습률을 키우며 오른쪽으로 걸으면 땅이 점점 높아지고, 가장 높은 자리 0.447에서 한 칸만 더 가면 땅이 끊겨 처음 높이보다 아래로 떨어진다. 이 책은 이 경계 2/<span class="sym" style="color:#c45a00">L</span>을 「학습률의 벼랑」이라는 별칭으로도 부른다. 가장 좋은 학습률이 무너지는 학습률 바로 옆에 붙어 있다는 뜻을 담은 이름이다.</p>
+<figure class="fig "><img src="images/gradient-descent/d1_lr_cliff.png" alt="학습률의 벼랑. 같은 선형 회귀(입력 10개, 샘플 200개)를 학습률만 바꿔 50스텝 돌린 뒤, 손실을 처음의 몇 분의 일로 줄였는지를 땅 높이(로그)로 그린 길이다. 땅은 2/L = 0.482에서 끊긴다. 가장 높은 자리 0.447(손실 0.043)은 낭떠러지에서 한 칸 떨어져 있고, 그 너머 0.501에서는 손실이 처음 7.15보다 큰 31.7, 0.562에서는 4.7 × 10¹⁰이 된다. 사람이 선 0.1은 벼랑의 0.21배인 자리로, 손실이 0.054다. 오른쪽 작은 칸은 벼랑 너머에서 벌어지는 일로, 포물선 위에서 ηa = 2.1이면 스텝마다 1.1배씩 멀어진다. 이 벼랑은 학습률 축 위의 경계이고, 그래디언트 클리핑에서 만나는 손실 지형 위의 깎아지른 벽과는 다른 것이다(sources/gradient-descent/d_anchors.py)" loading="lazy"><figcaption>학습률의 벼랑. 같은 선형 회귀(입력 10개, 샘플 200개)를 학습률만 바꿔 50스텝 돌린 뒤, 손실을 처음의 몇 분의 일로 줄였는지를 땅 높이(로그)로 그린 길이다. 땅은 2/L = 0.482에서 끊긴다. 가장 높은 자리 0.447(손실 0.043)은 낭떠러지에서 한 칸 떨어져 있고, 그 너머 0.501에서는 손실이 처음 7.15보다 큰 31.7, 0.562에서는 4.7 × 10¹⁰이 된다. 사람이 선 0.1은 벼랑의 0.21배인 자리로, 손실이 0.054다. 오른쪽 작은 칸은 벼랑 너머에서 벌어지는 일로, 포물선 위에서 ηa = 2.1이면 스텝마다 1.1배씩 멀어진다. 이 벼랑은 학습률 축 위의 경계이고, 그래디언트 클리핑에서 만나는 손실 지형 위의 깎아지른 벽과는 다른 것이다(sources/gradient-descent/d_anchors.py)</figcaption></figure>
+<h3 id="개념-다지기-학습률은-작을수록-안전한데-왜-벼랑-가까이를-찾을까">개념 다지기: 학습률은 작을수록 안전한데 왜 벼랑 가까이를 찾을까</h3>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>민준 학생은 처음 보는 모델이면 학습률 0.001로 시작한다고 했죠. 이 선형 회귀를 0.001로 50스텝 돌리면 손실이 얼마가 될까요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>돌려 보면 처음 7.15에서 5.76이요. 음, 50스텝 동안 5분의 4로밖에 안 줄었네요. 0.1이면 0.054까지 가는데요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 거꾸로 가장 높은 자리 0.447을 고르면 되잖아. 손실 0.043으로 제일 작은데.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>두 사람 말을 나란히 놓아 보죠. 0.447에서 한 칸 오른쪽인 0.501은요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>31.7이에요. 처음보다 네 배 넘게 나빠졌어요. 한 칸 차이인데… 그다음 칸은 10¹⁰이고요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>반대로 0.447의 4.5분의 1쯤으로 물러난 0.1은 0.054야. 가장 낮은 값보다 0.011 높을 뿐이고.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>물러서서 잃는 것과 넘어가서 잃는 것을 견주면요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>물러서면 조금 잃고, 넘어가면 다 잃어요. 학습률 찾기가 벼랑 바로 앞이 아니라 몇 배 작은 값을 고르라고 하는 게 그래서네요. 그렇다고 0.001까지 물러설 이유도 없고요. 거기서는 50스텝 동안 거의 못 내려가니까요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M03"><img src="images/cast/M03.webp" alt="김민준 M03" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그런데 벼랑 자리를 계산할 수 있으면 0.45쯤 골라도 되지 않아요? 여기서는 2/<span class="sym" style="color:#c45a00">L</span> = 0.482를 구했잖아요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>이 회귀는 <span class="sym" style="color:#c45a00">L</span>을 계산할 수 있었어요. 신경망이라면요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>헤시안의 가장 큰 고윳값을 알아야 하는데, 파라미터가 1억 개면 그걸 구하기도 어렵고… 학습하는 동안 손실 지형이 바뀌면 <span class="sym" style="color:#c45a00">L</span>도 바뀌겠네요. 벼랑이 어디 있는지 모르는 채로 걷는 거구나.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그러면 학습률 찾기로 찾은 벼랑도 학습을 시작할 때의 벼랑일 뿐이에요. 학습 도중에 벼랑이 이쪽으로 다가오면 어떻게 돼요?</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 물음은 이 책에서 몇 번 더 돌아와요. 모멘텀을 켜면 벼랑이 옮겨 가고, 신경망은 학습하는 동안 스스로 벼랑 가장자리로 다가가기도 해요. 지금은 벼랑을 정하는 것이 무엇인지만 붙들어 두죠. 2/<span class="sym" style="color:#c45a00">L</span>의 <span class="sym" style="color:#c45a00">L</span>은 무엇이었죠?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>손실이 가장 가파르게 휜 방향의 곡률이요. 방향이 열 개여도 벼랑은 그 한 방향이 정해요.</p></div></div>
 <div class="dialogue"><h3 id="prob-gradient-muffin-batch">문제 4. 머핀을 몇 개 구울까<span id="문제-4-머핀을-몇-개-구울까" class="anchor-alias"></span></h3>
 <blockquote>
 <p>동네 빵집의 머핀은 하루에 40개씩 팔린다. 주인은 첫날 60개를 구웠고, 다음 날부터는 「오늘 구운 개수 − <span class="sym" style="color:#006600">r</span> × (오늘 남은 개수)」만큼 굽기로 했다. (가) <span class="sym" style="color:#006600">r</span> = 0.5, 1, 1.5, 2.5일 때 엿새 동안 구운 개수를 적어라. (나) 어떤 <span class="sym" style="color:#006600">r</span>까지는 결국 40개에 자리를 잡고, 어디서부터 안 되는가? (모자란 날은 남은 개수가 음수라고 보자.)</p>

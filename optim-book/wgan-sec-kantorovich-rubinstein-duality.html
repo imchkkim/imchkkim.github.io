@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -705,7 +713,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="wgan.html">WGAN: 최소최대와 1-립시츠 판별기</a></p>
 <h2 id="sec-kantorovich-rubinstein-duality">칸토로비치–루빈슈타인 쌍대: 1-립시츠 판별기로 잰 점수 차<span id="칸토로비치-루빈슈타인-쌍대-1-립시츠-판별기로-잰-점수-차" class="anchor-alias"></span></h2>
-<p>좁은 봉우리의 표에서 JS가 log 2에 붙어 있을 때도, 봉우리를 옮기는 거리 |<span class="sym" style="color:#665522">θ</span>|는 어디서나 기울기 1로 생성기를 진짜 쪽으로 끌어당겼다. 분포를 흙 무더기로 보고, 한 무더기를 다른 무더기 모양으로 옮기는 데 드는 가장 작은 「옮긴 양 × 거리」의 합을 바서슈타인 거리 <span class="sym" style="color:#8c564b">W₁</span>이라 한다. 생성기가 이 거리를 줄이게 하면 그래디언트가 사라지는 문제는 없다. 그런데 스텝마다 생성기가 만든 샘플 수천 개와 진짜 사진 수천 개를 가장 싸게 짝짓는 수송 문제를 풀어야 한다면, 그 계산이 학습보다 무겁다. 판별기처럼 신경망 하나를 학습시켜서 <span class="sym" style="color:#8c564b">W₁</span>을 잴 수 있다면 수송 문제를 풀지 않아도 될 텐데, 그러려면 판별기는 어떤 함수여야 할까?</p>
+<p>좁은 봉우리의 표에서 JS가 log 2에 붙어 있을 때도, 봉우리를 옮기는 거리 |<span class="sym" style="color:#665522">θ</span>|는 어디서나 기울기 1로 생성기를 진짜 쪽으로 끌어당겼다. 분포를 흙 무더기로 보고, 한 무더기를 다른 무더기 모양으로 옮기는 데 드는 가장 작은 「옮긴 양 × 거리」의 합을 바서슈타인 거리 <span class="sym" style="color:#8c564b">W₁</span>이라 한다. 생성기가 이 거리를 줄이게 하면 그래디언트가 사라지는 문제는 없다. 그런데 스텝마다 생성기가 만든 샘플 수천 개와 진짜 사진 수천 개를 가장 싸게 짝짓는 수송 문제를 풀어야 한다면, 그 계산이 학습보다 무겁다. 공사장 문제에서는 흙을 한 삽도 옮기지 않고 흙더미와 구덩이에 꽂은 가격표만으로 최소 비용을 알아냈다. 판별기처럼 신경망 하나를 학습시켜 그 가격표 노릇을 하게 해서 <span class="sym" style="color:#8c564b">W₁</span>을 잴 수 있다면 수송 문제를 풀지 않아도 될 텐데, 그러려면 판별기는 어떤 함수여야 할까?</p>
 <h3 id="hist-kantorovich-duality-wgan" class="history" data-people="kantorovich-leonid rubinstein-gennadii arjovsky-martin">역사: 칸토로비치와 루빈슈타인, 그리고 아홉 날<span id="역사-칸토로비치와-루빈슈타인-그리고-아홉-날" class="anchor-alias"></span></h3>
 <p>흙 무더기를 옮기는 문제를 선형계획으로 풀고 그 쌍대를 세운 사람은 레오니트 칸토로비치(Leonid Kantorovich)다. 그는 1957년의 짧은 글과, 1958년 레닌그라드 대학의 학술지에 동료 게나디 루빈슈타인(Gennadii Rubinstein)과 함께 실은 「완전 가법 함수들의 공간에 대하여」에서 이 거리를 함수 공간의 거리로 일반화했다. 칸토로비치를 가까이서 본 레닌그라드의 수학자 아나톨리 베르시크(Anatoly Vershik)의 회고에 따르면, 이 논문에는 수송 계획이 가장 좋은지를 가리는 기준이 립시츠 함수, 곧 그래디언트 길이(직선 위에서는 기울기)가 1을 넘지 않는 「가격」 함수의 말로 들어 있었다. 흙을 실제로 옮겨 보지 않고도, 자리마다 붙인 가격표 하나로 비용을 잴 수 있다는 것이다.</p>
 <p>칸토로비치–루빈슈타인 쌍대가 생성 모델로 넘어온 것은 반세기가 훌쩍 지나서다. 아르좁스키와 보투는 2017년 1월 17일에 JS 가 왜 생성기를 막는지 따진 논문을 공개했고, 아흐레 뒤인 1월 26일에 페이스북 AI 연구소의 수미스 친탈라(Soumith Chintala)와 셋이서 「바서슈타인 GAN(Wasserstein GAN)」을 공개했다(ICML 2017). 그들의 처방은 판별기를 칸토로비치–루빈슈타인의 가격표로 쓰는 것이었다. 진짜일 확률 대신 점수를 매긴다는 뜻에서 판별기를 「비평가(critic)」라고 불렀고, 평행한 두 직선 분포를 예로 들어 JS 와 KL 은 직선을 아무리 가까이 붙여도 줄지 않는데 바서슈타인 거리는 떨어진 거리만큼 줄어든다는 것을 보였다.</p>

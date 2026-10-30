@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=b4f62a4a" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"b4f62a4a"}</script>
-<script defer src="/reader/reader.js?v=b4f62a4a" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -818,6 +826,47 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>학습률을 고정하면 확률적 경사하강은 바닥에 닿지 못하고 노이즈 플로어에서 맴돈다. 노이즈 플로어의 높이는 ησ²/(2B(2 − ηa))이고, ηa가 작으면 학습률 ÷ 배치 크기 η/B에 비례한다. 그래서 배치 크기를 k배 하면 학습률도 k배 하는 선형 배율 규칙이 나오지만, 학습률이 학습률의 상한 2/L에 다가가면 이 규칙은 깨진다.</p>
 <p>바닥에 닿으려면 학습률을 줄여 가야 한다. 로빈스–먼로 조건은 학습률의 합은 무한하고 학습률 제곱의 합은 유한해야 한다는 것이다. 앞의 조건은 끝까지 갈 거리를, 뒤의 조건은 잦아드는 노이즈를 보장하고, 1/k 꼴이 둘 사이에 맞는다. 스텝 수가 정해진 실제 학습에서는 계단이나 코사인 같은 학습률 스케줄을 쓴다. 처음에는 큰 학습률로 빨리 다가가고, 끝에서는 작은 학습률로 노이즈 플로어를 낮춘다. 학습률을 줄인 뒤 새 노이즈 플로어까지 내려가는 데는 1/(ηa) 스텝쯤 걸린다.</p>
 <p>학습 초반에 곡률이 크면, 끝에 쓸 학습률을 처음부터 쓰는 순간 학습률 × 곡률이 2를 넘어 튕겨 나갈 수 있다. 워밍업은 처음 몇 스텝 동안 학습률을 작은 값에서 목표까지 올려, 곡률이 내려오는 동안 스텝을 묶어 둔다. 큰 모델의 학습률은 대개 워밍업으로 올린 뒤 코사인으로 내린다.</p>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-sgd-1">
+<p><strong>물음.</strong> 미니배치 그래디언트에 섞인 노이즈의 표준편차를 반으로 줄이려면 배치 크기를 몇 배로 늘려야 하나?</p>
+<ul>
+<li>[ ] 두 배 〔틀림: 노이즈의 분산이 배치 크기에 반비례하므로, 표준편차는 배치 크기의 제곱근에 반비례한다. 두 배로는 약 0.7배가 될 뿐이다.〕</li>
+<li>[x] 네 배 〔맞음: 분산이 4분의 1이 되면 표준편차는 반이 된다. 두 배 정확하려면 네 배의 샘플이 든다.〕</li>
+<li>[ ] 열 배 〔틀림: 네 배면 충분하다. 열 배면 표준편차가 약 0.3배로 준다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-sgd-2">
+<p><strong>물음.</strong> 학습률을 고정한 확률적 경사하강을 아주 오래 돌린다. 손실은 어떻게 되나?</p>
+<ul>
+<li>[ ] 결국 손실의 바닥에 닿는다 〔틀림: 바닥에서 참 그래디언트는 0이 되지만 노이즈는 남는다. 남은 노이즈만큼 계속 움직인다.〕</li>
+<li>[x] 손실의 바닥에 닿지 못하고 노이즈 플로어에서 맴돈다. 학습률이 작을수록, 배치가 클수록 노이즈 플로어가 낮다 〔맞음: 학습률이 크지 않으면 노이즈 플로어의 높이는 학습률을 배치 크기로 나눈 값에 비례한다.〕</li>
+<li>[ ] 노이즈가 쌓여 손실이 끝없이 오른다 〔틀림: 참 그래디언트가 바닥 쪽으로 끌어당겨, 학습률이 상한보다 작으면 일정한 높이에서 맴돈다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-sgd-3">
+<p><strong>물음.</strong> 배치 크기를 k배 하면 학습률도 k배 하라는 선형 배율 규칙은 언제 통하나?</p>
+<ul>
+<li>[ ] 언제나. 학습률 ÷ 배치 크기만 같으면 노이즈 플로어가 같다 〔틀림: 학습률이 상한에 다가가면 노이즈 플로어가 끝없이 높아져 규칙이 깨진다.〕</li>
+<li>[x] 학습률이 학습률의 상한보다 한참 작은 범위에서만 〔맞음: 그 범위에서는 노이즈 플로어가 학습률을 배치 크기로 나눈 값에 비례한다.〕</li>
+<li>[ ] 학습률이 상한에 가까울수록 더 잘 맞는다 〔틀림: 거꾸로다. 상한 근처에서 노이즈 플로어가 가장 크게 어긋난다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-sgd-4">
+<p><strong>물음.</strong> 손실의 바닥에 닿으려고 학습률을 스텝마다 줄여 간다. 로빈스–먼로 조건에 맞는 줄이기는?</p>
+<ul>
+<li>[ ] 스텝마다 반으로 줄인다. 빨리 줄일수록 빨리 수렴한다 〔틀림: 반씩 줄이면 학습률을 모두 더해도 처음 학습률의 두 배에 그친다. 손실의 바닥에 닿기 전에 스텝이 멈춘다.〕</li>
+<li>[ ] 줄이지 않는다. 고정한 채 오래 돌리면 된다 〔틀림: 학습률을 고정하면 노이즈가 잦아들지 않아 노이즈 플로어에서 맴돈다.〕</li>
+<li>[x] k번째 스텝의 학습률을 1/k 꼴로 줄인다 〔맞음: 학습률을 모두 더하면 끝없이 커져 끝까지 갈 거리가 남고, 제곱을 모두 더하면 유한해 노이즈가 잦아든다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-sgd-5">
+<p><strong>물음.</strong> 학습 초반에 곡률이 큰 신경망에 워밍업을 둔다. 워밍업이 하는 일은?</p>
+<ul>
+<li>[x] 처음 몇 스텝 동안 학습률을 작은 값에서 목표까지 올려, 곡률이 내려오는 동안 스텝을 묶어 둔다 〔맞음: 끝에 쓸 학습률을 처음부터 쓰면 학습률과 곡률의 곱이 2를 넘어 튕겨 나갈 수 있다.〕</li>
+<li>[ ] 학습 끝에서 학습률을 낮춰 노이즈 플로어를 낮춘다 〔틀림: 끝에서 낮추는 일은 계단이나 코사인 같은 학습률 스케줄의 뒷부분이 맡는다. 워밍업은 처음 몇 스텝의 일이다.〕</li>
+<li>[ ] 처음 곡률로 계산해, 워밍업 동안 모든 스텝에서 학습률과 곡률의 곱이 2 아래가 되게 길게 잡는다 〔틀림: 모든 스텝에서 곱을 2 아래로 지키라는 조건은 넉넉하게 잡은 것이다. 곡률은 학습하며 내려오므로, 워밍업 길이는 초반 곡률이 몇 스텝 만에 내려오는지에 맞춘다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>이 장의 처방은 배치를 키우거나 학습률을 줄이거나 스텝을 평균 내어, 모두 노이즈를 줄이는 쪽이었다. 어느 것이든 값을 치른다. 배치를 키우면 한 스텝이 비싸지고, 학습률을 줄이면 바닥까지 가는 스텝이 늘어난다. 그리고 경사하강에서 본 길쭉한 골짜기의 문제는 그대로 남아 있다. 학습률은 가장 가파른 방향의 곡률이 정하는 상한 아래에 묶이고, 완만한 방향은 그 작은 학습률로 기어간다. 노이즈가 섞이면 가파른 방향의 상한 근처에서 노이즈 플로어가 먼저 높아지니, 학습률을 상한 가까이 올릴 수도 없다.</p>
 <p>방향마다 곡률이 다르다면, 모든 방향에 학습률 하나를 쓰는 대신 방향마다 스텝을 다르게 할 수는 없을까? 그래디언트만이 아니라 손실이 어느 방향으로 얼마나 휘었는지를 안다면, 한 스텝에 바닥으로 곧장 갈 수도 있지 않을까? 그 대가는 무엇일까?</p>
