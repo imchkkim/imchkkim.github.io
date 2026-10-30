@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/compression-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/compression-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="압축은 이해인가"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"compression-book","base":"/compression-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"compression-book","base":"/compression-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -705,7 +713,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <aside class="guide"><p class="guide-title">길잡이 · 『생성 모델: MLP에서 디퓨전 트랜스포머까지』 「오토인코더: 그림 자신을 정답으로 삼기」</p><p>784칸 손글씨 그림을 2칸으로 줄였다 되살리는 오토인코더를 직접 학습하고, 인코더·디코더·잠재 변수라는 이름과 그 잠재 변수 지도를 본다. <a href="https://lameproof.com/diffusion-book/autoencoder.html">이어 읽기</a></p>
 </aside>
 <h3 id="hist-linear-autoencoder-nonuniqueness" class="history" data-people="baldi-pierre hornik-kurt">역사: 코드는 하나로 정해지지 않는다<span id="역사-코드는-하나로-정해지지-않는다" class="anchor-alias"></span></h3>
-<p>가운데 층이 좁은 신경망에 입력을 되살리게 하는 학습에서 역전파는 손실을 조금씩 줄여 갈 뿐이어서, 닿은 곳이 가장 낮은 곳인지, 가운데 층이 무엇을 배웠는지는 따로 따져야 했다. 샌디에이고 캘리포니아 대학의 피에르 발디(Pierre Baldi)와 쿠르트 호르닉(Kurt Hornik)은 층이 모두 선형인 신경망에서 두 물음에 끝까지 답했다(『Neural Networks』, 1989). 제목이 「신경망과 주성분 분석: 국소 최소 없이 예에서 배우기」다.</p>
+<p>가운데 층이 좁은 신경망에 입력을 되살리게 하는 학습에서 역전파는 손실을 조금씩 줄여 갈 뿐이어서, 닿은 곳이 가장 낮은 곳인지, 가운데 층이 무엇을 배웠는지는 따로 따져야 했다. 샌디에이고 캘리포니아 대학 소속으로 논문을 낸 피에르 발디(Pierre Baldi)와 쿠르트 호르닉(Kurt Hornik, 본래 소속은 빈 공과대학)은 층이 모두 선형인 신경망에서 두 물음에 끝까지 답했다(『Neural Networks』, 1989). 제목이 「신경망과 주성분 분석: 국소 최소 없이 예에서 배우기」다.</p>
 <p>그들은 신경망을 돌려 보는 대신 자료의 공분산 행렬 하나로 제곱 오차의 지형 전체를 계산했다. 결론은 둘이다. 첫째, 오차가 가장 작은 곳은 하나뿐이고, 그곳의 신경망은 자료를 첫 주성분들이 펼치는 부분공간에 그림자로 내린다. 나머지 평평한 자리는 모두 안장점이다. 둘째, 신경망이 <span class="sym" style="color:#1b9e77">x</span>를 코드 <span class="sym" style="color:#665522">B</span><span class="sym" style="color:#1b9e77">x</span>로 줄이고(인코더 <span class="sym" style="color:#665522">B</span>) 거기에 <span class="sym" style="color:#665522">A</span>를 곱해 되살린다고(디코더 <span class="sym" style="color:#665522">A</span>) 하자. 가역 행렬 C를 아무것이나 끼워 <span class="sym" style="color:#665522">A</span><span class="sym" style="color:#665522">B</span> = (<span class="sym" style="color:#665522">A</span>C)(C⁻¹<span class="sym" style="color:#665522">B</span>)로 바꾸어도 되살린 점도 오차도 달라지지 않는다. 논문은 하나로 정해지는 것이 사상 전체 <span class="sym" style="color:#665522">W</span> = <span class="sym" style="color:#665522">A</span><span class="sym" style="color:#665522">B</span>뿐이고, <span class="sym" style="color:#665522">A</span>와 <span class="sym" style="color:#665522">B</span>는 결코 하나로 정해지지 않는다고 못박았다.</p>
 <figure class="fig "><img src="images/closed-loop/same_map.png" alt="바로 아래에서 쓸 점 180개를 수 하나로 줄이는 선형 오토인코더. 왼쪽: 오차가 가장 작은 신경망이 되살린 점(색)은 주축 위에 놓이고 재구성 오차는 0.184다. 오른쪽: 같은 사상 W = AB 를 C = 1, −1, 2.5 로 쪼갠 세 신경망의 코드. 되살린 점은 셋이 똑같은데, 코드는 뒤집히고 줄어든다" loading="lazy"><figcaption>바로 아래에서 쓸 점 180개를 수 하나로 줄이는 선형 오토인코더. 왼쪽: 오차가 가장 작은 신경망이 되살린 점(색)은 주축 위에 놓이고 재구성 오차는 0.184다. 오른쪽: 같은 사상 W = AB 를 C = 1, −1, 2.5 로 쪼갠 세 신경망의 코드. 되살린 점은 셋이 똑같은데, 코드는 뒤집히고 줄어든다</figcaption></figure>
 <p>재구성 오차는 사상 전체만 정할 뿐, 그 사이 코드의 좌표는 정하지 않는다. 코드가 수 하나인 위의 그림에서는 C가 0이 아닌 수 하나라서, 코드가 <span class="sym" style="color:#ff5a78">z</span>, −<span class="sym" style="color:#ff5a78">z</span>, 0.4<span class="sym" style="color:#ff5a78">z</span>로 달라져도 재구성 오차는 셋 다 0.184다. 오차가 가장 작은 곳이라 차이가 늘이기와 뒤집기에 그쳤지만, 가장 작은 곳이 아닌 두 오토인코더는 오차가 같으면서 코드가 훨씬 크게 다를 수 있다. 재구성 오차와 코드, 두 기준이 늘 같은 쪽을 가리킬까?</p>

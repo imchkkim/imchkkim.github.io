@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/compression-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/compression-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="압축은 이해인가"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"compression-book","base":"/compression-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"compression-book","base":"/compression-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -693,23 +701,20 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="low-dimension.html">예측할 수 있으면 낮은 차원</a></p>
 <h2 id="sec-low-dimension-summary">혼동하기 쉬운 점과 요약<span id="혼동하기-쉬운-점과-요약" class="anchor-alias"></span></h2>
-<div class="dialogue"><h3 id="talk-low-imperfect-prediction">토론 1. 가끔 틀리는 예측은 아무것도 아껴 주지 않나<span id="토론-1-가끔-틀리는-예측은-아무것도-아껴-주지-않나" class="anchor-alias"></span></h3>
+<div class="dialogue"><h3 id="talk-low-imperfect-prediction">토론 1. 늘 빗나가는 예측은 아무것도 아껴 주지 않나<span id="토론-1-늘-빗나가는-예측은-아무것도-아껴-주지-않나" class="anchor-alias"></span></h3>
 <blockquote>
-<p>주말마다 타는 KTX가 30일 가운데 24일은 시간표대로, 6일은 1~3분 늦게 도착했다. 도착 시각 기록을, 같은 시간표를 가진 친구에게 보낸다면 무엇을 보내야 하는가?</p>
+<p>민준은 30일 동안 알람을 07:00에 맞췄지만 하루도 제시간에 일어나지 못했고, 날마다 1~8분 늦게 일어났다. 일어난 시각 기록을 알람 시각을 아는 친구에게 보낸다면, 알람 시각은 비트를 아껴 주는가?</p>
 </blockquote>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>주말마다 타는 KTX의 도착 시각을 30번 기록해서 친구에게 보낸다고 해 봐요. 시각은 분 단위로 적고, 친구도 같은 시간표를 갖고 있어요. 열차는 30번 가운데 24번은 시간표대로 왔고, 6번은 1~3분 늦었어요. 무엇을 보내면 될까요?</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>음, 늦은 날이 6일이나 있으니까 시간표로는 못 맞히잖아요. 그냥 매번 도착 시각을 적어야죠. 하루 1,440분 가운데 하나니까 log₂ 1,440 = 10.49비트, 30번이면 315비트요.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>시간표가 틀린 날, 얼마나 틀렸나요?</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>많아야 3분이요… 아, 틀려도 0~3분 사이에서만 틀리네요. 틀린 날은 시간표가 쓸모없다고 생각했어요.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 친구가 시간표로 맞힌 시각에서 몇 분 늦었는지만 보낸다면요?</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>0, 1, 2, 3분 넷 중 하나니까 한 번에 2비트, 30번이면 60비트예요. 틀리는 날이 있어도 315비트가 60비트가 됐어요.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>24번은 0분인데 그것도 매번 2비트씩 쓰는 건 아까워. 매번 「제시간」 1비트만 붙이고, 늦은 6번에만 1~3분 셋 중 하나를 log₂ 3 = 1.58비트로 더 적으면 30 + 6 × 1.58 = 39.5비트야.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그런데 어느 날 선로 공사로 40분 늦었다면요? 0~3분 밖이에요.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그때만 「규칙 밖」 표시를 하고 실제 시각을 10.49비트로 따로 적으면 돼요. 버스 시간표에서 늦은 버스만 따로 적은 것처럼요. 그 하루 때문에 나머지 29번까지 시각을 다 적을 필요는 없고요.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 시간표가 아무것도 못 아껴 주는 건 언제야? 늦는 폭이 넓어지면 아끼는 게 줄긴 할 텐데.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>늦는 폭이 0~63분으로 고르게 퍼졌다면 몇 비트를 아낄까요?</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>해 볼게요. 64가지니까 6비트, 그냥 적는 10.49비트보다 4.49비트 적어요. log₂(1,440 ÷ 64)도 4.49니까 퍼진 폭의 비의 log₂예요. 늦는 폭이 하루 전체만큼 넓어져야 아끼는 게 0이 되네요.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>맞히느냐 틀리느냐보다, 틀린 폭이 얼마나 좁으냐가 아끼는 비트를 정하네요. 늘 맞을 필요는 없었어요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>민준 학생은 한 달 동안 알람을 07:00에 맞췄는데, 30일 내내 1~8분 늦게 일어났다면서요? 일어난 시각을 분 단위로 30번 적어서, 알람 시각을 아는 친구에게 보낸다고 해 봐요. 몇 비트가 들까요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>음, 알람 시각에 맞춰 일어난 날이 하루도 없으니까, 알람 시각으로는 아무것도 못 맞혀요. 그냥 매번 하루 1,440분 가운데 하나를 적어야죠. log₂ 1,440 = 10.49비트, 30번이면 315비트요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>알람 시각이 빗나간 날, 얼마나 빗나갔나요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S04"><img src="images/cast/S04.webp" alt="이서연 S04" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>많아야 8분이요… 아, 하루도 안 맞았지만 늘 1~8분 안에서만 빗나갔네요. 맞히지 못하면 쓸모없다고 생각했어요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 07:00에서 몇 분 늦었는지만 보내면 돼. 1~8분은 여덟 가지라 한 번에 3비트, 30번이면 90비트야. 하루도 안 맞은 예측인데 315비트가 90비트가 됐어.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>알람을 끄고 다시 잠드는 날이 늘어서, 늦는 폭이 1~64분으로 고르게 퍼졌다면 하루에 몇 비트를 아낄까요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>해 볼게요. 64가지니까 6비트, 그냥 적는 10.49비트보다 4.49비트 적어요. log₂(1,440 ÷ 64)도 4.49니까, 아끼는 비트는 퍼질 수 있는 폭의 비에 log₂를 씌운 값이에요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 알람 시각이 아무것도 아껴 주지 못하는 건 언제일까요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>늦는 폭이 하루 전체만큼 넓어져서 비가 1이 될 때뿐이에요. 맞히느냐 못 맞히느냐가 아니라, 빗나간 폭이 얼마나 좁으냐가 아끼는 비트를 정하네요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>알람이 한 번도 안 맞았는데 쓸모는 있었던 거네. 적는 건 예측에서 빗나간 만큼, 잔차뿐이었어.</p></div></div>
 </div><div class="dialogue"><h3 id="talk-low-radius-ratio">토론 2. 가게 수가 늘어난 배수만 보면 차원이 나오나<span id="토론-2-가게-수가-늘어난-배수만-보면-차원이-나오나" class="anchor-alias"></span></h3>
 <blockquote>
 <p>반경을 1km에서 3km로 넓혔더니 가게가 12개에서 108개가 되었다. 가게들은 몇 차원으로 퍼져 있는가?</p>
@@ -749,7 +754,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <tbody>
 <tr>
 <td>규칙에서 벗어난 것이 하나 생기면 처음부터 다 적어야 한다고 봄</td>
-<td>토론 1</td>
+<td>1</td>
 <td>규칙은 그대로 두고 벗어난 것만 따로 적는다</td>
 </tr>
 <tr>
@@ -808,6 +813,55 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   B -- &quot;이웃으로 맞힌다&quot; --&gt; C[&quot;좁은 잔차&lt;br/&gt;적을 것이 준다&quot;]
   C -- &quot;아낀 비트 ≈ log₂(s ÷ e)&quot; --&gt; D[&quot;짧게 적기&quot;]
 </pre>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-low-dimension-1">
+<p><strong>물음.</strong> 기운 평면 x₃ = 0.5x₁ + 0.3x₂ 위에 점 500개가 있다. 받는 사람이 이 규칙을 알 때, 점 하나마다 새로 보내야 하는 숫자는 몇 개인가?</p>
+<ul>
+<li>[ ] 3개. 점 하나가 칸 셋을 차지한다 〔틀림: 셋째 칸은 앞의 두 칸에서 계산되므로 보낼 필요가 없다.〕</li>
+<li>[x] 2개 〔맞음: 규칙을 안 뒤에도 점마다 새로 정해야 하는 숫자의 수가 자유도다. 앞의 두 칸만 보내면 셋째 칸은 받는 사람이 계산한다.〕</li>
+<li>[ ] 4개. 규칙의 두 숫자도 점마다 함께 보내야 한다 〔틀림: 규칙의 두 숫자 0.5와 0.3은 점 500개 전체에 한 번만 보낸다. 그래서 모두 1,002개였다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-low-dimension-2">
+<p><strong>물음.</strong> 점 구름에서 반지름을 세 배로 넓혔더니, 거리가 반지름보다 짧은 쌍의 수가 9배가 되었다. 내재 차원은 얼마쯤인가?</p>
+<ul>
+<li>[ ] 9 〔틀림: 늘어난 배수는 차원이 아니다. 9배가 반지름 세 배의 몇 제곱인지를 본다.〕</li>
+<li>[x] 2 〔맞음: 3을 두 번 곱하면 9다. 쌍의 수가 반지름의 제곱으로 늘었으니 평평한 주택가처럼 2차원이다.〕</li>
+<li>[ ] 3보다 조금 크다. 9배에 밑이 2인 로그를 취한다 〔틀림: 밑이 2인 로그는 반지름을 두 배로 넓혔을 때만 맞는다. 세 배로 넓혔으면 3을 몇 번 곱해 9가 되는지 본다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-low-dimension-3">
+<p><strong>물음.</strong> 두께 0.3인 기운 판(한 변 2)에 점을 흩고 내재 차원을 잰다. 반지름을 판 두께보다 훨씬 작게 잡을 때와 두께보다 크게 잡을 때, 잰 차원은 어떻게 되는가?</p>
+<ul>
+<li>[ ] 둘이 같다. 판 하나에는 차원이 한 숫자로 정해져 있다 〔틀림: 잰 차원에는 「어느 반지름에서」가 붙는다. 보는 눈금이 바뀌면 값도 바뀐다.〕</li>
+<li>[ ] 반지름을 크게 잡아 이웃을 많이 볼수록 참값에 가까워진다 〔틀림: 이웃 수는 보는 눈금을 바꿀 뿐이다. 멀리서 본 종이 한 장과 돋보기로 본 두께 있는 판이 둘 다 맞다.〕</li>
+<li>[x] 작은 반지름에서는 3쯤, 큰 반지름에서는 2쯤이다 〔맞음: 두께보다 작은 공 안에서는 위아래로도 이웃이 늘고, 공이 두께보다 커지면 위아래가 금방 막혀 옆으로만 이웃이 는다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-low-dimension-4">
+<p><strong>물음.</strong> 1,024칸짜리 인물 그림 70장의 내재 차원을 재면 4.3, 칸마다 숫자를 무작위로 뽑은 그림 70장을 재면 109.2가 나왔다. 이 결과와 맞는 말은?</p>
+<ul>
+<li>[x] 인물 그림은 1,024칸 공간을 고르게 채우지 않고, 몇 방향으로만 퍼진 얇은 면 근처에 모여 있다 〔맞음: 그럴듯한 자료가 넓은 공간의 얇은 면 근처에 모여 있다는 생각이 매니폴드 가설이다.〕</li>
+<li>[ ] 칸을 무작위로 채우다 보면 언젠가 그럴듯한 인물 그림이 나온다 〔틀림: 그럴듯한 그림이 모인 곳은 1,024칸 공간에서 너무 좁아, 무작위로 뽑아서는 닿지 않는다.〕</li>
+<li>[ ] 인물 그림도 칸이 1,024개이니, 실제로 퍼진 방향도 1,024개 가까이 된다 〔틀림: 칸 수는 겉보기 차원이다. 새 칸이 다른 칸들로 거의 정해지면 새 방향이 생기지 않는다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-low-dimension-5">
+<p><strong>물음.</strong> 판에서 조금 떠 있는 점들의 x₃을 이웃으로 맞히면 늘 조금씩 빗나간다. 빗나간 차이(잔차)의 퍼짐이 x₃ 자체의 퍼짐의 4분의 1이라면, 점마다 대략 몇 비트를 아끼는가?</p>
+<ul>
+<li>[ ] 0비트. 맞히지 못하면 결국 x₃을 다 적어야 한다 〔틀림: 받는 사람도 같은 이웃으로 맞힐 수 있으니 잔차만 적으면 된다.〕</li>
+<li>[ ] 아끼기는커녕 늘어난다. 빗나간 점은 처음부터 다 적어야 한다 〔틀림: 예측은 두고, 벗어난 만큼만 따로 적는다.〕</li>
+<li>[x] 2비트 〔맞음: 적을 값이 퍼진 범위가 4분의 1로 좁아진다. 범위가 절반이 될 때마다 1비트를 아끼니, 절반을 두 번 한 4분의 1이면 2비트다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-low-dimension-6">
+<p><strong>물음.</strong> 두 도시의 1년 치 하루 기온 기록이 있다. 날마다의 기온이 퍼진 정도는 두 기록이 같은데, 가 도시는 어제와 오늘 기온이 비슷하고 나 도시는 날마다 제멋대로 바뀐다. 어느 기록을 더 짧게 적을 수 있는가?</p>
+<ul>
+<li>[ ] 퍼진 정도가 같으니 둘 다 같다 〔틀림: 견줄 것은 앞의 값을 알고 난 뒤에 남는 퍼짐이다.〕</li>
+<li>[x] 가 도시 〔맞음: 어제 기온으로 오늘을 맞히면 잔차가 좁아 적을 비트가 준다. 나 도시는 어제를 알아도 남는 퍼짐이 넓다.〕</li>
+<li>[ ] 나 도시. 크게 바뀌는 기록일수록 어제와의 차이로 적을 때 많이 아낀다 〔틀림: 날마다 제멋대로 바뀌면 어제와의 차이도 기온만큼 넓게 퍼져 아낄 것이 없다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>「짧게 적는다」는 말을 이 장에서는 꽤 느슨하게 썼다. 판 위의 점은 숫자 1,500개 대신 1,002개로 적었는데, 숫자 하나가 몇 비트인지는 셈에 넣지 않았다. 잔차로 아낀 비트는 log₂(퍼짐의 비)로 근사했지만, 퍼짐이 같아도 모양이 다르면 드는 비트가 같을지, 그리고 3.89비트 같은 정수가 아닌 비트를 실제로 어떻게 아낄 수 있을지는 따지지 않았다. 섀넌의 순번 이야기에서도 「순번을 그 비율대로 코드로 주면」이라고만 했다. 예측이 정해 주는 것은 결국 다음 값에 대한 확률일 텐데, 그 확률이 실제 0과 1의 줄로 몇 자리가 되는지는 무엇으로 재야 할까?</p>
 

@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/compression-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/compression-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="압축은 이해인가"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"compression-book","base":"/compression-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"compression-book","base":"/compression-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -797,6 +805,55 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   B -- &quot;라벨이 없으면&lt;br/&gt;축·라벨 비트까지 더해 최소&quot; --&gt; C[&quot;가장 짧은 나누기&lt;br/&gt;클러스터 수는 ε가 정한다&quot;]
   B -- &quot;라벨을 두고&lt;br/&gt;표현을 움직여 최대&quot; --&gt; D[&quot;MCR²&lt;br/&gt;클러스터끼리 직교, 클러스터 안은 다양하게&quot;]
 </pre>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-rate-reduction-1">
+<p><strong>물음.</strong> 점 구름의 어느 방향 하나는 퍼짐이 허용 오차보다 훨씬 작다. 그 방향은 코딩 레이트에 몇 비트를 보태는가?</p>
+<ul>
+<li>[ ] 음수다. 그 방향이 비트를 아껴 준다 〔틀림: 방향마다 더하는 비트는 0보다 작아지지 않는다.〕</li>
+<li>[x] 거의 0비트다 〔맞음: 허용 오차 안에서는 그 방향으로 구별할 것이 없다. 그래서 같은 만큼 퍼져도 납작한 구름이 둥근 구름보다 적게 든다.〕</li>
+<li>[ ] 다른 방향과 같은 만큼이다. 쓰는 방향의 수는 공간의 차원이 정한다 〔틀림: 쓰는 방향의 수는 허용 오차가 정한다. 허용 오차보다 좁은 방향은 그 눈금에서 쓰이지 않는다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-rate-reduction-2">
+<p><strong>물음.</strong> 학습이 잘못되어 임베딩 모두가 원점이 아닌 한 점에 모였다. 그 묶음의 코딩 레이트는 얼마인가?</p>
+<ul>
+<li>[ ] 0이다. 점이 하나뿐이니 적을 것이 없다 〔틀림: 코딩 레이트는 원점을 기준으로 퍼짐을 잰다. 원점이 아닌 한 점도 원점에서 그 점으로 가는 방향 하나를 쓴다.〕</li>
+<li>[x] 0보다 크다. 방향 하나만큼 든다 〔맞음: 다만 고르게 퍼진 묶음보다는 훨씬 작다. 쓰는 방향이 하나뿐이다.〕</li>
+<li>[ ] 고르게 퍼졌을 때와 같다. 점의 수가 같다 〔틀림: 코딩 레이트는 점의 수가 아니라 점들이 퍼진 방향과 크기로 정해진다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-rate-reduction-3">
+<p><strong>물음.</strong> 원점을 지나는 직선 하나 위의 점들을 원점 양쪽 두 클러스터로 갈랐다. 클러스터별로 따로 적으면 점 하나에 아끼는 비트는 얼마인가?</p>
+<ul>
+<li>[ ] 많다. 두 클러스터가 멀리 떨어져 있다 〔틀림: 코딩 레이트는 거리가 아니라 방향을 본다. 원점 양쪽은 같은 직선, 같은 방향이다.〕</li>
+<li>[x] 거의 없다 〔맞음: 같은 부분공간 안에서는 어떻게 갈라도 클러스터마다 그 방향 하나를 그대로 쓴다.〕</li>
+<li>[ ] 클러스터가 둘이니 1비트를 아낀다 〔틀림: 오히려 라벨을 모르면 점마다 어느 클러스터인지 적는 라벨 비트가 더 든다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-rate-reduction-4">
+<p><strong>물음.</strong> 표현 A는 전체 코딩 레이트가 70비트쯤이고 네 클래스가 공간 아무 데나 섞여 있다. 표현 B는 13비트쯤이고 클래스마다 한 방향 근처에 모였다. 라벨에 맞는 표현은 어느 것인가?</p>
+<ul>
+<li>[ ] A. 전체가 넓게 퍼질수록 좋다 〔틀림: 클래스가 섞여 있으면 클래스 하나만 모아도 전체만큼 넓다. 라벨을 알아도 아끼는 비트가 거의 없다.〕</li>
+<li>[x] B 〔맞음: 클러스터 안의 코딩 레이트가 작아, 전체와 클러스터 안의 차인 코딩 레이트 감소가 크다.〕</li>
+<li>[ ] 알 수 없다. 클러스터 사이의 거리를 재야 한다 〔틀림: 코딩 레이트는 거리가 아니라 방향을 본다. 클러스터끼리 서로 직교할 때 가장 많이 아낀다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-rate-reduction-5">
+<p><strong>물음.</strong> 라벨 없이, 점을 적는 비트와 클러스터마다의 축과 라벨을 적는 비트를 모두 더한 코드 길이가 가장 짧은 나누기를 찾는다. 직선 세 개 근처의 점에서 허용 오차를 키우면 찾은 클러스터 수는 어떻게 되는가?</p>
+<ul>
+<li>[ ] 그대로 셋이다. 자료에 직선이 셋이다 〔틀림: 클러스터 수는 허용 오차가 정한다. 큰 눈금에서는 직선들이 정말 구별되지 않는다.〕</li>
+<li>[x] 둘, 하나로 줄어든다 〔맞음: 눈금이 크면 한 클러스터로 적어도 비트가 크게 늘지 않아, 나누는 데 드는 라벨과 축의 비트가 더 비싸다.〕</li>
+<li>[ ] 허용 오차와 상관없이 하나다. 한 덩어리로 적으면 라벨 비트가 들지 않는다 〔틀림: 클러스터 수를 줄이면 클러스터 안을 적는 비트가 는다. 작은 허용 오차에서는 셋으로 나눈 것이 가장 짧았다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-rate-reduction-6">
+<p><strong>물음.</strong> MCR²로 표현을 학습할 때 점마다 길이를 1로 맞춘다. 그 이유는 무엇인가?</p>
+<ul>
+<li>[x] 묶지 않으면 표현의 배율을 키우기만 해도 코딩 레이트 감소가 커진다 〔맞음: 길이를 맞추면 배율이 아니라 모양으로만 겨루게 된다.〕</li>
+<li>[ ] 클러스터 안을 한 점으로 모으기 위해서다 〔틀림: MCR²는 클러스터마다 맡긴 방향을 다 쓰게 한다. 한 점으로 모으면 클러스터 안의 다양함을 잃는다.〕</li>
+<li>[ ] 이유가 없다. 코딩 레이트 감소는 크기와 상관없다 〔틀림: 배율을 두 배로 할 때마다 감소가 는다. 그래서 크기를 묶어 둔다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>MCR²는 표현이 어디에 놓여야 하는지를 비트로 말해 준다. 점을 직접 움직인 장난감에서는 점의 좌표를 바로 옮겨 세 클러스터를 서로 직교하는 직선 위에 보냈다. 그런데 신경망은 점을 바로 옮기지 못하고, 입력을 층에서 층으로 바꿔 가며 표현을 만든다. 감소를 키우는 그래디언트 스텝 하나하나가 층 하나가 하는 일과 어떤 관계일까? 그리고 클러스터끼리 직교하게, 클러스터 안은 납작하게 놓인 표현에서 원래 자료를 다시 그려 낼 수 있을까? 짧게 적었다는 것만으로는 그 표현이 자료에서 무엇을 남겼는지까지 알 수 없다.</p>
 
