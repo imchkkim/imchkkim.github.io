@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -723,7 +731,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그동안 노이즈에서 그림까지 가는 길은 어떻게 걸었어요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>스코어를 따라 걸으며 스텝마다 노이즈를 다시 넣는 역방향 SDE(레이더 비유의 바람)와, 노이즈 없이 흐르는 확률 플로우 ODE 가 같은 분포 pₜ 를 지났어요. 그런데 확률 플로우 ODE 의 궤적이 휘어 있어서, 처음부터 (그림, 노이즈) 쌍을 잇는 직선 위의 속도를 배우는 플로우 매칭으로 넘어갔고요. 노이즈와 속도와 원래 그림은 같은 정보인데도 무엇을 맞히게 하느냐에 따라 노이즈 레벨마다 배점이 달랐고, 그림이 좁은 면 위에 모여 있으면 원래 그림을 맞히는 출력 꼴이 넓은 신경망을 덜 요구했어요. 몇 스텝에 어떻게 걸을지는 그다음에 샘플러로 따로 정했고요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 마디를 볼까요. 민준 학생이 칸을 하나씩 짚어 봐요.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>steps, sampler_name, scheduler 는 같은 궤적을 몇 스텝에, 어떤 솔버로, 어느 노이즈 크기에 디디며 걸을지예요. cfg 가 1이 아니면 스텝마다 신경망을 두 번 불러요. 조건을 넣은 예측과 빈 조건의 예측을 읽어서 두 예측의 차이를 cfg 배로 키우는 거죠. 그리고 seed 는 출발점의 노이즈니까, seed 만 고정해 두면 스텝 수를 바꿔도 같은 그림이 나와요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>steps, sampler_name, scheduler 는 같은 궤적을 몇 스텝에, 어떤 솔버로, 어느 노이즈 크기에 디디며 걸을지예요. cfg 가 1이 아니면 스텝마다 신경망을 두 번 불러요. 조건을 넣은 예측과 빈 조건의 예측을 읽어서 두 예측의 차이를 cfg 배로 키우는 거죠. 그리고 seed 는 출발점의 노이즈니까, seed 만 고정해 두면 스텝 수를 바꿔도 거의 같은 그림이 나와요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>sampler_name 이 euler_ancestral 이라면요? 시드는 그대로 두고 steps 만 20에서 30으로 바꾸면?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>앤세스트럴은 스텝마다 읽은 노이즈를 덜어 내고 새 노이즈로 채우니까… 스텝 수가 바뀌면 새로 넣는 노이즈도 달라지네요. 같은 시드에서도 다른 그림이 나와요. 출발점이 도착점을 정하는 건 노이즈를 다시 넣지 않는 euler 같은 결정적 솔버일 때고요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그러니까 시드는 뽑을 노이즈를 정할 뿐이고, 그 노이즈를 몇 번 어디에 쓸지는 샘플러와 스텝 수가 정하는 거야.</p></div></div>

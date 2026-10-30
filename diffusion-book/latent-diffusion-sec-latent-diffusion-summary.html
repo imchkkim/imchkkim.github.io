@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -826,6 +834,55 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   E --&gt;|&quot;압축기가 생성의 상한&quot;| F[&quot;채널을 늘린 압축기&lt;br/&gt;16 · 128채널&quot;]
   F --&gt;|&quot;되살리기 ↑ 생성 ↓&quot;| G[&quot;뜻을 담는 잠재&lt;br/&gt;특징 맞추기 · 표현 오토인코더&quot;]
 </pre>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-latent-diffusion-1">
+<p><strong>물음.</strong> Stable Diffusion 1.x 의 압축기는 512 × 512 컬러 그림(칸마다 수 3개)을 64 × 64칸, 칸마다 수 4개로 줄인다. 수는 몇 분의 1이 되는가?</p>
+<ul>
+<li>[ ] 8분의 1 〔틀림: 8은 한 변이 줄어든 비다. 가로와 세로가 함께 줄어 칸 수는 64분의 1이 된다.〕</li>
+<li>[ ] 64분의 1 〔틀림: 칸 수의 비만 셌다. 칸마다 담는 수가 3개에서 4개로 늘었다.〕</li>
+<li>[x] 48분의 1 〔맞음: 칸이 64분의 1로 줄고 칸마다 수가 3개에서 4개가 되어, 64에 4분의 3을 곱한 48분의 1이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-latent-diffusion-2">
+<p><strong>물음.</strong> 잠재 디퓨전에서 디퓨전 모델을 아무리 잘 학습해도 넘을 수 없는 상한은 무엇이 정하는가?</p>
+<ul>
+<li>[x] 압축기가 그림을 줄였다가 되살리는 실력 〔맞음: 압축기를 한 번 왕복한 그림의 질이 생성의 상한이다. 그래서 뒤의 모델들은 압축기의 채널을 늘려 그 상한을 올렸다.〕</li>
+<li>[ ] 상한은 없다. 디퓨전을 잘 배우면 압축기가 지운 세부도 되살아난다 〔틀림: 디퓨전이 만든 잠재는 디코더를 거쳐 그림이 된다. 압축기가 지운 세부는 디코더가 다시 그려 내지 못한다.〕</li>
+<li>[ ] 디퓨전 모델의 학습 스텝 수 〔틀림: 학습을 오래 해도 디코더를 거쳐 나오는 그림은 압축기의 되살리기 실력을 넘지 못한다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-latent-diffusion-3">
+<p><strong>물음.</strong> 칸 배치를 지키는 압축기(수 16,384개)와, 그림 전체를 수 1,024개짜리 벡터 하나로 줄이는 압축기가 있다. 이 책의 U-Net 같은 디퓨전 신경망에는 어느 쪽이 맞는가?</p>
+<ul>
+<li>[ ] 벡터 하나. 수가 16분의 1이라 맞힐 것도 계산도 적다 〔틀림: 수가 적어도 신경망이 읽을 짜임이 없으면 쓸 수 없다. 벡터 하나에는 이웃 칸이 없다.〕</li>
+<li>[x] 칸 배치를 지키는 압축기 〔맞음: U-Net 은 합성곱으로 이웃 칸을 보고 칸을 고친다. 잠재 칸에서 이웃한 칸이 그림에서도 이웃이어야 합성곱이 그대로 통한다.〕</li>
+<li>[ ] 어느 압축기든 상관없다. 담긴 정보의 양이 같으면 된다 〔틀림: 정보의 양보다 먼저, 잠재의 수마다 그림의 어느 자리를 담는지가 남아 있어야 한다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-latent-diffusion-4">
+<p><strong>물음.</strong> Stable Diffusion 1.x 의 잠재는 표준편차가 5 남짓이라, 학습 전에 스케일 값 0.18215 를 곱한다. 곱하지 않으면 무슨 일이 생기는가?</p>
+<ul>
+<li>[ ] 아무 일도 없다. 마지막 스텝은 어차피 거의 노이즈다 〔틀림: 잠재가 크면 마지막 스텝에도 신호가 꽤 남는다. 생성 때 순수한 노이즈에서 출발하면 학습 때 본 적 없는 출발점이 된다.〕</li>
+<li>[ ] 채널마다 표준편차가 달라진다. 스케일 값은 모든 채널을 표준편차 1로 만든다 〔틀림: 수 하나를 곱해서는 채널끼리의 크기 비가 바뀌지 않는다. 곱한 뒤에도 넷째 채널은 0.56이다.〕</li>
+<li>[x] 노이즈가 신호를 덮는 스텝이 끝의 일부로 몰리고, 생성의 출발점이 학습 때 본 마지막 스텝과 달라진다 〔맞음: 노이즈 스케줄은 데이터의 크기가 1 근처라고 정해 놓고 짠 시간표다. 스케일 값은 잠재를 그 크기에 맞춘다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-latent-diffusion-5">
+<p><strong>물음.</strong> 압축기의 채널을 16에서 64로 늘리면 되살리기는 좋아진다. 같은 디퓨전 예산으로 학습하면 생성은 어떻게 되었나?</p>
+<ul>
+<li>[ ] 좋아졌다. 압축기가 생성의 상한이니 상한이 오른 만큼 따라 오른다 〔틀림: 상한은 올랐지만 디퓨전이 맞힐 수가 늘었다. 같은 예산에서는 생성 FID 가 16.24에서 36.83으로 나빠졌다(낮을수록 좋다).〕</li>
+<li>[x] 나빠졌다. 그래서 잠재를 그림의 뜻을 따라 정리하는 손실을 더했다 〔맞음: 되살리기와 생성의 딜레마다. 뜻을 담는 특징에 맞추는 손실을 더하자 채널 64의 FID 가 24.00으로 내려왔다.〕</li>
+<li>[ ] 달라지지 않았다. 채널 수는 압축기의 설정이라 디퓨전과는 상관없다 〔틀림: 채널이 늘면 디퓨전이 맞힐 수가 늘어, 같은 예산에서는 결과가 달라진다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-latent-diffusion-6">
+<p><strong>물음.</strong> 생성한 그림에서 작게 그린 손가락이 무너졌다. 압축기 탓인지 가리려면 어떻게 하는가?</p>
+<ul>
+<li>[ ] 압축기를 다른 것으로 바꿔 같은 프롬프트로 다시 뽑아 본다 〔틀림: 디퓨전은 압축기의 잠재 위에서 배웠다. 압축기를 바꾸면 디퓨전도 다시 학습해야 한다.〕</li>
+<li>[x] 손가락이 같은 크기로 나온 진짜 그림을 압축기에 넣었다 꺼내 본다 〔맞음: 진짜 그림을 한 번 왕복시키면 압축기만 따로 잴 수 있다. 작은 손가락과 글자는 왕복만으로도 무너질 수 있다.〕</li>
+<li>[ ] 디퓨전 스텝 수를 늘려 다시 뽑아 본다 〔틀림: 스텝을 늘려도 디코더를 거치는 것은 같다. 압축기가 되살리지 못하는 세부는 여전히 나오지 않는다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>이제 512 × 512 그림을 64 × 64칸에서 만든다. U-Net 한 번이 픽셀에서보다 수백 배 가벼워졌고, 그 덕에 큰 그림도 손에 닿는 계산으로 뽑는다.</p>
 <p>그런데 사람들이 바라는 그림은 계속 커진다. 1024 × 1024 그림의 잠재는 128 × 128 = 16,384칸이고, 칸끼리 서로 읽는 쌍은 2억 개가 넘는다. 1024 × 1024 그림을 만드는 SDXL 의 U-Net 은 그래서 가장 고운 128 × 128칸 단계에는 어텐션을 두지 않고 합성곱으로 이웃만 보았다. 멀리 보는 일을 점점 어텐션에 맡기는 흐름이라면, 합성곱 단계를 아예 걷어 내고 어텐션만으로 잠재를 읽을 수는 없을까? 그렇다면 16,384칸을 어떻게 다뤄야 쌍의 수가 감당될까? 압축 배율을 더 키우면 되살리기가 무너지는데, 칸을 줄이는 일을 압축기 말고 신경망 쪽에서 할 수는 없을까?</p>

@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -765,12 +773,12 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <tr>
 <td>노이즈 한 스텝의 크기를 시간 간격에 비례하게 둠</td>
 <td>2</td>
-<td>그러면 스텝을 잘게 나눌수록 노이즈가 사라진다. 한 스텝의 분산이 시간 간격에 비례해야 하므로 크기는 √Δt에 비례한다</td>
+<td>그러면 스텝을 잘게 나눌수록 노이즈가 사라진다. 한 스텝의 분산이 시간 간격에 비례해야 하므로 크기는 √<span class="sym" style="color:#006600">Δt</span>에 비례한다</td>
 </tr>
 <tr>
-<td>픽셀마다 σ인 노이즈이면 그림 전체도 σ쯤 움직인다고 봄</td>
+<td>픽셀마다 <span class="sym" style="color:#4c5d80">σ</span>인 노이즈이면 그림 전체도 <span class="sym" style="color:#4c5d80">σ</span>쯤 움직인다고 봄</td>
 <td>토론 2</td>
-<td>d개 숫자의 거리는 σ√d다. 3072차원에서 σ = 1이면 원래 그림에서 55.4 떨어진 얇은 껍질 위에 놓인다</td>
+<td><span class="sym" style="color:#3c4bff">d</span>개 숫자의 거리는 <span class="sym" style="color:#4c5d80">σ</span>√<span class="sym" style="color:#3c4bff">d</span>다. 3072차원에서 <span class="sym" style="color:#4c5d80">σ</span> = 1이면 원래 그림에서 55.4 떨어진 얇은 껍질 위에 놓인다</td>
 </tr>
 <tr>
 <td>그림과 노이즈를 더한 벡터의 길이를 길이끼리 더해 구함</td>
@@ -780,7 +788,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <tr>
 <td>두 점의 봉우리가 종의 폭이 두 점 사이 거리만큼 넓어져야 합쳐진다고 봄</td>
 <td>5</td>
-<td>한가운데의 두 번 미분이 0이 되는 때로 정해진다. 두 점 ±2이면 σ = 2, 각 점에서 한가운데까지의 거리다</td>
+<td>한가운데의 두 번 미분이 0이 되는 때로 정해진다. 두 점 ±2이면 <span class="sym" style="color:#4c5d80">σ</span> = 2, 각 점에서 한가운데까지의 거리다</td>
 </tr>
 <tr>
 <td>블러와 노이즈 섞기를 같은 일로 봄</td>
@@ -790,7 +798,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <tr>
 <td>무늬가 n배 가늘면 n배 빨리 지워진다고 봄</td>
 <td>8</td>
-<td>배율의 지수에 k²가 들어 있다. 파장이 5분의 1이면 같은 만큼 지워지는 시간은 약 25분의 1이다</td>
+<td>배율의 지수에 <span class="sym" style="color:#008787">k</span>²가 들어 있다. 파장이 5분의 1이면 같은 만큼 지워지는 시간은 약 25분의 1이다</td>
 </tr>
 <tr>
 <td>노이즈가 모든 픽셀에 고르게 섞였으니 모든 무늬가 똑같이 망가진다고 봄</td>
@@ -798,24 +806,24 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <td>노이즈의 파워는 파장마다 같지만 그림의 파워는 가는 무늬(짧은 파장)일수록 약하다. 가는 무늬부터 묻힌다</td>
 </tr>
 <tr>
-<td>진하기(신호로 나눈 노이즈 크기)를 양(α, σ의 크기)으로 비교함</td>
+<td>진하기(신호로 나눈 노이즈 크기)를 양(<span class="sym" style="color:#4c5d80">α</span>, <span class="sym" style="color:#4c5d80">σ</span>의 크기)으로 비교함</td>
 <td>토론 3</td>
-<td>알아볼 수 있는 정도는 σ/α 하나가 정한다. α로 나누면 모든 일정이 분산 폭발의 꼴이 된다</td>
+<td>알아볼 수 있는 정도는 <span class="sym" style="color:#4c5d80">σ</span>/<span class="sym" style="color:#4c5d80">α</span> 하나가 정한다. <span class="sym" style="color:#4c5d80">α</span>로 나누면 모든 일정이 분산 폭발의 꼴이 된다</td>
 </tr>
 <tr>
 <td>직선 일정도 분산을 지킨다고 봄</td>
 <td>11</td>
-<td>분산은 α² + σ²다. 직선 일정은 t = 0.5에서 분산이 0.5로 줄어든다</td>
+<td>분산은 <span class="sym" style="color:#4c5d80">α</span>² + <span class="sym" style="color:#4c5d80">σ</span>²다. 직선 일정은 <span class="sym" style="color:#a67a63">t</span> = 0.5에서 분산이 0.5로 줄어든다</td>
 </tr>
 <tr>
-<td>마지막 스텝의 β만 보고 그림이 많이 남았다고 봄</td>
+<td>마지막 스텝의 <span class="sym" style="color:#4c5d80">β</span>만 보고 그림이 많이 남았다고 봄</td>
 <td>12</td>
-<td>남는 비율은 모든 스텝의 (1 − β)를 곱한 것이다. DDPM은 마지막에 0.64%만 남는다</td>
+<td>남는 비율은 모든 스텝의 (1 − <span class="sym" style="color:#4c5d80">β</span>)를 곱한 것이다. DDPM은 마지막에 0.64%만 남는다</td>
 </tr>
 <tr>
 <td>마지막 스텝에 남은 그림은 픽셀마다 노이즈에 묻히니 상관없다고 봄</td>
 <td>토론 2</td>
-<td>픽셀 d개를 평균 내면 노이즈는 1/√d로 줄지만 밝기 신호는 줄지 않는다. SD 1.x 마지막 스텝에서 밝기 분산의 75%가 읽히고, 순수 노이즈에서 만든 그림은 밝기 폭이 절반(0.199)이 된다</td>
+<td>픽셀 <span class="sym" style="color:#3c4bff">d</span>개를 평균 내면 노이즈는 1/√<span class="sym" style="color:#3c4bff">d</span>로 줄지만 밝기 신호는 줄지 않는다. SD 1.x 마지막 스텝에서 밝기 분산의 75%가 읽히고, 순수 노이즈에서 만든 그림은 밝기 폭이 절반(0.199)이 된다</td>
 </tr>
 <tr>
 <td>제로 터미널 SNR 일정에도 노이즈를 맞히는 출력을 그대로 씀</td>
@@ -830,7 +838,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </tbody>
 </table></div>
 <h3 id="요약">요약</h3>
-<p>그림에 서로 상관없는 정규분포 노이즈를 여러 번 더하면 분산이 더해진다. 그래서 노이즈를 잘게 나눠 쌓아도 한 번에 섞어도 같은 분포가 나오고, 학습 코드는 노이즈 레벨을 뽑아 한 번만 섞는다. 이 장의 기본 일정에서 노이즈는 xₜ = x₀ + σₜε, σₜ² = 2Dt로 쌓인다. 그림들을 모아 놓은 분포는 이웃 평균의 연속 극한인 열 방정식 ∂pₜ/∂t = D∇²pₜ를 따라 퍼지고, 그 답은 데이터의 점마다 가우시안 종을 씌워 더한 것(데이터 분포와 정규분포의 합성곱)이다. 분포를 물결무늬로 쪼개면 파수 k인 무늬가 e^(−Dk²t)배로 줄어들어, 파수가 큰 촘촘한 구조가 먼저 지워지고 파수가 작은 굵은 구조가 가장 오래 남는다. 그림 한 장에서도, 파워 스펙트럼이 평평한 노이즈 아래 내리막인 그림의 공간 주파수가 높은 가는 무늬가 먼저 묻힌다. 그래서 노이즈 레벨마다 살아남는 대역이 다르다. 짙은 노이즈에는 구도만, 옅은 노이즈에는 머리카락 같은 가는 무늬까지 남아, 노이즈 레벨이 그림의 특징을 공간 주파수별로 갈라 놓는다. 노이즈 스케줄은 xₜ = αₜx₀ + σₜε의 αₜ와 σₜ를 정하는 시간표이고, 분산 폭발·분산 보존·직선 일정은 αₜ로 나누면 모두 노이즈 크기가 σₜ/αₜ(신호로 나눈 노이즈 크기)인 분산 폭발의 꼴이 된다. 흔히 쓰는 일정은 마지막 스텝에도 그림을 조금 남겨(SD 1.x 에서 αₜ = 0.068), 픽셀을 모두 평균 낸 밝기 같은 가장 굵은 무늬가 새어 나간다. 순수 노이즈에서 출발하는 생성과 어긋나지 않으려면 일정을 제로 터미널 SNR로 맞추고, 샘플러도 마지막 스텝에서 출발해야 한다.</p>
+<p>그림에 서로 상관없는 정규분포 노이즈를 여러 번 더하면 분산이 더해진다. 그래서 노이즈를 잘게 나눠 쌓아도 한 번에 섞어도 같은 분포가 나오고, 학습 코드는 노이즈 레벨을 뽑아 한 번만 섞는다. 이 장의 기본 일정에서 노이즈는 <span class="sym" style="color:#1b9e77">xₜ</span> = <span class="sym" style="color:#1b9e77">x₀</span> + <span class="sym" style="color:#4c5d80">σₜ</span><span class="sym" style="color:#1f6066">ε</span>, <span class="sym" style="color:#4c5d80">σₜ</span>² = 2<span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#a67a63">t</span>로 쌓인다. 그림들을 모아 놓은 분포는 이웃 평균의 연속 극한인 열 방정식 ∂pₜ/∂<span class="sym" style="color:#a67a63">t</span> = <span class="sym" style="color:#8787ff">D</span>∇²<span class="sym" style="color:#c2408a">pₜ</span>를 따라 퍼지고, 그 답은 데이터의 점마다 가우시안 종을 씌워 더한 것(데이터 분포와 정규분포의 합성곱)이다. 분포를 물결무늬로 쪼개면 파수 <span class="sym" style="color:#008787">k</span>인 무늬가 e^(−<span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#008787">k</span>²<span class="sym" style="color:#a67a63">t</span>)배로 줄어들어, 파수가 큰 촘촘한 구조가 먼저 지워지고 파수가 작은 굵은 구조가 가장 오래 남는다. 그림 한 장에서도, 파워 스펙트럼이 평평한 노이즈 아래 내리막인 그림의 공간 주파수가 높은 가는 무늬가 먼저 묻힌다. 그래서 노이즈 레벨마다 살아남는 대역이 다르다. 짙은 노이즈에는 구도만, 옅은 노이즈에는 머리카락 같은 가는 무늬까지 남아, 노이즈 레벨이 그림의 특징을 공간 주파수별로 갈라 놓는다. 노이즈 스케줄은 <span class="sym" style="color:#1b9e77">xₜ</span> = <span class="sym" style="color:#4c5d80">αₜ</span><span class="sym" style="color:#1b9e77">x₀</span> + <span class="sym" style="color:#4c5d80">σₜ</span><span class="sym" style="color:#1f6066">ε</span>의 <span class="sym" style="color:#4c5d80">αₜ</span>와 <span class="sym" style="color:#4c5d80">σₜ</span>를 정하는 시간표이고, 분산 폭발·분산 보존·직선 일정은 <span class="sym" style="color:#4c5d80">αₜ</span>로 나누면 모두 노이즈 크기가 <span class="sym" style="color:#4c5d80">σₜ</span>/<span class="sym" style="color:#4c5d80">αₜ</span>(신호로 나눈 노이즈 크기)인 분산 폭발의 꼴이 된다. 흔히 쓰는 일정은 마지막 스텝에도 그림을 조금 남겨(SD 1.x 에서 <span class="sym" style="color:#4c5d80">αₜ</span> = 0.068), 픽셀을 모두 평균 낸 밝기 같은 가장 굵은 무늬가 새어 나간다. 순수 노이즈에서 출발하는 생성과 어긋나지 않으려면 일정을 제로 터미널 SNR로 맞추고, 샘플러도 마지막 스텝에서 출발해야 한다.</p>
 <pre class="mermaid">flowchart LR
   A[&quot;노이즈 한 스텝&lt;br/&gt;x + √(2DΔt)·ε&quot;] --&gt;|&quot;분산이 더해진다&quot;| B[&quot;한 번에 섞기&lt;br/&gt;xₜ = x₀ + σₜε, σₜ² = 2Dt&quot;]
   B --&gt;|&quot;분포로 모으면&quot;| C[&quot;열 방정식&lt;br/&gt;∂pₜ/∂t = D∇²pₜ&quot;]
@@ -839,8 +847,57 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   B --&gt;|&quot;αₜ로 나누면&quot;| E[&quot;노이즈 스케줄&lt;br/&gt;분산 폭발 · 분산 보존 · 직선&lt;br/&gt;= σₜ/αₜ 하나로 읽는다&quot;]
   E --&gt;|&quot;마지막 스텝에서&quot;| G[&quot;제로 터미널 SNR&lt;br/&gt;α_T = 0: 학습의 끝 = 생성의 출발&quot;]
 </pre>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-noising-1">
+<p><strong>물음.</strong> 그림에 표준편차 3인 정규분포 노이즈를 더하고, 그 위에 서로 상관없는 표준편차 4인 노이즈를 또 더했다. 합친 노이즈의 표준편차는?</p>
+<ul>
+<li>[ ] 7 〔틀림: 표준편차가 그대로 더해지는 것은 두 노이즈가 늘 같은 쪽으로 움직일 때뿐이다.〕</li>
+<li>[ ] 25 〔틀림: 25는 합친 분산이다. 표준편차는 그 제곱근이다.〕</li>
+<li>[x] 5 〔맞음: 서로 상관없는 노이즈는 분산이 더해진다. 9와 16을 더한 25의 제곱근이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-noising-2">
+<p><strong>물음.</strong> 숫자 3072개로 된 그림(32 × 32 컬러)의 숫자마다 표준편차 1인 노이즈를 따로 더했다. 노이즈를 섞은 그림은 원래 그림에서 얼마나 떨어지는가?</p>
+<ul>
+<li>[ ] 1쯤 〔틀림: 1은 숫자 하나가 움직인 정도다. 3072개가 모두 따로 움직이면 그림 전체의 거리는 훨씬 길다.〕</li>
+<li>[x] 55쯤 〔맞음: 숫자마다 움직인 거리의 제곱이 더해져 거리의 제곱이 3072쯤 되고, 그 제곱근이 55.4다.〕</li>
+<li>[ ] 3072쯤 〔틀림: 3072는 거리의 제곱이다. 거리는 그 제곱근이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-noising-3">
+<p><strong>물음.</strong> 노이즈를 섞어 그림들의 분포가 퍼질 때, 파장이 5분의 1인 촘촘한 무늬는 같은 만큼 지워지는 데 시간이 얼마나 걸리는가?</p>
+<ul>
+<li>[x] 약 25분의 1 〔맞음: 촘촘한 구조일수록 훨씬 빨리 지워지고, 굵은 구조가 가장 오래 남는다.〕</li>
+<li>[ ] 5분의 1 〔틀림: 줄어드는 배율의 지수에 파수의 제곱이 들어 있다. 파장이 5분의 1이면 파수는 다섯 배이고 그 제곱은 25다.〕</li>
+<li>[ ] 같다. 노이즈는 모든 무늬에 똑같이 걸린다 〔틀림: 열 방정식을 따라 퍼지면 같은 시간 동안 줄어드는 배율이 무늬의 파수마다 다르다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-noising-4">
+<p><strong>물음.</strong> 사진 한 장에 노이즈를 점점 짙게 섞는다. 무엇부터 묻혀 알아볼 수 없게 되는가?</p>
+<ul>
+<li>[ ] 노이즈가 모든 픽셀에 고르게 섞였으니 모든 무늬가 함께 묻힌다 〔틀림: 노이즈의 파워는 공간 주파수마다 같지만, 그림의 파워는 가는 무늬(높은 공간 주파수)일수록 약하다.〕</li>
+<li>[x] 머리카락 같은 가는 무늬부터 묻히고, 구도는 가장 오래 남는다 〔맞음: 평평한 노이즈 아래 그림의 내리막 파워가 높은 공간 주파수부터 잠긴다. 그래서 노이즈 레벨마다 살아남는 대역이 다르다.〕</li>
+<li>[ ] 구도 같은 굵은 무늬부터 묻힌다 〔틀림: 굵은 무늬는 그림의 파워가 가장 큰 대역이라 노이즈에 가장 늦게 묻힌다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-noising-5">
+<p><strong>물음.</strong> 두 노이즈 스케줄이 어느 시점에서 노이즈 크기는 같고 남은 그림의 크기는 다르다. 두 그림은 똑같이 알아보기 어려운가?</p>
+<ul>
+<li>[ ] 같다. 노이즈 크기가 같으니까 〔틀림: 남은 그림이 작으면 같은 노이즈에도 더 깊이 묻힌다.〕</li>
+<li>[ ] 다르다. 남은 그림의 크기만 보면 된다 〔틀림: 노이즈 크기도 함께 봐야 한다. 두 크기의 비가 진하기를 정한다.〕</li>
+<li>[x] 다르다. 알아볼 수 있는 정도는 노이즈 크기를 남은 그림의 크기로 나눈 값 하나가 정한다 〔맞음: 남은 그림의 크기로 나누면 모든 일정이 분산 폭발의 꼴로 바뀌어, 그 나눈 값 하나로 견줄 수 있다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-noising-6">
+<p><strong>물음.</strong> SD 1.x의 노이즈 스케줄은 마지막 스텝에도 원래 그림을 조금 남긴다. 생성은 순수한 노이즈에서 출발한다. 무엇을 고쳐야 하는가?</p>
+<ul>
+<li>[ ] 고칠 것이 없다. 남은 그림은 픽셀마다 노이즈에 묻힌다 〔틀림: 픽셀을 모두 평균 내면 노이즈는 줄지만 밝기 신호는 줄지 않는다. 학습한 모델은 그 밝기를 읽어 왔다.〕</li>
+<li>[ ] 스케줄만 제로 터미널 SNR로 고치면 된다 〔틀림: 샘플러가 마지막 스텝에서 출발하지 않으면 남은 그림이 있는 스텝에서 출발하게 되어 밝기 폭이 다시 줄어든다.〕</li>
+<li>[x] 스케줄을 제로 터미널 SNR로 맞추고, 신경망이 노이즈 대신 v를 맞히게 하고, 샘플러도 마지막 스텝에서 출발하게 한다 〔맞음: 학습의 끝과 생성의 출발이 같아야 밝기 같은 가장 굵은 무늬가 어긋나지 않는다. 마지막 스텝의 입력은 노이즈 그 자체라, 노이즈를 맞히는 출력으로는 원래 그림을 되돌릴 수 없다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
-<p>이제 그림을 망가뜨리는 순방향 과정은 완전히 안다. 어느 노이즈 레벨이든 xₜ = x₀ + σₜε 한 줄로 바로 만들 수 있고, 그 과정에서 분포가 어떤 규칙으로 퍼지며 무엇이 먼저 지워지는지도 안다. 디노이저가 믿던 「σ 만큼 망가진 그림」은 순방향 과정의 한 시점이었고, 노이즈 레벨마다 그림에 살아남는 대역이 달랐다. 짙은 노이즈 아래에는 구도와 큰 덩어리만, 옅은 노이즈 아래에는 공간 주파수가 높은 가는 무늬까지 남는다.</p>
+<p>이제 그림을 망가뜨리는 순방향 과정은 완전히 안다. 어느 노이즈 레벨이든 <span class="sym" style="color:#1b9e77">xₜ</span> = <span class="sym" style="color:#1b9e77">x₀</span> + <span class="sym" style="color:#4c5d80">σₜ</span><span class="sym" style="color:#1f6066">ε</span> 한 줄로 바로 만들 수 있고, 그 과정에서 분포가 어떤 규칙으로 퍼지며 무엇이 먼저 지워지는지도 안다. 디노이저가 믿던 「<span class="sym" style="color:#4c5d80">σ</span> 만큼 망가진 그림」은 순방향 과정의 한 시점이었고, 노이즈 레벨마다 그림에 살아남는 대역이 달랐다. 짙은 노이즈 아래에는 구도와 큰 덩어리만, 옅은 노이즈 아래에는 공간 주파수가 높은 가는 무늬까지 남는다.</p>
 <p>그렇다면 순방향 과정을 거꾸로 걷는 신경망은 한 몸으로 두 가지 일을 해야 한다. 노이즈가 짙을 때는 살아남은 굵은 대역만 보고 그림 전체의 모양을 짐작해야 하고, 노이즈가 옅을 때는 칸 하나하나의 가는 무늬를 정확히 다듬어야 한다. 그런데 작은 합성곱 커널을 그림 크기 그대로 쌓으면 출력 한 칸이 실제로 기대는 폭이 층 수의 제곱근으로만 넓어졌다. 굵은 대역은 넓게, 가는 대역은 촘촘히 읽는 신경망을 어떻게 짤까? 라플라시안 피라미드가 그림을 대역마다 나눠 적었듯, 신경망도 대역마다 나눠 읽을 수는 없을까? 그리고 지금 어느 노이즈 레벨인지는 숫자 하나인데, 그 숫자를 칸마다 같은 커널을 쓰는 신경망의 어디에 넣어야 할까?</p>
 
 </article>

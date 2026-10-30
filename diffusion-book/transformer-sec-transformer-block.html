@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -748,7 +756,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래서 앞 정규화 블록은 정규화한 것을 어텐션과 MLP 에만 보내고, 줄기에는 정규화 전의 값을 그대로 둬요. 지운 높이와 크기도 줄기에는 남아 있어요.</p></div></div>
 </div><div class="dialogue"><h3 id="prob-transformer-residual-growth">문제 10. 잔차 줄기는 얼마나 자라는가<span id="문제-10-잔차-줄기는-얼마나-자라는가" class="anchor-alias"></span></h3>
 <blockquote>
-<p>앞 정규화 블록에서 줄기는 h<sup>(ℓ)</sup> = h<sup>(ℓ−1)</sup> + (어텐션·MLP 의 출력)으로 자란다. 길이 1인 출발 벡터에, 블록마다 길이 1이고 방향이 무작위인 벡터(256차원)를 더한다고 하자. (가) 블록 1, 4, 16, 36개를 지난 뒤 줄기의 길이는 대략 얼마인가? (나) 블록 안의 어텐션·MLP 는 정규화한 입력을 받는다. 줄기가 길어지면 블록 하나가 줄기를 바꾸는 비율은 어떻게 되는가? (다) 「블록이 더하는 벡터가 무작위 방향」이라는 가정이 깨지면?</p>
+<p>앞 정규화 블록에서 줄기는 <span class="sym" style="color:#a5003c">h</span><sup>(ℓ)</sup> = <span class="sym" style="color:#a5003c">h</span><sup>(ℓ−1)</sup> + (어텐션·MLP 의 출력)으로 자란다. 길이 1인 출발 벡터에, 블록마다 길이 1이고 방향이 무작위인 벡터(256차원)를 더한다고 하자. (가) 블록 1, 4, 16, 36개를 지난 뒤 줄기의 길이는 대략 얼마인가? (나) 블록 안의 어텐션·MLP 는 정규화한 입력을 받는다. 줄기가 길어지면 블록 하나가 줄기를 바꾸는 비율은 어떻게 되는가? (다) 「블록이 더하는 벡터가 무작위 방향」이라는 가정이 깨지면?</p>
 </blockquote>
 <figure class="fig "><img src="images/transformer/p10_residual.png" alt="길이 1인 출발 줄기에 블록마다 길이 1, 무작위 방향 벡터를 더하는 앞 정규화 블록의 줄기. 스크립트 sources/transformer/problems_figs.py" loading="lazy"><figcaption>길이 1인 출발 줄기에 블록마다 길이 1, 무작위 방향 벡터를 더하는 앞 정규화 블록의 줄기. 스크립트 sources/transformer/problems_figs.py</figcaption></figure>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>서로 상관없는 방향을 더하면 길이의 제곱이 더해지니까, 블록 L개 뒤에는 √(L + 1)일 것 같아. 1, 4, 16, 36이면 √2, √5, √17, √37.</p></div></div>

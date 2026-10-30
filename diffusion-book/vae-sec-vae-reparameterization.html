@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -703,7 +711,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="vae.html">VAE: 잠재 변수를 분포로 뽑아 그리기</a></p>
 <h2 id="sec-vae-reparameterization">재파라미터화: 뽑기를 거쳐 미분하기<span id="재파라미터화-뽑기를-거쳐-미분하기" class="anchor-alias"></span></h2>
-<p>VAE의 손실에는 「인코더 분포 q<sub>φ</sub>(z ∣ x)에서 잠재 변수를 하나 뽑는다」는 단계가 들어 있다. 손실을 줄이려면 인코더의 파라미터 <span class="sym" style="color:#665522">φ</span>로 손실을 미분해야 하는데, 역전파가 뽑기 단계를 어떻게 지나갈까? 실제로 코드에서 <code>z = torch.normal(mu, sd)</code> 처럼 그 분포에서 바로 뽑으면 mu 와 sd 에는 그래디언트가 흐르지 않는다. 주사위를 던진 결과를 주사위의 무게중심으로 미분할 수는 없는 것처럼 보인다.</p>
+<p>VAE의 손실에는 「인코더 분포 <span class="sym" style="color:#ff5a78">q<sub>φ</sub></span>(<span class="sym" style="color:#8c564b">z</span> ∣ <span class="sym" style="color:#1b9e77">x</span>)에서 잠재 변수를 하나 뽑는다」는 단계가 들어 있다. 손실을 줄이려면 인코더의 파라미터 <span class="sym" style="color:#665522">φ</span>로 손실을 미분해야 하는데, 역전파가 뽑기 단계를 어떻게 지나갈까? 실제로 코드에서 <code>z = torch.normal(mu, sd)</code> 처럼 그 분포에서 바로 뽑으면 mu 와 sd 에는 그래디언트가 흐르지 않는다. 주사위를 던진 결과를 주사위의 무게중심으로 미분할 수는 없는 것처럼 보인다.</p>
 <p>한계 ②에서 바란 것은 무작위 요소를 쉽게 정의하는 것이었고, 새 그림을 뽑을 때의 무작위는 N(0, I) 하나로 정했다. 그런데 학습 안의 무작위는 그림마다 다른 인코더 분포, 곧 인코더의 파라미터에 따라 모양이 바뀌는 분포에서 뽑는다. 이 무작위도 N(0, I)처럼 쉽게 정의된 꼴로 다시 적을 수 있다면, 뽑기를 거쳐서도 미분이 지나가지 않을까?</p>
 <h3 id="장난감-평균을-옮기면-결과가-어떻게-바뀌나">장난감: 평균을 옮기면 결과가 어떻게 바뀌나</h3>
 <p>계산이 손으로 되는 가장 작은 경우로 보자. 잠재 변수 하나가 정규분포 N(<span class="sym" style="color:#87965a">μ</span>, <span class="sym" style="color:#874b0f">σ</span>²)에서 뽑히고, 손실은 f(<span class="sym" style="color:#8c564b">z</span>) = (<span class="sym" style="color:#8c564b">z</span> − 3)²이라 하자. 평균 손실은 E[(<span class="sym" style="color:#8c564b">z</span> − 3)²] = (<span class="sym" style="color:#87965a">μ</span> − 3)² + <span class="sym" style="color:#874b0f">σ</span>²이라 <span class="sym" style="color:#87965a">μ</span>로 미분하면 2(<span class="sym" style="color:#87965a">μ</span> − 3)이고, <span class="sym" style="color:#87965a">μ</span> = 1, <span class="sym" style="color:#874b0f">σ</span> = 1이면 −4다. 이 −4를 샘플만으로 추정하고 싶다.</p>
@@ -725,7 +733,7 @@ f &amp; \text{잠재 변수를 받아 손실을 내는 함수}
 <h3 id="로그-미분과-비교하기">로그 미분과 비교하기</h3>
 <p>뽑기를 거쳐 미분하는 방법은 하나 더 있다. 분포의 로그 확률을 파라미터로 미분해 손실에 곱하는 방법이다(로그 미분, 또는 스코어 함수 추정). 로그 미분은 f를 미분하지 않아도 되고 <span class="sym" style="color:#8c564b">z</span>가 띄엄띄엄한 값이어도 쓸 수 있어서, 윌리엄스(Ronald Williams)가 1992년에 강화학습의 REINFORCE 알고리즘으로 정리한 뒤 널리 쓰였다. 같은 −4를 재파라미터화와 로그 미분으로 샘플 하나씩 추정해 보자.</p>
 <figure class="fig "><img src="images/vae/reparam_hist.png" alt="f(z) = (z − 3)², z ~ N(1, 1)에서 ∂/∂μ 를 샘플 하나로 추정한 값 20만 개의 분포. 두 방법 모두 평균은 참값 −4에 맞지만(재파라미터화 −3.998, 로그 미분 −4.000), 재파라미터화는 참값 둘레에 좁게(표준편차 2.0), 로그 미분은 넓고 한쪽으로 긴 꼬리를 끌며(표준편차 9.3) 흩어진다. 가로축 −30 ~ 30 밖의 값은 그리지 않았다." loading="lazy"><figcaption>f(z) = (z − 3)², z ~ N(1, 1)에서 ∂/∂μ 를 샘플 하나로 추정한 값 20만 개의 분포. 두 방법 모두 평균은 참값 −4에 맞지만(재파라미터화 −3.998, 로그 미분 −4.000), 재파라미터화는 참값 둘레에 좁게(표준편차 2.0), 로그 미분은 넓고 한쪽으로 긴 꼬리를 끌며(표준편차 9.3) 흩어진다. 가로축 −30 ~ 30 밖의 값은 그리지 않았다.</figcaption></figure>
-<p>둘 다 평균은 맞고, 차이는 추정값의 표준편차에 있다. 샘플 하나의 표준편차가 재파라미터화는 2.00, 로그 미분은 9.34이고, 샘플 100개를 평균 내도 0.200 대 0.934다. 로그 미분으로 재파라미터화만큼 정확하게 추정하려면 샘플이 (9.34 / 2.00)² ≈ 22배 필요하다. 재파라미터화가 f의 미분값 f′(z)라는 정보를 더 쓰기 때문이다. 로그 미분은 「이 샘플의 손실이 컸는가 작았는가」만 보고, 재파라미터화는 「<span class="sym" style="color:#8c564b">z</span>를 조금 옮기면 손실이 어느 쪽으로 바뀌는가」까지 본다.</p>
+<p>둘 다 평균은 맞고, 차이는 추정값의 표준편차에 있다. 샘플 하나의 표준편차가 재파라미터화는 2.00, 로그 미분은 9.34이고, 샘플 100개를 평균 내도 0.200 대 0.934다. 로그 미분으로 재파라미터화만큼 정확하게 추정하려면 샘플이 (9.34 / 2.00)² ≈ 22배 필요하다. 재파라미터화가 f의 미분값 f′(<span class="sym" style="color:#8c564b">z</span>)라는 정보를 더 쓰기 때문이다. 로그 미분은 「이 샘플의 손실이 컸는가 작았는가」만 보고, 재파라미터화는 「<span class="sym" style="color:#8c564b">z</span>를 조금 옮기면 손실이 어느 쪽으로 바뀌는가」까지 본다.</p>
 <h3 id="ml에서-코드-한-줄">ML에서: 코드 한 줄</h3>
 <p>VAE 코드에서 재파라미터화는 한 줄이다: <code>z = mu + torch.exp(0.5 * logvar) * torch.randn_like(mu)</code>. 표준편차는 늘 양수여야 하는데 신경망 출력은 음수도 될 수 있기 때문에, 인코더는 표준편차 대신 로그 분산(logvar)을 내놓고 그 로그 분산을 지수에 넣어 양수로 바꾼다. 「평균 + 크기 × 표준정규 노이즈」이라는 이 꼴은 이 책에서 그림에 노이즈를 섞을 때마다 다시 나온다.</p>
 <div class="dialogue"><h3 id="prob-autoencoder-bus-timetable">문제 9. 버스 시간표를 옮기면<span id="문제-9-버스-시간표를-옮기면" class="anchor-alias"></span></h3>
@@ -761,7 +769,7 @@ f &amp; \text{잠재 변수를 받아 손실을 내는 함수}
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>바꿔 쓰기는 됐는데 미분이 안 지나가. 버스 문제에서는 시간표를 1분 옮기면 도착도 1분 옮겨 갔는데, 동전은 확률을 조금 옮겨도 결과가 뛰기 전까지는 꿈쩍도 안 해.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(다)는요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p><span class="sym" style="color:#8c564b">z</span>가 파라미터에 대해 매끄럽게, 미분할 수 있게 움직여야 해요. 그리고 손실도 <span class="sym" style="color:#8c564b">z</span>로 미분할 수 있어야 하고요. 연속인 잠재 변수와 미분되는 디코더가 두 조건을 채워서 VAE에서는 통했던 거예요. 동전처럼 띄엄띄엄한 잠재 변수에는 로그 미분 같은 다른 방법이 필요하고요.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>0.1 kg 단위로만 보여 주는 체중계랑 같네요. 50 g 쪄도 숫자가 안 바뀌다가 어느 순간 0.1이 뛰니까, 조금씩 바뀐 걸 숫자로는 알 수가 없어요. 몸무게가 π, 체중계에 뜨는 숫자가 z 예요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>0.1 kg 단위로만 보여 주는 체중계랑 같네요. 50 g 쪄도 숫자가 안 바뀌다가 어느 순간 0.1이 뛰니까, 조금씩 바뀐 걸 숫자로는 알 수가 없어요. 몸무게가 π, 체중계에 뜨는 숫자가 <span class="sym" style="color:#8c564b">z</span> 예요.</p></div></div>
 </div>
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="vae-sec-vae-prior-gathering.html">&larr; VAE: 인코더 분포를 사전분포 안으로 모으기</a><span class="page-count">4 / 9</span><a class="chapter-nav-next" href="vae-sec-vae-elbo-bound.html">ELBO: 잴 수 없는 로그우도의 하한 &rarr;</a></nav>

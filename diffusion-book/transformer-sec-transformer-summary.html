@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -838,6 +846,55 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   E --&gt;|&quot;글을 읽어야 한다&quot;| F[&quot;크로스 어텐션&lt;br/&gt;질의는 그림, 열쇠·값은 글&quot;]
   E --&gt;|&quot;한 토큰씩 이어 쓴다&quot;| G[&quot;가림 + KV 캐시&quot;]
 </pre>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-transformer-1">
+<p><strong>물음.</strong> 지난 메시지 넷에 대한 어텐션 점수가 3, 3, 0, 0이다. 어텐션이 읽어 오는 값은 무엇인가?</p>
+<ul>
+<li>[ ] 점수가 3인 메시지 둘 가운데 하나의 값 〔틀림: 어텐션은 하나를 골라 오지 않는다. 점수가 같은 두 메시지가 비중을 거의 반씩 나눠 가진다.〕</li>
+<li>[x] 네 메시지의 값을 소프트맥스 비중대로 섞은 것. 점수 3인 둘이 거의 반씩 차지한다 〔맞음: 소프트맥스 비중으로 모두를 섞는다. 점수가 비슷한 토큰이 여럿이면 어느 토큰에도 없는 값을 읽어 온다.〕</li>
+<li>[ ] 네 메시지의 값을 똑같이 4분의 1씩 섞은 것 〔틀림: 점수 차이가 비중을 정한다. 점수 0인 두 메시지의 비중은 2%를 조금 넘을 뿐이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-transformer-2">
+<p><strong>물음.</strong> 질의와 열쇠의 내적을 √d_k 로 나눈 뒤 소프트맥스를 씌운다. 나누는 목적은 무엇인가?</p>
+<ul>
+<li>[ ] 나누지 않는 편이 낫다. 점수가 클수록 확실하게 고른다 〔틀림: 처음부터 한 토큰으로 99.97%까지 쏠리면 그래디언트가 거의 사라져 학습이 나아가지 않는다.〕</li>
+<li>[x] 학습을 시작할 때 점수의 표준편차를 1로 맞춰, 비중이 처음부터 한 토큰으로 쏠리지 않게 한다 〔맞음: 쏠리지 않은 비중에서 출발해야 그래디언트가 살아 있다.〕</li>
+<li>[ ] 학습이 끝난 뒤에도 비중이 한 토큰으로 쏠리지 않게 막는다 〔틀림: 나누기는 성분이 서로 독립인 처음 상태에서 크기를 맞출 뿐이다. 학습이 만든 쏠림은 그대로 남는다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-transformer-3">
+<p><strong>물음.</strong> 폭이 같은 어텐션을 머리 하나에서 머리 여덟 개로 나눈다. 파라미터와 곱셈 수는 어떻게 되는가?</p>
+<ul>
+<li>[ ] 둘 다 여덟 배가 된다 〔틀림: 질의·열쇠·값 행렬을 머리 수로 자를 뿐이라 새 행렬이 생기지 않는다.〕</li>
+<li>[x] 둘 다 머리 하나일 때와 같다. 늘어나는 것은 소프트맥스(비중 분포)의 수다 〔맞음: 같은 행렬을 여덟 조각으로 나눠 쓰고, 조각마다 따로 비중을 매긴다.〕</li>
+<li>[ ] 파라미터는 같고 곱셈 수만 여덟 배가 된다 〔틀림: 머리 하나가 맡는 길이가 8분의 1로 줄어, 곱셈 수도 머리 하나일 때와 같다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-transformer-4">
+<p><strong>물음.</strong> 그림의 가로와 세로를 모두 두 배로 키워 칸 수를 늘렸다. 셀프 어텐션의 점수 표는 몇 배가 되는가?</p>
+<ul>
+<li>[ ] 두 배 〔틀림: 가로와 세로가 함께 두 배라 칸만 해도 네 배다.〕</li>
+<li>[ ] 네 배 〔틀림: 네 배가 되는 것은 칸 수다. 점수 표는 모든 칸 쌍의 점수를 담는다.〕</li>
+<li>[x] 열여섯 배 〔맞음: 칸이 네 배이고, 점수 표의 크기는 칸 수의 제곱이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-transformer-5">
+<p><strong>물음.</strong> 크로스 어텐션에서 질의는 그림 칸에서, 열쇠와 값은 글 토큰에서 만든다. 글 토큰이 단 하나라면 그림 칸들은 무엇을 받는가?</p>
+<ul>
+<li>[ ] 칸마다 다른 벡터. 칸의 질의가 서로 다르기 때문이다 〔틀림: 질의가 달라도 읽을 토큰이 하나뿐이면 비중은 늘 그 토큰 하나에 모인다.〕</li>
+<li>[x] 모든 칸이 같은 벡터 〔맞음: 소프트맥스에 들어가는 점수가 하나라 비중이 언제나 1이다. 칸마다 다르게 읽으려면 글 토큰이 여럿이고 서로 달라야 한다.〕</li>
+<li>[ ] 아무것도 받지 못한다 〔틀림: 비중 1로 그 토큰의 값을 그대로 받는다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-transformer-6">
+<p><strong>물음.</strong> 한 토큰씩 이어 쓰는 언어 모델은 앞 토큰들의 열쇠와 값을 KV 캐시에 적어 두고 다시 쓴다. 다시 써도 되는 근거는 무엇인가?</p>
+<ul>
+<li>[x] 뒤 토큰을 가려 두어서, 토큰을 하나 더 붙여도 앞 토큰들의 열쇠와 값이 바뀌지 않는다 〔맞음: 작은 트랜스포머로 재면 가림이 있을 때 앞 토큰 출력의 차이가 반올림 차이뿐이었다.〕</li>
+<li>[ ] 앞 토큰의 열쇠와 값은 조금 바뀌어도 결과에 큰 차이가 없다 〔틀림: 가림이 없으면 토큰 하나를 붙였을 때 앞 토큰의 출력이 눈에 띄게 바뀌었다. 적어 둔 값은 바뀌지 않을 때만 다시 쓸 수 있다.〕</li>
+<li>[ ] 열쇠와 값은 토큰 내용과 상관없이 자리마다 정해져 있다 〔틀림: 열쇠와 값은 토큰마다 그 층의 은닉 상태에서 만든다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>이제 그림의 칸들이 거리와 상관없이 서로를 읽고, 글 토큰까지 골라 읽게 할 수 있지만, 셀프 어텐션의 점수 표는 칸 수의 제곱으로 자랐다. Stable Diffusion 1.x 가 512 × 512 그림을 만들 때 가장 고운 단계의 칸이 4096개였던 것은, 그림을 가로세로 8배 줄인 64 × 64칸 위에서 일했기 때문이다. 픽셀마다 칸 하나로 두면 칸이 262,144개, 점수 표 하나에 687억 개가 넘는 점수가 들어간다. 그 64 × 64칸, 칸마다 수 4개인 그림은 어디서 왔을까? 그림을 작게 줄여 놓고 그 위에서 노이즈를 섞고 걷어 내도, 줄이기 전의 그림으로 되살릴 수 있을까?</p>
 

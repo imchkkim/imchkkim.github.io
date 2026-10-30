@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -705,14 +713,14 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h2 id="sec-ddim-eta">DDIM: 새 노이즈의 비율을 파라미터 η 하나로<span id="ddim-새-노이즈의-비율을-파라미터-η-하나로" class="anchor-alias"></span></h2>
 <p>오일러 스텝은 읽은 노이즈를 모두 물려주고, 앤세스트럴은 그 일부를 새 노이즈로 바꾼다. 둘이 같은 분포를 지나는 두 길의 양 끝이라면, 그 사이 어디쯤에서 걸을 수도 있지 않을까? 그리고 DDPM처럼 학습 때 1000스텝으로 정한 모델을, 다시 학습하지 않고 50스텝이나 20스텝으로 걸을 수는 없을까? 이 두 물음에 한꺼번에 답한 것이 DDIM이다.</p>
 <h3 id="hist-ddim-implicit-model" class="history" data-people="song-jiaming">역사: 같은 학습, 다른 생성<span id="역사-같은-학습-다른-생성" class="anchor-alias"></span></h3>
-<p>송(Jiaming Song), 멍(Chenlin Meng), 에르몬(Stefano Ermon)은 2020년 10월 「디노이징 디퓨전 암묵 모델(Denoising Diffusion Implicit Models)」을 내놓았다. 출발점은 DDPM의 손실이 스텝 사이의 관계가 아니라 원래 그림에서 각 노이즈 레벨로 바로 가는 분포 q(<span class="sym" style="color:#1b9e77">x</span><sub>t</sub> ∣ <span class="sym" style="color:#1b9e77">x₀</span>)에만 기댄다는 관찰이었다. 그렇다면 이 분포들은 그대로 두고 스텝 사이의 관계만 다르게 정한 과정들이 모두 같은 학습 목표를 가진다. 논문은 그런 과정의 가족을 만들고, 그 가운데 생성이 노이즈를 하나도 넣지 않는 과정을 「암묵 모델」이라 불렀다. 논문 요약은 DDIM이 DDPM보다 벽시계 시간으로 10배에서 50배 빠르게 좋은 샘플을 만든다고 적었다. 신경망은 다시 학습하지 않는다.</p>
+<p>송(Jiaming Song), 멍(Chenlin Meng), 에르몬(Stefano Ermon)은 2020년 10월 「디노이징 디퓨전 암묵 모델(Denoising Diffusion Implicit Models)」을 내놓았다. 출발점은 DDPM의 손실이 스텝 사이의 관계가 아니라 원래 그림에서 각 노이즈 레벨로 바로 가는 분포 <span class="sym" style="color:#c2408a">q</span>(<span class="sym" style="color:#1b9e77">x</span><sub>t</sub> ∣ <span class="sym" style="color:#1b9e77">x₀</span>)에만 기댄다는 관찰이었다. 그렇다면 이 분포들은 그대로 두고 스텝 사이의 관계만 다르게 정한 과정들이 모두 같은 학습 목표를 가진다. 논문은 그런 과정의 가족을 만들고, 그 가운데 생성이 노이즈를 하나도 넣지 않는 과정을 「암묵 모델」이라 불렀다. 논문 요약은 DDIM이 DDPM보다 벽시계 시간으로 10배에서 50배 빠르게 좋은 샘플을 만든다고 적었다. 신경망은 다시 학습하지 않는다.</p>
 <figure class="fig "><img src="images/samplers/h3_ddim_table1.png" alt="DDIM 논문 표 1의 CIFAR10 FID를 다시 그림. 같은 신경망으로 생성 스텝 수 S만 바꿨을 때, 새 노이즈를 넣지 않는 η = 0(DDIM)은 10스텝에서 FID 13.36, DDPM처럼 새 노이즈를 넣는 η = 1은 41.07이었고, 1000스텝에서는 4.04와 4.73으로 가까워진다. 출처: Song, Meng, Ermon(2020), arXiv 2010.02502 표 1(sources/samplers/h_history.py)" loading="lazy"><figcaption>DDIM 논문 표 1의 CIFAR10 FID를 다시 그림. 같은 신경망으로 생성 스텝 수 S만 바꿨을 때, 새 노이즈를 넣지 않는 η = 0(DDIM)은 10스텝에서 FID 13.36, DDPM처럼 새 노이즈를 넣는 η = 1은 41.07이었고, 1000스텝에서는 4.04와 4.73으로 가까워진다. 출처: Song, Meng, Ermon(2020), arXiv 2010.02502 표 1(sources/samplers/h_history.py)</figcaption></figure>
 <p>뒤에 카라스와 동료들은 DDIM이 앞에서 본 노이즈 크기 눈금(노이즈 크기를 시간처럼 쓰고 그림을 줄이지 않는 꼴)을 쓰고 있었다는 것을 짚었다. 그 눈금에서 DDIM의 결정적인 스텝은 오일러 스텝이다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>다시 학습하지 않고 10배에서 50배 빨라졌다면, DDPM 때는 왜 그렇게 안 했어요? 스텝만 건너뛰면 되잖아요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>DDPM의 체인은 한 칸씩 정의돼 있어요. 타임스텝 1000에서 980으로 바로 가는 분포는 학습한 적이 없죠. 건너뛰면 무엇을 따라 걷는 거예요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>음… 아무것도 아니네요. 학습한 적 없는 칸을 밟는 거니까 맞는다는 보장이 없어요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>DDPM 논문은 손실도 체인의 칸마다 붙은 항을 쌓아서 유도했어요. 그 틀 안에서는 칸 사이의 관계를 버려도 된다는 생각이 나오기 어려웠죠.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 줄여서 실제로 쓰는 손실은 q(<span class="sym" style="color:#1b9e77">x</span><sub>t</sub> ∣ <span class="sym" style="color:#1b9e77">x₀</span>)에서 뽑은 점만 쓰니까… 칸 사이 관계는 학습에 들어간 적이 없었던 거네요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 줄여서 실제로 쓰는 손실은 <span class="sym" style="color:#c2408a">q</span>(<span class="sym" style="color:#1b9e77">x</span><sub>t</sub> ∣ <span class="sym" style="color:#1b9e77">x₀</span>)에서 뽑은 점만 쓰니까… 칸 사이 관계는 학습에 들어간 적이 없었던 거네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>학습은 그대로 두고 생성 쪽만 골라 쓸 수 있었던 거구나.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 노이즈를 하나도 안 넣는 쪽과 앤세스트럴 쪽 사이를 숫자 하나로 이을 수도 있어요?</p></div></div>
 <h3 id="파라미터-η">파라미터 η</h3>

@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -750,14 +758,14 @@ i,\ j,\ a,\ b &amp; \text{칸의 번호와 가운데에서 떨어진 칸 수 (�
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>평균은 1, 차이는 0이에요. 합이 1이면 고른 기온은 그대로 두고, 합이 0이면 고른 기온은 0으로 지우고 바뀐 곳만 남기네요. 아까 밝기 줄에서 이웃 평균과 [−1, 0, 1]이 한 일이랑 똑같아요.</p></div></div>
 </div><div class="dialogue"><h3 id="prob-convolution-flipped-kernel">문제 2. 커널을 뒤집어 거는 수학의 합성곱<span id="문제-2-커널을-뒤집어-거는-수학의-합성곱" class="anchor-alias"></span></h3>
 <blockquote>
-<p>수학 교과서는 합성곱을 <span class="sym" style="color:#a5003c">h</span>[i] = Σ<sub>j</sub> <span class="sym" style="color:#665522">w</span>[j] <span class="sym" style="color:#1b9e77">x</span>[i − j]로 적는다(Σ는 「대문자 시그마」로 읽고, j를 바꿔 가며 모두 더하라는 기호다). 본문의 합성곱 식 h[i] = Σ<sub>j</sub> w[j] x[i + j]에 든 <span class="sym" style="color:#1b9e77">x</span>[i + j]와 부호가 다르다. 줄 5, 5, 5, 1, 1, 1에 대해 (가) 커널 [−1, 0, 1]을 두 정의로 각각 걸어라. (나) 커널 [1, 2, 3]이면? (다) 신경망이 커널을 배울 때 두 정의 가운데 무엇을 쓰는지가 중요한가?</p>
+<p>수학 교과서는 합성곱을 <span class="sym" style="color:#a5003c">h</span>[i] = Σ<sub>j</sub> <span class="sym" style="color:#665522">w</span>[j] <span class="sym" style="color:#1b9e77">x</span>[i − j]로 적는다(Σ는 「대문자 시그마」로 읽고, j를 바꿔 가며 모두 더하라는 기호다). 본문의 합성곱 식 <span class="sym" style="color:#a5003c">h</span>[i] = Σ<sub>j</sub> <span class="sym" style="color:#665522">w</span>[j] <span class="sym" style="color:#1b9e77">x</span>[i + j]에 든 <span class="sym" style="color:#1b9e77">x</span>[i + j]와 부호가 다르다. 줄 5, 5, 5, 1, 1, 1에 대해 (가) 커널 [−1, 0, 1]을 두 정의로 각각 걸어라. (나) 커널 [1, 2, 3]이면? (다) 신경망이 커널을 배울 때 두 정의 가운데 무엇을 쓰는지가 중요한가?</p>
 </blockquote>
 <figure class="fig "><img src="images/convolution/p02_flipped_kernel.png" alt="줄 5, 5, 5, 1, 1, 1과 커널 [−1, 0, 1]. 출력 둘째 칸 h[1]은 입력 0~2번 칸에서 나온다. 스크립트 sources/convolution/problems_figs.py" loading="lazy"><figcaption>줄 5, 5, 5, 1, 1, 1과 커널 [−1, 0, 1]. 출력 둘째 칸 h[1]은 입력 0~2번 칸에서 나온다. 스크립트 sources/convolution/problems_figs.py</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>신경망 식으로는 0, −4, −4, 0이에요. 수학 식은 j 앞에 마이너스가 붙었을 뿐이니 같은 거 아니에요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>수학 식으로 직접 계산해 봐요. 출력 둘째 칸에서 <span class="sym" style="color:#665522">w</span>[1]은 어느 입력 칸에 곱해지죠?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>i − j니까… 왼쪽 이웃이에요. 신경망 식에서는 오른쪽 이웃이었는데요. 그럼 커널을 좌우로 뒤집어 건 거네요. 결과가 0, 4, 4, 0으로 부호가 바뀌었어요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>[1, 2, 3]은 뒤집으면 [3, 2, 1]이라 30, 18, 10, 6과 30, 26, 18, 6으로 갈려. 그런데 [¼, ½, ¼]처럼 좌우가 같은 커널은 뒤집어도 같으니까 차이가 안 나겠다.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(다)는요? PyTorch 문서는 자기들의 합성곱 층이 「교차 상관(cross-correlation)」을 계산한다고 적어 두었어요. 커널을 뒤집지 않는 본문의 x[i + j] 정의예요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(다)는요? PyTorch 문서는 자기들의 합성곱 층이 「교차 상관(cross-correlation)」을 계산한다고 적어 두었어요. 커널을 뒤집지 않는 본문의 <span class="sym" style="color:#1b9e77">x</span>[i + j] 정의예요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>커널을 배우는 거라면 상관없어요. 뒤집은 커널이 필요하면 학습이 뒤집힌 수를 찾을 테니까요. 손으로 고른 커널을 남의 코드에 옮길 때만 조심하면 돼요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>길이도 봤어요. 6칸 줄에 3칸 커널이면 출력은 4칸이에요. 6 − 3 + 1이요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>해석학 수업에서 f * g를 정의할 때 g(x − y)로 뒤집는 게 이상했는데, 점 하나에 걸었을 때 커널 모양이 그대로 나오게 하려고 그런 거였구나.</p></div></div>

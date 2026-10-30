@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -799,7 +807,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </tbody>
 </table></div>
 <h3 id="요약">요약</h3>
-<p>라벨이 정하지 못한 생김새의 값을 사람 대신 그림 자신에게서 얻으려고, 그림 자신을 정답으로 삼아 좁은 가운데 칸(잠재 변수)을 거쳐 되살리게 했다(오토인코더). 손실은 되살리기만 보므로, 잠재 변수를 늘이거나 돌려도 디코더가 맞춰 주면 손실이 같고, 잠재 변수가 어디에 놓일지는 학습이 정하지 않는다. 그림을 다루는 인코더가 쓰는 최대 풀링도 미분할 수 있다. 창 안에서 이긴 칸에 대한 미분이 1, 진 칸에 대한 미분이 0이라 그래디언트는 이긴 칸으로만 돌아가고, 미분이 정해지지 않는 곳은 동점뿐이다. 앞으로 갈 때 적어 둔 이긴 칸의 번호를 디코더가 넘겨받으면 같은 칸으로 값을 되돌려 키울 수 있고(최대 언풀링), 합성곱을 입력으로 미분한 계산을 앞으로 쓰면 전치 합성곱이 된다. 가운데를 조이는 대신 입력을 일부러 망가뜨려도 베끼기를 막을 수 있다(디노이징 오토인코더). 제곱 오차로 배운 디노이저는 그 망가진 그림이 나올 수 있었던 원래 그림들의 평균(조건부 평균)을 내놓으므로, 많이 망가질수록 고친 그림이 흐려지고 전체 평균 그림에 다가간다. 망가진 정도 σ 를 조건으로 함께 주면(조건부 디노이징) 디노이저 하나가 모든 σ 를 제 기준으로 고친다. 라벨도 조건으로 줄 수 있고, 조건은 망가진 그림이 아직 말하지 않은 것이 많을수록 크게 듣는다. 줄이고 고치는 솜씨는 새 그림을 만들지 않아도 쓸 데가 많다. 잠재 변수 16칸은 그림을 49분의 1로 줄여 담고, 짧은 계산으로 비슷한 그림을 찾고, 라벨이 적을 때 픽셀보다 나은 거리를 준다. 평소의 데이터만으로 배운 오토인코더가 잘 되살리지 못하는 입력을 골라내면 이상한 예를 모으지 않고도 이상 탐지를 할 수 있지만, 재구성 오차는 생김새가 얼마나 다른지만 재므로 배운 것과 닮은 이상은 빠져나간다.</p>
+<p>라벨이 정하지 못한 생김새의 값을 사람 대신 그림 자신에게서 얻으려고, 그림 자신을 정답으로 삼아 좁은 가운데 칸(잠재 변수)을 거쳐 되살리게 했다(오토인코더). 손실은 되살리기만 보므로, 잠재 변수를 늘이거나 돌려도 디코더가 맞춰 주면 손실이 같고, 잠재 변수가 어디에 놓일지는 학습이 정하지 않는다. 그림을 다루는 인코더가 쓰는 최대 풀링도 미분할 수 있다. 창 안에서 이긴 칸에 대한 미분이 1, 진 칸에 대한 미분이 0이라 그래디언트는 이긴 칸으로만 돌아가고, 미분이 정해지지 않는 곳은 동점뿐이다. 앞으로 갈 때 적어 둔 이긴 칸의 번호를 디코더가 넘겨받으면 같은 칸으로 값을 되돌려 키울 수 있고(최대 언풀링), 합성곱을 입력으로 미분한 계산을 앞으로 쓰면 전치 합성곱이 된다. 가운데를 조이는 대신 입력을 일부러 망가뜨려도 베끼기를 막을 수 있다(디노이징 오토인코더). 제곱 오차로 배운 디노이저는 그 망가진 그림이 나올 수 있었던 원래 그림들의 평균(조건부 평균)을 내놓으므로, 많이 망가질수록 고친 그림이 흐려지고 전체 평균 그림에 다가간다. 망가진 정도 <span class="sym" style="color:#4c5d80">σ</span> 를 조건으로 함께 주면(조건부 디노이징) 디노이저 하나가 모든 <span class="sym" style="color:#4c5d80">σ</span> 를 제 기준으로 고친다. 라벨도 조건으로 줄 수 있고, 조건은 망가진 그림이 아직 말하지 않은 것이 많을수록 크게 듣는다. 줄이고 고치는 솜씨는 새 그림을 만들지 않아도 쓸 데가 많다. 잠재 변수 16칸은 그림을 49분의 1로 줄여 담고, 짧은 계산으로 비슷한 그림을 찾고, 라벨이 적을 때 픽셀보다 나은 거리를 준다. 평소의 데이터만으로 배운 오토인코더가 잘 되살리지 못하는 입력을 골라내면 이상한 예를 모으지 않고도 이상 탐지를 할 수 있지만, 재구성 오차는 생김새가 얼마나 다른지만 재므로 배운 것과 닮은 이상은 빠져나간다.</p>
 <pre class="mermaid">flowchart LR
   A[&quot;라벨이 정하지 못한 79%&lt;br/&gt;생김새 값을 어디서 얻나&quot;] --&gt; C[&quot;오토인코더&lt;br/&gt;그림 자신을 정답으로&quot;]
   C --&gt; B[&quot;미분이 흐르는 길&lt;br/&gt;그래디언트는 이긴 칸으로&lt;br/&gt;최대 언풀링은 같은 칸으로&quot;]
@@ -809,6 +817,55 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   C --&gt; G[&quot;응용&lt;br/&gt;압축 · 검색 · 라벨 적게 · 이상 탐지&quot;]
   F --&gt; G
 </pre>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-autoencoder-1">
+<p><strong>물음.</strong> 학습을 마친 오토인코더의 잠재 변수를 모두 두 배로 늘리고, 디코더도 받은 값을 먼저 반으로 줄이도록 고쳤다. 되살리기 손실은 어떻게 되는가?</p>
+<ul>
+<li>[x] 그대로다. 잠재 변수가 어디에 놓일지는 학습이 정하지 않는다 〔맞음: 늘이거나 돌린 잠재 변수도 같은 손실을 내므로, 학습은 그 가운데 아무것이나 고를 수 있다.〕</li>
+<li>[ ] 잠재 변수 좌표마다 정해진 뜻이 있어 손실이 커진다 〔틀림: 손실은 되살린 그림만 본다. 디코더가 맞춰 주면 좌표를 늘이든 돌리든 되살린 그림은 같다.〕</li>
+<li>[ ] 잠재 변수가 커진 만큼 그림에 담긴 정보가 늘어 손실이 준다 〔틀림: 디코더가 반으로 줄여 읽으니 디코더가 받는 값은 전과 같다. 되살린 그림도 같다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-autoencoder-2">
+<p><strong>물음.</strong> 최대 풀링의 2 × 2 창에 1, 5, 3, 2가 들어왔고 출력은 5다. 출력 쪽에서 그래디언트 1이 돌아왔을 때, 네 칸이 받는 그래디언트는?</p>
+<ul>
+<li>[ ] 네 칸이 0.25씩 나눠 받는다 〔틀림: 출력은 이긴 칸 하나의 값이라, 진 칸을 조금 바꿔도 출력이 변하지 않는다. 진 칸의 미분은 0이다.〕</li>
+<li>[x] 5가 있던 칸이 1을 받고, 나머지 세 칸은 0을 받는다 〔맞음: 이긴 칸에 대한 미분은 1, 진 칸에 대한 미분은 0이라 그래디언트는 이긴 칸으로만 돌아간다.〕</li>
+<li>[ ] 최대 풀링은 미분할 수 없어 그래디언트가 여기서 멈춘다 〔틀림: 미분이 정해지지 않는 곳은 동점일 때뿐이다. 동점이 아니면 이긴 칸과 진 칸의 미분이 정해져 있다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-autoencoder-3">
+<p><strong>물음.</strong> 디코더가 작은 그림을 키울 때 쓰는 전치 합성곱(디컨볼루션)에 대한 말로 맞는 것은?</p>
+<ul>
+<li>[ ] 합성곱을 되돌려, 줄일 때 잃은 것을 되살린다 〔틀림: 줄여서 잃은 것은 돌아오지 않는다. 이름만 반대 방향이다.〕</li>
+<li>[ ] 인코더가 적어 둔 이긴 칸의 번호를 넘겨받아 같은 칸으로 값을 되돌린다 〔틀림: 그것은 최대 언풀링이다. 전치 합성곱은 칸의 번호를 넘겨받지 않는다.〕</li>
+<li>[x] 합성곱을 입력으로 미분한 계산을 앞으로 쓰는 층이다 〔맞음: 출력 칸의 수를 창 모양으로 거꾸로 뿌려 더한다. 커널 크기가 스트라이드로 나누어떨어지지 않으면 겹침이 고르지 않아 바둑판 무늬가 생긴다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-autoencoder-4">
+<p><strong>물음.</strong> 제곱 오차로 배운 디노이저에 아주 많이 망가진 그림을 넣었다. 고친 그림은 어떻게 나오는가?</p>
+<ul>
+<li>[ ] 원래 그림이 그대로 나온다 〔틀림: 디노이저가 내놓는 것은 그 망가진 그림이 나올 수 있었던 원래 그림들의 평균이다.〕</li>
+<li>[ ] 조금 망가진 그림을 고칠 때와 똑같이 또렷하다 〔틀림: 망가진 정도가 클수록 평균에 섞이는 후보가 많아져 더 흐려진다.〕</li>
+<li>[x] 흐리게 나오고, 전체 평균 그림에 가까워진다 〔맞음: 많이 망가질수록 망가진 그림과 어울리는 원래 그림의 후보가 늘어, 평균이 전체 평균 쪽으로 끌려간다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-autoencoder-5">
+<p><strong>물음.</strong> 망가진 정도를 조건으로 받는 디노이저에, 실제보다 훨씬 크게 망가졌다고 잘못 알려 주었다. 무슨 일이 생기는가?</p>
+<ul>
+<li>[ ] 디노이저가 그림을 보고 알아서 맞춘다 〔틀림: 디노이저는 받은 망가진 정도를 제 기준으로 삼아 고친다. 잘못 알려 주면 잘못 고친다.〕</li>
+<li>[x] 멀쩡한 세부까지 흐리게 지운다 〔맞음: 크게 망가졌다고 믿으면 더 많은 후보를 섞어 평균을 낸다. 거꾸로 작게 알려 주면 노이즈를 남긴다.〕</li>
+<li>[ ] 노이즈를 덜 걷어 내 노이즈가 남는다 〔틀림: 노이즈가 남는 것은 망가진 정도를 실제보다 작게 알려 줄 때다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-autoencoder-6">
+<p><strong>물음.</strong> 평소의 데이터만으로 배운 오토인코더로 이상 탐지를 한다. 맞는 말은?</p>
+<ul>
+<li>[ ] 이상한 예를 배우지 않았으니 처음 보는 이상은 거를 수 없다 〔틀림: 이상한 예를 배우는 대신 평소답지 않은 정도를 잰다. 평소와 다르기만 하면 처음 보는 이상도 걸린다.〕</li>
+<li>[ ] 재구성 오차가 문턱 아래면 학습한 종류의 입력이다 〔틀림: 재구성 오차는 생김새가 배운 것과 얼마나 다른지만 잰다. 숫자의 획처럼 생긴 샌들도 문턱 아래로 빠져나간다.〕</li>
+<li>[x] 잘 되살리지 못하는 입력을 골라내지만, 배운 것과 생김새가 닮은 이상은 빠져나간다 〔맞음: 재구성 오차는 종류를 묻지 않고 생김새의 차이만 잰다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>오토인코더는 그림마다 생김새를 적은 잠재 변수를 사람 손 없이 찾아 주었고, 디노이저는 노이즈 크기를 함께 받아 망가진 그림을 고칠 줄 알게 되었다. 그런데 처음에 바란 일은 새 그림을 만드는 것이었다. 잠재 변수를 무작위로 뽑아 디코더에 넣으면 새 그림이 나올까? 학습한 잠재 변수들 사이에서 무엇을 그릴지 디코더가 배운 적이 없고, 잠재 변수가 어디에 놓일지도 아무도 정하지 않았다.</p>
 <p>이 두 가지를 학습할 때부터 붙잡아 두려면 오토인코더의 무엇을 바꿔야 할까? 그리고 고치기만 배운 디노이저에 아무 그림도 담기지 않은 순수한 노이즈를 주면 무엇을 내놓을까?</p>

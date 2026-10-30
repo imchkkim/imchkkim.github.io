@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -705,7 +713,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h2 id="sec-time-embedding">시간 넣기: 노이즈 레벨을 사인 인코딩으로 펴서 블록마다 더한다<span id="시간-넣기-노이즈-레벨을-사인-인코딩으로-펴서-블록마다-더한다" class="anchor-alias"></span></h2>
 <p>합성곱을 배우며 노이즈를 걷는 가장 좋은 커널이 노이즈 크기마다 달랐던 것을 보았다. 노이즈가 옅으면 바로 옆 칸만 조금 섞는 좁은 커널이, 짙으면 넓고 납작한 커널이 좋았고, 한 노이즈 크기에서 배운 커널을 다른 크기에 걸면 아무것도 안 하느니만 못했다. 노이즈 예측 신경망은 1000가지 노이즈 레벨을 신경망 하나로 맡으니, 지금 어느 수준인지 알려 줘야 한다. 그런데 타임스텝 <span class="sym" style="color:#a67a63">t</span>는 0부터 999까지의 숫자 하나이고, 신경망은 칸이 수천 개, 채널이 수백 개다. 숫자 하나를 어디에 어떤 꼴로 넣어야 할까?</p>
 <h3 id="hist-noise-level-conditioning" class="history" data-people="song-yang ermon-stefano ho-jonathan">역사: 정규화 층에, 출력에, 그리고 모든 블록에<span id="역사-정규화-층에-출력에-그리고-모든-블록에" class="anchor-alias"></span></h3>
-<p>노이즈 레벨을 신경망에 알리는 자리는 처음부터 정해져 있지 않았다. 송과 에르몬의 2019년 모델은 노이즈 크기를 정규화 층에서만 받았고, 이듬해 고친 판은 출력에서만 노이즈 크기를 반영했다. 호, 자인, 아빌의 2020년 DDPM 논문은 송과 에르몬의 두 판과 자기들의 차이를 적어 두었다. 자신들은 「트랜스포머의 사인 위치 임베딩을 더해 모든 층을 t로 조건 지었다」는 것이다.</p>
+<p>노이즈 레벨을 신경망에 알리는 자리는 처음부터 정해져 있지 않았다. 송과 에르몬의 2019년 모델은 노이즈 크기를 정규화 층에서만 받았고, 이듬해 고친 판은 출력에서만 노이즈 크기를 반영했다. 호, 자인, 아빌의 2020년 DDPM 논문은 송과 에르몬의 두 판과 자기들의 차이를 적어 두었다. 자신들은 「트랜스포머의 사인 위치 임베딩을 더해 모든 층을 <span class="sym" style="color:#a67a63">t</span>로 조건 지었다」는 것이다.</p>
 <figure class="fig "><img src="images/unet/noise_cond_sites.png" alt="노이즈 크기를 신경망에 알리는 세 자리. 송·에르몬의 2019년 모델은 블록 안 정규화 층에서만, 2020년 고친 판은 마지막 출력을 σ로 나눌 때만, DDPM 은 스텝 t 를 사인 위치 임베딩으로 펴서 잔차 블록마다 더했다. 호·자인·아빌 2020(arXiv 2006.11239) 4절·부록 C 의 설명으로 직접 그림. 스크립트 sources/unet/hist_figs2.py" loading="lazy"><figcaption>노이즈 크기를 신경망에 알리는 세 자리. 송·에르몬의 2019년 모델은 블록 안 정규화 층에서만, 2020년 고친 판은 마지막 출력을 σ로 나눌 때만, DDPM 은 스텝 t 를 사인 위치 임베딩으로 펴서 잔차 블록마다 더했다. 호·자인·아빌 2020(arXiv 2006.11239) 4절·부록 C 의 설명으로 직접 그림. 스크립트 sources/unet/hist_figs2.py</figcaption></figure>
 <p>사인 위치 임베딩은 원래 문장 속 낱말의 자리를 알리려고 만든 것이다. 2017년 바스와니(Ashish Vaswani)와 동료들의 트랜스포머는 낱말 순서를 스스로 알지 못해서, 자리 번호를 주파수가 다른 사인과 코사인 값 여러 개로 펴서 낱말 벡터에 더했다. DDPM 은 낱말의 자리 번호 대신 스텝 번호 <span class="sym" style="color:#a67a63">t</span>를 같은 꼴로 폈다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>숫자 하나 넣는 건데 자리가 왜 이렇게 바뀌었어요? 입력에 같이 넣으면 되잖아요.</p></div></div>
@@ -714,7 +722,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>DDPM 이 가져온 사인 위치 임베딩은 언제, 무엇을 하려고 만든 거였죠?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>2017년에, 문장 속 낱말의 자리를 알리려고요. 3년 만에 전혀 다른 곳에 옮겨 쓴 거네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>지금은 ComfyUI 에도 시간 임베딩을 만드는 함수 <code>timestep_embedding</code> 이 기본으로 들어 있는데, 그때는 낱말 자리에 쓰던 꼴이 노이즈 레벨에도 통하는지 직접 돌려 봐야 알았겠네요.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 왜 숫자 t 하나를 그대로 넣지 않고 사인과 코사인 여러 개로 폈을까요? 0부터 999까지 숫자 하나면 충분해 보이는데요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 왜 숫자 <span class="sym" style="color:#a67a63">t</span> 하나를 그대로 넣지 않고 사인과 코사인 여러 개로 폈을까요? 0부터 999까지 숫자 하나면 충분해 보이는데요.</p></div></div>
 <h3 id="숫자-하나를-여러-주파수로-펴기">숫자 하나를 여러 주파수로 펴기</h3>
 <p>시계를 떠올리자. 시침 하나만으로도 시각을 알 수 있지만, 3시 정각과 3시 5분은 시침이 2.5°밖에 다르지 않다. 그래서 시계는 도는 속도가 다른 시곗바늘을 여럿 두어, 시침은 굵은 위치를, 분침은 그 사이의 세밀한 위치를 알려 준다. 타임스텝 <span class="sym" style="color:#a67a63">t</span>도 한 숫자로 넣는 대신, 도는 속도(주파수)가 다른 시곗바늘 여러 개의 각도로 펴서 넣는다. ComfyUI 의 <code>timestep_embedding</code>(Stable Diffusion 1.x 에서 320개)은 이렇게 계산한다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#008787"><mi>e</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#a67a63"><mi>t</mi></mstyle><mo stretchy="false">)</mo><mo>=</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">[</mo><mi>cos</mi><mo>⁡</mo><mo stretchy="false">(</mo><mstyle mathcolor="#87965a"><msub><mi>f</mi><mn>0</mn></msub></mstyle><mstyle mathcolor="#a67a63"><mi>t</mi></mstyle><mo stretchy="false">)</mo><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><mi>cos</mi><mo>⁡</mo><mo stretchy="false">(</mo><mstyle mathcolor="#87965a"><msub><mi>f</mi><mn>159</mn></msub></mstyle><mstyle mathcolor="#a67a63"><mi>t</mi></mstyle><mo stretchy="false">)</mo><mo separator="true">,</mo><mtext> </mtext><mi>sin</mi><mo>⁡</mo><mo stretchy="false">(</mo><mstyle mathcolor="#87965a"><msub><mi>f</mi><mn>0</mn></msub></mstyle><mstyle mathcolor="#a67a63"><mi>t</mi></mstyle><mo stretchy="false">)</mo><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><mi>sin</mi><mo>⁡</mo><mo stretchy="false">(</mo><mstyle mathcolor="#87965a"><msub><mi>f</mi><mn>159</mn></msub></mstyle><mstyle mathcolor="#a67a63"><mi>t</mi></mstyle><mo stretchy="false">)</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">]</mo><mo separator="true">,</mo><mspace width="2em"/><mstyle mathcolor="#87965a"><msub><mi>f</mi><mi>i</mi></msub></mstyle><mo>=</mo><msup><mn>10000</mn><mrow><mo>−</mo><mi>i</mi><mi mathvariant="normal">/</mi><mn>160</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\textcolor{#008787}{e}(\textcolor{#a67a63}{t}) = \big[\cos(\textcolor{#87965a}{f_0}\textcolor{#a67a63}{t}), \ldots, \cos(\textcolor{#87965a}{f_{159}}\textcolor{#a67a63}{t}),\ \sin(\textcolor{#87965a}{f_0}\textcolor{#a67a63}{t}), \ldots, \sin(\textcolor{#87965a}{f_{159}}\textcolor{#a67a63}{t})\big], \qquad \textcolor{#87965a}{f_i} = 10000^{-i/160}
@@ -762,7 +770,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 </blockquote>
 <figure class="fig "><img src="images/unet/p08_pairs.png" alt="타임스텝 축 위의 두 타임스텝 짝. 본문에서 잰 100과 101, 100과 600의 코사인 유사도와, 물음의 두 짝. 스크립트 sources/unet/problems_figs.py" loading="lazy"><figcaption>타임스텝 축 위의 두 타임스텝 짝. 본문에서 잰 100과 101, 100과 600의 코사인 유사도와, 물음의 두 짝. 스크립트 sources/unet/problems_figs.py</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>타임스텝 500과 600은 둘 다 노이즈가 짙어서 비슷할 테니까, 100과 101처럼 0.97 근처 아닐까요?</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>내적을 성분별로 적어 봐요. 같은 주파수 fᵢ 의 코사인끼리, 사인끼리 곱해서 더하면 무엇이 되죠?</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>내적을 성분별로 적어 봐요. 같은 주파수 <span class="sym" style="color:#87965a">fᵢ</span> 의 코사인끼리, 사인끼리 곱해서 더하면 무엇이 되죠?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>cos(<span class="sym" style="color:#87965a">fᵢ</span><span class="sym" style="color:#a67a63">t</span>)cos(<span class="sym" style="color:#87965a">fᵢ</span><span class="sym" style="color:#a67a63">t</span>′) + sin(<span class="sym" style="color:#87965a">fᵢ</span><span class="sym" style="color:#a67a63">t</span>)sin(<span class="sym" style="color:#87965a">fᵢ</span><span class="sym" style="color:#a67a63">t</span>′) = cos(<span class="sym" style="color:#87965a">fᵢ</span>(<span class="sym" style="color:#a67a63">t</span> − <span class="sym" style="color:#a67a63">t</span>′))예요. 그러니까 내적은 Σᵢ cos(<span class="sym" style="color:#87965a">fᵢ</span>(<span class="sym" style="color:#a67a63">t</span> − <span class="sym" style="color:#a67a63">t</span>′))이고, 차이에만 기대요. 길이는 늘 √160이라 코사인 유사도도 차이에만 기대고요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 500과 600은 0과 100, 100과 200과 같아야 하네요. 위젯에 넣으니까 0.443이에요. 제가 짐작한 값은 한참 틀렸어요. 타임스텝이 100이나 떨어져 있었으니까요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(다)는 차이가 99라서 100과 199랑 같아. 0.443이야. 사인 인코딩은 「짙은 노이즈끼리」라는 건 모르고 타임스텝 사이의 거리만 알아.</p></div></div>

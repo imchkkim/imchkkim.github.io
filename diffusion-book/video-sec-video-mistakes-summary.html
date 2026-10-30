@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -848,6 +856,52 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   C --&gt;|&quot;여전히&lt;br/&gt;데이터의 과거&quot;| D[&quot;셀프 포싱&lt;br/&gt;자기 롤아웃 + 영상 전체 손실&quot;]
   D --&gt;|&quot;학습 길이를 넘으면&lt;br/&gt;다시 처음 보는 과거&quot;| E[&quot;긴 영상 방법들&lt;br/&gt;길게 겪기 · 조건 바꾸기&quot;]
 </pre>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-video-1">
+<p><strong>물음.</strong> Wan2.1 의 VAE 는 프레임을 넷씩 묶되 첫 프레임만 혼자 한 장으로 둔다. 81프레임 영상은 잠재 프레임 몇 장이 되는가?</p>
+<ul>
+<li>[ ] 20장쯤 〔틀림: 81을 그냥 4로 나눴다. 첫 프레임은 혼자 한 장이다.〕</li>
+<li>[x] 21장 〔맞음: 첫 프레임이 한 장, 나머지 80프레임이 넷씩 묶여 20장이다.〕</li>
+<li>[ ] 81장 〔틀림: VAE 는 가로세로뿐 아니라 시간 방향으로도 프레임을 묶어 줄인다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-video-2">
+<p><strong>물음.</strong> 정답 과거를 보고 다음 프레임을 맞히도록 배운 모델(티처 포싱)로 영상을 한 장씩 이어 만들면, 뒤로 갈수록 오차가 커진다. 무엇 때문인가?</p>
+<ul>
+<li>[x] 학습 때는 정답 과거만 보았는데, 생성 때는 자기가 만든 어긋난 과거를 딛고 다음 프레임을 만들기 때문에 〔맞음: 노출 편향이다. 생성 때는 바로잡아 주는 정답이 없어, 자기 실수가 만든 자리에서 다음 프레임을 시작한다.〕</li>
+<li>[ ] 연습과 실전이 같은 자리에서 출발하니 오차가 커질 일은 없다. 학습이 덜 된 것이다 〔틀림: 실전에서는 앞 프레임이 정답이 아니라 모델 자신의 출력이다. 연습 때의 성공률은 그런 자리에서 잰 적이 없다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-video-3">
+<p><strong>물음.</strong> 어긋난 과거가 다음 프레임에 1.01배로 넘어가는 모델이 있다. 5초 영상에서는 문제가 없어 보였다. 1분 영상에서는 어떻게 되는가?</p>
+<ul>
+<li>[ ] 1에 아주 가까우니 길게 굴려도 괜찮다 〔틀림: 작은 배율도 스텝마다 곱해진다. 잠재 프레임으로 240스텝을 이어 가면 10배가 넘게 불어난다.〕</li>
+<li>[ ] 프레임마다 오차가 조금씩 더해져, 길이에 비례해 천천히 는다 〔틀림: 어긋난 과거는 다음 프레임에 몇 배로 넘어간다. 배율이 1을 넘으면 더해지는 것이 아니라 곱해져 기하급수로 커진다.〕</li>
+<li>[x] 10배 넘게 불어날 수 있다. 짧은 영상만 보고는 드러나지 않는다 〔맞음: 짧은 영상에서는 두 모델이 거의 같아 보여, 배율이 1을 조금 넘는지는 길게 굴려 봐야 드러난다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-video-4">
+<p><strong>물음.</strong> 스케줄드 샘플링은 학습 때 과거 입력의 일부를 모델이 만든 프레임으로 바꾸고, 목표는 데이터의 다음 프레임으로 둔다. 노출 편향이 다 풀리는가?</p>
+<ul>
+<li>[ ] 다 풀린다. 과거를 모델의 것으로 바꿨으니 학습과 생성의 조건이 같다 〔틀림: 입력은 모델의 과거인데 목표는 데이터의 정답이라, 둘이 한 영상에서 오지 않는다.〕</li>
+<li>[x] 다 풀리지 않는다. 모델은 어긋났던 만큼 한 번에 되돌아가는, 실제 영상에 없는 움직임을 배운다 〔맞음: 그래서 셀프 포싱은 자기가 굴린 영상 전체를 평가하는 손실로 넘어갔다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-video-5">
+<p><strong>물음.</strong> 디퓨전 포싱은 학습 때 무엇을 바꿨나?</p>
+<ul>
+<li>[ ] 모델 자신이 굴린 영상을 과거로 썼다 〔틀림: 그것은 셀프 포싱이다. 디퓨전 포싱의 과거는 여전히 데이터에서 온다.〕</li>
+<li>[x] 프레임마다 노이즈 레벨을 따로 주어, 흐려진 과거로 틀린 과거를 값싸게 흉내 냈다 〔맞음: 「다음 프레임 맞히기」와 「노이즈 걷어 내기」 두 목표를 한 모델에 담고, 생성 때 쓸 일정도 유연하게 고를 수 있다.〕</li>
+<li>[ ] 모든 프레임에 같은 노이즈 레벨을 주어 영상 전체를 한꺼번에 걷어 냈다 〔틀림: 그것은 전체 시퀀스 디퓨전이다. 매끄럽지만 길이가 묶인다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-video-6">
+<p><strong>물음.</strong> 셀프 포싱은 학생이 굴린 영상을 두 스코어의 차이로 진짜 영상의 분포 쪽으로 민다. 학생 분포의 스코어를 빼지 않고 진짜 분포의 스코어만 따라 밀면 어떻게 되는가?</p>
+<ul>
+<li>[ ] 진짜 영상의 분포가 그대로 나온다 〔틀림: 진짜 분포의 스코어만 따르면 샘플이 봉우리 쪽으로 올라갈 뿐, 분포의 폭을 맞추는 힘이 없다.〕</li>
+<li>[x] 샘플이 진짜 분포의 봉우리 한 점으로 몰린다 〔맞음: 학생 분포의 스코어를 빼는 항이 학생의 샘플을 서로 퍼지게 해, 폭까지 진짜 분포에 맞춘다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>셀프 포싱의 손실을 다시 보자. 모델은 자기가 굴린 영상 위에서, 데이터로 배운 선생 모델이 알려 준 「진짜 영상다움」 쪽으로 밀리며 배웠다. 그런데 사람이 영상에 원하는 것은 진짜 같음만이 아니다. 움직임이 크고 자연스러운지, 프롬프트와 맞는지, 인물이 끝까지 같은 얼굴인지는 데이터의 분포가 따로 알려 주지 않는다. 선생 모델이 알려 주던 진짜 영상다움 대신 사람이 원하는 점수를 손실에 넣으려면, 무엇을 바꿔야 할까?</p>
 

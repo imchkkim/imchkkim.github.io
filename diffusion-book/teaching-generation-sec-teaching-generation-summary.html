@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -813,6 +821,49 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   G --&gt; I[&quot;다양 · 선명 · 새로움&lt;br/&gt;셋을 함께&quot;]
   H --&gt; I
 </pre>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-teaching-generation-1">
+<p><strong>물음.</strong> 라벨 「3」을 넣으면 그림을 내놓도록 MLP를 제곱 오차로 학습했다. 학습이 잘 끝났을 때 MLP는 어떤 그림을 내놓는가?</p>
+<ul>
+<li>[ ] 학습 그림 가운데 가장 흔한 3 하나 〔틀림: 제곱 오차를 가장 작게 하는 답은 정답들의 평균이다. 평균은 학습 그림 가운데 하나가 아니다.〕</li>
+<li>[x] 3 그림들의 평균인 흐린 그림 〔맞음: 같은 라벨에 정답 그림이 여럿이면 제곱 오차의 답은 조건부 평균이고, 그림에서는 흐린 평균 그림이 된다.〕</li>
+<li>[ ] 매번 다른 3 〔틀림: 같은 입력에는 늘 같은 출력을 낸다. 라벨이 같으면 그림도 같다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-teaching-generation-2">
+<p><strong>물음.</strong> 라벨 → 그림 MLP가 흐린 평균 그림을 내놓는다. 무엇을 바꿔야 실제로 있을 법한 3이 나오는가?</p>
+<ul>
+<li>[ ] 손실을 절댓값 오차로 바꾼다 〔틀림: 절댓값 오차의 답인 중앙값도 칸마다 따로 고른 값이다. 칸들이 함께 정하지 않으면 획이 끊기거나 사라진 그림이 나온다.〕</li>
+<li>[ ] 신경망을 키우고 더 오래 학습한다 〔틀림: 라벨만 받는 함수의 손실은 라벨 안 분산 아래로 내려갈 수 없다. 큰 신경망은 평균 그림을 더 정확히 그릴 뿐이다.〕</li>
+<li>[x] 생성을 뽑기로 바꿔, 같은 라벨에도 다른 그림이 나오게 한다 〔맞음: 라벨은 그림을 조금만 정한다. 나머지 생김새는 생성기가 여러 가능성 가운데 골라야 한다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-teaching-generation-3">
+<p><strong>물음.</strong> 두 반 학생의 시험 점수에서 반 사이 분산이 25, 반 안 분산이 100이다. 학생의 반만 알고 그 반의 평균으로 점수를 짐작하면, 남는 평균 제곱 오차는?</p>
+<ul>
+<li>[ ] 125 〔틀림: 125는 반을 모를 때의 전체 분산이다. 반을 알면 반 사이 분산 25는 지워진다.〕</li>
+<li>[x] 100 〔맞음: 전체 분산은 반 사이 분산과 반 안 분산의 합이고, 반을 알아도 반 안 분산은 남는다.〕</li>
+<li>[ ] 25 〔틀림: 25는 반을 알면 지워지는 부분이다. 남는 것은 같은 반 안에서 학생끼리 다른 정도다.〕</li>
+<li>[ ] 학생을 더 많이 모으면 0에 가까워진다 〔틀림: 반 안 분산은 같은 반 안에서 점수끼리 다른 정도라, 자료를 늘려도 줄지 않는다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-teaching-generation-4">
+<p><strong>물음.</strong> 같은 라벨에는 늘 같은 그림을 내놓는 생성기가 있다. 속은 아주 복잡한 신경망이다. 라벨 열 가지를 넣어 얻을 수 있는 서로 다른 그림은 몇 장인가?</p>
+<ul>
+<li>[ ] 속이 복잡하니 셀 수 없이 많다 〔틀림: 속이 아무리 복잡해도 같은 입력에 같은 답을 낸다. 입력이 열 가지면 답도 열 가지다.〕</li>
+<li>[x] 많아야 10장 〔맞음: 결정적인 생성기는 입력 가짓수만큼 줄이 있는 룩업 테이블과 같다.〕</li>
+<li>[ ] 학습한 그림 수만큼 〔틀림: 내놓는 그림의 수는 넣을 수 있는 입력의 가짓수가 정한다. 학습 그림 수와는 상관없다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-teaching-generation-5">
+<p><strong>물음.</strong> 바라는 생성기에 대한 말 가운데 맞는 것은?</p>
+<ul>
+<li>[ ] 학습 그림을 무작위로 꺼내 주면 새 그림이 나온다 〔틀림: 무작위로 꺼내도 꺼내는 곳이 학습 데이터라 새로움은 0이다.〕</li>
+<li>[ ] 생성한 그림끼리 서로 많이 다르면 새 그림도 많다 〔틀림: 다양성은 생성한 그림끼리 비교하고, 새로움은 학습 그림과 비교한다. 둘은 따로 잰다.〕</li>
+<li>[ ] 학습 그림과의 거리만 멀면 좋은 생성기다 〔틀림: 평균 그림을 섞은 흐린 그림도 학습 그림과 멀다. 선명함도 함께 봐야 한다.〕</li>
+<li>[x] 다양하고, 선명하고, 학습 그림에서 진짜 새 그림만큼 떨어져 있어야 한다 〔맞음: 셋 가운데 하나만 보면 암기나 흐린 평균 그림도 좋은 생성기로 보인다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <p>라벨 「3」은 그림의 분산 합 가운데 21%만 정하고, 나머지 79%는 생성기가 골라야 한다. 그런데 지금까지 만든 생성기는 둘 다 그 79%를 고르지 못했다. 결정적인 MLP는 열 줄짜리 표였고, 무작위 찾아보기는 학습 그림을 고르는 데만 무작위를 썼다. 획의 자리, 기울기, 굵기처럼 라벨이 정하지 못한 생김새를 생성기가 고르게 하려면, 그 생김새를 정해 줄 값이 라벨 곁에 함께 들어가야 하지 않을까? 그렇다면 그 값은 무엇이어야 하고, 학습 그림마다 그 값을 어디서 얻을까? 라벨은 그림마다 사람이 붙여 주었지만, 획의 생김새를 적은 값을 붙여 준 사람은 없다.</p>
 
