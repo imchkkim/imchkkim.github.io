@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -250,6 +250,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -500,6 +505,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -582,7 +590,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -623,9 +631,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/dynamics-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/dynamics-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="ML 입문자를 위한 동역학"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"dynamics-book","base":"/dynamics-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"dynamics-book","base":"/dynamics-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -664,7 +672,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>마르코프의 체인은 바로 앞 글자 하나만 보았고, 그래서 모음이 셋 이어지는 횟수처럼 앞 글자 하나로는 맞히지 못하는 것이 남았다. 섀넌이 영어 글을 흉내 낼 때는 앞 두 글자를 보았고, 오늘날의 언어 모델은 앞 토큰 수천 개를 본다. 앞 글자를 여럿 보는 순간 「다음은 지금만 보고 정한다」는 체인의 성질은 깨지는 것일까? 깨진다면 지금까지 본 정상 분포와 에르고드 정리는 언어 모델에 쓸 수 없게 된다.</p>
 <h3 id="hist-shannon-markov-source" class="history" data-people="shannon-claude">역사: 섀넌의 마르코프 과정<span id="역사-섀넌의-마르코프-과정" class="anchor-alias"></span></h3>
 <p>섀넌은 1948년 논문에서 영어 글을 내보내는 원천을 마르코프 과정으로 다루었다. 글자를 비율대로 뽑는 원천, 앞 글자 하나를 보고 다음 글자를 뽑는 원천, 앞 두 글자를 보는 원천을 차례로 늘어놓고, 앞을 많이 볼수록 가짜 글이 영어를 닮아 간다는 것을 보였다. 그는 「에르고드 원천과 섞인 원천」이라는 절을 따로 두어, 이런 원천의 통계를 긴 글 하나에서 셀 수 있으려면 원천이 에르고드적이어야 한다는 점도 짚었다. 그가 적은 조건은 글자 사이의 전이 그림이 서로 오가지 않는 두 덩어리로 나뉘지 않을 것, 그리고 그림 속 고리 길이들의 최대공약수가 1일 것이었다. 앞에서 본 에르고드 정리의 두 조건 「갇힌 곳이 없다」와 「주기가 없다」와 같다. 긴 글 한 편에서 센 비율이 그 언어의 모든 글을 모아 센 비율과 같아야 한다는 것, 곧 시간 평균과 분포 평균이 같아야 한다는 것이다.</p>
-<figure class="fig "><img src="images/ch08/h3_shannon_korean.png" alt="섀넌이 영어로 한 근사를 이 책의 2~17장 원고(이 장과 1장 제외)로 해 본 결과. 원고를 아무 데나 펴서 앞 k글자와 같은 곳을 찾고 그 뒤 글자를 적는 일을 되풀이했다. 앞을 많이 볼수록 가짜 글이 한국어 문장을 닮아 간다. 출처: 직접 제작" loading="lazy"><figcaption>섀넌이 영어로 한 근사를 이 책의 2~17장 원고(이 장과 1장 제외)로 해 본 결과. 원고를 아무 데나 펴서 앞 k글자와 같은 곳을 찾고 그 뒤 글자를 적는 일을 되풀이했다. 앞을 많이 볼수록 가짜 글이 한국어 문장을 닮아 간다. 출처: 직접 제작</figcaption></figure>
+<figure class="fig "><img src="images/ch08/h3_shannon_korean.png" alt="섀넌이 영어로 한 근사를 이 책의 1~17장 원고(이 장 제외)로 해 본 결과. 원고를 아무 데나 펴서 앞 k글자와 같은 곳을 찾고 그 뒤 글자를 적는 일을 되풀이했다. 앞을 많이 볼수록 가짜 글이 한국어 문장을 닮아 간다. 출처: 직접 제작" loading="lazy"><figcaption>섀넌이 영어로 한 근사를 이 책의 1~17장 원고(이 장 제외)로 해 본 결과. 원고를 아무 데나 펴서 앞 k글자와 같은 곳을 찾고 그 뒤 글자를 적는 일을 되풀이했다. 앞을 많이 볼수록 가짜 글이 한국어 문장을 닮아 간다. 출처: 직접 제작</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>앞 두 글자를 보는 가짜 글이면, 지금은 글자 세 개짜리 줄을 세서 표를 만들면 끝이에요. 텍스트 파일 하나면 되죠.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>1948년의 섀넌에게는 그 텍스트 파일도, 줄을 세어 줄 컴퓨터도 없었어요. 그럼 앞 두 글자를 보는 표를 어떻게 얻었을까요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>글자 26개에 띄어쓰기까지 27가지면, 앞 두 글자의 경우가 27 × 27 = 729가지예요. 그 뒤에 오는 글자까지 손으로 다 세는 건… 너무 많네요.</p></div></div>
@@ -674,7 +682,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M02"><img src="images/cast/M02.webp" alt="김민준 M02" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그런데 앞 두 글자를 보는 원천은 「지금만 보고 다음을 정하는」 체인이 아니잖아요. 그래도 에르고드 정리를 쓸 수 있어요?</p></div></div>
 <h3 id="앞-두-글자를-한-상태로">앞 두 글자를 한 상태로</h3>
 <p>앞 두 글자를 보는 원천에서 다음 글자의 확률은 앞 글자 둘에 기대는데, 「앞 두 글자」를 한 덩어리의 상태로 보면 어떨까? 상태가 (x₁, x₂)일 때 다음 글자 x₃를 뽑으면 새 상태는 (x₂, x₃)이고, 이 새 상태의 확률은 지금 상태 (x₁, x₂)만으로 정해진다. 상태를 짝으로 넓히자 다시 체인이 된 것이다. 이처럼 다음 상태의 확률이 바로 앞 k개의 상태에 기대는 과정을 <strong>k차 마르코프 체인</strong> (앞 k개를 보는 체인, k-th order Markov chain)이라 하고, 앞 k개를 한 덩어리로 묶은 것을 상태로 삼으면 언제나 보통의 체인으로 바뀐다. 다만 상태의 수가 글자 종류의 k제곱으로 늘어난다.</p>
-<p>이 책의 원고에서 얼마나 늘어나는지 세어 보자. 이 장을 뺀 2~17장 원고(1장은 같은 날 다른 작업이 고치고 있어 뺐다)에서 한글 음절과 띄어쓰기만 남기면 47만 7,525글자이고, 서로 다른 글자는 1,066가지다. 앞 k글자를 문맥으로 삼을 때 만들 수 있는 문맥의 수와 원고에 실제로 나온 문맥의 수를 비교하면 다음과 같다.</p>
+<p>이 책의 원고에서 얼마나 늘어나는지 세어 보자. 이 장을 뺀 1~17장 원고에서 한글 음절과 띄어쓰기만 남기면 62만 6,041글자이고, 서로 다른 글자는 1,107가지다. 앞 k글자를 문맥으로 삼을 때 만들 수 있는 문맥의 수와 원고에 실제로 나온 문맥의 수를 비교하면 다음과 같다.</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -687,38 +695,38 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <tbody>
 <tr>
 <td>1</td>
-<td>1,066</td>
-<td>1,066</td>
-<td>9.5%</td>
+<td>1,107</td>
+<td>1,107</td>
+<td>8.9%</td>
 </tr>
 <tr>
 <td>2</td>
-<td>약 114만</td>
-<td>12,993</td>
-<td>29.6%</td>
+<td>약 123만</td>
+<td>14,221</td>
+<td>27.7%</td>
 </tr>
 <tr>
 <td>3</td>
-<td>약 12억</td>
-<td>55,136</td>
-<td>44.7%</td>
+<td>약 14억</td>
+<td>63,312</td>
+<td>42.8%</td>
 </tr>
 <tr>
 <td>4</td>
-<td>약 1.3조</td>
-<td>144,183</td>
-<td>61.3%</td>
+<td>약 1.5조</td>
+<td>173,452</td>
+<td>59.6%</td>
 </tr>
 <tr>
 <td>6</td>
-<td>약 1.5 × 10^18</td>
-<td>322,011</td>
-<td>81.6%</td>
+<td>약 1.8 × 10^18</td>
+<td>406,684</td>
+<td>80.5%</td>
 </tr>
 </tbody>
 </table></div>
 <p>앞 여섯 글자를 보면 실제로 나온 문맥 10개 가운데 8개는 원고 전체에서 딱 한 번 나온다. 한 번 나온 문맥에서 「다음 글자의 확률」을 세면, 그 한 번 뒤에 온 글자의 확률이 1이 될 뿐이다. 앞을 길게 볼수록 다음 글자를 잘 맞힐 것 같지만, 세어서 만든 전이 행렬은 대부분의 행이 비거나 한 번의 우연으로 채워진다.</p>
-<figure class="fig "><img src="images/ch08/a7_contexts.png" alt="이 책의 2~17장 원고(이 장과 1장 제외)에서 앞 k글자를 문맥으로 삼을 때. 왼쪽: 만들 수 있는 문맥의 수와 실제로 나온 문맥의 수(로그 눈금). 오른쪽: 실제로 나온 문맥 가운데 한 번만 나온 것의 비율" loading="lazy"><figcaption>이 책의 2~17장 원고(이 장과 1장 제외)에서 앞 k글자를 문맥으로 삼을 때. 왼쪽: 만들 수 있는 문맥의 수와 실제로 나온 문맥의 수(로그 눈금). 오른쪽: 실제로 나온 문맥 가운데 한 번만 나온 것의 비율</figcaption></figure>
+<figure class="fig "><img src="images/ch08/a7_contexts.png" alt="이 책의 1~17장 원고(이 장 제외)에서 앞 k글자를 문맥으로 삼을 때. 왼쪽: 만들 수 있는 문맥의 수와 실제로 나온 문맥의 수(로그 눈금). 오른쪽: 실제로 나온 문맥 가운데 한 번만 나온 것의 비율" loading="lazy"><figcaption>이 책의 1~17장 원고(이 장 제외)에서 앞 k글자를 문맥으로 삼을 때. 왼쪽: 만들 수 있는 문맥의 수와 실제로 나온 문맥의 수(로그 눈금). 오른쪽: 실제로 나온 문맥 가운데 한 번만 나온 것의 비율</figcaption></figure>
 <h3 id="ml에서-언어-모델은-아주-큰-체인이다">ML에서: 언어 모델은 아주 큰 체인이다</h3>
 <p>언어 모델 GPT-2는 토큰 종류가 50,257개이고 앞 토큰을 1,024개까지 본다. 앞 1,024개를 상태로 삼으면 언어 모델이 글을 뽑는 일은 상태가 50,257^1024 ≈ 10^4814가지인 체인 위를 걷는 일이다. 이런 전이 행렬은 세어서 만들 수도 저장할 수도 없다. 언어 모델은 행렬을 적어 두는 대신, 상태(앞 토큰들)를 받아 그 행(다음 토큰의 확률)을 그때그때 계산하는 신경망이다. 처음 보는 문맥에서도 비슷한 문맥에서 배운 것을 나눠 쓰므로, 한 번만 나온 문맥의 행이 한 번의 우연으로 채워지는 문제를 피한다.</p>
 <p>상태를 이렇게 크게 잡아도 체인은 체인이라서, 이 장에서 본 성질이 그대로 나타난다. 다음 토큰을 확률대로 뽑지 않고 가장 큰 확률의 토큰만 고르는 그리디 디코딩은 같은 상태에서 늘 같은 다음 상태로 가는 체인이다. 상태의 수가 아무리 커도 유한하면, 이런 체인은 언젠가 앞에 나온 상태를 다시 만나고 그 뒤로는 같은 길을 되풀이한다. 언어 모델이 그리디 디코딩에서 같은 구절을 되풀이하는 현상은 홀츠먼 외(2020) 등이 보고했고, 온도를 두고 확률대로 뽑는 샘플링이 그 되풀이를 깨는 이유를 아래 문제 20에서 작은 모델로 확인해 보자.</p>

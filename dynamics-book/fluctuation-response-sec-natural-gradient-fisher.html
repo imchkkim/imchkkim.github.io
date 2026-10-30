@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -250,6 +250,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -500,6 +505,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -582,7 +590,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -623,9 +631,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/dynamics-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/dynamics-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="ML 입문자를 위한 동역학"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"dynamics-book","base":"/dynamics-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"dynamics-book","base":"/dynamics-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -680,6 +688,10 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p>둘째 식이 왜 나오는지 그림의 점 (2, 1)에서 직접 찾아보자. 셋째 클래스가 정답이면 손실은 2.408이고, 두 로짓에 대한 손실의 그래디언트는 (0.665, 0.245)다. 보통 경사 하강은 이 그래디언트의 반대쪽으로 가서 첫째 로짓을 주로 낮춘다. 그런데 KL이 0.02가 되는 타원의 둘레를 한 바퀴 돌며 스텝을 하나씩 대 보면, 손실을 가장 많이 줄이는 스텝은 두 로짓을 똑같이 낮추는 (−1, −1) 방향이다. 셋째 로짓은 0으로 묶여 있으니, 이것은 정답인 셋째 로짓 하나를 올리는 것과 같은 스텝이다. 그래디언트에 <span class="sym" style="color:#008b8b">𝓘</span>(<span class="sym" style="color:#1b9e77">θ</span>)의 역행렬을 곱하면 바로 이 방향이 나온다. 타원이 길게 누운 방향은 분포가 덜 바뀌는 방향이라, 그 방향으로는 파라미터를 더 크게 움직여도 KL이 그대로이므로, 같은 KL 안에서 손실을 더 많이 줄일 수 있다.</p>
 <h3 id="ml에서-자연-그래디언트와-k-fac">ML에서: 자연 그래디언트와 K-FAC</h3>
 <p>아마리(1998)의 논문 요약 첫 문장은 「파라미터 공간이 어떤 구조를 가지면 함수의 보통 그래디언트는 가장 가파른 방향을 나타내지 않지만 자연 그래디언트는 나타낸다」이다. 이 책의 말로 옮기면 아마리의 문장은 「파라미터마다 모델 분포를 바꾸는 정도가 다르므로, 스코어의 공분산(Fisher 정보)으로 그래디언트를 나눠야 분포가 실제로 가장 빨리 좋아지는 방향이 된다」라는 뜻이다. 에너지가 파라미터의 일차식이면 Fisher 정보가 음의 로그우도의 헤시안과 같으므로, 이때 자연 그래디언트는 뉴턴 방법과 같은 스텝이 된다. 큰 신경망에서는 이 행렬을 그대로 역행렬로 만들 수 없어서 K-FAC(Kronecker-factored approximate curvature의 머리글자)처럼 층별로 쪼개어 근사하는 방법들이 쓰인다. 출력층이 softmax인 모델에서 가우스–뉴턴 행렬(Gauss–Newton matrix, 손실의 헤시안에서 신경망 출력 자체의 2차 미분이 들어간 항을 뺀 근사)과 Fisher 정보 행렬이 같아진다는, 2차 최적화 문헌에서 널리 쓰이는 사실도 크로스 엔트로피의 로짓 헤시안이 모델이 뽑은 원-핫의 공분산이라는 데서 나온다.</p>
+<p>KL이 0.02가 되는 타원처럼, Fisher 정보는 파라미터 공간의 자리마다 눈금이 다른 자 노릇을 한다. 장소마다 눈금이 바뀌는 자를 미분기하학에서는 계량이라 부르고, 분포 하나를 점 하나로 놓은 공간에 Fisher 정보로 그 자를 댄 것을 피셔 계량이라 한다.</p>
+<blockquote>
+<p><strong>길잡이 · 『미분기하학의 언어들』 「피셔 계량: 분포 공간의 눈금」</strong> 정규분포 하나하나를 (평균, 표준편차) 평면의 점으로 놓으면, 표준편차가 작은 곳일수록 같은 파라미터 차이가 더 먼 거리가 되는 「분포 공간의 고무판」. 장소마다 바뀌는 눈금(리만 계량) 위에서 피셔 정보가 어떤 자인지. <a href="https://lameproof.com/diffgeo-book/metric-sec-fisher-metric-distribution-scale.html">이어 읽기</a></p>
+</blockquote>
 <div class="dialogue"><h3 id="prob-fluctuation-same-step-different-change">문제 11. 같은 스텝, 다른 변화<span id="문제-11-같은-스텝-다른-변화" class="anchor-alias"></span></h3>
 <blockquote>
 <p>로짓이 <span class="sym" style="color:#1b9e77">θ</span> 하나인 동전 모델 <span class="sym" style="color:#e377c2">p</span> = 1/(1 + e^(−<span class="sym" style="color:#1b9e77">θ</span>))의 Fisher 정보는 <span class="sym" style="color:#008b8b">𝓘</span>(<span class="sym" style="color:#1b9e77">θ</span>) = <span class="sym" style="color:#e377c2">p</span>(1 − <span class="sym" style="color:#e377c2">p</span>)다. (가) <span class="sym" style="color:#1b9e77">θ</span> = 0(<span class="sym" style="color:#e377c2">p</span> = 0.5)과 <span class="sym" style="color:#1b9e77">θ</span> = ln 99(<span class="sym" style="color:#e377c2">p</span> = 0.99)에서 <span class="sym" style="color:#1b9e77">θ</span>를 똑같이 0.1 늘리면 KL 발산은 각각 얼마인가? (나) <span class="sym" style="color:#e377c2">p</span> = 0.99에서 <span class="sym" style="color:#1b9e77">θ</span> = 0일 때와 같은 KL 발산을 내려면 <span class="sym" style="color:#1b9e77">θ</span>를 얼마나 늘려야 하는가?</p>
