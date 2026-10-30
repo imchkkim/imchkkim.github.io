@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/signal-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/signal-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="스펙트럼으로 보기"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"signal-book","base":"/signal-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"signal-book","base":"/signal-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -772,6 +780,8 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <li><strong>컬러 그레이딩</strong>: 다 그린 화면의 세 숫자를 세 숫자로 바꾸는 함수(3×3 행렬, 3D LUT, 톤 매핑)다. 조명이 하나이고 매끈하면 꽤 듣지만(백열등 오차 5분의 1), 같은 세 숫자로 합쳐진 메타머는 가를 수 없다. 조명을 스펙트럼끼리 곱하는 단계에서 넣어야 한다.</li>
 <li><strong>스펙트럴 렌더링</strong>: 파장마다 빛을 계산하고 세 숫자로 줄이는 일을 맨 끝으로 미룬다. 경로마다 파장을 몇 개 고르는 몬테카를로라 오차가 1/√N 로 주고, RGB 곱의 편향은 줄지 않는다. 히어로 파장처럼 같은 간격으로 고르면 경로 하나로도 RGB 곱보다 정확했다. 웨타의 마누카와 PhysLight 가 영화에서, Mitsuba 3 과 pbrt-v4 가 연구에서 이 방식을 쓴다. 웨타의 파시오네는 카메라 색을 3×3 행렬 너머로 계산하자 사람이 알아볼 만한 차이가 예상보다 훨씬 많은 장면에서 보였다고 말했다.</li>
 </ul>
+<aside class="guide"><p class="guide-title">길잡이 · 『최적화: 경사하강에서 Muon 까지』 「편향–분산: 너무 단순해도, 너무 흔들려도 틀린다」</p><p>경로를 늘려도 줄지 않는 RGB 곱의 오차는 편향, 1/√N 로 줄어드는 몬테카를로의 오차는 분산에서 온다. 두 오차를 과녁과 화살로 나눠 보는 이야기는 최적화 책에서. <a href="https://lameproof.com/optim-book/double-descent.html">이어 읽기</a></p>
+</aside>
 <pre class="mermaid">flowchart LR
   L[&quot;CG 와 사진의 차이&lt;br/&gt;질감 · 그림자 · 피부 · 해상도 · 톤 매핑&quot;] --&gt;|&quot;좁힌 뒤에도 남는 것&quot;| A2
   A[&quot;빛의 스펙트럼&lt;br/&gt;조명 × 반사율&quot;] --&gt;|&quot;곱한 뒤 줄이기&quot;| B[&quot;세 숫자 (참 값)&quot;]
@@ -779,6 +789,55 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   C --&gt; D[&quot;컬러 그레이딩&lt;br/&gt;세 숫자 → 세 숫자&quot;]
   A --&gt;|&quot;파장 샘플링&quot;| E[&quot;스펙트럴 렌더링&quot;]
 </pre>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-cg-rendering-1">
+<p><strong>물음.</strong> 옷 가게 조명 아래에서 양말 두 켤레가 눈의 세 숫자로 똑같았다. 집에 와서 노을빛 아래 보면 어떻게 되는가?</p>
+<ul>
+<li>[ ] 세 숫자가 같았으니 어느 조명에서나 같은 색이다 〔틀림: 세 숫자는 빛의 스펙트럼을 셋으로 줄인 값이다. 스펙트럼이 달라도 세 숫자는 같을 수 있다.〕</li>
+<li>[x] 다른 색으로 갈라질 수 있다 〔맞음: 한 조명에서만 세 숫자가 같은 두 스펙트럼을 메타머라 한다. 조명이 바뀌면 줄인 세 숫자도 달라질 수 있다.〕</li>
+<li>[ ] 좁은 띠 조명에서만 갈라지고, 노을빛 아래에서는 여전히 같다 〔틀림: 파장마다 세기가 고르지 않은 조명이면 갈라질 수 있다. 다섯 칸 장난감 세계에서도 노을빛 아래 두 양말의 세 숫자가 달라졌다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-cg-rendering-2">
+<p><strong>물음.</strong> RGB 렌더러는 조명과 반사율을 먼저 세 숫자로 줄인 뒤 채널마다 곱한다. 이 곱이 참 값과 같아지는 경우는?</p>
+<ul>
+<li>[x] 조명이 고른 흰빛이거나, 물체가 모든 파장에서 반사율이 같은 회색일 때 〔맞음: 둘 가운데 하나가 파장마다 같은 값이면 그 상수를 합 밖으로 꺼낼 수 있다. 그러면 줄이는 일과 곱하는 일의 순서를 바꿔도 된다.〕</li>
+<li>[ ] 없다. RGB 곱은 늘 조금씩 틀린다 〔틀림: 조명이나 반사율 가운데 하나가 파장마다 일정하면 정확하다.〕</li>
+<li>[ ] 좁은 띠 조명처럼 빛이 몇 파장에 몰려 있을 때 〔틀림: 좁은 띠 조명은 RGB 곱이 크게 틀리는 경우다. 줄인 뒤 곱하느냐, 곱한 뒤 줄이느냐가 결과를 크게 바꾼다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-cg-rendering-3">
+<p><strong>물음.</strong> 고른 흰빛 아래 찍은 사진의 세 숫자만 받는 재질 분류 모델이 있다. 두 천은 같은 회색 배경에 걸려 있고, 이 사진에서 세 숫자가 같다. 두 천을 가르게 하려면 무엇을 해야 하는가?</p>
+<ul>
+<li>[ ] 모델을 더 크게 만든다 〔틀림: 입력이 같으면 어떤 모델도 같은 답을 낸다.〕</li>
+<li>[ ] 이웃 칸을 보는 합성곱 층을 쌓아 두 천이 걸린 자리로 가르게 한다 〔틀림: 합성곱은 자리를 모른다. 이웃이 같으면 출력도 같다.〕</li>
+<li>[x] 다른 조명 아래 찍은 사진을 입력에 더한다 〔맞음: 한 조명에서 같던 두 천도 나트륨등 흉내 같은 다른 조명에서는 세 숫자가 갈라진다. 모델을 키우기보다 입력을 늘려야 한다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-cg-rendering-4">
+<p><strong>물음.</strong> 나트륨등 흉내 아래 RGB 곱으로 그린 천 A 와 천 B 가 같은 세 숫자를 받았다. 다 그린 화면의 세 숫자를 다른 세 숫자로 바꾸는 컬러 그레이딩 표(3D LUT)로 고치려 한다. 두 천을 합쳐 가장 좋은 결과는?</p>
+<ul>
+<li>[ ] 한쪽 천의 참 값에 정확하게 맞춘다 〔틀림: 같은 입력에는 출력이 하나뿐이라 다른 쪽 천이 크게 틀린다. 두 천의 오차를 합치면 가운데를 낼 때보다 나쁘다.〕</li>
+<li>[ ] 표의 칸을 65 × 65 × 65 로 늘려 두 천을 따로 맞춘다 〔틀림: 두 천은 표의 같은 칸에 들어간다. 칸을 늘려도 둘을 가를 수 없다.〕</li>
+<li>[x] 두 천의 참 값의 가운데를 낸다. 그래도 오차는 남는다 〔맞음: 같은 세 숫자에는 출력 하나만 낼 수 있다. 메타머를 가르려면 조명을 스펙트럼끼리 곱하는 단계에서 넣어야 한다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-cg-rendering-5">
+<p><strong>물음.</strong> 스펙트럴 렌더링에서 경로 하나마다 파장 네 개를 고른다. 같은 경로 수에서 오차가 가장 작은 방법은?</p>
+<ul>
+<li>[ ] 네 개를 서로 상관없이 무작위로 고른다. 개수가 같으면 오차도 비슷하다 〔틀림: 무작위로 고르면 몰리는 곳과 비는 곳이 생긴다. 같은 파장 네 개라도 고르는 방법에 따라 오차가 열 배 넘게 갈린다.〕</li>
+<li>[x] 하나만 무작위로 고르고 나머지 셋은 그로부터 같은 간격으로 놓는다 〔맞음: 히어로 파장 방식이다. 같은 간격으로 놓으면 간격보다 느린 출렁임이 지워져서, 경로 하나로도 RGB 곱보다 정확했다.〕</li>
+<li>[ ] 어느 방법이든 RGB 곱보다 낫지 않다. 파장을 고르는 것도 결국 몇 개로 줄이는 일이다 〔틀림: 파장마다 따라가는 방법은 경로를 늘리면 오차가 계속 준다. RGB 곱의 편향은 경로를 아무리 늘려도 줄지 않는다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-cg-rendering-6">
+<p><strong>물음.</strong> 보라 칸에 들어온 빛의 일부를 노랑 칸으로 내보내는 형광 펜이 있다. 칸마다 「들어온 빛 × 반사율」을 곱하는 렌더러로 이 펜을 적을 수 있는가?</p>
+<ul>
+<li>[x] 적을 수 없다 〔맞음: 칸마다 곱하기는 대각 행렬이라 빛을 다른 파장으로 옮기지 못한다. 형광은 대각 밖의 칸에 값이 있다.〕</li>
+<li>[ ] 노랑 칸의 반사율을 1 보다 크게 적으면 된다 〔틀림: 고른 빛 하나에 맞춘 숫자다. 보라만 있는 빛 아래에서는 노란빛이 하나도 나오지 않아 틀린다.〕</li>
+<li>[ ] 파장 칸을 더 잘게 나누면 적을 수 있다 〔틀림: 칸을 늘려도 칸마다 따로 곱하는 것은 같다. 들어온 칸과 나가는 칸이 다른 빛은 칸 하나 안에서 끝나지 않는다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <ul>
 <li>물체 반사 스펙트럼 31칸이 실제로는 몇 개의 축이면 거의 다 적힐까? 그 축은 RGB 원색처럼 사람이 정할 수 있을까, 아니면 수많은 재질을 재 본 자료가 골라야 할까?</li>

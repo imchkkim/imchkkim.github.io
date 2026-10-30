@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/signal-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/signal-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="스펙트럼으로 보기"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"signal-book","base":"/signal-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"signal-book","base":"/signal-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -814,6 +822,47 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   C --&gt; D[&quot;합성곱 정리&lt;br/&gt;Y[k] = H[k] X[k]&quot;]
   C --&gt; E[&quot;주파수 응답 H(ω)&lt;br/&gt;물결마다 배율과 밀림&quot;]
 </pre>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-shift-symmetry-1">
+<p><strong>물음.</strong> 두 연산 모두 입력을 한 칸 밀면 출력도 한 칸 밀린다. (가) 선형 시불변 필터, (나) 합성곱 뒤에 ReLU 를 끼운 층. 칸 하나에만 1을 넣었을 때의 응답만 보고 연산 전체를 알 수 있는 것은?</p>
+<ul>
+<li>[ ] 둘 다 〔틀림: ReLU 를 끼우면 밀림은 따라가지만 응답을 더할 수 없다. 칸 하나 응답이 전부를 정하는 것은 선형일 때만이다.〕</li>
+<li>[x] (가)만 〔맞음: 선형이고 평행이동과 순서를 바꿔도 되면, 연산은 칸 하나 응답으로 원형 합성곱하는 꼴이다.〕</li>
+<li>[ ] 둘 다 안 된다 〔틀림: 선형 시불변 필터는 어느 입력이든 칸 하나 응답을 밀어서 더한 것이다. 칸 하나 응답으로 전부 알 수 있다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-shift-symmetry-2">
+<p><strong>물음.</strong> 녹음의 처음 1초 동안 소리를 서서히 키우는 효과가 있다. 같은 박수 소리를 0.2초에 넣을 때와 2초에 넣을 때, 결과는 같은 소리를 민 것인가?</p>
+<ul>
+<li>[ ] 같다. 같은 소리를 넣었으니까 〔틀림: 0.2초의 박수는 작게, 2초의 박수는 원래 크기로 나온다. 같은 입력이라도 넣는 때에 따라 결과가 다르다.〕</li>
+<li>[x] 다르다. 시작부터 잰 시간에 따라 배율이 바뀌어 시불변이 아니다 〔맞음: 규칙이 시작부터의 시간을 쓰면 기준점이 생겨 평행이동 대칭이 깨진다.〕</li>
+<li>[ ] 다르다. 선형이 아니라서다 〔틀림: 배율이 소리 크기와 상관없이 시간으로만 정해지므로 선형이다. 깨진 것은 시불변이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-shift-symmetry-3">
+<p><strong>물음.</strong> 고리 위의 칸 신호에 합성곱 커널이 서로 다른 원형 행렬 두 개를 쓴다. 두 행렬의 고유벡터는 어떤가?</p>
+<ul>
+<li>[ ] 커널마다 다르다 〔틀림: 물결은 평행이동 자체의 고유벡터라 어느 원형 행렬에서나 같다. 커널은 고윳값만 바꾼다.〕</li>
+<li>[x] 같다. 복소 물결이 두 행렬 모두의 고유벡터다 〔맞음: 원형 행렬은 커널이 무엇이든 같은 물결을 고유벡터로 갖고, 커널마다 다른 것은 물결에 곱하는 수다.〕</li>
+<li>[ ] 같다. 실수 코사인 물결도 언제나 고유벡터다 〔틀림: 실수 코사인 물결은 커널이 대칭일 때만 고유벡터다. 대칭이 아니면 코사인 물결이 같은 주파수의 물결로 밀린다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-shift-symmetry-4">
+<p><strong>물음.</strong> 길이가 같은 두 신호를 DFT 해 물결 번호마다 곱하고, 거꾸로 DFT 했다. 무엇이 나오는가?</p>
+<ul>
+<li>[ ] 보통의 합성곱 〔틀림: 끝이 처음으로 감겨 들어간 결과가 나온다. 보통의 합성곱을 얻으려면 결과 길이만큼 제로 패딩한다.〕</li>
+<li>[x] 고리 위의 합성곱 〔맞음: 칸에서 원형 합성곱하는 일과 물결 번호마다 곱하는 일은 같은 연산이다. 고속 푸리에 변환과 함께 쓰면 긴 합성곱이 훨씬 빨라진다.〕</li>
+<li>[ ] 칸마다 곱한 값 〔틀림: 물결 번호마다 곱하는 일은 칸에서는 합성곱이다. 칸마다의 곱이 아니다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-shift-symmetry-5">
+<p><strong>물음.</strong> 위너 필터는 신호와 노이즈의 세기로 물결마다 배율을 정한다. 굵은 무늬일수록 신호가 센 사진에서 노이즈가 세지면, 배율이 ½ 이상인 물결은 어떻게 되는가?</p>
+<ul>
+<li>[ ] 바뀌지 않는다. 노이즈를 줄이는 필터 하나로 어떤 노이즈 크기에도 맞출 수 있다 〔틀림: 가장 좋은 배율의 경계는 노이즈 세기에 따라 움직인다. 그래서 디퓨전 모델의 디노이저는 노이즈 크기를 입력으로 받는다.〕</li>
+<li>[x] 굵은 무늬 몇 개로 줄어든다 〔맞음: 노이즈가 신호보다 센 물결이 늘어나서, 믿을 만한 것은 신호가 센 굵은 무늬뿐이다.〕</li>
+<li>[ ] 늘어난다. 노이즈가 세니 더 많은 물결을 살려야 한다 〔틀림: 노이즈가 신호보다 센 물결은 살릴수록 노이즈가 남는다. 그런 물결의 배율은 작아진다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <ul>
 <li>고리라는 약속을 빼고 가장자리가 있는 칸 신호를 다루면 평행이동 대칭이 깨진다. 그래도 사진이나 소리 한 토막에는 늘 가장자리가 있다. 가장자리 밖을 어떻게 이어 붙인다고 약속하면 다시 쓸모 있는 축을 얻을 수 있을까?</li>

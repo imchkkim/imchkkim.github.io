@@ -98,7 +98,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #b8860b; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -264,6 +264,11 @@ details.answer summary { cursor: pointer; color: var(--accent); }
 .dialogue blockquote p { margin: 0; }
 .dialogue blockquote code { background: #eee; color: #111; }
 [data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
 .turn-T { --who: var(--who-T); }
 .turn-M { --who: var(--who-M); }
 .turn-S { --who: var(--who-S); }
@@ -531,6 +536,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -613,7 +621,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   letter-spacing: 0.03em;
 }
 .widget-label { font-weight: 600; flex: 1; min-width: 12em; }
-.widget-open { font-size: 0.85em; white-space: nowrap; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
 .widget-embed iframe {
   display: block;
   width: 100%;
@@ -654,9 +662,9 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/signal-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/signal-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="스펙트럼으로 보기"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"signal-book","base":"/signal-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"signal-book","base":"/signal-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -812,6 +820,55 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   C --&gt; D[&quot;위치 인코딩 = 1차원 푸리에 특징&lt;br/&gt;못 본 각도와 위치 보간&quot;]
   B --&gt; E[&quot;일찍 멈추기&lt;br/&gt;높은 주파수 노이즈 거르기&quot;]
 </pre>
+<h3 id="정리-연습문제">정리 연습문제</h3>
+<div class="quiz" data-id="q-spectral-bias-1">
+<p><strong>물음.</strong> 과녁을 굵은 물결(진폭 0.5)과 가는 물결(진폭 1.0)의 합으로 두고 작은 신경망을 학습시켰다. 어느 물결의 오차가 먼저 줄어드는가?</p>
+<ul>
+<li>[ ] 가는 물결. 진폭이 커서 손실을 더 많이 줄여 주는 물결부터 지운다 〔틀림: 가는 물결의 진폭을 두 배로 줘도 굵은 물결이 먼저 맞았다. 가는 물결은 마흔 배쯤 늦었다.〕</li>
+<li>[x] 굵은 물결 〔맞음: 신경망은 오차의 낮은 주파수 성분을 먼저 줄인다. 순서는 커널의 고윳값이 정한다.〕</li>
+<li>[ ] 두 물결의 오차가 같은 스텝 수에 맞춰진다 〔틀림: 굵은 물결은 수십 스텝 만에 맞았고, 가는 물결은 천 스텝 넘게 걸렸다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-spectral-bias-2">
+<p><strong>물음.</strong> 신경망의 남은 오차가 0.3 sin π<span class="sym" style="color:#a67a63">x</span> 와 0.4 sin 10π<span class="sym" style="color:#a67a63">x</span> 두 물결이다. 손실(오차 제곱의 평균)은 얼마인가?</p>
+<ul>
+<li>[x] 0.125 〔맞음: 출렁임 수가 다른 물결은 직교해서, 물결마다 진폭 제곱의 절반을 따로 더한다. 0.045 와 0.08 을 더한 값이다.〕</li>
+<li>[ ] 0.245. 진폭 0.3 과 0.4 를 더해 제곱하고 절반을 취한다 〔틀림: 주파수가 같은 물결끼리만 진폭이 더해진다. 출렁임 수가 다른 두 물결은 곱의 평균이 0 이라 교차항이 빠진다.〕</li>
+<li>[ ] 0.35. 진폭 0.3 과 0.4 의 절반을 더한다 〔틀림: 손실은 진폭의 제곱에 비례한다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-spectral-bias-3">
+<p><strong>물음.</strong> 손실이 스텝 100 에서 500 사이 400 스텝 동안 0.118 에서 0.098 로 조금밖에 줄지 않았다. 학습을 멈춰야 하는가?</p>
+<ul>
+<li>[ ] 멈춘다. 이 망이 맞출 수 있는 것은 거의 다 맞췄다 〔틀림: 같은 망이 3000 스텝에는 손실이 98배 작아졌다. 힘이 없던 것이 아니라 가는 물결의 차례가 아직 오지 않았다.〕</li>
+<li>[ ] 멈추지 않는다. 손실이 머물면 늘 끝까지 학습해야 한다 〔틀림: 정답에 노이즈가 섞여 있으면 일찍 멈추는 편이 이득일 때도 있다. 남은 오차가 무엇인지 보고 정한다.〕</li>
+<li>[x] 손실 숫자 하나로는 정할 수 없다. 남은 오차를 주파수로 나눠 본다 〔맞음: 굵은 물결은 다 맞추고 가는 물결 하나가 남은 자리일 수 있다. 그 물결의 진폭이 조금씩이라도 줄고 있으면 아직 배우는 중이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-spectral-bias-4">
+<p><strong>물음.</strong> 넓은 망에서 가는 물결 방향의 고윳값이 가장 큰 고윳값보다 백만 배 넘게 작다. 지금 학습률 0.008 은 학습이 터지지 않는 끝(0.011 남짓) 바로 아래다. 가는 물결을 빨리 배우려고 학습률을 100배로 키우면?</p>
+<ul>
+<li>[ ] 가는 물결도 100배 빨리 배운다 〔틀림: 가는 물결만 보고 셈한 것이다. 고윳값이 가장 큰 방향의 오차가 스텝마다 부호를 바꾸며 커져 학습이 터진다.〕</li>
+<li>[x] 학습이 터진다. 학습률을 키울 수 있는 끝은 가장 큰 고윳값이 정한다 〔맞음: 그 끝까지 키워도 가는 물결은 가장 큰 고윳값과 가장 작은 고윳값의 비만큼 늦다. 학습률로는 두 고윳값의 차이를 메우지 못한다.〕</li>
+<li>[ ] 아무것도 바뀌지 않는다. 학습률은 배우는 순서와 상관없다 〔틀림: 학습률은 스텝마다 오차가 줄어드는 비율을 바꾼다. 너무 키우면 줄어드는 대신 커진다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-spectral-bias-5">
+<p><strong>물음.</strong> 좌표를 sin, cos 물결로 펴서 넣는 푸리에 특징에서 넣을 주파수의 개수 <span class="sym" style="color:#3c4bff">L</span> 을 고른다. 어떻게 고르는가?</p>
+<ul>
+<li>[ ] 클수록 좋다. 가는 무늬를 더 빨리 배운다 〔틀림: 넘치게 넣으면 노이즈를 빨리 외운다. 학습 점의 간격으로 담을 수 있는 주파수를 넘으면 에일리어싱이 생긴다.〕</li>
+<li>[ ] 작을수록 좋다. 좌표를 그대로 넣는 것이 가장 낫다 〔틀림: 좌표를 그대로 넣으면 높은 주파수의 고윳값이 아주 작아 가는 무늬를 거의 배우지 못한다.〕</li>
+<li>[x] 데이터에 든 가장 높은 주파수까지, 학습 점의 간격에 맞춰 고른다 〔맞음: 넣은 주파수까지 고윳값이 고르게 커진다. 데이터에 없는 주파수까지 넣으면 노이즈를 더 빨리 외우게 될 뿐이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-spectral-bias-6">
+<p><strong>물음.</strong> RoPE 로 학습 길이 4096 에서 학습한 언어 모델을 16384 토큰으로 늘린다. YaRN 이 가장 빠른 묶음의 주파수를 줄이지 않고 그대로 두는 이유는?</p>
+<ul>
+<li>[x] 빠른 묶음은 학습 길이 안에서 이미 여러 바퀴를 돌아 모든 각도를 보았다 〔맞음: 늘린 문맥에서도 처음 보는 각도가 생기지 않는다. 줄이면 이웃 토큰 사이의 각도 차가 작아져 가는 정보만 잃는다.〕</li>
+<li>[ ] 빠른 묶음은 위치 정보를 거의 담지 않아서 〔틀림: 빠른 묶음은 바로 옆 토큰과 그다음 토큰을 가르는 가는 위치 정보를 담는다.〕</li>
+<li>[ ] 모든 묶음을 같은 비율로 줄이는 위치 보간과 같은 방법이라서 〔틀림: 위치 보간은 모든 묶음을 같은 비율로 줄이고, YaRN 은 한 바퀴를 못 돈 느린 묶음만 줄인다.〕</li>
+</ul>
+</div>
 <h3 id="막힌-곳">막힌 곳</h3>
 <ul>
 <li>푸리에 특징의 주파수는 사람이 정했다(2배씩, 또는 10000<sup>−2j/d</sup>). 데이터마다 알맞은 주파수가 다를 텐데, 주파수 자체를 데이터에서 배우게 할 수는 없을까? 그러면 스펙트럼 편향은 어떻게 바뀔까?</li>
