@@ -147,7 +147,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #9a6f08; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #9a6f08 은 #f5f5f5 위 대비 4.14 → 5.03(2026-10-30, 다른 권과 같은 값) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -436,6 +436,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -609,6 +612,11 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   --sym-4527a0: #4527a0;
   --sym-7a1f5a: #7a1f5a; --sym-8877ff: #8877ff; --sym-5d4037: #5d4037;
 }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.exercise :is(th, td) { border-color: #ddd; }
+.exercise th { background: #f5f5f5; color: #111; }
+.exercise figcaption { color: #555; }
 
 /* ===== 절 단위 페이지 ===== */
 .page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
@@ -673,9 +681,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 
@@ -724,13 +732,13 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 
 <main>
 <section class="chapter chapter-paged">
-<h3>Chapter 17: 다차원 보상: 스칼라를 넘어서</h3>
+<h3>17장: 다차원 보상: 스칼라를 넘어서</h3>
 <h4 id="q-multi-reward">의문<span id="의문" class="anchor-alias"></span></h4>
 <p>쌍비교로 학습한 Bradley-Terry(BT. 두 응답의 점수 차를 시그모이드로 승률로 바꾸는 모델) 보상 모델은 응답마다 점수 <strong>하나</strong>만 준다. 정책(응답을 뽑는 모델)을 학습하는 정책 그래디언트 속 보상 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span></eq> 도 스칼라다. 그런데 좋은 답은 정확하고, 간결하고, 안전하고, 친절하다는 식으로 여러 면에서 좋다. 보상이 숫자 하나가 아니라 벡터라면, <strong>&quot;이 응답이 좋다&quot;는 판단을 어떻게 내리는가?</strong></p>
 <h4 id="sec-pareto-frontier">파레토 프론티어: 모든 축에서 이기는 응답은 없다<span id="파레토-프론티어-모든-축에서-이기는-응답은-없다" class="anchor-alias"></span></h4>
 <p>선호 데이터를 만드는 사람은 같은 프롬프트에 나온 두 응답을 놓고 하루에도 수백 번 둘 중 하나를 고른다. 그런데 한 응답은 더 정확하고 다른 응답은 더 간결한 경우가 흔하다. 두 응답 가운데 어느 쪽이 &quot;더 좋다&quot;고 말할 수 있을까, 말할 수 없다면 적어도 “확실히 나쁜” 응답은 어떻게 가려낼까?</p>
 <h5 id="hist-pareto-ordinal-comparison" class="history" data-people="pareto-vilfredo">역사: 더할 수 없는 만족을 더하지 않고 비교하기<span id="역사-더할-수-없는-만족을-더하지-않고-비교하기" class="anchor-alias"></span></h5>
-<p>점수를 더하지 않고 「확실히 나쁜 것」만 가려내는 이 판정에 이름을 준 사람은 이탈리아의 빌프레도 파레토(Vilfredo Pareto)다. 그는 원래 토목 기사였다. 1869년 토리노의 공과대학에서 공학 박사 학위를 받고 국영 철도 회사와 제철소에서 일했고, 경제학에 본격적으로 뛰어든 것은 마흔 중반이 되어서였다.</p>
+<p>점수를 더하지 않고 「확실히 나쁜 것」만 가려내는 이 판정에 이름을 준 사람은 이탈리아의 빌프레도 파레토(Vilfredo Pareto)다. 그는 원래 토목 기사였다. 1869년(1870년으로 적은 자료도 있다) 토리노의 공과대학에서 공학 학위를 받고 국영 철도 회사와 제철소에서 일했고, 경제학에 본격적으로 뛰어든 것은 마흔 중반이 되어서였다.</p>
 <p>그 무렵 경제학은 사람마다의 만족(효용)을 숫자로 재어 더할 수 있다고 보았다. 공리주의 철학이 내건 「최대 다수의 최대 행복」도 모두의 만족을 더한 합을 키우자는 말이다. 파레토는 이 덧셈을 버렸다. 한 사람이 무엇을 무엇보다 더 좋아하는지 그 순서만 알면 경제를 다룰 수 있고, 그 좋음이 몇 점인지는 잴 필요가 없다고 처음으로 짚은 사람이 그였다. 좋음은 잴 수 없다고 본 그는 1906년 『정치경제학 교본(Manuale di economia politica)』에서, 점수를 더하지 않고도 내릴 수 있는 판정만 남겼다. 누군가의 처지를 나쁘게 하지 않고는 다른 누구의 처지도 더 낫게 할 수 없는 상태라면, 거기서 모두가 동의할 만큼 나아질 길은 없다. 이 판정에는 사람 사이의 만족을 바꿔 주는 환율이 필요 없다.</p>
 <svg class="fig" viewBox="0 0 560 470" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="두 사람이 빵과 포도주를 나누는 상자. 처음 나눔 E 에서 두 사람의 같은 만족 곡선이 감싼 렌즈 안으로 옮기면 둘 다 나아지고, 렌즈 안의 계약 곡선 위에서는 더 옮길 수 없다">
   <rect x="0" y="0" width="560" height="470" rx="6" style="fill:#ffffff;stroke:#d0cfc8;stroke-width:1"/>

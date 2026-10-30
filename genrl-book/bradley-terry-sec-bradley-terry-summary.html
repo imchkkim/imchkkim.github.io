@@ -147,7 +147,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #9a6f08; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #9a6f08 은 #f5f5f5 위 대비 4.14 → 5.03(2026-10-30, 다른 권과 같은 값) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -436,6 +436,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -609,6 +612,11 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   --sym-4527a0: #4527a0;
   --sym-7a1f5a: #7a1f5a; --sym-8877ff: #8877ff; --sym-5d4037: #5d4037;
 }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.exercise :is(th, td) { border-color: #ddd; }
+.exercise th { background: #f5f5f5; color: #111; }
+.exercise figcaption { color: #555; }
 
 /* ===== 절 단위 페이지 ===== */
 .page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
@@ -673,9 +681,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 
@@ -726,7 +734,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="bradley-terry.html">16. Bradley-Terry 모델: 시그모이드는 왜 거기 있는가?</a></p>
 <h4 id="sec-bradley-terry-summary">혼동하기 쉬운 점과 요약<span id="혼동하기-쉬운-점과-요약" class="anchor-alias"></span></h4>
-<h5 id="talk-bradley-same-gap-top-players">토론 1: 고수끼리는 같은 점수 차라도 승부가 더 기울까<span id="토론-1-고수끼리는-같은-점수-차라도-승부가-더-기울까" class="anchor-alias"></span></h5>
+<h5 id="talk-bradley-same-gap-top-players">토론 1. 고수끼리는 같은 점수 차라도 승부가 더 기울까<span id="토론-1-고수끼리는-같은-점수-차라도-승부가-더-기울까" class="anchor-alias"></span></h5>
 <div class="exercise">
 <p>Elo 2000과 1600인 두 선수, 1200과 800인 두 선수가 있다. BT로 보면 어느 쪽 승부가 한쪽으로 더 기우는가?</p>
 </div>
@@ -739,7 +747,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">그럼 모든 선수 점수에 100점씩 더해도 승률은 하나도 안 바뀌겠네. 점수의 원점은 아무 데나 둬도 되고.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. BT의 점수는 차이만 뜻이 있는 상대적인 양이에요. 400점 차는 2000점대에서 재든 800점대에서 재든 오즈 10배예요.</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">보상 모델 점수도 같겠네요. 두 응답의 보상 차만 손실에 들어가니까, 보상 전체에 상수를 더해도 학습은 그대로고요.</div></div>
-</div><h5 id="talk-bradley-average-probability">토론 2: 정답에 준 확률의 평균이 높으면 더 나은 보상 모델인가<span id="토론-2-정답에-준-확률의-평균이-높으면-더-나은-보상-모델인가" class="anchor-alias"></span></h5>
+</div><h5 id="talk-bradley-average-probability">토론 2. 정답에 준 확률의 평균이 높으면 더 나은 보상 모델인가<span id="토론-2-정답에-준-확률의-평균이-높으면-더-나은-보상-모델인가" class="anchor-alias"></span></h5>
 <div class="exercise">
 <p>사람이 고른 쪽이 정해진 선호 쌍 세 개에서, 보상 모델 A는 사람이 고른 쪽이 이길 확률을 0.98, 0.97, 0.25로, 보상 모델 B는 셋 다 0.7로 예측했다. 어느 보상 모델이 더 나은가? BT 손실로 견주면?</p>
 </div>

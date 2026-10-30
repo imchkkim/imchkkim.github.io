@@ -147,7 +147,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #9a6f08; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #9a6f08 은 #f5f5f5 위 대비 4.14 → 5.03(2026-10-30, 다른 권과 같은 값) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -436,6 +436,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -609,6 +612,11 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   --sym-4527a0: #4527a0;
   --sym-7a1f5a: #7a1f5a; --sym-8877ff: #8877ff; --sym-5d4037: #5d4037;
 }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.exercise :is(th, td) { border-color: #ddd; }
+.exercise th { background: #f5f5f5; color: #111; }
+.exercise figcaption { color: #555; }
 
 /* ===== 절 단위 페이지 ===== */
 .page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
@@ -673,9 +681,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 
@@ -724,7 +732,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 
 <main>
 <section class="chapter chapter-paged">
-<h3>Chapter 5: 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</h3>
+<h3>5장: 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</h3>
 <h4 id="q-bellman">의문<span id="의문" class="anchor-alias"></span></h4>
 <p>세 구역 택시를 다시 떠올려 보자. 운전사는 역, 시장, 대학가 가운데 손님을 내려 준 구역에서 배회(거리를 돌며 손님 태우기)나 승차장(줄에 서서 기다리기, 기다리는 비용 2천 원)을 고르고, 손님을 내려 줄 때마다 1/10 확률로 퇴근한다. 「늘 승차장」 정책(구역마다 무엇을 고를지 정한 규칙)으로 시장에서 하루를 1만 번 돌려 리턴(앞으로 받을 보상의 합)을 평균 내니 59.41이 나왔고, 표준오차(다시 돌리면 평균이 달라지는 정도를 잰 표준편차)가 0.59였다. 시장에서 배회와 승차장의 행동 가치(첫 행동을 정해 두고 그 뒤로 정책을 따를 때의 리턴 기댓값) 차이 0.34가 우연이 아님을 보이는 데는 하루 200만 번이 들었다.</p>
 <p>그 셈을 하는 동안 우리는 같은 숫자 세 개(구역마다의 가치. 그 구역에서 시작해 앞으로 받을 돈의 기댓값)를 알고 싶었을 뿐이다. 그리고 상태의 가치는 바로 아래 상태들의 가치를 확률로 섞은 평균이라는 것도 알고 있었다. 숫자 세 개가 서로를 붙들고 있다면, 하루를 수백만 번 돌리지 않고 그 관계만으로 셈할 수는 없을까?</p>
@@ -819,7 +827,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </svg>
 <p>그림은 단계마다 두 가지 가운데 하나를 고를 때 선택의 줄을 모두 늘어놓는 나무와, 처지가 단계마다 셋뿐이라 가정하고 처지마다 두 선택만 견주는 격자를 나란히 놓고 단계 30의 셈 수를 견준 것이다(처지 셋은 설명을 위한 가정, 이 책이 직접 그림).</p>
 <p>이 방법의 이름 「동적 계획법(dynamic programming)」에는 벨먼 자신이 남긴 일화가 있다. 그는 자서전 『Eye of the Hurricane』(1984)에서, 1950년 가을 학기를 랜드에서 보낼 때 첫 일이 여러 단계 결정 문제에 붙일 이름을 찾는 것이었다고 회고했다. 당시 국방장관 윌슨은 「연구(research)」라는 말만 들어도 얼굴이 붉어질 만큼 그 말을 싫어했고, 공군은 사실상 윌슨의 지휘를 받았다. 그래서 랜드 안에서 수학을 한다는 사실을 가릴 이름이 필요했다는 것이다. 계획을 뜻하는 「programming」에, 여러 단계에 걸쳐 시간에 따라 변한다는 뜻을 담아 「dynamic」을 붙였다. 그는 「dynamic」은 나쁜 뜻으로 쓸 수 없는 형용사라서 국회의원도 반대하지 못할 이름이라고 덧붙였다.</p>
-<p>다만 이 회고를 그대로 믿기는 어렵다는 지적이 있다. 러셀(Stuart Russell)과 노빅(Peter Norvig)은 교과서 『Artificial Intelligence: A Modern Approach』에서, 벨먼이 이 말을 쓴 첫 논문(1952)이 윌슨의 국방장관 취임(1953)보다 앞서므로 이야기가 글자 그대로 사실일 수는 없다고 적었다. 해럴드 쿠슈너(Harold Kushner)는 자신이 같은 물음을 했을 때 벨먼이 조지 댄치그의 「선형 계획법(linear programming)」보다 앞서 보이려고 「dynamic」을 붙였다고 답했다는 다른 이야기를 전했다.</p>
+<p>다만 이 회고를 그대로 믿기는 어렵다는 지적이 있다. 러셀(Stuart Russell)과 노빅(Peter Norvig)은 교과서 『Artificial Intelligence: A Modern Approach』에서, 벨먼이 이 말을 쓴 첫 논문(1952)이 윌슨의 국방장관 취임(1953)보다 앞서므로 이야기가 글자 그대로 사실일 수는 없다고 적었다. 해럴드 쿠슈너(Harold Kushner)는 자신이 같은 물음을 했을 때 벨먼이 조지 단치그의 「선형 계획법(linear programming)」보다 앞서 보이려고 「dynamic」을 붙였다고 답했다는 다른 이야기를 전했다.</p>
 <svg class="fig" viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="연표: 1949년 여름 랜드 자문, 1950년 가을 이름을 찾았다는 자서전의 회고, 1952년 이 이름을 쓴 첫 논문, 1953년 1월 윌슨 국방장관 취임, 1957년 책, 1984년 자서전. 회고는 1950년의 일에 윌슨을 등장시키지만 윌슨의 취임은 첫 논문보다도 뒤다" style="background:#fff;border:1px solid #ccc;border-radius:4px;--w-1:#2a78d6;--w-2:#eb6834;--w-3:#1baf7a;--w-4:#4a3aa7;--w-ink:#0b0b0b;--w-ink-2:#222222;--w-muted:#6b6a65;--w-grid:#e1e0d9;--w-axis:#c3c2b7;--w-surface:#ffffff;--w-fill-1:rgba(42,120,214,0.14);--w-fill-2:rgba(235,104,52,0.14);--w-fill-3:rgba(27,175,122,0.16);--w-neutral:#f0efec;--sym-0093b8:#0093b8;--sym-1c9c60:#1c9c60;--sym-d9670b:#d9670b;--sym-1565c0:#1565c0;--sym-00897b:#00897b;--sym-8877ff:#8877ff;--sym-5d4037:#5d4037;--sym-7a1f5a:#7a1f5a;--sym-915a08:#915a08;--sym-5f970c:#5f970c;">
   <defs><marker id="h2-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" markerUnits="strokeWidth" orient="auto"><path class="sink" style="fill:var(--w-ink-2)" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
   <line class="sink" x1="20" y1="120" x2="540" y2="120" stroke-width="2"/>

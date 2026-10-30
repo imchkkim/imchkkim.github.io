@@ -147,7 +147,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #9a6f08; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #9a6f08 은 #f5f5f5 위 대비 4.14 → 5.03(2026-10-30, 다른 권과 같은 값) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -436,6 +436,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -609,6 +612,11 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   --sym-4527a0: #4527a0;
   --sym-7a1f5a: #7a1f5a; --sym-8877ff: #8877ff; --sym-5d4037: #5d4037;
 }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.exercise :is(th, td) { border-color: #ddd; }
+.exercise th { background: #f5f5f5; color: #111; }
+.exercise figcaption { color: #555; }
 
 /* ===== 절 단위 페이지 ===== */
 .page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
@@ -673,9 +681,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 
@@ -729,8 +737,8 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p>앞 절의 루프 그림에서 「에이전트」 상자에는 LLM 하나만 그려져 있었지만, 같은 모델을 쓰는 코딩 도우미들이 일을 해내는 정도는 서로 다르다. 그 성능 차이는 상자 안 어디에서 나올까? 모델이 같다면, 모델이 무엇을 보고 무엇을 할 수 있는지를 정하는 부분(모델을 감싼 실행 틀)이 다른 것이다.</p>
 <h5 id="hist-react-reason-act" class="history" data-people="yao-shunyu">역사: 생각과 행동을 번갈아 쓰게 한 틀<span id="역사-생각과-행동을-번갈아-쓰게-한-틀" class="anchor-alias"></span></h5>
 <p>언어 모델이 루프 안으로 들어온 대표적인 계기는 2022년 10월 프린스턴과 구글의 야오(Shunyu Yao)와 동료들이 낸 ReAct다. 그때까지 언어 모델의 추론(답 전에 생각을 적는 것)과 행동 계획은 따로 연구됐다. 생각만 적는 모델은 위키백과를 찾아볼 수 없어 사실을 지어냈고, 행동만 하는 모델은 지금까지 본 것을 정리하지 못해 엉뚱한 행동을 되풀이했다. ReAct는 모델의 파라미터를 건드리지 않았다. 모델에게 「생각」과 「행동」을 번갈아 쓰게 하고, 행동으로는 위키백과에 <code>search[개체]</code>(첫 다섯 문장 받기), <code>lookup[문자열]</code>(그 문자열이 든 다음 문장 받기), <code>finish[답]</code> 세 가지만 허락했다. 예시 한두 개를 보여 주는 것만으로 집안일 게임 환경(ALFWorld)과 쇼핑 사이트 흉내(WebShop)에서 모방 학습·강화학습으로 훈련한 방법보다 성공률이 각각 34%p, 10%p 높았다. 바뀐 것은 모델이 아니라, 모델에게 무엇을 쓰게 하고 무엇을 할 수 있게 하는 틀이었다.</p>
-<svg class="fig" viewBox="0 0 560 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ALFWorld 성공률: 모방 학습 BUTLER 37, 행동만 45, ReAct 71. WebShop 성공률: IL 29.1, IL+RL 28.7, 행동만 30.1, ReAct 40.0">
-  <rect x="0" y="0" width="560" height="360" rx="6" style="fill:#ffffff;stroke:#cccccc"/>
+<svg class="fig" viewBox="0 0 560 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ALFWorld 성공률: 모방 학습 BUTLER 37, 행동만 45, ReAct 71. WebShop 성공률: IL 29.1, IL+RL 28.7, 행동만 30.1, ReAct 40.0">
+  <rect x="0" y="0" width="560" height="380" rx="6" style="fill:#ffffff;stroke:#cccccc"/>
   <text x="280.0" y="26.0" text-anchor="middle" style="fill:#111111;font-size:16px;font-weight:700">성공률 (%): 예시 1~2개를 보인 ReAct 와 훈련한 방법</text>
   <text x="16.0" y="60.0" text-anchor="start" style="fill:#111111;font-size:15px;font-weight:700">ALFWorld (집안일 게임)</text>
   <text x="182.0" y="85.8" text-anchor="end" style="fill:#111111;font-size:14px">모방 학습 BUTLER</text>
@@ -756,11 +764,12 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   <rect x="190.0" y="272.0" width="165.0" height="22.0" rx="0" style="fill:#eb6834;fill-opacity:1"/>
   <text x="361.0" y="287.8" text-anchor="start" style="fill:#111111;font-size:14px">40</text>
   <line x1="190.0" y1="62.0" x2="190.0" y2="294.0" style="stroke:#888888;stroke-width:1.5"/>
-  <text x="16.0" y="322.0" text-anchor="start" style="fill:#555555;font-size:13px">회색 막대는 사람이 쓴 궤적 1,012개로 훈련했다(IL+RL 은 지시문 10,587개로 더 훈련).</text>
-  <text x="16.0" y="342.0" text-anchor="start" style="fill:#555555;font-size:13px">ReAct 는 모델을 학습시키지 않고, 손으로 쓴 예시 궤적만 프롬프트에 넣었다.</text>
+  <text x="16.0" y="322.0" text-anchor="start" style="fill:#555555;font-size:13px">회색 막대는 궤적으로 훈련했다. BUTLER 는 태스크 유형마다 전문가 궤적 10만 개,</text>
+  <text x="16.0" y="342.0" text-anchor="start" style="fill:#555555;font-size:13px">IL 은 사람이 쓴 궤적 1,012개(IL+RL 은 지시문 10,587개로 더 훈련).</text>
+  <text x="16.0" y="362.0" text-anchor="start" style="fill:#555555;font-size:13px">ReAct 는 모델을 학습시키지 않고, 손으로 쓴 예시 궤적만 프롬프트에 넣었다.</text>
 </svg>
 <blockquote>
-<p><em>ReAct는 모델을 학습시키지 않고 손으로 쓴 예시 궤적 한두 개만 보여 주고도, 사람이 쓴 궤적 1,012개로 훈련한 방법보다 두 환경 모두에서 성공률이 높았다. 출처: Yao 외, 「ReAct」(ICLR 2023) 표 3·4의 숫자로 새로 그림.</em></p>
+<p><em>ReAct는 모델을 학습시키지 않고 손으로 쓴 예시 궤적 한두 개만 보여 주고도, 천 개에서 수십만 개의 궤적으로 훈련한 방법(ALFWorld 는 태스크 유형마다 전문가 궤적 10만 개, WebShop 은 사람이 쓴 궤적 1,012개)보다 두 환경 모두에서 성공률이 높았다. 출처: Yao 외, 「ReAct」(ICLR 2023) 표 3·4의 숫자로 새로 그림.</em></p>
 </blockquote>
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">생각하고, 찾아보고, 다시 생각하고… 지금 코딩 도우미가 다 하는 일이잖아요. 이게 2022년에야 나왔다는 게 좀 신기해요.</div></div>

@@ -147,7 +147,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #9a6f08; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #9a6f08 은 #f5f5f5 위 대비 4.14 → 5.03(2026-10-30, 다른 권과 같은 값) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -436,6 +436,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -609,6 +612,11 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   --sym-4527a0: #4527a0;
   --sym-7a1f5a: #7a1f5a; --sym-8877ff: #8877ff; --sym-5d4037: #5d4037;
 }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.exercise :is(th, td) { border-color: #ddd; }
+.exercise th { background: #f5f5f5; color: #111; }
+.exercise figcaption { color: #555; }
 
 /* ===== 절 단위 페이지 ===== */
 .page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
@@ -673,9 +681,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 
@@ -833,7 +841,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <ol>
 <li><strong>크기.</strong> &quot;이 풀이 앞부분에서 결국 맞힐 확률&quot;을 예측하려면 풀이를 정책만큼 이해해야 한다. 그래서 비평가는 흔히 보상 모델이나 정책을 복사해 시작하고, 크기도 그만큼 크다. 오픈AI의 InstructGPT(2022)는 1.3B·6B·175B(파라미터 13억·60억·1,750억 개) 정책 모두에 6B 보상 모델에서 시작한 6B 비평가를 붙였다. 175B 비평가를 쓰면 PPO의 계산량이 크게 늘고, 175B 보상 모델은 학습이 불안정했기 때문이다. 비평가를 정책과 같은 7B(파라미터 70억 개)로 두고 혼합 정밀도 Adam(널리 쓰는 옵티마이저 Adam을 16비트와 32비트 수를 섞어 돌리는 방식)으로 학습하면, 파라미터 값뿐 아니라 그래디언트와 옵티마이저 상태도 메모리에 올라간다. 두 모델에 얼마나 드는지는 아래 문제 5에서 세어 본다.</li>
 <li><strong>정확도.</strong> 게임의 비평가는 점수가 수시로 들어오는 장면을 아주 많이 보며 배운다. 언어 모델의 비평가는 &quot;천 토큰짜리 풀이의 300번째 토큰 시점에서 결국 맞힐 확률&quot;을, 끝에 한 번 주어지는 0/1 점수만 보고 배워야 한다. 학습 초기의 비평가는 거의 무작위이고, GAE의 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#993600"><mi>λ</mi></mstyle><mo>&lt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\textcolor{#993600}{\lambda} &lt; 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7335em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="color:var(--sym-993600, #993600);">λ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></eq> 부분은 그 무작위 예측을 어드밴티지에 섞는다.</li>
-<li><strong>두 모델의 춤.</strong> 정책이 바뀌면 &quot;정책을 따를 때의 기대 점수&quot;인 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#00897b"><msup><mi>V</mi><mi>π</mi></msup></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#00897b}{V^\pi}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord" style="color:var(--sym-00897b, #00897b);"><span class="mord mathnormal" style="margin-right:0.2222em;color:var(--sym-00897b, #00897b);">V</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-00897b, #00897b);"><span class="mord mathnormal mtight" style="margin-right:0.0359em;color:var(--sym-00897b, #00897b);">π</span></span></span></span></span></span></span></span></span></span></span></eq>도 바뀐다. 비평가는 움직이는 과녁을 쫓고, 정책은 그 비평가의 판단을 따른다. 둘의 학습 속도가 어긋나면 불안정해진다.</li>
+<li><strong>두 모델의 춤.</strong> 정책이 바뀌면 &quot;정책을 따를 때의 기대 점수&quot;인 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#00897b"><msup><mi>V</mi><mi>π</mi></msup></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#00897b}{V^\pi}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord" style="color:var(--sym-00897b, #00897b);"><span class="mord mathnormal" style="margin-right:0.2222em;color:var(--sym-00897b, #00897b);">V</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-00897b, #00897b);"><span class="mord mathnormal mtight" style="margin-right:0.0359em;color:var(--sym-00897b, #00897b);">π</span></span></span></span></span></span></span></span></span></span></span></eq>도 바뀐다. 비평가는 움직이는 결승선을 쫓고, 정책은 그 비평가의 판단을 따른다. 둘의 학습 속도가 어긋나면 불안정해진다.</li>
 </ol>
 <p>세 번째 항목의 위험, 곧 비평가가 틀린 예측이 정책을 어떻게 비트는지는 아래 문제 7에서 숫자로 본다. 아래 위젯의 비평가 단추를 「‘24’ 뒤 +0.3」으로 바꾸면, 오답 풀이에서 ‘24’를 쓴 뒤의 앞부분을 실제보다 0.3 높게 보는 비평가가 된다.</p>
 <div class="widget" data-widget="gae-lambda" data-set="bias"></div>

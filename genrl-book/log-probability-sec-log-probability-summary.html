@@ -147,7 +147,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #9a6f08; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #9a6f08 은 #f5f5f5 위 대비 4.14 → 5.03(2026-10-30, 다른 권과 같은 값) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -436,6 +436,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -609,6 +612,11 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   --sym-4527a0: #4527a0;
   --sym-7a1f5a: #7a1f5a; --sym-8877ff: #8877ff; --sym-5d4037: #5d4037;
 }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.exercise :is(th, td) { border-color: #ddd; }
+.exercise th { background: #f5f5f5; color: #111; }
+.exercise figcaption { color: #555; }
 
 /* ===== 절 단위 페이지 ===== */
 .page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
@@ -673,9 +681,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 
@@ -726,7 +734,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="log-probability.html">13. 로그확률: 문장의 확률은 어떻게 매기나</a></p>
 <h4 id="sec-log-probability-summary">혼동하기 쉬운 점과 요약<span id="혼동하기-쉬운-점과-요약" class="anchor-alias"></span></h4>
-<h5 id="talk-log-parallel-scoring">토론 1: 이미 다 적힌 답안도 앞에서부터 차례로 봐야 하나<span id="토론-1-이미-다-적힌-답안도-앞에서부터-차례로-봐야-하나" class="anchor-alias"></span></h5>
+<h5 id="talk-log-parallel-scoring">토론 1. 이미 다 적힌 답안도 앞에서부터 차례로 봐야 하나<span id="토론-1-이미-다-적힌-답안도-앞에서부터-차례로-봐야-하나" class="anchor-alias"></span></h5>
 <div class="exercise">
 <p>이어달리기 네 주자의 경기를 처음부터 끝까지 찍은 영상이 있다. 주자마다 구간 기록을 재려면 1번 주자의 구간부터 차례로 재야 하는가?</p>
 </div>
@@ -740,7 +748,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">트랜스포머로 응답의 로그확률을 구할 때는 어느 쪽이죠?</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">응답이 이미 다 있으니까 영상을 보는 쪽이요. 한 번에 넣으면 자리마다의 확률표가 동시에 나와요. 생성할 때만 앞 토큰이 나와야 다음 토큰을 뽑을 수 있고요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T13.webp" alt="선생님 (흐뭇함)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 앞의 답이 이미 적혀 있으면 자리마다 따로, 동시에 볼 수 있어요. 차례가 필요한 것은 답을 만들어 낼 때예요.</div></div>
-</div><h5 id="talk-log-same-order-mean">토론 2: 순서가 같으면 평균도 비슷한가<span id="토론-2-순서가-같으면-평균도-비슷한가" class="anchor-alias"></span></h5>
+</div><h5 id="talk-log-same-order-mean">토론 2. 순서가 같으면 평균도 비슷한가<span id="토론-2-순서가-같으면-평균도-비슷한가" class="anchor-alias"></span></h5>
 <div class="exercise">
 <p>어느 카페 손님 가운데 오전·오후·저녁 손님의 비율이 평일에는 50%, 30%, 20%, 주말에는 70%, 20%, 10%다. 한 사람의 평균 결제액은 요일과 상관없이 오전 4,000원, 오후 6,000원, 저녁 10,000원이다. 두 날 모두 오전 손님이 가장 많고 저녁 손님이 가장 적으니, 손님 한 사람의 평균 결제액도 비슷한가?</p>
 </div>

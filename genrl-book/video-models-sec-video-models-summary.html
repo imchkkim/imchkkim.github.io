@@ -147,7 +147,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #9a6f08; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #9a6f08 은 #f5f5f5 위 대비 4.14 → 5.03(2026-10-30, 다른 권과 같은 값) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -436,6 +436,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -609,6 +612,11 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   --sym-4527a0: #4527a0;
   --sym-7a1f5a: #7a1f5a; --sym-8877ff: #8877ff; --sym-5d4037: #5d4037;
 }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.exercise :is(th, td) { border-color: #ddd; }
+.exercise th { background: #f5f5f5; color: #111; }
+.exercise figcaption { color: #555; }
 
 /* ===== 절 단위 페이지 ===== */
 .page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
@@ -673,9 +681,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 
@@ -726,7 +734,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="video-models.html">27. 영상 생성 모델의 학습: 시퀀스와 디퓨전 사이에서 무엇을 "강제"하는가</a></p>
 <h4 id="sec-video-models-summary">혼동하기 쉬운 점과 요약<span id="혼동하기-쉬운-점과-요약" class="anchor-alias"></span></h4>
-<h5 id="talk-video-same-start">토론 1: 연습 때와 실전 때 출발점은 같은가<span id="토론-1-연습-때와-실전-때-출발점은-같은가" class="anchor-alias"></span></h5>
+<h5 id="talk-video-same-start">토론 1. 연습 때와 실전 때 출발점은 같은가<span id="토론-1-연습-때와-실전-때-출발점은-같은가" class="anchor-alias"></span></h5>
 <div class="exercise">
 <p>티처 포싱으로 학습한 영상 모델이, 정답 과거를 넣어 주면 다음 프레임을 99% 그럴듯하게 만든다. 이 모델이 혼자 100프레임을 이어 만들 때도 프레임마다 99%로 그럴듯할까?</p>
 </div>
@@ -740,7 +748,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그러면 99%는 「정답 과거에서 한 장 만들기」의 성공률이네. 혼자 만들 때 받는 입력은 그거랑 다르게 생겼고, 뒤로 갈수록 더 달라질 거고.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">리듬 게임 연습 모드랑 비슷하네. 틀리면 그 소절 처음으로 돌려주니까 99%가 나와도, 본 게임에서 한 번 박자가 밀리면 다음 노트를 밀린 자리에서 쳐야 하잖아.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 바로잡아 주는 사람이 없으면 다음 순간은 자기 실수가 만든 자리에서 시작해요. 연습 때의 성공률은 그런 출발점에서 잰 적이 없어요.</div></div>
-</div><h5 id="talk-video-errors-add-up">토론 2: 프레임마다 생기는 오차는 그냥 더해지나<span id="토론-2-프레임마다-생기는-오차는-그냥-더해지나" class="anchor-alias"></span></h5>
+</div><h5 id="talk-video-errors-add-up">토론 2. 프레임마다 생기는 오차는 그냥 더해지나<span id="토론-2-프레임마다-생기는-오차는-그냥-더해지나" class="anchor-alias"></span></h5>
 <div class="exercise">
 <p>프레임마다 새 오차 0.02가 생기고, 어긋난 과거는 다음 프레임에 1.1배로 넘어간다(<eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#cc00ff"><mi>g</mi></mstyle><mo>=</mo><mn>1.1</mn></mrow><annotation encoding="application/x-tex">\textcolor{#cc00ff}{g} = 1.1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-cc00ff, #cc00ff);">g</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1.1</span></span></span></span></eq>). 30번째 프레임의 누적 오차는 0.02 × 30 = 0.6인가?</p>
 </div>

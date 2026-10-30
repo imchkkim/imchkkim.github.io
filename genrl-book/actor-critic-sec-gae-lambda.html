@@ -147,7 +147,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #9a6f08; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #9a6f08 은 #f5f5f5 위 대비 4.14 → 5.03(2026-10-30, 다른 권과 같은 값) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -436,6 +436,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -609,6 +612,11 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   --sym-4527a0: #4527a0;
   --sym-7a1f5a: #7a1f5a; --sym-8877ff: #8877ff; --sym-5d4037: #5d4037;
 }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.exercise :is(th, td) { border-color: #ddd; }
+.exercise th { background: #f5f5f5; color: #111; }
+.exercise figcaption { color: #555; }
 
 /* ===== 절 단위 페이지 ===== */
 .page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
@@ -673,9 +681,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 
@@ -726,7 +734,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="actor-critic.html">9. Actor-Critic: 비평가를 곁에 두다</a></p>
 <h4 id="sec-gae-lambda">GAE: 둘 사이를 λ로 잇는다<span id="gae-둘-사이를-λ로-잇는다" class="anchor-alias"></span></h4>
-<p>MC는 편향이 없는 대신 분산이 크고, TD는 분산이 작은 대신 비평가가 틀린 만큼 편향된다. 학습은 응답마다, 토큰마다 이 추정을 되풀이하므로 편향과 분산 가운데 어느 오류를 받아들일지는 매번 따라오는 선택이다. 둘 중 하나만 골라야 할까, 아니면 가까운 미래는 실제 결과를 보고 먼 미래만 비평가에 맡기는 중간은 없을까?</p>
+<p>MC는 편향이 없는 대신 분산이 크고, TD는 분산이 작은 대신 비평가가 틀린 만큼 편향된다. 「과녁과 화살」로 그리면 MC의 화살은 넓게 흩어지되 한가운데를 둘러싸고, TD의 화살은 좁게 모이되 비평가가 틀린 만큼 비켜 난 곳에 모인다. 학습은 응답마다, 토큰마다 이 추정을 되풀이하므로 편향과 분산 가운데 어느 오류를 받아들일지는 매번 따라오는 선택이다. 둘 중 하나만 골라야 할까, 아니면 가까운 미래는 실제 결과를 보고 먼 미래만 비평가에 맡기는 중간은 없을까?</p>
 <h5 id="hist-berkeley-gae" class="history" data-people="schulman-john">역사: 버클리의 절충<span id="역사-버클리의-절충" class="anchor-alias"></span></h5>
 <p>MC와 TD 사이의 중간을 파라미터 λ 하나로 고를 수 있게 만든 것이 UC 버클리의 존 슐먼(John Schulman)과 동료들(모리츠 Philipp Moritz, 레빈 Sergey Levine, 조던 Michael Jordan, 아빌 Pieter Abbeel)이 2016년 ICLR에 발표한 GAE다. 그들이 겨냥한 것은 시뮬레이션 속 로봇이었다. 두 다리·네 다리 로봇이 관절에 주는 힘만으로 달리게 하고, 누운 자세에서 일어서게 하는 일이다. 정책 그래디언트로 이런 일을 배우려면 샘플이 너무 많이 든다는 것이 큰 걸림돌이었고, 그들은 가치함수로 분산을 크게 줄이는 대신 편향을 조금 받아들이기로 했다. 두 다리 로봇이 달리기를 배우는 데 든 시뮬레이션 경험은 실제 시간으로 1~2주 분량이었다. 같은 슐먼이 이듬해 내놓은 PPO(비평가를 쓰는 정책 그래디언트의 대표 방법)와 함께 쓰이며, GAE는 언어 모델 RLHF에서 어드밴티지를 계산하는 기본 방법이 됐다.</p>
 <svg class="fig" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="장난감 문제에서 λ 를 0에서 1로 올리면 비평가 탓의 편향 제곱은 0.81에서 0으로 줄고, 보상 노이즈 탓의 분산은 0.16에서 0.84로 커진다. 둘을 더한 오차는 λ = 0.925 근처에서 0.68로 가장 작다" style="background:#fff;border:1px solid #ccc;border-radius:4px;--w-1:#2a78d6;--w-2:#eb6834;--w-3:#1baf7a;--w-4:#4a3aa7;--w-ink:#0b0b0b;--w-ink-2:#222222;--w-muted:#6b6a65;--w-grid:#e1e0d9;--w-axis:#c3c2b7;--w-surface:#ffffff;--w-fill-1:rgba(42,120,214,0.14);--w-fill-2:rgba(235,104,52,0.14);--w-fill-3:rgba(27,175,122,0.16);--w-neutral:#f0efec;--sym-0093b8:#0093b8;--sym-1c9c60:#1c9c60;--sym-d9670b:#d9670b;--sym-1565c0:#1565c0;--sym-00897b:#00897b;--sym-8e44ad:#8e44ad;--sym-7a1f5a:#7a1f5a;--sym-993600:#993600;">

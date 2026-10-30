@@ -147,7 +147,7 @@ aside.sidenote {
   background: var(--bg-code);
   font-size: 0.93em;
 }
-aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #9a6f08; }
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #9a6f08 은 #f5f5f5 위 대비 4.14 → 5.03(2026-10-30, 다른 권과 같은 값) */
 [data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
 [data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
 
@@ -436,6 +436,9 @@ pre.mermaid {
 #sidebar a.active:hover {
   background: var(--accent);
 }
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
 
 /* ===== Print ===== */
 @media print {
@@ -609,6 +612,11 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   --sym-4527a0: #4527a0;
   --sym-7a1f5a: #7a1f5a; --sym-8877ff: #8877ff; --sym-5d4037: #5d4037;
 }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.exercise :is(th, td) { border-color: #ddd; }
+.exercise th { background: #f5f5f5; color: #111; }
+.exercise figcaption { color: #555; }
 
 /* ===== 절 단위 페이지 ===== */
 .page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
@@ -673,9 +681,9 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/genrl-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/genrl-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성모델의 강화학습"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=70befe84" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"70befe84"}</script>
-<script defer src="/reader/reader.js?v=70befe84" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"genrl-book","base":"/genrl-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
 </head>
 <body>
 
@@ -724,10 +732,10 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 
 <main>
 <section class="chapter chapter-paged">
-<h2>Part IV: 두 줄기의 만남 (액터–크리틱과 PPO)</h2>
+<h2>4부: 두 줄기의 만남 (액터–크리틱과 PPO)</h2>
 <p>정책 그래디언트는 고른 것의 로그확률을 점수만큼 올렸고, 가치 기반 방법은 상태마다 앞으로 받을 보상의 합(리턴)을 추정했다. 이 파트는 둘을 한 모델 안에서 만나게 한다: <em>정책이 고르고, 가치함수가 그 선택을 평가한다.</em> 그리고 그렇게 커진 학습이 너무 멀리 가지 않게 묶는다.</p>
 <hr>
-<h3>Chapter 9: Actor-Critic: 비평가를 곁에 두다</h3>
+<h3>9장: Actor-Critic: 비평가를 곁에 두다</h3>
 <h4 id="q-actor-critic">의문<span id="의문" class="anchor-alias"></span></h4>
 <p>REINFORCE는 응답 전체에 숫자 하나를 준다. 다음 오답을 보자.</p>
 <blockquote>
@@ -737,8 +745,11 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p>토큰마다 따로 물을 수는 없을까? <strong>“이 토큰 하나가 결과를 얼마나 좋게, 혹은 나쁘게 만들었나?”</strong> 그러려면 풀이 중간중간에 &quot;지금 이 풀이가 얼마나 유망한가&quot;를 알려줄 누군가가 필요하다. 그 누군가가 <strong>비평가</strong>(critic)이고, 행동하는 정책(프롬프트를 받아 답을 고르는 언어 모델)을 <strong>액터</strong>(actor)라 부른다. 둘이 함께 학습하는 구조가 Actor-Critic이다.</p>
 <p>두 이름에는 지금까지 따로 걸어온 두 줄기가 들어 있다. 액터는 고른 것의 로그확률을 점수만큼 올리는 정책 그래디언트 줄기의 정책이고, 비평가는 상태마다 앞으로 받을 보상의 합(리턴)을 벨먼 방정식과 시간차 학습으로 추정하는 가치 기반 줄기의 가치함수다. 가치 기반 방법은 가치함수만 배우고 행동은 행동 가치가 가장 큰 것을 고르는 식으로 정했지만, 액터–크리틱은 정책을 따로 두고 가치함수를 그 정책의 점수표로 쓴다.</p>
 <h4 id="sec-advantage">어드밴티지: 가치가 얼마나 바뀌었나<span id="어드밴티지-가치가-얼마나-바뀌었나" class="anchor-alias"></span><span id="hist-bellman-to-critic" class="anchor-alias"></span></h4>
-<p>&quot;지금 이 풀이가 얼마나 유망한가&quot;를 숫자로 적을 수 있다면, 토큰 하나의 책임은 유망함이 그 토큰 앞뒤로 얼마나 달라졌는지로 잴 수 있지 않을까? 먼저 &quot;유망함&quot;을 셀 수 있는 것으로 만들자.</p>
-<p>보상이 정답 1 / 오답 0이라고 하자. 풀이를 어느 지점까지 써 둔 채로 모델에게 나머지를 이어 쓰게 하기를 여러 번 되풀이한다. 100번 가운데 45번이 정답으로 끝나면 그 앞부분의 유망함은 0.45다. 어떤 모델로 “17 × 3” 풀이의 지점마다 이렇게 세어 보니 아래와 같았다고 하자(설명을 위해 정한 값이다).</p>
+<p>&quot;지금 이 풀이가 얼마나 유망한가&quot;를 숫자로 적을 수 있다면, 토큰 하나의 책임은 유망함이 그 토큰 앞뒤로 얼마나 달라졌는지로 잴 수 있지 않을까?</p>
+<p>끝에 받은 숫자 하나를 거기에 이르기까지 내린 결정들 사이에 나누는 물음을 크레딧 할당(credit assignment)이라 한다. 조별과제에서 조 전체가 받은 A 도장 하나를 조원마다 몇 점씩으로 나눌지 묻는 것과 같은 물음이고(「조별과제의 A 도장」), 신경망의 층 사이에서는 역전파가 그 답을 낸다. 강화학습이 답해야 하는 것은 시간을 따라 이어진 스텝 사이의 나눔이다.</p>
+<aside class="guide"><p class="guide-title">길잡이 · 『최적화: 경사하강에서 Muon 까지』 「크레딧 할당」</p><p>조별과제의 A 도장 그림의 원본과, 층 사이의 나눔(역전파)과 스텝 사이의 나눔(강화학습)을 한 그림에서 나란히 보고, 민스키가 1961년 글에서 크레딧 할당 문제를 적은 역사를 따라간다. <a href="https://lameproof.com/optim-book/backprop-sec-credit-assignment.html">이어 읽기</a></p>
+</aside>
+<p>먼저 &quot;유망함&quot;을 셀 수 있는 것으로 만들자. 보상이 정답 1 / 오답 0이라고 하자. 풀이를 어느 지점까지 써 둔 채로 모델에게 나머지를 이어 쓰게 하기를 여러 번 되풀이한다. 100번 가운데 45번이 정답으로 끝나면 그 앞부분의 유망함은 0.45다. 어떤 모델로 “17 × 3” 풀이의 지점마다 이렇게 세어 보니 아래와 같았다고 하자(설명을 위해 정한 값이다).</p>
 <div class="table-scroll"><table>
 <thead>
 <tr>
