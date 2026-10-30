@@ -868,6 +868,55 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </tbody>
 </table></div>
 <p>시각 생성 RL은 선호 기반·정책 그래디언트·GRPO 기반의 세 가지로 나뉘고, 정책 그래디언트와 GRPO 기반 방법은 CLIP 점수에서 멀티모달 LLM 심사까지 진화해 온 보상 모델에 기댄다. 요즘의 플로우 매칭 모델은 결정론적 ODE로 샘플링해 로그확률도 탐색도 없으므로, 노이즈가 퍼뜨린 만큼 스코어 쪽으로 되모아 주변분포를 보존하는 SDE로 바꿔 노이즈를 다시 넣어야 GRPO를 쓸 수 있다(Flow-GRPO, DanceGRPO). 그러면 스텝마다 정규분포라 레퍼런스와의 KL도 닫힌 꼴로 계산되고, 두 모델의 평균 차이가 같아도 노이즈가 작은 스텝에서 KL이 크다. GRPO를 새 도메인에 옮길 때마다 시작 노이즈·앵커처럼 &quot;그룹 안에서 무엇을 같게 두고 비교할지&quot;를 새로 정해야 하고, 보상이 완성본에만 오는 크레딧 할당 문제는 마지막 스텝부터 학습하고 중간에서 갈라 같은 분기끼리 비교하는 방식으로 다룬다.</p>
+<h5 id="정리-연습문제">정리 연습문제</h5>
+<div class="quiz" data-id="q-image-robotics-1">
+<p><strong>물음.</strong> 시각 생성 RL의 세 가지 방법(선호 기반, 정책 그래디언트, GRPO 기반)을 「비평가(가치 모델)가 있는가」로 나눌 때, 정책 그래디언트 줄에 맞는 것은?</p>
+<ul>
+<li>[ ] 없음. DDPO에 비평가가 없으니까 〔틀림: DDPO 하나가 정책 그래디언트 방법 전부는 아니다. PPO식으로 구현하면 가치 모델을 붙일 수 있다.〕</li>
+<li>[ ] 늘 있음. 정책 그래디언트는 비평가 없이 돌지 않는다 〔틀림: DDPO는 비평가 없이 보상 모델과 온라인 생성만으로 돈다.〕</li>
+<li>[x] 방법에 따라 다르다. DDPO는 없고 PPO식이면 있지만, 시각 생성에서는 드물다 〔맞음: 이미지·영상 모델만 한 비평가를 하나 더 올리면 메모리가 두 배가 든다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-image-robotics-2">
+<p><strong>물음.</strong> 한 학생이 같은 답안을 여덟 장 복사해 냈고, 채점자는 매번 조금씩 달리 6.97점에서 7.03점 사이를 주었다(평균 7.00, 표준편차 약 0.019). 7.03점 답안의 표준점수는 약 1.6이다. 이 1.6은 무엇을 뜻하는가?</p>
+<ul>
+<li>[ ] 여덟 장 가운데 7.03점 답안을 가장 잘 썼다 〔틀림: 여덟 장이 모두 같은 답안이라 잘 쓰고 못 쓰고가 없다.〕</li>
+<li>[x] 채점자의 손에서 나온 0.03점 차이가 표준 크기로 부풀려진 값일 뿐이다 〔맞음: 표준점수는 차이의 크기를 지운다. 0.02점의 노이즈도 2점의 실력 차와 같은 표준점수가 된다.〕</li>
+<li>[ ] 아무 뜻이 없다. 같은 답안이면 표준편차가 0이라 표준점수를 구할 수 없다 〔틀림: 점수가 조금씩 달라 표준편차가 0이 아니다. 모두 7.00점을 받았을 때에만 표준편차가 0이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-image-robotics-3">
+<p><strong>물음.</strong> ODE 샘플러로 같은 프롬프트·같은 시작 노이즈의 그림 8장을 만들었다. 보상 모델이 계산 순서 탓에 0.70에서 0.73 사이의 점수를 내서, 어드밴티지가 0이 아니게 나왔다. 정책은 이 그룹에서 배우는가?</p>
+<ul>
+<li>[ ] 배운다. 노이즈로라도 순위가 매겨졌으니 그 순위대로 그래디언트가 생긴다 〔틀림: 순위가 매겨지는 것과 그래디언트가 생기는 것은 다르다.〕</li>
+<li>[x] 배우지 못한다. 여덟 장이 같은 경로라 로그확률의 그래디언트가 하나뿐이고, 어드밴티지의 합이 0이라 상쇄된다 〔맞음: 그래서 ODE를 같은 주변분포의 SDE로 바꿔 스텝마다 노이즈를 다시 넣는다.〕</li>
+<li>[ ] 배우지 못한다. 표준편차가 0이라 어드밴티지를 계산할 수 없다 〔틀림: 이번에는 점수가 조금씩 달라 표준편차가 0이 아니다. 배우지 못하는 이유는 경로가 하나뿐이라는 데 있다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-image-robotics-4">
+<p><strong>물음.</strong> Flow-GRPO에서 학습 모델과 레퍼런스의 스텝 평균이 모든 스텝에서 똑같이 0.01씩 어긋나 있다. 스텝마다의 KL은 어떻게 되는가?</p>
+<ul>
+<li>[x] 노이즈가 작은 완성 그림 끝 스텝에서 크다. 10스텝 샘플러에서 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">t = 0.1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.1</span></span></span></span></eq> 스텝의 KL은 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><mn>0.9</mn></mrow><annotation encoding="application/x-tex">t = 0.9</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.9</span></span></span></span></eq> 스텝의 81배다 〔맞음: 노이즈 폭이 좁은 두 분포는 평균이 조금만 어긋나도 크게 갈라진다.〕</li>
+<li>[ ] 평균 차이가 모든 스텝에서 0.01로 같으니 KL도 모든 스텝에서 같다 〔틀림: KL은 평균 차이의 제곱을 노이즈 폭의 제곱으로 나눈다. 노이즈 폭이 스텝마다 다르다.〕</li>
+<li>[ ] 노이즈가 큰 스텝에서 크다. 노이즈가 크면 레퍼런스에서 더 멀리 가니까 〔틀림: 스텝 노이즈는 두 모델이 똑같이 받는다. 노이즈 폭이 크면 평균 차이가 묻혀 오히려 KL이 작다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-image-robotics-5">
+<p><strong>물음.</strong> DanceGRPO는 한 그룹의 모든 샘플이 같은 시작 노이즈를 쓰게 한다. 이 선택에 대해 맞는 말은?</p>
+<ul>
+<li>[ ] 탐색이 줄어드는 손해를 감수한 선택이다 〔틀림: 줄어드는 것은 정책이 원래 배울 수 없는 시작 노이즈 쪽 차이다. 스텝 노이즈의 탐색은 남는다.〕</li>
+<li>[x] 시작 노이즈에서 온 보상 차이는 정책이 배울 수 없는 운이라, 같게 두어야 스텝 행동의 차이만 남는다 〔맞음: 로그확률은 스텝 전이에만 있고, 시작 노이즈는 그냥 정규분포에서 뽑은 것이다.〕</li>
+<li>[ ] 그룹 평균은 여러 시작 노이즈에 걸친 기대 보상을 재야 좋은데, 공유하면 그 추정이 좁아져 베이스라인이 나빠진다 〔틀림: 베이스라인은 같은 상태에 조건을 걸수록 분산이 작다. 다양한 시작 노이즈는 그룹을 여러 개 만들어 얻는다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-image-robotics-6">
+<p><strong>물음.</strong> B²-DiffuRL은 디노이징 중간 상태에서 여러 번 갈라 끝까지 만든 뒤, 각 완성본의 보상에서 평균을 뺀다. 이 평균은 무엇을 추정하는가?</p>
+<ul>
+<li>[ ] GRPO 그룹의 평균과 같은 것. 출발점만 프롬프트에서 중간 상태로 바뀌었다 〔틀림: GRPO 그룹의 평균은 첫 상태의 가치이고, 분기의 평균은 중간 상태의 가치다. 평균을 뺀 차이가 책임을 묻는 구간도 다르다.〕</li>
+<li>[ ] 따로 학습한 비평가가 예측한 값 〔틀림: 비평가를 학습하는 대신 그때그때 굴려서 잰다.〕</li>
+<li>[x] 그 중간 상태의 가치 함수를 몬테카를로로 추정한 값 〔맞음: 보상에서 이 평균을 빼면 갈라진 뒤 구간이 평균보다 얼마나 나았는지가 남는다.〕</li>
+</ul>
+</div>
 
 </section>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="image-robotics-sec-branch-sampling.html">&larr; 분기 샘플링: 중간에서 갈라 같은 분기끼리 비교한다</a><span class="page-count">6 / 6</span><a class="chapter-nav-next" href="video-models.html">27. 영상 생성 모델의 학습: 시퀀스와 디퓨전 사이에서 무엇을 "강제"하는가 &rarr;</a></nav>

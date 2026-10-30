@@ -838,6 +838,55 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </table></div>
 <h5 id="요약">요약</h5>
 <p>모델이 정보를 얻는 방법은 둘이다. 데이터를 섞어 스펙트럼을 넓히는 섞어서 넓히기(프리트레인·SFT)와, 그 스펙트럼 위에서 특정 방향을 키우는 곱해서 고르기(RLHF·DPO·GRPO)다. 정책 그래디언트는 실제로 뽑힌 답에만 작용하므로 곱해서 고르는 RL은 없는 답을 만들지 못하고, RL의 상한은 프리트레인과 SFT가 정한다. 데이터를 순방향 KL(SFT)과 역방향 KL(RL) 가운데 어느 쪽으로 가르칠지는 목표 분포의 엔트로피가 정한다. 이름처럼 봉우리가 한 토큰 안에서 끝나고 꼬리가 상품인 자리는 덮는 순방향(SFT)으로, 풀이 경로처럼 봉우리 사이가 오답인 자리는 고르는 역방향(RL·증류)으로 가르친다. 그 단위는 데이터셋이 아니라 토큰이다. 한 문제 단위에서는 정답과 오답이 섞여야 시그널이 있고, 그 확률은 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><msup><mi>p</mi><mi>G</mi></msup><mo>−</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false">)</mo><mi>G</mi></msup></mrow><annotation encoding="application/x-tex">1 - p^G - (1-p)^G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0358em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">G</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0913em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">G</span></span></span></span></span></span></span></span></span></span></span></eq> 라서 정답률 30–70% 문제가 가장 많이 가르친다. 파라미터 공간에서 RL이 바꾸는 양은 적다. 받아들이는 정보가 적고 움직이는 파라미터도 일부지만, 그 변화가 몇 개 방향에만 몰린 것은 아니다. 이 조건들을 합친 예측대로, RLVR은 pass@1을 크게 올리지만 아주 많이 시도할 때의 폭은 줄이고, 보상이 무작위여도 클리핑 편향을 통해 원래 우세하던 모드를 끌어올린다. RLVR의 효과 상당 부분은 이미 있던 능력을 표면으로 꺼내는 것이다.</p>
+<h5 id="정리-연습문제">정리 연습문제</h5>
+<div class="quiz" data-id="q-rl-conditions-1">
+<p><strong>물음.</strong> 모델이 답 A를 0.7, B를 0.3의 확률로 내고, 가장 좋은 답 C는 한 번도 내지 않는다(확률 0). C를 내게 하려면?</p>
+<ul>
+<li>[ ] C에 가장 높은 점수를 주고 RL로 학습한다 〔틀림: RL은 지금 확률에 배수를 곱해 고르는 학습이라, 0에는 무엇을 곱해도 0이다.〕</li>
+<li>[ ] C의 확률이 0보다 조금이라도 크면, RL을 오래 돌려 언젠가 강화할 수 있다 〔틀림: 현실적인 샘플 수 안에서 한 번도 뽑히지 않는 답은 그래디언트에 나오지 않는다.〕</li>
+<li>[x] C가 든 데이터를 섞어 학습해 스펙트럼부터 넓힌다 〔맞음: 섞어서 넓히기만 0을 벗어난다. 그 뒤에야 곱해서 고르는 RL이 C를 키울 수 있다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-rl-conditions-2">
+<p><strong>물음.</strong> 「그녀의 이름은」 다음 자리처럼 드문 이름의 꼬리가 상품인 자리는 어떻게 가르치는가?</p>
+<ul>
+<li>[x] 모든 봉우리를 덮는 순방향 KL, 곧 SFT로 가르친다 〔맞음: 이름의 봉우리는 한 토큰 안에서 끝나 넓게 덮어도 해가 없고, 드문 이름의 꼬리를 지킨다.〕</li>
+<li>[ ] 역방향 KL로 가르친다. 꼬리를 버려도 페널티가 0.80으로 작아 꼬리를 거의 안 잃는다 〔틀림: 작은 페널티는 꼬리를 싸게 버릴 수 있다는 뜻이다. 확률 0.55의 꼬리를 버려도 0.80뿐이라 소설마다 같은 이름이 나온다.〕</li>
+<li>[ ] 검증 손실이 0으로 내려갈 때까지 학습한다 〔틀림: 목표 분포의 엔트로피(약 6.2 nats)가 손실의 하한이다. 그 아래로 계속 내려가면 암기하거나 이름 분포를 좁히고 있다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-rl-conditions-3">
+<p><strong>물음.</strong> 작은 학생 모델을 학습시키며, 어떤 토큰은 역방향 KL로 큰 교사 모델을 따라 하게 하고(증류) 나머지는 데이터의 정답으로 크로스 엔트로피 학습을 한다. 증류로 보낼 토큰은 무엇으로 고르는가?</p>
+<ul>
+<li>[ ] 데이터셋(도메인)으로 고른다. 수학 풀이는 증류, 웹 문서는 크로스 엔트로피 〔틀림: 같은 수학 풀이 안에서도 계산 토큰과 갈림길 토큰은 교사의 확신이 다르다. 도메인 나눔은 무작위 나눔보다도 낮았다.〕</li>
+<li>[x] 토큰마다 교사의 예측 엔트로피를 재서, 교사가 확신하는(엔트로피가 낮은) 토큰을 고른다 〔맞음: 나눔의 단위는 토큰이다. 봉우리가 하나인 자리라 역방향 KL이 그 봉우리를 그대로 강화한다.〕</li>
+<li>[ ] 교사가 망설이는(엔트로피가 높은) 토큰을 고른다 〔틀림: 교사를 따라 하는 목표는 교사가 준 확률에서 멈춰, 학생도 똑같이 얼버무리게 된다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-rl-conditions-4">
+<p><strong>물음.</strong> 정답률 0.8인 문제에서 답을 4개씩 뽑아 GRPO 그룹을 만든다. 맞는 말은?</p>
+<ul>
+<li>[x] 시그널이 있을 확률은 약 0.59로, 정답과 오답이 섞인 그룹에서만 배운다 〔맞음: 모두 맞힐 확률 0.4096과 모두 틀릴 확률 0.0016을 빼면 0.5888이다.〕</li>
+<li>[ ] 정답이 하나라도 있으면 시그널이 생기니 거의 매번 배운다 〔틀림: 네 답이 모두 정답이면 어드밴티지가 모두 0이다. 시그널에는 정답과 오답이 모두 필요하다.〕</li>
+<li>[ ] 그룹을 8개로 늘리면 「모두 정답」 확률이 절반이 된다 〔틀림: 하나 늘 때마다 0.8이 한 번 더 곱해지므로 절반이 되지 않고 제곱이 된다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-rl-conditions-5">
+<p><strong>물음.</strong> RLVR 모델은 베이스 모델보다 pass@1이 크게 높았지만, 256번 시도하는 pass@256에서는 오히려 낮았다. 해석으로 맞는 것은?</p>
+<ul>
+<li>[ ] RLVR 모델이 더 나쁜 모델이다 〔틀림: 한 번에 맞히기는 늘고 여러 번 시도할 때의 폭은 줄었다. 어느 쪽이 중요한지는 용도가 정한다.〕</li>
+<li>[x] RL이 베이스 모델이 드물게 맞히던 일부 문제의 성공확률을 사실상 0으로 만들었다 〔맞음: 성공확률이 0인 문제는 몇 번을 시도해도 0이라 시도를 늘려도 따라잡지 못한다.〕</li>
+<li>[ ] 시도를 끝없이 늘리면 두 모델 모두 1로 가니 차이는 우연이다 〔틀림: 성공확률이 0인 문제는 몇 번을 시도해도 0이다. 극한은 성공확률이 0보다 큰 문제의 비율이다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-rl-conditions-6">
+<p><strong>물음.</strong> Qwen2.5-Math-7B를 정답과 상관없는 동전 던지기 보상으로 GRPO 학습했더니 MATH-500 점수가 21.4%p 올랐다. 그 이유로 맞는 것은?</p>
+<ul>
+<li>[ ] 기댓값이 0인 업데이트이니 데이터 오염이나 평가 오차다 〔틀림: 그 논증은 그래디언트가 보상에 비례하는 꼴이라고 전제했다. GRPO는 클리핑 때문에 그 꼴이 아니다.〕</li>
+<li>[ ] 무작위 보상이 새로운 추론 능력을 만들어 냈다 〔틀림: 무엇이 증폭될지는 프리트레인이 정한다. 같은 실험이 Llama 계열에서는 재현되지 않았다.〕</li>
+<li>[x] 클리핑이 원래 확률이 높은 토큰을 덜 잘라서, 원래 우세하던 코드 추론 습관이 증폭되었다 〔맞음: 이것이 클리핑 편향이다. 클리핑을 빼면 무작위 보상의 효과도 사라졌다.〕</li>
+</ul>
+</div>
 
 </section>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="rl-conditions-sec-spurious-rewards.html">&larr; 가짜 보상: 무작위 보상으로도 점수가 오르는 이유</a><span class="page-count">6 / 6</span><a class="chapter-nav-next" href="grpo-variants.html">23. GRPO의 변종들: 설계 선택을 하나씩 의심하다 &rarr;</a></nav>

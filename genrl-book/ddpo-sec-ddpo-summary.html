@@ -821,6 +821,55 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 </table></div>
 <h5 id="요약">요약</h5>
 <p>디퓨전은 이미지를 한 번에 그리지 않는다. 제곱 오차로 학습한 네트워크의 답은 조건부 평균이라, 순수한 노이즈에서 한 번에 회귀하면 모든 이미지의 흐릿한 평균이 나온다. 그래서 지금까지 그린 결과(내부 조건)를 다음 디노이징 스텝의 조건으로 넣어 평균을 한 봉우리로 좁혀 간다. 시간을 축으로 한 자기회귀다. 추정이 스텝마다 바뀌는 것은 조건이 특정되기 때문이고, 처음 추정은 앞으로의 추정들의 평균이다. 한 스텝 생성은 가능하지만 대개 여러 스텝 모델을 압축한 것이고, 교사의 수준에 닿으려면 보고된 예로 4스텝은 걸렸다. 이렇게 생성이 여러 번의 결정이므로, 쌍비교 데이터 없이 점수만 주는 보상 모델이 있을 때 DDPO는 디노이징 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#915a08"><mi>T</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#915a08}{T}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;color:var(--sym-915a08, #915a08);">T</span></span></span></span></eq>스텝을 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#915a08"><mi>T</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#915a08}{T}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;color:var(--sym-915a08, #915a08);">T</span></span></span></span></eq>번의 행동으로 보는 MDP로 디퓨전에 정책 그래디언트를 쓴다. 이미지 전체의 확률은 몰라도 실제로 밟은 경로의 스텝별 정규분포 로그확률은 정확히 계산되고, 스텝 노이즈 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#993600"><msub><mi>σ</mi><mi>t</mi></msub></mstyle><mstyle mathcolor="#b8860b"><mi>ε</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#993600}{\sigma_t}\textcolor{#b8860b}{\varepsilon}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord" style="color:var(--sym-993600, #993600);"><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-993600, #993600);">σ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-993600, #993600);"><span class="mord mathnormal mtight" style="color:var(--sym-993600, #993600);">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathnormal" style="color:var(--sym-b8860b, #b8860b);">ε</span></span></span></span></eq>가 탐색을, <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#1565c0"><msub><mi>μ</mi><mi>θ</mi></msub></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#1565c0}{\mu_\theta}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord" style="color:var(--sym-1565c0, #1565c0);"><span class="mord mathnormal" style="color:var(--sym-1565c0, #1565c0);">μ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight" style="color:var(--sym-1565c0, #1565c0);"><span class="mord mathnormal mtight" style="margin-right:0.0278em;color:var(--sym-1565c0, #1565c0);">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></eq>가 학습되는 판단을 맡는다. 노이즈가 작을수록 샘플 하나의 그래디언트는 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#b8860b"><mi>ε</mi></mstyle><mi mathvariant="normal">/</mi><mstyle mathcolor="#993600"><mi>σ</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#b8860b}{\varepsilon}/\textcolor{#993600}{\sigma}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="color:var(--sym-b8860b, #b8860b);">ε</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.0359em;color:var(--sym-993600, #993600);">σ</span></span></span></span></eq>로 예민해지고, 노이즈가 없는 결정론적 샘플러에서는 로그확률도 탐색도 사라진다. 그래디언트는 REINFORCE식(DDPO<sub>SF</sub>)이나 임포턴스 비율과 클리핑을 쓰는 PPO식(DDPO<sub>IS</sub>)으로 추정하고, 프롬프트별 보상 정규화가 비평가를 대신한다. 대가는 보상 모델에 대한 전적인 의존이다. 온라인 탐색이 보상 모델의 빈틈을 찾아내 리워드 해킹이 일어나고, 보상 앙상블은 모델마다 다른 빈틈만 지울 뿐 공유된 편향은 남긴다.</p>
+<h5 id="정리-연습문제">정리 연습문제</h5>
+<div class="quiz" data-id="q-ddpo-1">
+<p><strong>물음.</strong> 거의 순수한 노이즈에서 깨끗한 이미지를 한 번에 맞히도록 제곱 오차로 학습한 네트워크가 흐릿한 얼룩을 내놓는다. 그 이유는?</p>
+<ul>
+<li>[ ] 학습이 부족해서다. 더 오래 학습하면 또렷해진다 〔틀림: 순수한 노이즈에는 봉우리를 가를 정보가 없어 평균이 최선이다.〕</li>
+<li>[x] 제곱 오차의 최선은 조건부 평균이라, 여러 이미지의 평균이 나온다 〔맞음: 그래서 지금까지 그린 결과를 조건으로 넣는 스텝을 여러 번 밟아 평균을 한 봉우리로 좁혀 간다.〕</li>
+<li>[ ] 가장 그럴듯한 이미지 하나를 고르려다 흐려진다 〔틀림: 회귀는 봉우리 하나를 고르지 않고 봉우리들의 평균을 낸다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-ddpo-2">
+<p><strong>물음.</strong> DDPO는 이미지 전체의 로그확률을 모르는데도 정책 그래디언트를 쓴다. 어떻게 하는가?</p>
+<ul>
+<li>[ ] 이미지 하나를 한 번의 행동으로 보고 ELBO로 로그확률을 근사한다 〔틀림: DDPO는 디노이징 스텝 하나를 행동 하나로 본다.〕</li>
+<li>[ ] 선호 이미지 쌍에서 노이즈 예측 오차를 로그확률 대리로 쓴다 〔틀림: 그것은 Diffusion-DPO의 방식이다. DDPO는 점수만 주는 보상 모델로 학습한다.〕</li>
+<li>[x] 디노이징 스텝 하나를 행동 하나로 보고, 밟은 경로의 스텝별 로그확률을 쓴다 〔맞음: 한 스텝은 정규분포라 그 로그확률은 정확히 계산된다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-ddpo-3">
+<p><strong>물음.</strong> 한 디노이징 스텝에서 표준 노이즈 0.5로 샘플했다. 노이즈 크기를 0.5에서 0.1로 줄이면 샘플 하나의 로그확률 그래디언트는?</p>
+<ul>
+<li>[x] 1에서 5로, 다섯 배 커진다 〔맞음: 그래디언트는 표준 노이즈를 노이즈 크기로 나눈 값이라, 노이즈가 작을수록 예민해진다.〕</li>
+<li>[ ] 벗어난 거리도 함께 줄어 그대로다 〔틀림: 벗어난 거리는 다섯 배 줄지만 분모의 분산은 스물다섯 배 준다.〕</li>
+<li>[ ] 다섯 배 작아진다 〔틀림: 노이즈가 작을수록 같은 편차가 드문 일이 되어 그래디언트가 커진다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-ddpo-4">
+<p><strong>물음.</strong> 노이즈를 섞지 않는 결정론적 샘플러(노이즈를 얼마나 섞을지 정하는 파라미터 η를 0으로 둔 DDIM)로 만든 경로에 DDPO를 쓸 수 있는가?</p>
+<ul>
+<li>[ ] 아주 작은 노이즈 크기를 가정해 계산하면 쓸 수 있다 〔틀림: 그래디언트가 노이즈 크기에 반비례해 한없이 튀고, 그 경로는 그 분포에서 뽑힌 것도 아니다.〕</li>
+<li>[x] 쓸 수 없다. 노이즈가 섞이는 샘플링으로 바꿔 노이즈를 다시 넣어야 한다 〔맞음: 스텝 분포가 한 점이라 로그확률이 정의되지 않고, 스텝 단위의 탐색도 사라진다.〕</li>
+<li>[ ] 쓸 수 있다. 시작점이 무작위이니 탐색은 충분하다 〔틀림: 시작점 말고는 무작위성이 없어, 같은 시작점에서는 늘 같은 경로가 나온다. 스텝마다 고른 행동의 차이가 없다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-ddpo-5">
+<p><strong>물음.</strong> PPO식 DDPO(DDPO<sub>IS</sub>)가 한 번 생성한 경로로 업데이트를 두 번 한다. 두 번째 업데이트에서 이 경로는?</p>
+<ul>
+<li>[ ] 같은 학습 루프에서 방금 뽑았으니 여전히 지금 정책의 샘플이다 〔틀림: 첫 업데이트로 정책이 바뀌었다. 장의 예에서 같은 스텝의 밀도가 0.20에서 0.26이 되었다.〕</li>
+<li>[ ] 이미 쓴 경로라 버려야 한다 〔틀림: 한 번 쓰고 버리는 것은 REINFORCE식 추정이다. 비율로 보정하면 여러 번 쓸 수 있다.〕</li>
+<li>[x] 다른 정책이 뽑은 샘플이 되었으니, 확률 비율로 보정하고 너무 멀어진 비율은 클리핑한다 〔맞음: 비율이 정책 변화를 보정하고, 클리핑은 비율이 큰 경로 몇 개가 업데이트를 휘두르지 않게 막는다.〕</li>
+</ul>
+</div>
+<div class="quiz" data-id="q-ddpo-6">
+<p><strong>물음.</strong> 보상 모델 여러 개의 평균(보상 앙상블)으로 DDPO를 돌린다. 리워드 해킹은 어떻게 되나?</p>
+<ul>
+<li>[x] 모델마다 다른 빈틈은 지우지만, 모든 모델이 공유하는 빈틈은 그대로 남는다 〔맞음: 같은 데이터로 비슷하게 학습한 모델이면 빈틈도 같은 곳에 생기기 쉽다.〕</li>
+<li>[ ] 앙상블이면 어떤 빈틈이든 메워진다 〔틀림: 두 모델의 빈틈이 같은 곳에 있으면 평균이 거기서 여전히 1.5다.〕</li>
+<li>[ ] 빈틈에 양수 점수가 남아 있는 한 정책은 결국 그 빈틈으로 간다 〔틀림: 최적화는 순위 싸움이다. 장의 예에서 진짜 최고점의 평균 1이 빈틈의 0.75보다 컸다.〕</li>
+</ul>
+</div>
 
 </section>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="ddpo-sec-diffusion-reward-hacking.html">&larr; 리워드 해킹: 보상 모델의 빈틈을 파고든다</a><span class="page-count">5 / 5</span><a class="chapter-nav-next" href="image-robotics.html">26. 이미지·로보틱스의 강화학습: GRPO가 시각 생성을 만났을 때 &rarr;</a></nav>
