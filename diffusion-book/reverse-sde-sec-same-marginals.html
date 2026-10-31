@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주변 분포: 길은 달라도 매 순간의 분포는 같다 — 랑주뱅과 역방향 미분방정식: 샘플을 뽑는 길 — 생성 모델: MLP에서 디퓨전 트랜스포머까지</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>@font-face{font-display:block;font-family:KaTeX_AMS;font-style:normal;font-weight:400;src:url(fonts/KaTeX_AMS-Regular.woff2) format("woff2"),url(fonts/KaTeX_AMS-Regular.woff) format("woff"),url(fonts/KaTeX_AMS-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Bold.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Caligraphic;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Regular.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Fraktur-Bold.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Bold.woff) format("woff"),url(fonts/KaTeX_Fraktur-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Fraktur;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Fraktur-Regular.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Regular.woff) format("woff"),url(fonts/KaTeX_Fraktur-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Main-Bold.woff2) format("woff2"),url(fonts/KaTeX_Main-Bold.woff) format("woff"),url(fonts/KaTeX_Main-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Main-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Main-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Main-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Main-Italic.woff2) format("woff2"),url(fonts/KaTeX_Main-Italic.woff) format("woff"),url(fonts/KaTeX_Main-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Main;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Main-Regular.woff2) format("woff2"),url(fonts/KaTeX_Main-Regular.woff) format("woff"),url(fonts/KaTeX_Main-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Math-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Math-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Math-BoldItalic.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Math;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Math-Italic.woff2) format("woff2"),url(fonts/KaTeX_Math-Italic.woff) format("woff"),url(fonts/KaTeX_Math-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:700;src:url(fonts/KaTeX_SansSerif-Bold.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Bold.woff) format("woff"),url(fonts/KaTeX_SansSerif-Bold.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:italic;font-weight:400;src:url(fonts/KaTeX_SansSerif-Italic.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Italic.woff) format("woff"),url(fonts/KaTeX_SansSerif-Italic.ttf) format("truetype")}@font-face{font-display:block;font-family:"KaTeX_SansSerif";font-style:normal;font-weight:400;src:url(fonts/KaTeX_SansSerif-Regular.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Regular.woff) format("woff"),url(fonts/KaTeX_SansSerif-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Script;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Script-Regular.woff2) format("woff2"),url(fonts/KaTeX_Script-Regular.woff) format("woff"),url(fonts/KaTeX_Script-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size1;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size1-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size1-Regular.woff) format("woff"),url(fonts/KaTeX_Size1-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size2;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size2-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size2-Regular.woff) format("woff"),url(fonts/KaTeX_Size2-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size3;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size3-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size3-Regular.woff) format("woff"),url(fonts/KaTeX_Size3-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Size4;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size4-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size4-Regular.woff) format("woff"),url(fonts/KaTeX_Size4-Regular.ttf) format("truetype")}@font-face{font-display:block;font-family:KaTeX_Typewriter;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Typewriter-Regular.woff2) format("woff2"),url(fonts/KaTeX_Typewriter-Regular.woff) format("woff"),url(fonts/KaTeX_Typewriter-Regular.ttf) format("truetype")}.katex{font:normal 1.21em KaTeX_Main,Times New Roman,serif;line-height:1.2;position:relative;text-indent:0;text-rendering:auto}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.16.47"}.katex .katex-mathml{border:0;-webkit-clip-path:inset(50%);clip-path:inset(50%);height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.newline{display:block}.katex .base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .base,.katex .strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathboldfrak,.katex .textboldfrak{font-family:KaTeX_Fraktur;font-weight:700}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .mathsfit,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .hbox{width:100%}.katex .hbox,.katex .thinbox{display:inline-flex;flex-direction:row}.katex .thinbox{max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline,.katex .hline,.katex .mfrac .frac-line,.katex .overline .overline-line,.katex .rule,.katex .underline .underline-line{min-height:1px}.katex .mspace{display:inline-block}.katex .smash{display:inline;line-height:0}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.inner,.katex .llap>.inner,.katex .rlap>.inner{position:absolute}.katex .clap>.fix,.katex .llap>.fix,.katex .rlap>.fix{display:inline-block}.katex .llap>.inner{right:0}.katex .clap>.inner,.katex .rlap>.inner{left:0}.katex .clap>.inner>span{margin-left:-50%;margin-right:50%}.katex .rule{border:0 solid;display:inline-block;position:relative}.katex .hline,.katex .overline .overline-line,.katex .underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.root{margin-left:.2777777778em;margin-right:-.5555555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .sizing.reset-size2.size1{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .sizing.reset-size2.size3{font-size:1.1666666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .sizing.reset-size2.size4{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .sizing.reset-size2.size6{font-size:1.6666666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .sizing.reset-size2.size10{font-size:3.4566666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .sizing.reset-size2.size11{font-size:4.1466666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .sizing.reset-size3.size1{font-size:.7142857143em}.katex .fontsize-ensurer.reset-size3.size2,.katex .sizing.reset-size3.size2{font-size:.8571428571em}.katex .fontsize-ensurer.reset-size3.size3,.katex .sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .sizing.reset-size3.size4{font-size:1.1428571429em}.katex .fontsize-ensurer.reset-size3.size5,.katex .sizing.reset-size3.size5{font-size:1.2857142857em}.katex .fontsize-ensurer.reset-size3.size6,.katex .sizing.reset-size3.size6{font-size:1.4285714286em}.katex .fontsize-ensurer.reset-size3.size7,.katex .sizing.reset-size3.size7{font-size:1.7142857143em}.katex .fontsize-ensurer.reset-size3.size8,.katex .sizing.reset-size3.size8{font-size:2.0571428571em}.katex .fontsize-ensurer.reset-size3.size9,.katex .sizing.reset-size3.size9{font-size:2.4685714286em}.katex .fontsize-ensurer.reset-size3.size10,.katex .sizing.reset-size3.size10{font-size:2.9628571429em}.katex .fontsize-ensurer.reset-size3.size11,.katex .sizing.reset-size3.size11{font-size:3.5542857143em}.katex .fontsize-ensurer.reset-size4.size1,.katex .sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .sizing.reset-size5.size1{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .sizing.reset-size5.size2{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .sizing.reset-size5.size3{font-size:.7777777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .sizing.reset-size5.size4{font-size:.8888888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .sizing.reset-size5.size6{font-size:1.1111111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .sizing.reset-size5.size7{font-size:1.3333333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .sizing.reset-size5.size10{font-size:2.3044444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .sizing.reset-size5.size11{font-size:2.7644444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .sizing.reset-size7.size1{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .sizing.reset-size7.size3{font-size:.5833333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .sizing.reset-size7.size4{font-size:.6666666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .sizing.reset-size7.size6{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .sizing.reset-size7.size10{font-size:1.7283333333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .sizing.reset-size7.size11{font-size:2.0733333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .sizing.reset-size8.size1{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .sizing.reset-size8.size2{font-size:.4166666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .sizing.reset-size8.size3{font-size:.4861111111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .sizing.reset-size8.size4{font-size:.5555555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .sizing.reset-size8.size6{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .sizing.reset-size8.size7{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .sizing.reset-size8.size10{font-size:1.4402777778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .sizing.reset-size8.size11{font-size:1.7277777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .sizing.reset-size9.size1{font-size:.2893518519em}.katex .fontsize-ensurer.reset-size9.size2,.katex .sizing.reset-size9.size2{font-size:.3472222222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .sizing.reset-size9.size3{font-size:.4050925926em}.katex .fontsize-ensurer.reset-size9.size4,.katex .sizing.reset-size9.size4{font-size:.462962963em}.katex .fontsize-ensurer.reset-size9.size5,.katex .sizing.reset-size9.size5{font-size:.5208333333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .sizing.reset-size9.size6{font-size:.5787037037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .sizing.reset-size9.size7{font-size:.6944444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .sizing.reset-size9.size8{font-size:.8333333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .sizing.reset-size9.size10{font-size:1.2002314815em}.katex .fontsize-ensurer.reset-size9.size11,.katex .sizing.reset-size9.size11{font-size:1.4398148148em}.katex .fontsize-ensurer.reset-size10.size1,.katex .sizing.reset-size10.size1{font-size:.2410800386em}.katex .fontsize-ensurer.reset-size10.size2,.katex .sizing.reset-size10.size2{font-size:.2892960463em}.katex .fontsize-ensurer.reset-size10.size3,.katex .sizing.reset-size10.size3{font-size:.337512054em}.katex .fontsize-ensurer.reset-size10.size4,.katex .sizing.reset-size10.size4{font-size:.3857280617em}.katex .fontsize-ensurer.reset-size10.size5,.katex .sizing.reset-size10.size5{font-size:.4339440694em}.katex .fontsize-ensurer.reset-size10.size6,.katex .sizing.reset-size10.size6{font-size:.4821600771em}.katex .fontsize-ensurer.reset-size10.size7,.katex .sizing.reset-size10.size7{font-size:.5785920926em}.katex .fontsize-ensurer.reset-size10.size8,.katex .sizing.reset-size10.size8{font-size:.6943105111em}.katex .fontsize-ensurer.reset-size10.size9,.katex .sizing.reset-size10.size9{font-size:.8331726133em}.katex .fontsize-ensurer.reset-size10.size10,.katex .sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .sizing.reset-size10.size11{font-size:1.1996142719em}.katex .fontsize-ensurer.reset-size11.size1,.katex .sizing.reset-size11.size1{font-size:.2009646302em}.katex .fontsize-ensurer.reset-size11.size2,.katex .sizing.reset-size11.size2{font-size:.2411575563em}.katex .fontsize-ensurer.reset-size11.size3,.katex .sizing.reset-size11.size3{font-size:.2813504823em}.katex .fontsize-ensurer.reset-size11.size4,.katex .sizing.reset-size11.size4{font-size:.3215434084em}.katex .fontsize-ensurer.reset-size11.size5,.katex .sizing.reset-size11.size5{font-size:.3617363344em}.katex .fontsize-ensurer.reset-size11.size6,.katex .sizing.reset-size11.size6{font-size:.4019292605em}.katex .fontsize-ensurer.reset-size11.size7,.katex .sizing.reset-size11.size7{font-size:.4823151125em}.katex .fontsize-ensurer.reset-size11.size8,.katex .sizing.reset-size11.size8{font-size:.578778135em}.katex .fontsize-ensurer.reset-size11.size9,.katex .sizing.reset-size11.size9{font-size:.6945337621em}.katex .fontsize-ensurer.reset-size11.size10,.katex .sizing.reset-size11.size10{font-size:.8336012862em}.katex .fontsize-ensurer.reset-size11.size11,.katex .sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .accent .accent-body{position:relative}.katex .accent .accent-body:not(.accent-full){width:0}.katex .overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex svg{fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .stretchy:after,.katex .stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+</style>
+<style>/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-code: #f5f5f5;
+  --fg: #1a1a1a;
+  --fg-muted: #555;
+  --accent: #1565C0;
+  --border: #ddd;
+  --sidebar-bg: #fafafa;
+  --sidebar-width: 280px;
+  --chapter-gap: 3rem;
+  --max-width: 52rem;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1a2e;
+  --bg-code: #16213e;
+  --fg: #e0e0e0;
+  --fg-muted: #aaa;
+  --accent: #64b5f6;
+  --border: #333;
+  --sidebar-bg: #16213e;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.8;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ===== Main Content ===== */
+main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.chapter { margin-bottom: var(--chapter-gap); }
+
+hr.chapter-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: var(--chapter-gap) 0;
+}
+
+/* ===== Typography ===== */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+  font-weight: 700;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.3em; }
+h2 { font-size: 1.6rem; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+h3 { font-size: 1.3rem; }
+h4 { font-size: 1.1rem; }
+
+.chapter > h1:first-child,
+.chapter > h2:first-child,
+.chapter > h3:first-child { margin-top: 0; }
+
+p { margin: 0.8em 0; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+strong { font-weight: 700; }
+
+blockquote {
+  border-left: 4px solid var(--accent);
+  padding: 0.5em 1em;
+  margin: 1em 0;
+  background: var(--bg-code);
+  color: var(--fg-muted);
+}
+
+/* 보법 노트: 본문 흐름 밖의 곁글 */
+aside.sidenote {
+  margin: 1.5em 0;
+  padding: 0.9em 1.2em;
+  border: 1px solid var(--border);
+  border-top: 3px solid #b8860b;
+  border-radius: 6px;
+  background: var(--bg-code);
+  font-size: 0.93em;
+}
+aside.sidenote .sidenote-title { margin: 0 0 0.4em; font-weight: 700; color: #8a6206; } /* #b8860b 은 #f5f5f5 위 대비 2.98 → 5.03(2026-10-30) */
+[data-theme="dark"] aside.sidenote { border-top-color: #e0b84a; }
+[data-theme="dark"] aside.sidenote .sidenote-title { color: #e0b84a; }
+
+/* 길잡이: 다른 권(이론 책 ↔ 응용 책)으로 잇는 안내. 곁글과 다르게 왼쪽 선 + 작은 글씨 */
+aside.guide {
+  margin: 1.2em 0;
+  padding: 0.6em 1em;
+  border-left: 3px solid #0093b8;
+  background: var(--bg-code);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.9em;
+}
+aside.guide p { margin: 0.2em 0; }
+aside.guide .guide-title { font-weight: 700; color: #0078a0; }
+[data-theme="dark"] aside.guide { border-left-color: #37a9be; }
+[data-theme="dark"] aside.guide .guide-title { color: #5cc4d8; }
+
+/* ===== Code ===== */
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9em;
+  background: var(--bg-code);
+  padding: 0.15em 0.3em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--bg-code);
+  padding: 1em 1.2em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1em 0;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85em;
+}
+
+/* ===== Tables ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: 0.95em;
+}
+/* 좁은 화면에서 넓은 표는 표만 가로로 밀어 본다(쪽 전체가 밀리지 않게). 빌드가 표를 이 상자로 감싼다.
+   상자가 여백을 가져가야 앞뒤 문단과의 간격이 전과 같다 */
+.table-wrap { overflow-x: auto; margin: 0.95em 0; } /* = 표 글자 크기(0.95em)의 1em */
+.table-wrap > table { margin: 0; }
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.8em;
+  text-align: left;
+}
+th { background: var(--bg-code); font-weight: 600; }
+
+/* ===== Lists ===== */
+ul, ol { padding-left: 1.5em; margin: 0.5em 0; }
+li { margin: 0.3em 0; }
+
+/* ===== SVG ===== */
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+}
+
+[data-theme="dark"] svg text { fill: var(--fg); }
+[data-theme="dark"] svg line,
+[data-theme="dark"] svg path { stroke: var(--fg-muted); }
+
+/* KaTeX 는 근호·긴 화살표를 SVG 로 그린다. 위 전역 규칙에서 빼낸다. */
+.katex svg {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: inherit;
+  max-width: none;
+  margin: 0;
+}
+[data-theme="dark"] .katex svg path { stroke: inherit; }
+
+/* ===== Images ===== */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+  border-radius: 6px;
+}
+
+/* ===== 따라 계산해 보기 / 연습문제 ===== */
+.worked, .exercises {
+  margin: 1.8em 0;
+  padding: 1em 1.3em;
+  border-left: 4px solid var(--accent);
+  background: var(--bg-code);
+  border-radius: 0 8px 8px 0;
+}
+.worked > :first-child, .exercises > :first-child { margin-top: 0; }
+.exercises ol { padding-left: 1.4em; }
+.exercises li { margin: 0.6em 0; }
+.exercises .level {
+  display: inline-block;
+  font-size: 0.75em;
+  padding: 0 0.5em;
+  margin-right: 0.4em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--fg-muted);
+  vertical-align: 0.1em;
+}
+details.answer { margin: 0.4em 0 0.2em; font-size: 0.95em; }
+details.answer summary { cursor: pointer; color: var(--accent); }
+
+/* ===== 같이 풀기 세션 (대화) ===== */
+.exercises + h4 {
+  margin-top: 1.2em;
+  font-size: 0.95em;
+  color: var(--fg-muted);
+  letter-spacing: 0.02em;
+}
+.exercises + h4::before { content: "💬 "; }
+/* 인물 색은 .turn 에도 둔다: 문제 밖 대화(16장 맺음 등)에서도 이름·선 색이 나오게 */
+.dialogue, .turn { --who-T: #243b61; --who-M: #4d5763; --who-S: #3c6e4b; }
+.dialogue {
+  margin: 1.5em 0 2em;
+}
+[data-theme="dark"] :is(.dialogue, .turn) { --who-T: #8fa9d6; --who-M: #b4bac1; --who-S: #8cc59c; }
+.turn {
+  display: flex;
+  gap: 0.9em;
+  align-items: flex-start;
+  margin: 0.7em 0;
+}
+.turn-body {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55em 0.95em;
+  border-radius: 10px;
+  background: var(--bg-code);
+}
+.turn-body p { margin: 0; font-weight: 350; }
+.turn-body strong { font-weight: 600; }
+
+/* 문제 본문: 테마와 관계없이 시험지처럼 흰 바탕에 검은 굵은 글씨 */
+.dialogue blockquote {
+  background: #fff;
+  color: #111;
+  border: 1.5px solid #222;
+  border-radius: 4px;
+  padding: 0.9em 1.2em;
+  margin: 0.8em 0 1.4em;
+  font-size: 1.12em;
+  font-weight: 600;
+  line-height: 1.75;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.dialogue blockquote p { margin: 0; }
+.dialogue blockquote code { background: #eee; color: #111; }
+[data-theme="dark"] .dialogue blockquote { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+/* 상자 안 표 머리칸·칸 선·그림 설명도 테마와 관계없이 밝은 화면 값으로(상자가 늘 흰 바탕이라).
+   어두운 화면에서 남색 머리칸에 검은 글씨(대비 1.19)·흰 바탕에 흐린 설명(#aaa, 2.32)이던 것, 2026-10-30 */
+.dialogue blockquote :is(th, td) { border-color: #ddd; }
+.dialogue blockquote th { background: #f5f5f5; color: #111; }
+.dialogue blockquote figure figcaption { color: #555; } /* figure.fig figcaption(아래)보다 앞서게 figure 를 넣음 */
+.turn-T { --who: var(--who-T); }
+.turn-M { --who: var(--who-M); }
+.turn-S { --who: var(--who-S); }
+.cast {
+  flex: 0 0 88px;
+  width: 88px;
+  margin: 0;
+}
+.cast img {
+  width: 88px; height: 88px;
+  object-fit: cover;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  float: none; box-shadow: none; max-width: none;
+}
+.cast figcaption {
+  margin-top: 0.25em;
+  text-align: center;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--who);
+}
+.cast-slot {
+  width: 88px; height: 88px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border: 1.5px dashed var(--who, var(--border));
+  border-radius: 12px;
+  color: var(--who);
+  font-size: 0.85em;
+  font-weight: 600;
+  opacity: 0.75;
+  line-height: 1.3;
+}
+.cast-slot small { font-weight: 400; font-size: 0.8em; color: var(--fg-muted); }
+/* 대화 사이의 수식·그림은 말풍선 폭에 맞춘다 */
+.dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: calc(88px + 0.9em); }
+@media (max-width: 600px) {
+  .cast, .cast img, .cast-slot { flex-basis: 56px; width: 56px; height: 56px; }
+  .cast-slot { font-size: 0.7em; }
+  .dialogue > :not(.turn):not(h3):not(h4):not(blockquote) { margin-left: 0; }
+}
+
+
+/* ===== KaTeX ===== */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}
+
+/* ===== Mermaid ===== */
+pre.mermaid {
+  background: transparent;
+  border: none;
+  text-align: center;
+  padding: 1em 0;
+}
+
+/* ===== Theme Toggle (목차 머리 안) ===== */
+#theme-toggle {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+#theme-toggle:hover { background: var(--border); }
+
+/* ===== Sidebar ===== */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 999;
+  transition: left 0.3s ease;
+  padding: 1rem;
+}
+#sidebar.open { left: 0; }
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-header h2 { font-size: 1.1rem; margin: 0; border: none; padding: 0; }
+.sidebar-actions { display: flex; align-items: center; gap: 0.4rem; }
+
+#sidebar-close {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: var(--fg);
+  padding: 0 0.3em;
+}
+
+#sidebar ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: chapter;
+}
+#sidebar li {
+  margin: 0.3em 0;
+}
+#sidebar a {
+  display: block;
+  padding: 0.4em 0.5em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--fg);
+}
+#sidebar a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+
+#sidebar-open {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 998;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#sidebar-open:hover { background: var(--border); }
+
+/* ===== Responsive ===== */
+@media (min-width: 1200px) {
+  #sidebar {
+    left: 0;
+    padding-top: 2rem;
+  }
+  #sidebar-open { display: none; }
+  #sidebar-close { display: none; }
+  main {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+@media (max-width: 600px) {
+  main { padding: 1rem 0.8rem 3rem; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  pre { font-size: 0.8em; padding: 0.8em; }
+}
+/* 목차 버튼(☰, 오른쪽 위 고정 40px)이 보이는 폭에서는 본문을 버튼 아래에서 시작해 첫 제목 끝이 깔리지 않게 */
+@media (max-width: 1199px) {
+  main { padding-top: 4rem; }
+}
+
+/* ===== Chapter Navigation ===== */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border);
+  gap: 1rem;
+}
+.chapter-nav a {
+  display: inline-block;
+  padding: 0.6em 1em;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9em;
+  color: var(--fg);
+  transition: background 0.2s;
+  max-width: 45%;
+}
+.chapter-nav a:hover {
+  background: var(--border);
+  text-decoration: none;
+}
+.chapter-nav-next { text-align: right; margin-left: auto; }
+.page-count { font-size: 0.85em; color: var(--fg-muted); white-space: nowrap; }
+
+/* ===== 절 단위 페이지 ===== */
+.chapter-crumb { margin: 0 0 0.4em; font-size: 0.85em; }
+.chapter-crumb a { color: var(--fg-muted); }
+.chapter-paged > h2:first-of-type { margin-top: 0.4em; }
+#sidebar .sidebar-toc a.current { color: var(--accent); font-weight: 600; }
+
+/* ===== TOC Page ===== */
+.toc-page { padding-top: 1rem; }
+.toc-page h1 {
+  margin-bottom: 1.5rem;
+}
+/* 대문(교재 목록)으로 돌아가는 링크 */
+.site-nav { font-size: 0.9rem; }
+.site-nav a { color: var(--fg-muted); text-decoration: none; }
+.site-nav a:hover { color: var(--accent); }
+.site-nav + h1 { margin-top: 1rem; }
+@media print { .site-nav { display: none; } }
+.toc-list {
+  list-style: none;
+  padding: 0;
+  counter-reset: toc-ch;
+}
+.toc-list li {
+  margin: 0;
+}
+.toc-list a {
+  display: block;
+  padding: 0.7em 1em;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg);
+  font-size: 1.05em;
+  transition: background 0.2s;
+}
+.toc-list a:hover {
+  background: var(--bg-code);
+  text-decoration: none;
+}
+/* 부 이름 줄(book.json 의 parts). 번호 없이 이름만 */
+.toc-list .toc-part {
+  margin-top: 1.6em;
+  padding: 0 1em 0.4em;
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+  border-bottom: 2px solid var(--border);
+}
+#sidebar .toc-part {
+  margin: 1.1em 0 0.2em;
+  padding: 0 0.5em;
+  font-size: 0.75em;
+  font-weight: 700;
+  color: var(--fg-muted);
+}
+
+/* ===== Sidebar Active ===== */
+#sidebar a.active {
+  background: var(--accent);
+  color: #fff;
+}
+#sidebar a.active:hover {
+  background: var(--accent);
+}
+/* 어두운 화면의 강조색(#64b5f6)은 밝아서 흰 글씨가 묻힌다(대비 2.2). 짙은 남색 글씨로(대비 약 7.9).
+   2026-10-30 reader.css 가 덮던 것을 여기로 옮김(한 곳에 두기) */
+[data-theme="dark"] #sidebar a.active { color: #0d1b2a; }
+
+/* ===== Print ===== */
+@media print {
+  #sidebar, #sidebar-open, #theme-toggle { display: none; }
+  main { margin: 0; max-width: none; }
+}
+
+/* ===== 그림과 캡션 ===== */
+figure.fig { margin: 1.8em auto; text-align: center; }
+figure.fig img { margin: 0 auto; }
+figure.fig figcaption {
+  margin-top: 0.5em;
+  font-size: 0.86em;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: center;
+}
+/* 초상화: 오른쪽에 작게 띄운다 */
+figure.fig-portrait {
+  float: right;
+  clear: right; /* 초상화가 연달아 나와도 옆으로 늘어서지 않고 세로로 쌓인다 */
+  width: 200px;
+  margin: 0.3em 0 1em 1.5em;
+  text-align: left;
+}
+figure.fig-portrait img { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+figure.fig-portrait figcaption { text-align: left; font-size: 0.78em; }
+h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, table, pre { clear: both; }
+/* 붙어 나온 초상화 여러 장: 본문 폭 전체를 쓰는 가운데 정렬 한 줄(글을 옆에 두지 않는다) */
+.portrait-row { clear: both; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5em; margin: 1.2em 0 1.6em; }
+.portrait-row figure.fig-portrait { float: none; clear: none; margin: 0; width: 180px; }
+@media (max-width: 600px) {
+  figure.fig-portrait { float: none; width: 170px; margin: 1em auto; }
+  .portrait-row { gap: 1em; }
+  .portrait-row figure.fig-portrait { width: 140px; }
+}
+/* 다크모드에서 흰 바탕 그림이 눈부시지 않게 */
+[data-theme="dark"] figure.fig img { filter: brightness(0.92); }
+
+/* ===== 수식 ===== */
+.math-block { margin: 1.2em 0; }
+.math-block .katex-display { margin: 0; }
+.math-legend {
+  margin: -0.4em auto 1.6em;
+  padding: 0.2em 1em;
+  width: fit-content;
+  max-width: 100%;
+  border-left: 3px solid var(--border);
+  background: var(--bg-code);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.86em;
+}
+.math-legend .katex-display > .katex { text-align: left; }
+/* 어두운 배경에서 수식 색이 너무 어둡지 않게 (본문·대화 속 색 입힌 기호 span.sym 도 같이) */
+[data-theme="dark"] :is(.katex, .sym) { filter: brightness(1.25); }
+/* 문제 본문 상자는 테마와 관계없이 흰 바탕이므로 밝은 화면 색 그대로 둔다 */
+[data-theme="dark"] .dialogue blockquote :is(.katex, .sym) { filter: none; }
+
+/* ===== 인터랙티브 위젯 ===== */
+.widget-embed {
+  margin: 1.8em 0 2.2em;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-code);
+}
+.widget-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3em 0.8em;
+  padding: 0.55em 1em;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9em;
+}
+.widget-tag {
+  font-size: 0.78em;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.03em;
+}
+.widget-label { font-weight: 600; flex: 1; min-width: 12em; }
+.widget-open { font-size: 0.85em; white-space: nowrap; display: inline-block; min-height: 24px; line-height: 24px; padding: 0 0.15em; } /* 누르는 자리 24px 이상(47×22 이던 것, 2026-10-30) */
+.widget-embed iframe {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border: 0;
+  background: transparent;
+  color-scheme: normal;
+}
+.widget-embed noscript img { margin: 0; border-radius: 0; }
+
+/* ===== 장 안의 목차 (사이드바) ===== */
+.sidebar-toc { list-style: none; padding: 0.1em 0 0.4em 0.8em; margin: 0; border-left: 2px solid var(--border); margin-left: 0.6em; }
+#sidebar .sidebar-toc a { font-size: 0.8em; padding: 0.2em 0.5em; color: var(--fg-muted); }
+.toc-sub { color: var(--fg-muted); margin: -0.8rem 0 1.5rem; }
+
+/* 표지: 목차 페이지 첫머리. 그림의 원본과 그리는 스크립트는 ~/lameproof/shared/covers/ */
+.book-cover { float: right; width: min(240px, 38%); margin: 0.4rem 0 1rem 1.5rem; }
+.book-cover img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
+@media (max-width: 640px) { .book-cover { float: none; width: 62%; margin: 0.5rem auto 1.2rem; } }
+
+/* 메뉴·닫기·테마 단추는 쪽 글자색을 따른다(button 은 글자색을 물려받지 않아 다크 모드에서 ☰가 검게 보였다, 2026-10-25) */
+#sidebar-open, #sidebar-close, #theme-toggle { color: var(--fg); }
+/* 사이드 메뉴 맨 위의 전체 교재 링크 */
+.sidebar-home { display: block; margin: 0 0 0.8rem; font-size: 0.85em; color: var(--fg-muted); text-decoration: none; }
+.sidebar-home:hover { color: var(--fg); text-decoration: underline; }
+
+/* 다크 모드의 그림: 시리즈 그림(PNG·SVG)은 밝은 바탕이 원본이다. 다크 모드에서는 흰 판에 올려 투명 바탕 그림의 검은 선·글자가
+   묻히지 않게 하고, 조금 어둡게 해 눈부심을 줄인다. 사진(jpg)·표정 그림(webp)·표지는 그대로 둔다.
+   (2026-10-25 저자 지시: 「다크모드와 라이트모드 둘다 대응할수 있게 해」) */
+[data-theme="dark"] main img:is([src$=".svg"], [src$=".png"]):not(.book-cover img) {
+  background: #fff;
+  padding: 0.5em;
+  filter: brightness(0.9);
+}
+
+.preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
+<script>
+(function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
+</script>
+<link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="/reader/reader.css?v=9e1251e2" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"9e1251e2"}</script>
+<script defer src="/reader/reader.js?v=9e1251e2" data-lp-reader></script>
+</head>
+<body>
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="index.html" style="color:inherit;text-decoration:none">생성 모델: MLP에서 디퓨전 트랜스포머까지</a></h2>
+    <div class="sidebar-actions">
+      <button id="theme-toggle" aria-label="다크모드 전환">&#x1F319;</button>
+      <button id="sidebar-close" aria-label="사이드바 닫기">&times;</button>
+    </div>
+  </div>
+  <a class="sidebar-home" href="/">&larr; 전체 교재</a>
+  <ol><li><a href="preface.html">머리말: 생성이란 무엇인가</a></li>
+<li class="toc-part">기본기</li>
+<li><a href="conditional-prob.html">조건부 확률분포: p(a∣b) 와 p(b∣a)</a></li>
+<li class="toc-part">줄이고 되살리기: 오토인코더와 VAE</li>
+<li><a href="teaching-generation.html">생성을 가르치는 법: 분류기를 뒤집으면</a></li>
+<li><a href="autoencoder.html">오토인코더: 줄였다 되살리며 배우는 신경망</a></li>
+<li><a href="vae.html">VAE: 잠재 변수를 분포로 뽑아 그리기</a></li>
+<li class="toc-part">신호와 스펙트럼</li>
+<li><a href="spectrum.html">그림을 나누는 축: 스펙트럼</a></li>
+<li><a href="convolution.html">합성곱: 이웃만 보는 MLP</a></li>
+<li><a href="noising.html">퍼짐: 그림에 노이즈를 섞으면</a></li>
+<li><a href="unet.html">U-Net: 여러 해상도로 노이즈를 읽는다</a></li>
+<li class="toc-part">직관을 합치기</li>
+<li><a href="score.html">스코어: 퍼지기 전으로 되돌리는 방향</a></li>
+<li><a href="ddpm.html">노이즈를 맞히는 신경망: DDPM과 디노이징 스코어 매칭</a></li>
+<li><a href="reverse-sde.html" class="active">랑주뱅과 역방향 미분방정식: 샘플을 뽑는 길</a><ul class="sidebar-toc"><li><a href="reverse-sde.html">랑주뱅 샘플링: 스코어를 따라 비틀거리며 걷기</a></li><li><a href="reverse-sde-sec-annealed-langevin.html">어닐드 랑주뱅: 노이즈를 줄여 가며 걷기</a></li><li><a href="reverse-sde-sec-reverse-time-sde.html">역방향 SDE: 노이즈를 다시 넣으며 거꾸로 걷기</a></li><li><a href="reverse-sde-sec-probability-flow-ode.html">확률 플로우 ODE: 노이즈 없이 같은 분포로</a></li><li><a href="reverse-sde-sec-same-marginals.html" class="current">주변 분포: 길은 달라도 매 순간의 분포는 같다</a></li><li><a href="reverse-sde-sec-sde-ode-code-knobs.html">코드 속의 두 숫자: 스코어 배수와 새 노이즈를 짝으로</a></li><li><a href="reverse-sde-sec-reverse-sde-mistakes-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li><a href="flow-matching.html">플로우 매칭: 길을 통째로 배우기</a></li>
+<li><a href="prediction-target.html">예측의 대상: 노이즈·속도장·이미지</a></li>
+<li><a href="samplers.html">샘플러: 같은 길을 걷는 여러 솔버</a></li>
+<li class="toc-part">구조와 조건, 영상</li>
+<li><a href="transformer.html">어텐션과 트랜스포머: 멀리 떨어진 칸끼리 읽기</a></li>
+<li><a href="latent-diffusion.html">잠재 디퓨전: 작게 줄여 놓고 퍼뜨리기</a></li>
+<li><a href="dit.html">디퓨전 트랜스포머: U-Net 자리에 트랜스포머를</a></li>
+<li><a href="guidance.html">가이던스: 조건 쪽으로 더 세게</a></li>
+<li><a href="text-encoder.html">글을 읽는 인코더: CLIP의 마지막 층에서 언어 모델의 여러 층으로</a></li>
+<li><a href="image-condition.html">그림으로 조건 걸기: 참조 이미지 여러 장</a></li>
+<li><a href="video.html">영상 생성: 시퀀스와 디퓨전 사이</a></li>
+<li><a href="appendix-rl.html">부록 A — 강화학습으로 이어지는 다리</a></li>
+<li><a href="epilogue.html">에필로그</a></li></ol>
+</nav>
+<button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
+<main>
+<article class="chapter chapter-paged">
+<p class="chapter-crumb"><a href="reverse-sde.html">랑주뱅과 역방향 미분방정식: 샘플을 뽑는 길</a></p>
+<h2 id="sec-same-marginals">주변 분포: 길은 달라도 매 순간의 분포는 같다<span id="주변-분포-길은-달라도-매-순간의-분포는-같다" class="anchor-alias"></span></h2>
+<p>역방향 SDE도, 확률 플로우 ODE도, 랑주뱅 쌍을 셋 얹은 규칙도 같은 분포에 닿았다. 그런데 점 하나가 걷는 길을 그려 보면 셋은 전혀 다르다. ODE의 길은 매끈하고, SDE의 길은 비틀거리고, 쌍을 셋 얹은 길은 그보다 더 어지럽게 오르내린다. 길이 이렇게 다른데 같은 것은 정확히 무엇일까? 그리고 걷는 규칙을 바꿔도 결과가 그대로이려면, 무엇을 지켜야 할까?</p>
+<h3 id="hist-feller-forward-equation" class="history" data-people="feller-william">역사: 전화 교환기에서 다듬은 앞으로 방정식<span id="역사-전화-교환기에서-다듬은-앞으로-방정식" class="anchor-alias"></span></h3>
+<p>1949년에 나온 첫 버클리 수리통계·확률 심포지엄 논문집에 코넬 대학의 수학자 윌리엄 펠러(William Feller, 1906–1970)가 30쪽짜리 논문 「확률 과정의 이론, 특히 응용과 관련하여」를 실었다. 자그레브에서 태어나 독일 킬 대학에서 가르치던 펠러는 나치 서약에 서명하지 않고 1933년 독일을 떠났고, 1939년 미국으로 건너왔다. 그가 논문 머리에 적은 고민은 이론과 응용이 서로를 알아보지 못한다는 것이었다. 콜모고로프(Andrey Kolmogorov)의 1931년 논문 이후 확률 과정 이론은 실제 현상을 설명할 수 있음을 보였지만, 수학 문헌은 이 이론을 형식적이고 일반적으로만 다루었다. 실제 문제는 저마다 특수한 방법으로, 펠러의 말로는 「여러 변장을 하고」 풀려서 일반 이론과 이어진다는 것이 드러나지 않았다.</p>
+<p>그래서 펠러는 가장 단순한 예부터 늘어놓았다. 전화가 걸려 오는 순간, 방사성 원자의 붕괴, 우주선 입자의 충돌은 모두 상태가 한동안 그대로 있다가 갑자기 한 칸 뛰는 과정이고, 이런 과정은 이미 자동 전화 교환기와 보험 회사의 위험 계산에 쓰이고 있었다. 이런 과정마다 콜모고로프를 따라 미분방정식을 두 벌 세울 수 있다. 출발 시각과 출발 상태를 고정하고 도착 쪽을 변수로 두면 앞으로 방정식(forward equation), 도착을 고정하고 출발 쪽을 변수로 두면 뒤로 방정식(backward equation)이다. 펠러는 앞으로 방정식이 물리적으로 더 자연스럽지만, 뒤로 방정식은 「가역성의 물음과 관련해 중요한 역할을 한다」고 적었다.</p>
+<figure class="fig "><img src="images/reverse-sde/h_feller_forward_backward.png" alt="가장 단순한 확산(확산 계수 1)으로 직접 그린 두 방정식. 왼쪽: 앞으로 방정식은 출발 자리(x = 0)를 고정하고, 시간이 지나며 도착 자리의 분포가 어떻게 퍼지는지를 따른다. 정규분포가 넓어진다. 오른쪽: 뒤로 방정식은 도착 칸(x &gt; 1)을 고정하고, 출발 자리마다 그 칸에 닿을 확률을 따른다. 남은 시간이 길수록 곡선이 완만해진다(스크립트 sources/reverse-sde/marginal_figs.py)" loading="lazy"><figcaption>가장 단순한 확산(확산 계수 1)으로 직접 그린 두 방정식. 왼쪽: 앞으로 방정식은 출발 자리(x = 0)를 고정하고, 시간이 지나며 도착 자리의 분포가 어떻게 퍼지는지를 따른다. 정규분포가 넓어진다. 오른쪽: 뒤로 방정식은 도착 칸(x &gt; 1)을 고정하고, 출발 자리마다 그 칸에 닿을 확률을 따른다. 남은 시간이 길수록 곡선이 완만해진다(스크립트 sources/reverse-sde/marginal_figs.py)</figcaption></figure>
+<p>논문의 마지막 절은 확산으로 넘어간다. 생물 집단의 크기는 개체가 태어나거나 죽을 때마다 하나씩 뛰지만, 집단이 크면 크기를 연속인 값으로 다뤄도 되고 그때는 확산 방정식이 계산에 더 편하다. 확산에서는 아주 짧은 시간 동안 입자가 평균 얼마나 움직이는지와 그 움직임의 분산, 두 가지만 정해 두면 앞으로 방정식과 뒤로 방정식이 나온다. 가장 단순한 확산에서 그 해는 정규분포다.</p>
+<p>66년 뒤 이 논문을 다시 꺼낸 것은 생성 모델이었다. 2015년 졸-딕스타인(Jascha Sohl-Dickstein)과 동료들은 데이터를 노이즈로 천천히 무너뜨리고 거꾸로 되살리는 생성 모델을 내놓으면서, 「거꾸로 밟는 한 스텝을 어떤 꼴로 적을 것인가」의 근거로 펠러의 1949년 논문을 들었다. 스텝 크기가 작은 연속 확산의 극한에서는 거꾸로 가는 과정도 정방향의 분포 꼴을 그대로 따른다는 것이다. 정방향 한 스텝이 정규분포이니 스텝을 작게 잡으면 거꾸로 한 스텝도 정규분포이고, 모델은 그 평균과 분산만 배우면 된다.</p>
+<figure class="fig "><img src="images/reverse-sde/h_feller_reverse_step.png" alt="두 봉우리 분포(−1과 +1, 폭 0.1, 반반)에서 정방향 한 스텝을 밟은 뒤 베이즈 정리로 직접 계산한 거꾸로 분포(초록)를, 평균·분산이 같은 정규분포(검은 점선)와 견준 그림. 작은 스텝(β = 0.01)에서는 둘이 겹치고(겹친 넓이 1.000), 큰 스텝(β = 0.64)에서는 거꾸로 분포가 봉우리 둘로 갈라져 정규분포 하나로 적을 수 없다(겹친 넓이 0.238)(스크립트 sources/reverse-sde/marginal_figs.py)" loading="lazy"><figcaption>두 봉우리 분포(−1과 +1, 폭 0.1, 반반)에서 정방향 한 스텝을 밟은 뒤 베이즈 정리로 직접 계산한 거꾸로 분포(초록)를, 평균·분산이 같은 정규분포(검은 점선)와 견준 그림. 작은 스텝(β = 0.01)에서는 둘이 겹치고(겹친 넓이 1.000), 큰 스텝(β = 0.64)에서는 거꾸로 분포가 봉우리 둘로 갈라져 정규분포 하나로 적을 수 없다(겹친 넓이 0.238)(스크립트 sources/reverse-sde/marginal_figs.py)</figcaption></figure>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>짧은 시간의 평균 이동과 분산, 두 가지만 정하면 앞으로 방정식이 나온다고요? 그럼 그 두 가지가 같아야 분포도 똑같이 가겠네요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>이 장에서 쓴 규칙들로 확인해 볼까요? 역방향 SDE와 확률 플로우 ODE는 평균 이동이 같았어요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아니요. 스코어 항이 하나는 2<span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#b0892a">s</span><span class="sym" style="color:#006600">Δt</span>, 하나는 <span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#b0892a">s</span><span class="sym" style="color:#006600">Δt</span>였어요. 분산도 2<span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#006600">Δt</span>와 0으로 달랐고요. 둘 다 다른데 분포는 같았어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 두 가지가 각각 같을 필요는 없고, 둘이 함께 만드는 무언가만 같으면 되는 거 아닐까요? 평균 이동이 큰 만큼 분산도 커서, 하나가 더 모으는 만큼 다른 하나가 더 퍼뜨리면요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 「함께 만드는 무언가」가 무엇인지가 이 절의 물음이에요.</p></div></div>
+<h3 id="길-전체의-분포와-한-시각의-분포">길 전체의 분포와 한 시각의 분포</h3>
+<p>같은 출발점 2만 개를 <span class="sym" style="color:#a67a63">t</span> = 1에서 0까지 2,000스텝에 걸어 보자. 데이터는 앞 절들과 같이 −2(비중 0.2)와 +2(비중 0.8), 폭 0.5이고 <span class="sym" style="color:#8787ff">D</span> = 4다. 규칙은 랑주뱅 쌍을 <span class="sym" style="color:#962d1e">λ</span>개 얹은 스텝 <span class="sym" style="color:#1b9e77">x</span> + (1 + <span class="sym" style="color:#962d1e">λ</span>)<span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#b0892a">s</span><span class="sym" style="color:#006600">Δt</span> + √(2<span class="sym" style="color:#962d1e">λ</span><span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#006600">Δt</span>) <span class="sym" style="color:#1f6066">ε</span>이고, <span class="sym" style="color:#962d1e">λ</span> = 0이 확률 플로우 ODE, <span class="sym" style="color:#962d1e">λ</span> = 1이 역방향 SDE다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><span class="sym" style="color:#a67a63">t</span> = 0.5 오른쪽 비율</th>
+<th><span class="sym" style="color:#a67a63">t</span> = 0.5 표준편차</th>
+<th><span class="sym" style="color:#a67a63">t</span> = 0 오른쪽 비율</th>
+<th><span class="sym" style="color:#a67a63">t</span> = 0 표준편차</th>
+<th>출발과 도착의 상관</th>
+<th>오른쪽에서 출발한 점이 오른쪽에 도착한 비율</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>참값</td>
+<td>0.700</td>
+<td>2.610</td>
+<td>0.800</td>
+<td>1.676</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><span class="sym" style="color:#962d1e">λ</span> = 0 (ODE)</td>
+<td>0.699</td>
+<td>2.607</td>
+<td>0.797</td>
+<td>1.680</td>
+<td>0.888</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td><span class="sym" style="color:#962d1e">λ</span> = 1 (SDE)</td>
+<td>0.700</td>
+<td>2.600</td>
+<td>0.800</td>
+<td>1.674</td>
+<td>0.506</td>
+<td>0.925</td>
+</tr>
+<tr>
+<td><span class="sym" style="color:#962d1e">λ</span> = 3</td>
+<td>0.702</td>
+<td>2.615</td>
+<td>0.796</td>
+<td>1.686</td>
+<td>0.187</td>
+<td>0.844</td>
+</tr>
+</tbody>
+</table></div>
+<p>한 시각만 떼어 보면 세 규칙의 점들은 <span class="sym" style="color:#a67a63">t</span> = 0.5에서도 0에서도 참값과 같은 비율, 같은 퍼짐으로 놓여 있다. 그런데 두 시각을 함께 보면 다르다. ODE에서는 오른쪽에서 출발한 점이 모두 오른쪽에 닿지만, 쌍을 셋 얹으면 그런 점이 84.4%뿐이다. 출발과 도착의 상관도 0.888에서 0.187로 떨어진다.</p>
+<p>점 하나의 길은 시각마다의 자리를 늘어놓은 것 (<span class="sym" style="color:#1b9e77">x</span>(1), <span class="sym" style="color:#1b9e77">x</span>(0.5), <span class="sym" style="color:#1b9e77">x</span>(0))이다. 이 묶음 전체의 분포를 길의 결합 분포라 하면, 한 시각 <span class="sym" style="color:#a67a63">t</span>의 분포 <span class="sym" style="color:#c2408a">p<sub>t</sub></span>는 나머지 시각을 모두 더해 지운 주변 분포다. 사진첩 표에서 동물을 더해 지우면 찍은 곳의 주변 분포가 남던 것과 같은 연산이다. 줄 합과 칸 합이 같아도 네 칸은 여러 가지일 수 있었듯이, 시각마다의 주변 분포가 같아도 길의 결합 분포는 여러 가지일 수 있다. 세 규칙은 주변 분포를 모두 같게 두고 결합 분포만 다르게 고른 것이다.</p>
+<p>그림을 뽑는 데 필요한 것은 <span class="sym" style="color:#a67a63">t</span> = 0의 주변 분포 하나인데, 마지막 자리 <span class="sym" style="color:#1b9e77">x</span>(0)만 쓰고 지나온 길은 버리기 때문이다. 다만 걷는 도중에도 점들이 매 순간 <span class="sym" style="color:#c2408a">p<sub>t</sub></span>대로 놓여 있어야 한다. 스코어 <span class="sym" style="color:#b0892a">s</span>(<span class="sym" style="color:#1b9e77">x</span>, <span class="sym" style="color:#a67a63">t</span>)는 <span class="sym" style="color:#c2408a">p<sub>t</sub></span>의 스코어이고, 점들이 다른 분포로 새어 나가면 스코어를 그 스코어가 맞지 않는 자리에서 읽게 된다. 그래서 지켜야 할 것은 「매 순간의 주변 분포」다.</p>
+<h3 id="경계를-지나는-알짜-흐름">경계를 지나는 알짜 흐름</h3>
+<p>매 순간의 주변 분포가 같으려면 무엇이 같아야 할까? 위 실험에서 점들이 0을 지나간 횟수를 세어 보면 실마리가 보인다. ODE의 점들은 0을 왼쪽에서 오른쪽으로 2,868번 지났고 반대로는 한 번도 지나지 않았다. SDE의 점들은 왼쪽에서 오른쪽으로 107,849번, 반대로 104,924번 지났고, 쌍을 셋 얹으면 183,635번과 180,790번으로 늘어난다. 지나간 횟수는 수십 배씩 다른데, 오른쪽으로 간 횟수에서 왼쪽으로 간 횟수를 뺀 알짜는 2,868, 2,925, 2,845로 거의 같다. 오른쪽 비율이 0.654에서 0.800으로 늘어나려면 2만 개 가운데 2,917개가 알짜로 넘어가야 하니, 셋 다 그 수를 맞춘 셈이다.</p>
+<figure class="fig "><img src="images/reverse-sde/marginal_flow.png" alt="왼쪽 둘: 같은 출발점 30개를 λ = 0(확률 플로우 ODE)과 λ = 3(랑주뱅 쌍 셋)으로 걸은 길. 적갈 길은 오른쪽(x &gt; 0)에서, 청록 길은 왼쪽에서 출발했다. t = 0.5의 세로선에 그린 초록 히스토그램(점 4,000개)과 분홍 곡선 pₜ는 두 규칙에서 같다. 오른쪽: 점 4,000개가 0을 지난 횟수. λ = 0은 왼쪽에서 오른쪽으로만 613번, λ = 3은 26,502번과 25,910번이지만 알짜는 613과 592로 비슷하다(스크립트 sources/reverse-sde/marginal_figs.py)" loading="lazy"><figcaption>왼쪽 둘: 같은 출발점 30개를 λ = 0(확률 플로우 ODE)과 λ = 3(랑주뱅 쌍 셋)으로 걸은 길. 적갈 길은 오른쪽(x &gt; 0)에서, 청록 길은 왼쪽에서 출발했다. t = 0.5의 세로선에 그린 초록 히스토그램(점 4,000개)과 분홍 곡선 pₜ는 두 규칙에서 같다. 오른쪽: 점 4,000개가 0을 지난 횟수. λ = 0은 왼쪽에서 오른쪽으로만 613번, λ = 3은 26,502번과 25,910번이지만 알짜는 613과 592로 비슷하다(스크립트 sources/reverse-sde/marginal_figs.py)</figcaption></figure>
+<p>어느 자리의 점 수는 그 자리 경계를 드나드는 알짜 흐름으로만 바뀐다. 들어온 만큼 나가면 오가는 점이 아무리 많아도 그 자리의 점 수는 그대로다. 그래서 두 규칙이 경계마다 같은 알짜 흐름을 만들면 매 순간의 분포가 같고, 흐름을 어떤 꼴로 만드는지는 상관이 없다. 펠러가 말한 두 가지, 짧은 시간의 평균 이동(끌림)과 분산(노이즈) 가운데 분포의 앞날을 정하는 것은 둘이 함께 만드는 알짜 흐름이다.</p>
+<p>알짜 흐름을 속도로 적어 보자. 노이즈로 퍼지는 분포는 확률이 속도 −<span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#b0892a">s</span>로 흐르는 것과 같았다(<span class="sym" style="color:#8787ff">D</span>는 노이즈의 확산 계수, <span class="sym" style="color:#b0892a">s</span>는 지금 분포의 스코어). 랑주뱅 쌍 <span class="sym" style="color:#962d1e">λ</span>개의 노이즈는 확산 계수가 <span class="sym" style="color:#962d1e">λ</span><span class="sym" style="color:#8787ff">D</span>이니 확률을 −<span class="sym" style="color:#962d1e">λ</span><span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#b0892a">s</span>로 흘려 퍼뜨리고, 끌림은 점을 (1 + <span class="sym" style="color:#962d1e">λ</span>)<span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#b0892a">s</span>로 옮긴다. 둘을 더한 알짜 속도는 다음과 같다.</p>
+<div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mstyle mathcolor="#ff1eff"><mi>v</mi></mstyle><mo>=</mo><munder><munder><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mstyle mathcolor="#962d1e"><mi>λ</mi></mstyle><mo stretchy="false">)</mo><mtext> </mtext><mstyle mathcolor="#8787ff"><mi>D</mi></mstyle><mtext> </mtext><mstyle mathcolor="#b0892a"><mi>s</mi></mstyle></mrow><mo stretchy="true">⏟</mo></munder><mtext>끌림</mtext></munder><mtext>  </mtext><munder><munder><mrow><mo>−</mo><mtext>  </mtext><mstyle mathcolor="#962d1e"><mi>λ</mi></mstyle><mtext> </mtext><mstyle mathcolor="#8787ff"><mi>D</mi></mstyle><mtext> </mtext><mstyle mathcolor="#b0892a"><mi>s</mi></mstyle></mrow><mo stretchy="true">⏟</mo></munder><mtext>노이즈가 퍼뜨림</mtext></munder><mo>=</mo><mstyle mathcolor="#8787ff"><mi>D</mi></mstyle><mtext> </mtext><mstyle mathcolor="#b0892a"><mi>s</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#ff1eff}{v} = \underbrace{(1 + \textcolor{#962d1e}{\lambda})\,\textcolor{#8787ff}{D}\,\textcolor{#b0892a}{s}}_{\text{끌림}} \;\underbrace{-\;\textcolor{#962d1e}{\lambda}\,\textcolor{#8787ff}{D}\,\textcolor{#b0892a}{s}}_{\text{노이즈가 퍼뜨림}} = \textcolor{#8787ff}{D}\,\textcolor{#b0892a}{s}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;color:#ff1eff;">v</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3263em;vertical-align:-1.5763em;"></span><span class="minner munder"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.75em;"><span style="top:-1.4237em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord hangul_fallback mtight">끌림</span></span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="minner munder"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.75em;"><span class="svg-align" style="top:-2.102em;"><span class="pstrut" style="height:3em;"></span><span class="stretchy" style="height:0.548em;min-width:1.6em;"><span class="brace-left" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewBox="0 0 400000 548" preserveAspectRatio="xMinYMin slice"><path d="M0 6l6-6h17c12.688 0 19.313.3 20 1 4 4 7.313 8.3 10 13
+ 35.313 51.3 80.813 93.8 136.5 127.5 55.688 33.7 117.188 55.8 184.5 66.5.688
+ 0 2 .3 4 1 18.688 2.7 76 4.3 172 5h399450v120H429l-6-1c-124.688-8-235-61.7
+-331-161C60.687 138.7 32.312 99.3 7 54L0 41V6z"/></svg></span><span class="brace-center" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewBox="0 0 400000 548" preserveAspectRatio="xMidYMin slice"><path d="M199572 214
+c100.7 8.3 195.3 44 280 108 55.3 42 101.7 93 139 153l9 14c2.7-4 5.7-8.7 9-14
+ 53.3-86.7 123.7-153 211-199 66.7-36 137.3-56.3 212-62h199568v120H200432c-178.3
+ 11.7-311.7 78.3-403 201-6 8-9.7 12-11 12-.7.7-6.7 1-18 1s-17.3-.3-18-1c-1.3 0
+-5-4-11-12-44.7-59.3-101.3-106.3-170-141s-145.3-54.3-229-60H0V214z"/></svg></span><span class="brace-right" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewBox="0 0 400000 548" preserveAspectRatio="xMaxYMin slice"><path d="M399994 0l6 6v35l-6 11c-56 104-135.3 181.3-238 232-57.3
+ 28.7-117 45-179 50H-300V214h399897c43.3-7 81-15 113-26 100.7-33 179.7-91 237
+-174 2.7-5 6-9 10-13 .7-1 7.3-1 20-1h17z"/></svg></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="color:#962d1e;">λ</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;color:#8787ff;">D</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="color:#b0892a;">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.898em;"><span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.5763em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner munder"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-1.5903em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord hangul_fallback mtight">노이즈가</span><span class="mord mtight"> </span><span class="mord hangul_fallback mtight">퍼뜨림</span></span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="minner munder"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span class="svg-align" style="top:-2.2687em;"><span class="pstrut" style="height:3em;"></span><span class="stretchy" style="height:0.548em;min-width:1.6em;"><span class="brace-left" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewBox="0 0 400000 548" preserveAspectRatio="xMinYMin slice"><path d="M0 6l6-6h17c12.688 0 19.313.3 20 1 4 4 7.313 8.3 10 13
+ 35.313 51.3 80.813 93.8 136.5 127.5 55.688 33.7 117.188 55.8 184.5 66.5.688
+ 0 2 .3 4 1 18.688 2.7 76 4.3 172 5h399450v120H429l-6-1c-124.688-8-235-61.7
+-331-161C60.687 138.7 32.312 99.3 7 54L0 41V6z"/></svg></span><span class="brace-center" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewBox="0 0 400000 548" preserveAspectRatio="xMidYMin slice"><path d="M199572 214
+c100.7 8.3 195.3 44 280 108 55.3 42 101.7 93 139 153l9 14c2.7-4 5.7-8.7 9-14
+ 53.3-86.7 123.7-153 211-199 66.7-36 137.3-56.3 212-62h199568v120H200432c-178.3
+ 11.7-311.7 78.3-403 201-6 8-9.7 12-11 12-.7.7-6.7 1-18 1s-17.3-.3-18-1c-1.3 0
+-5-4-11-12-44.7-59.3-101.3-106.3-170-141s-145.3-54.3-229-60H0V214z"/></svg></span><span class="brace-right" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewBox="0 0 400000 548" preserveAspectRatio="xMaxYMin slice"><path d="M399994 0l6 6v35l-6 11c-56 104-135.3 181.3-238 232-57.3
+ 28.7-117 45-179 50H-300V214h399897c43.3-7 81-15 113-26 100.7-33 179.7-91 237
+-174 2.7-5 6-9 10-13 .7-1 7.3-1 20-1h17z"/></svg></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">−</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathnormal" style="color:#962d1e;">λ</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;color:#8787ff;">D</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="color:#b0892a;">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7313em;"><span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.4097em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;color:#8787ff;">D</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="color:#b0892a;">s</span></span></span></span></span></div>
+<div class="math-block math-legend"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.16em" columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#ff1eff"><mi>v</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>알짜 속도: 경계를 드나드는 확률의 알짜 흐름을 점 하나의 속도로 적은 것</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#962d1e"><mi>λ</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>스텝에 얹은 랑주뱅 쌍의 수 (0 이면 확률 플로우 ODE, 1 이면 역방향 SDE)</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#8787ff"><mi>D</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>순방향 노이즈의 확산 계수 (노이즈 분산이 </mtext><mn>2</mn><mi>D</mi><mi>t</mi><mtext> 로 쌓인다)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mstyle mathcolor="#b0892a"><mi>s</mi></mstyle></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>그 시간의 분포 </mtext><msub><mi>p</mi><mi>t</mi></msub><mtext> 의 스코어</mtext></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{array}{ll}
+\textcolor{#ff1eff}{v} &amp; \text{알짜 속도: 경계를 드나드는 확률의 알짜 흐름을 점 하나의 속도로 적은 것} \\
+\textcolor{#962d1e}{\lambda} &amp; \text{스텝에 얹은 랑주뱅 쌍의 수 (0 이면 확률 플로우 ODE, 1 이면 역방향 SDE)} \\
+\textcolor{#8787ff}{D} &amp; \text{순방향 노이즈의 확산 계수 (노이즈 분산이 } 2Dt \text{ 로 쌓인다)} \\
+\textcolor{#b0892a}{s} &amp; \text{그 시간의 분포 } p_t \text{ 의 스코어}
+\end{array}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:4.8em;vertical-align:-2.15em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.65em;"><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;color:#ff1eff;">v</span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#962d1e;">λ</span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;color:#8787ff;">D</span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="color:#b0892a;">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.15em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.65em;"><span style="top:-4.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">알짜</span><span class="mord"> </span><span class="mord hangul_fallback">속도</span><span class="mord">: </span><span class="mord hangul_fallback">경계를</span><span class="mord"> </span><span class="mord hangul_fallback">드나드는</span><span class="mord"> </span><span class="mord hangul_fallback">확률의</span><span class="mord"> </span><span class="mord hangul_fallback">알짜</span><span class="mord"> </span><span class="mord hangul_fallback">흐름을</span><span class="mord"> </span><span class="mord hangul_fallback">점</span><span class="mord"> </span><span class="mord hangul_fallback">하나의</span><span class="mord"> </span><span class="mord hangul_fallback">속도로</span><span class="mord"> </span><span class="mord hangul_fallback">적은</span><span class="mord"> </span><span class="mord hangul_fallback">것</span></span></span></span><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">스텝에</span><span class="mord"> </span><span class="mord hangul_fallback">얹은</span><span class="mord"> </span><span class="mord hangul_fallback">랑주뱅</span><span class="mord"> </span><span class="mord hangul_fallback">쌍의</span><span class="mord"> </span><span class="mord hangul_fallback">수</span><span class="mord"> (0 </span><span class="mord hangul_fallback">이면</span><span class="mord"> </span><span class="mord hangul_fallback">확률</span><span class="mord"> </span><span class="mord hangul_fallback">플로우</span><span class="mord"> ODE, 1 </span><span class="mord hangul_fallback">이면</span><span class="mord"> </span><span class="mord hangul_fallback">역방향</span><span class="mord"> SDE)</span></span></span></span><span style="top:-2.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">순방향</span><span class="mord"> </span><span class="mord hangul_fallback">노이즈의</span><span class="mord"> </span><span class="mord hangul_fallback">확산</span><span class="mord"> </span><span class="mord hangul_fallback">계수</span><span class="mord"> (</span><span class="mord hangul_fallback">노이즈</span><span class="mord"> </span><span class="mord hangul_fallback">분산이</span><span class="mord"> </span></span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mord mathnormal">t</span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">로</span><span class="mord"> </span><span class="mord hangul_fallback">쌓인다</span><span class="mord">)</span></span></span></span><span style="top:-1.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord hangul_fallback">그</span><span class="mord"> </span><span class="mord hangul_fallback">시간의</span><span class="mord"> </span><span class="mord hangul_fallback">분포</span><span class="mord"> </span></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord text"><span class="mord"> </span><span class="mord hangul_fallback">의</span><span class="mord"> </span><span class="mord hangul_fallback">스코어</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.15em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span></span></span></span></span></div>
+<p><span class="sym" style="color:#962d1e">λ</span>가 사라진다. 끌림을 <span class="sym" style="color:#962d1e">λ</span><span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#b0892a">s</span>만큼 세게 하는 만큼 노이즈가 같은 크기로 되퍼뜨리니, 알짜는 확률 플로우 ODE의 속도 <span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#b0892a">s</span> 그대로다. 앞에서 이서연이 짐작한 「둘이 함께 만드는 무언가」가 이 알짜 속도이고, 분포가 시간에 따라 어떻게 바뀌는지를 적은 앞으로 방정식(물리에서는 포커–플랑크 방정식)이 보는 것도 이 알짜 흐름뿐이다. 반대로 끌림과 노이즈 가운데 하나만 바꾸면 알짜가 바뀌어 분포가 새어 나간다. 문제 7에서 쌍을 깬 두 규칙이 퍼지거나 몰린 것도 알짜가 바뀌었기 때문이다.</p>
+<figure class="widget-embed" id="widget-reverse-sde-w2"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">역방향 SDE와 확률 플로우 ODE</span><a class="widget-open" href="widgets/reverse-sde.html?v=c73d9503#w2">크게 열기</a></div><iframe data-src="widgets/reverse-sde.html?w=w2&embed=1&v=c73d9503" title="역방향 SDE와 확률 플로우 ODE" loading="lazy"></iframe></figure>
+<p>위젯 2의 「스코어 항의 배수 c」와 「노이즈 항의 배수 g」에서 c = 1 + <span class="sym" style="color:#962d1e">λ</span>, g = <span class="sym" style="color:#962d1e">λ</span>이다. c = 1 + g를 지키며 함께 올리면 길만 어지러워지고 히스토그램은 그대로이고, 둘 가운데 하나만 움직이면 히스토그램이 분홍 곡선을 벗어난다.</p>
+<aside class="guide"><p class="guide-title">길잡이 · 『동역학』 「포커–플랑크 방정식: 많이 모은 입자의 흐름」</p><p>입자 하나의 흔들리는 움직임에서 많이 모은 입자의 분포가 따르는 방정식을 끌어내고, 끌림이 만드는 흐름과 노이즈가 만드는 흐름이 맞서는 모습을 본다. <a href="https://lameproof.com/dynamics-book/brownian-langevin-sec-fokker-planck-equation.html">이어 읽기</a></p>
+</aside>
+<h3 id="ml에서-학습-데이터에는-길이-없다">ML에서: 학습 데이터에는 길이 없다</h3>
+<p>디노이징 스코어 매칭으로 배울 때, 학습 그림 하나에 노이즈 레벨 하나를 뽑아 노이즈를 섞고 그 노이즈를 맞히게 한다. 한 학습 예제에 시각은 하나뿐이라, 같은 그림이 <span class="sym" style="color:#a67a63">t</span> = 0.5에서 어디에 있었고 <span class="sym" style="color:#a67a63">t</span> = 0.4에서 어디로 갔는지는 데이터에 없다. 모델이 배우는 것은 시각마다의 주변 분포 <span class="sym" style="color:#c2408a">p<sub>t</sub></span>의 스코어뿐이고, 길의 결합 분포는 배우지 않는다. 그래서 같은 모델을 다시 학습하지 않고도 생성할 때 <span class="sym" style="color:#962d1e">λ</span>를 마음대로 고를 수 있다. 모델이 정해 주지 않은 것을 샘플러가 고르는 셈이다.</p>
+<div class="dialogue"><h3 id="prob-reverse-two-gates">문제 12. 개찰구 두 개<span id="문제-12-개찰구-두-개" class="anchor-alias"></span></h3>
+<blockquote>
+<p>지하철역 두 곳의 개찰구를 1분 동안 세었더니, 가 역은 출구 하나만 열어 30명이 들어오고 아무도 나가지 않았고 나 역은 출구를 둘 다 열어 80명이 들어오고 50명이 나갔다. (가) 1분 동안 역 안의 사람 수는 두 역에서 각각 얼마나 늘었는가? (나) 개찰구를 지난 사람 수만 보고 어느 역이 더 빨리 차는지 말할 수 있는가? (다) 위 실험에서 0을 지난 횟수의 표와 견주면, 가 역과 나 역은 각각 어느 규칙에 해당하는가?</p>
+</blockquote>
+<figure class="fig "><img src="images/reverse-sde/p12_station.png" alt="1분 동안 두 역의 개찰구를 지난 사람 수. 가 역은 들어옴 30·나감 0, 나 역은 들어옴 80·나감 50(스크립트 sources/reverse-sde/marginal_figs.py)" loading="lazy"><figcaption>1분 동안 두 역의 개찰구를 지난 사람 수. 가 역은 들어옴 30·나감 0, 나 역은 들어옴 80·나감 50(스크립트 sources/reverse-sde/marginal_figs.py)</figcaption></figure>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(가)는 가 역이 30명, 나 역이 80 − 50 = 30명. 둘 다 30명씩 늘었어.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(나)는 지나간 사람으로 보면 가 역은 30명, 나 역은 130명이야. 그런데 늘어난 건 같으니까, 지나간 사람 수로는 못 정하겠다.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(다)는요?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>가 역이 확률 플로우 ODE예요. 한 방향으로만 2,868번 지났으니까요. 나 역은 양쪽으로 십만 번씩 지난 역방향 SDE고요. 알짜는 둘 다 3천 언저리라 역 안의 점 수는 같이 늘어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>출퇴근 시간에 붐비는 역이라고 사람이 빨리 차는 건 아니네. 드나드는 사람이 많아도 들어온 만큼 나가면 역은 그대로고.</p></div></div>
+</div><div class="dialogue"><h3 id="prob-reverse-drift-spread-pair">문제 13. 끌림과 퍼뜨리기의 짝<span id="문제-13-끌림과-퍼뜨리기의-짝" class="anchor-alias"></span></h3>
+<blockquote>
+<p>데이터가 N(0, 1)이고 <span class="sym" style="color:#8787ff">D</span> = 1.5로 노이즈를 섞어, 시간 <span class="sym" style="color:#a67a63">t</span>의 분포가 <span class="sym" style="color:#c2408a">p<sub>t</sub></span> = N(0, 1 + 3<span class="sym" style="color:#a67a63">t</span>)이다. (가) <span class="sym" style="color:#a67a63">t</span> = 1, <span class="sym" style="color:#1b9e77">x</span> = 1에서 <span class="sym" style="color:#962d1e">λ</span> = 0, 1, 2일 때 끌림의 속도, 노이즈가 퍼뜨리는 속도, 알짜 속도를 구하라. (나) 끌림은 <span class="sym" style="color:#962d1e">λ</span> = 1의 것(2<span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#b0892a">s</span>)을, 노이즈는 <span class="sym" style="color:#962d1e">λ</span> = 2의 것(√(4<span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#006600">Δt</span>))을 쓰면 <span class="sym" style="color:#a67a63">t</span> = 0에서 점들의 표준편차는 1보다 큰가 작은가? 거꾸로 짝지으면?</p>
+</blockquote>
+<figure class="fig "><img src="images/reverse-sde/p13_net_velocity.png" alt="t = 1의 분포 N(0, 4)와 x = 1의 점. 끌림은 스코어 쪽(가운데)으로, 노이즈는 점을 바깥으로 퍼뜨린다(스크립트 sources/reverse-sde/marginal_figs.py)" loading="lazy"><figcaption>t = 1의 분포 N(0, 4)와 x = 1의 점. 끌림은 스코어 쪽(가운데)으로, 노이즈는 점을 바깥으로 퍼뜨린다(스크립트 sources/reverse-sde/marginal_figs.py)</figcaption></figure>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(가)부터 할게. N(0, 4)의 스코어는 −<span class="sym" style="color:#1b9e77">x</span>/4라서 <span class="sym" style="color:#1b9e77">x</span> = 1이면 −0.25야. <span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#b0892a">s</span> = 1.5 × (−0.25) = −0.375. <span class="sym" style="color:#962d1e">λ</span> = 0이면 끌림 −0.375, 퍼뜨림 0, 알짜 −0.375.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p><span class="sym" style="color:#962d1e">λ</span> = 1이면 끌림이 두 배라 −0.750, 퍼뜨림은 −<span class="sym" style="color:#962d1e">λ</span><span class="sym" style="color:#8787ff">D</span><span class="sym" style="color:#b0892a">s</span> = +0.375. 알짜 −0.375. <span class="sym" style="color:#962d1e">λ</span> = 2면 −1.125와 +0.750이라 역시 −0.375네.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S04"><img src="images/cast/S04.webp" alt="이서연 S04" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(나)는… 끌림이 −0.750인데 퍼뜨림이 +0.750이면 알짜가 0이니까, 이 점은 제자리에 머물겠네. 그럼 분포가 안 줄어서 표준편차가 2로 남을 것 같아.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>알짜가 0인 건 <span class="sym" style="color:#a67a63">t</span> = 1, 그 순간이에요. 한 스텝 뒤에도 점들이 <span class="sym" style="color:#c2408a">p<sub>t</sub></span>대로 놓여 있을까요?</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>아니요, 첫 스텝에서 덜 줄었으니 점들은 이미 <span class="sym" style="color:#c2408a">p<sub>t</sub></span>보다 넓어요. 퍼뜨리는 속도는 지금 점들이 놓인 분포의 스코어로 정해지는데, 넓은 분포는 스코어가 작아서 퍼뜨림이 −0.750보다 약해지고… 그러니까 알짜가 0에 머물지는 않고, 계속 조금씩 덜 줄어드는 거예요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>돌려 볼게. 끌림 <span class="sym" style="color:#962d1e">λ</span> = 1에 노이즈 <span class="sym" style="color:#962d1e">λ</span> = 2면 표준편차 1.321, 거꾸로 끌림 <span class="sym" style="color:#962d1e">λ</span> = 2에 노이즈 <span class="sym" style="color:#962d1e">λ</span> = 1이면 0.728이야. 짝이 맞는 <span class="sym" style="color:#962d1e">λ</span> = 0과 2는 둘 다 0.999고.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>노이즈가 짝보다 크면 덜 줄어 넓게, 작으면 더 줄어 좁게 끝나요. 끌림과 노이즈는 짝으로만 움직일 수 있어요.</p></div></div>
+</div>
+</article>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="reverse-sde-sec-probability-flow-ode.html">&larr; 확률 플로우 ODE: 노이즈 없이 같은 분포로</a><span class="page-count">5 / 7</span><a class="chapter-nav-next" href="reverse-sde-sec-sde-ode-code-knobs.html">코드 속의 두 숫자: 스코어 배수와 새 노이즈를 짝으로 &rarr;</a></nav>
+</main>
+<script type="module">
+const toggle = document.getElementById('theme-toggle');
+const frames = () => document.querySelectorAll('.widget-embed iframe');
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  toggle.textContent = t === 'dark' ? '\u2600\uFE0F' : '\u{1F319}';
+  frames().forEach(f => f.contentWindow && f.contentWindow.postMessage({ type: 'dyn-theme', theme: t }, '*'));
+}
+const curTheme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+setTheme(curTheme());
+toggle.addEventListener('click', () => {
+  const t = curTheme() === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('theme', t);
+  setTheme(t);
+  renderMermaid();
+});
+
+// 위젯: 화면 가까이 오면 로드, 높이는 위젯이 알려 준다
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  io.unobserve(e.target);
+  e.target.src = e.target.dataset.src + '&theme=' + curTheme();
+}), { rootMargin: '600px' });
+frames().forEach(f => io.observe(f));
+addEventListener('message', e => {
+  if (!e.data || e.data.type !== 'dyn-widget-height') return;
+  frames().forEach(f => { if (f.contentWindow === e.source) { f.style.height = e.data.h + 'px'; f.classList.add('ready'); } });
+});
+
+// 사이드바
+const sidebar = document.getElementById('sidebar');
+document.getElementById('sidebar-open').addEventListener('click', () => sidebar.classList.add('open'));
+document.getElementById('sidebar-close').addEventListener('click', () => sidebar.classList.remove('open'));
+sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', () => sidebar.classList.remove('open')));
+
+// 키보드 ←/→ 로 이전·다음 페이지
+addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  const a = document.querySelector(e.key === 'ArrowLeft' ? '.chapter-nav-prev' : e.key === 'ArrowRight' ? '.chapter-nav-next' : null);
+  if (a) location.href = a.href;
+});
+
+// Mermaid — 화면 모드를 바꾸면 원본 소스로 되돌려 다시 그린다
+const mermaidNodes = [...document.querySelectorAll('pre.mermaid')];
+mermaidNodes.forEach(n => { n.dataset.src = n.textContent; });
+let mermaidLib = null;
+async function renderMermaid() {
+  if (!mermaidNodes.length) return;
+  if (!mermaidLib) mermaidLib = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+  // 어두운 화면: 머메이드 내장 dark 는 회색 상자·회색 묶음 바탕이 페이지 남색과 어긋난다 → 페이지 색 변수로 base 테마를 칠한다
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  mermaidLib.initialize(curTheme() === 'dark' ? {
+    startOnLoad: false, securityLevel: 'strict', theme: 'base',
+    themeVariables: {
+      darkMode: true, background: v('--bg'),
+      primaryColor: v('--bg-code'), primaryTextColor: v('--fg'), primaryBorderColor: v('--fg-muted'),
+      secondaryColor: v('--bg-code'), tertiaryColor: v('--bg-code'),
+      lineColor: v('--fg-muted'), textColor: v('--fg'),
+      clusterBkg: v('--bg-code'), clusterBorder: v('--fg-muted'),
+      edgeLabelBackground: v('--bg'), titleColor: v('--fg'),
+    },
+  } : { startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+  mermaidNodes.forEach(n => { n.removeAttribute('data-processed'); n.textContent = n.dataset.src; });
+  await mermaidLib.run({ nodes: mermaidNodes });
+}
+renderMermaid();
+</script>
+</body>
+</html>
