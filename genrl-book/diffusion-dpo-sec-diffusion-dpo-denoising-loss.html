@@ -735,7 +735,7 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
 <p class="chapter-crumb"><a href="diffusion-dpo.html">24. 디퓨전에서 DPO를 쓰려면: 로그확률의 벽</a></p>
 <h4 id="sec-diffusion-dpo-denoising-loss">Diffusion-DPO: 노이즈 복원 오차를 로그확률 대신 쓴다<span id="diffusion-dpo-노이즈-복원-오차를-로그확률-대신-쓴다" class="anchor-alias"></span></h4>
 <p>스텝별 로그확률은 경로가 있어야 계산되는데, 사람들이 모아 둔 선호 데이터셋에 있는 것은 완성된 이미지 쌍뿐이고 그 이미지를 만든 디노이징 경로는 어디에도 없다. 경로 없이 DPO를 할 수 있을까?</p>
-<h5 id="hist-diffusion-dpo-d3po" class="history" data-people="wallace-bram yang-kai">역사: 같은 달에 나온 두 논문<span id="역사-같은-달에-나온-두-논문" class="anchor-alias"></span></h5>
+<h5 id="hist-diffusion-dpo-d3po" class="history" data-people="wallace-bram yang-kai kirstain-yuval">역사: 같은 달에 나온 두 논문<span id="역사-같은-달에-나온-두-논문" class="anchor-alias"></span></h5>
 <p>2023년 11월, 디퓨전용 DPO 논문 두 편이 같은 달 arXiv에 올라왔고 둘 다 2024년 CVPR에 실렸다. 둘은 서로 다른 고민에서 출발했다.</p>
 <svg class="fig" viewBox="0 0 560 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2023년 5월부터 2024년 6월까지의 날짜 줄. 5월 Pick-a-Pic 과 DPO, 7월 SDXL 이 나오고, 11월 21일 Diffusion-DPO 와 하루 뒤 D3PO 가 arXiv 에 올라왔으며, 2024년 6월 CVPR 에서 둘 다 발표되었다">
   <rect x="0" y="0" width="560" height="280" rx="6" fill="#fff" stroke="#ccc"/>
@@ -786,7 +786,41 @@ svg.fig .sink { stroke: var(--w-ink-2); fill: none; }
   <text x="490.6" y="120.0" text-anchor="middle" style="font-size:13px;fill:#888">둘 다 발표</text>
 </svg>
 <p>Pick-a-Pic 데이터셋, 텍스트용 DPO, SDXL이 2023년 봄과 여름에 차례로 나왔고, 반년 뒤 디퓨전용 DPO 두 편이 하루 차이로 arXiv에 올라왔다. 출처: 각 논문의 arXiv 첫 제출일(2305.01569, 2305.18290, 2307.01952, 2311.12908, 2311.13231).</p>
-<p>Salesforce와 스탠퍼드의 브램 월리스(Bram Wallace) 등이 낸 Diffusion-DPO에는 DPO 저자 중 한 명인 라파엘 라파일로프(Rafael Rafailov)도 참여했다. 이들의 고민은 이미 쌓인 데이터였다. Pick-a-Pic은 웹 앱 사용자들이 같은 프롬프트로 만든 두 그림 가운데 하나를 고른 기록으로, 비긴 쌍을 빼고도 85만 1,293쌍(프롬프트 5만 8,960개)이었다. 이 쌍만으로 SDXL(Stability AI가 2023년에 공개한 텍스트-이미지 디퓨전 모델 Stable Diffusion XL)을 다듬었더니, 사람 평가자들은 다듬은 모델의 그림을 원래 모델의 그림보다 70.0%의 비교에서 더 낫다고 골랐다(PartiPrompts 프롬프트 기준).</p>
+<p>Pick-a-Pic은 그 자체로 하나의 고민에서 나온 기록이었다. 언어 모델은 사람의 선호 기록으로 고치는 일이 자리를 잡아 가고 있었지만, 그림 생성 모델에는 그만한 공개 기록이 없었다. 사용자의 선택을 크게 쌓는 곳은 대개 회사였고 그 기록은 공개되지 않았다. 돈을 받고 평가하는 사람을 모을 수도 있었지만, 텔아비브 대학의 키르스테인(Yuval Kirstain)과 레비(Omer Levy)를 비롯한 여섯 연구자는 그 기록이 실제 사용자의 선호와 다를 수 있다고 보았다. 평가하는 사람에게는 공들인 프롬프트를 쓸 이유가 없고, 자기가 원해서 쓴 프롬프트가 아니니 어느 그림이 바라던 것에 더 가까운지 판단할 기준도 없다. 그들은 누구나 그림을 만들 수 있는 웹 앱을 열고 트위터·페이스북·디스코드·레딧으로 사용자를 모았다. 시험 운영에서 그림 넷 가운데 고르기, 둘 가운데 비김 없이 고르기, 둘 가운데 비김도 허용하기를 견주었더니 마지막 방식에서 사용자가 가장 오래 머물고 평가자끼리 판정도 가장 잘 맞았다. 빠르게 마구 누르는 사용자는 막았다. 이 기록으로 CLIP 을 고쳐 배운 채점기 PickScore 는 시험 쌍에서 사용자가 고른 쪽을 열에 일곱쯤 맞혀, 사람이 맞힌 비율보다 조금 높았다. 한 건의 기록에 남는 것은 프롬프트, 그림 두 장, 어느 쪽을 골랐는지뿐이고 그림을 만든 경로는 없다.</p>
+<svg class="fig" viewBox="0 0 560 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pick-a-Pic 웹 앱에서 기록이 쌓이는 순서. 프롬프트를 쓰면 그림 두 장이 나오고, 더 마음에 드는 쪽을 누르면(비김도 고를 수 있다) 고르지 않은 그림 자리에 새 그림이 온다">
+<rect x="0" y="0" width="560" height="250" rx="6" fill="#fff" stroke="#ccc"/>
+<rect x="15" y="15" width="165" height="170" rx="5" fill="#f6f7f9" stroke="#999"/>
+<rect x="27" y="27" width="141" height="22" fill="#fff" stroke="#999"/>
+<text x="33" y="43" style="font-size:11.5px;fill:#222">프롬프트: 달 위의 강아지</text>
+<rect x="27" y="58" width="67" height="100" fill="#fff" stroke="#999" stroke-width="1"/>
+<text x="60.5" y="112" text-anchor="middle" style="font-size:12px;fill:#222">그림 A</text>
+<rect x="101" y="58" width="67" height="100" fill="#fff" stroke="#999" stroke-width="1"/>
+<text x="134.5" y="112" text-anchor="middle" style="font-size:12px;fill:#222">그림 B</text>
+<text x="97" y="208" text-anchor="middle" style="font-size:12.5px;fill:#333">① 프롬프트를 쓰면</text>
+<text x="97" y="226" text-anchor="middle" style="font-size:12.5px;fill:#333">그림 두 장이 나온다</text>
+<line x1="182" y1="100" x2="193" y2="100" stroke="#333" stroke-width="1.6"/><polygon points="197,100 190,96 190,104" fill="#333"/>
+<rect x="197" y="15" width="165" height="170" rx="5" fill="#f6f7f9" stroke="#999"/>
+<rect x="209" y="27" width="141" height="22" fill="#fff" stroke="#999"/>
+<text x="215" y="43" style="font-size:11.5px;fill:#222">프롬프트: 달 위의 강아지</text>
+<rect x="209" y="58" width="67" height="100" fill="#fff" stroke="#e000a5" stroke-width="3"/>
+<text x="242.5" y="112" text-anchor="middle" style="font-size:12px;fill:#222">그림 A</text>
+<rect x="283" y="58" width="67" height="100" fill="#fff" stroke="#999" stroke-width="1"/>
+<text x="316.5" y="112" text-anchor="middle" style="font-size:12px;fill:#222">그림 B</text>
+<text x="242" y="175" text-anchor="middle" style="font-size:12px;fill:var(--sym-e000a5, #e000a5)">고름</text>
+<text x="279" y="208" text-anchor="middle" style="font-size:12.5px;fill:#333">② 더 마음에 드는 쪽을 누른다</text>
+<text x="279" y="226" text-anchor="middle" style="font-size:12.5px;fill:#333">(비김도 고를 수 있다)</text>
+<line x1="364" y1="100" x2="375" y2="100" stroke="#333" stroke-width="1.6"/><polygon points="379,100 372,96 372,104" fill="#333"/>
+<rect x="379" y="15" width="165" height="170" rx="5" fill="#f6f7f9" stroke="#999"/>
+<rect x="391" y="27" width="141" height="22" fill="#fff" stroke="#999"/>
+<text x="397" y="43" style="font-size:11.5px;fill:#222">프롬프트: 달 위의 강아지</text>
+<rect x="391" y="58" width="67" height="100" fill="#fff" stroke="#999" stroke-width="1"/>
+<text x="424.5" y="112" text-anchor="middle" style="font-size:12px;fill:#222">그림 A</text>
+<rect x="465" y="58" width="67" height="100" fill="#eef6f2" stroke="#999" stroke-width="1"/>
+<text x="498.5" y="112" text-anchor="middle" style="font-size:12px;fill:#222">새 그림 C</text>
+<text x="461" y="208" text-anchor="middle" style="font-size:12.5px;fill:#333">③ 고르지 않은 그림 자리에</text>
+<text x="461" y="226" text-anchor="middle" style="font-size:12.5px;fill:#333">새 그림이 온다</text>
+</svg>
+<p>Salesforce와 스탠퍼드의 브램 월리스(Bram Wallace) 등이 낸 Diffusion-DPO에는 DPO 저자 중 한 명인 라파엘 라파일로프(Rafael Rafailov)도 참여했다. 이들의 고민은 이미 쌓인 데이터였다. 그렇게 쌓인 Pick-a-Pic의 쌍은 비긴 쌍을 빼고도 85만 1,293쌍(프롬프트 5만 8,960개)이었다. 이 쌍만으로 SDXL(Stability AI가 2023년에 공개한 텍스트-이미지 디퓨전 모델 Stable Diffusion XL)을 다듬었더니, 사람 평가자들은 다듬은 모델의 그림을 원래 모델의 그림보다 70.0%의 비교에서 더 낫다고 골랐다(PartiPrompts 프롬프트 기준).</p>
 <svg class="fig" viewBox="0 0 560 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diffusion-DPO 로 다듬은 SDXL 과 원래 SDXL 의 그림을 사람이 비교했을 때 다듬은 쪽을 고른 비율. PartiPrompts 프롬프트에서 70.0%, HPSv2 프롬프트에서 64.7% 로, 둘 다 반반인 50% 선을 넘는다">
   <rect x="0" y="0" width="560" height="250" rx="6" fill="#fff" stroke="#ccc"/>
   <text x="280.0" y="30.0" text-anchor="middle" style="font-size:16px;fill:#111;font-weight:700">사람 평가자가 다듬은 SDXL 쪽을 고른 비율</text>
