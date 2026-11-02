@@ -7,11 +7,13 @@
  * 하는 일
  *   - 「문제 N」 함께 풀기: 풀이 말칸을 접고 단추를 누를 때마다 하나씩 보인다(2.4·2.12절)
  *     장 끝 「토론 N」도 같게 접고 첫 단추만 「토론 따라가기」(계약서 끝 「변경 (장 끝 토론)」 절)
+ *     단추로 편 걸음 수는 페이지·묶음마다 이 브라우저에 기억하고, 「진행률 리셋」 때 그 책 것을 지운다(2026-11-02)
  *   - 정리 문제(div.quiz): 객관식 화면, 오답이면 「아니다」와 다시 시도, 정답이면 진도에 더함(2.11절)
  *   - 절 완료(본문 끝까지 스크롤), 목차 패널의 장·절 진도, 책 달성률(2.8·2.9절)
  *   - 이어 읽기: 마지막 위치 기록, 앱 첫 실행·다른 책 첫 화면에서 마지막 페이지로 넘기기(2.13절)
  *   - 대문 책 카드의 달성률 막대(2.14절)
  *   - 로그인(구글), 서버 합치기, 댓글 칸(2.7·2.15절)
+ *   - 목차 패널의 「댓글 칸 보이기」 체크 상자: 끄면 모든 책·모든 페이지의 댓글 칸을 숨긴다(이 브라우저에 저장)
  *   - 책 안 낱말 검색: 목차 패널 맨 위·대문의 검색 칸, search-index.json 지연 로드, 도착한 페이지에서 찾은 말 표시
  *     (계약서 끝 「변경 (책 안 검색)」 절)
  *   - 키보드·화면 읽기·휴대폰 다듬기: 함께 풀기·정리 문제 뒤 초점 유지, 목차 장 줄 읽기 글자, 본문 건너뛰기,
@@ -42,11 +44,13 @@
     session: "lp.reader.v1.session",
     dirty: "lp.reader.v1.dirty",
     tries: "lp.reader.v1.quizTries",
+    foldSteps: "lp.reader.v1.foldSteps",
     resume: "lp.reader.resume",
     launched: "lp.reader.launched",
     stay: "lp.reader.stay.",
     config: "lp.reader.config",
-    search: "lp.reader.search"
+    search: "lp.reader.search",
+    showComments: "lp.reader.showComments"
   };
   var STATUS_LABEL = { open: "저자가 아직 읽지 않음", applied: "원고에 반영됨", held: "보류" };
   var HEAD_RE = /^\s*(?:문제|토론)\s*\d+\s*[.:]/; // 접는 묶음의 머리: 「문제 N.」「문제 N:」, 장 끝 「토론 N.」「토론 N:」
@@ -378,6 +382,23 @@
 
   // ── 함께 풀기(2.4·2.12절) ────────────────────────────────────────────────
   var GROUPS = [];
+  // 단추로 편 걸음 수: { "<책>:<파일>": { "<묶음 열쇠>": n } }. 열쇠는 머리의 id, 없으면 페이지 안 차례
+  // (2026-11-02 저자: 「각 문제의 함께풀기 스텝도 페이지마다 기억」「진행률 리셋하면 모두 리셋되게 (접은 상태)」)
+  function foldPageKey() { return BOOK + ":" + FILE; }
+  function foldSaved(gk) {
+    var all = lsGet(K.foldSteps), pg = all && all[foldPageKey()];
+    var n = pg && pg[gk];
+    return typeof n === "number" && n > 0 ? n : 0;
+  }
+  function foldSave(gk, n) {
+    var all = lsGet(K.foldSteps) || {}, pk = foldPageKey();
+    var pg = all[pk] || {};
+    if (n > 0) pg[gk] = n; else delete pg[gk];
+    var empty = true;
+    for (var k in pg) if (Object.prototype.hasOwnProperty.call(pg, k)) { empty = false; break; }
+    if (empty) delete all[pk]; else all[pk] = pg;
+    lsSet(K.foldSteps, all);
+  }
   function isBox(e) { return e.matches("div.dialogue, div.dlg"); }
   function isTurn(e) { return e.matches(".turn, .dlg-line"); }
   function foldAll() {
@@ -432,6 +453,7 @@
     syncBoxes();
 
     var shown = 0;
+    var gkey = h.id ? "#" + h.id : "i" + GROUPS.length;
     var startLabel = TALK_RE.test(h.textContent || "") ? "토론 따라가기" : "함께 풀기";
     var next = el("button", { type: "button", class: "lp-fold-next", text: startLabel });
     var all = el("button", { type: "button", class: "lp-fold-all", text: "모두 펼치기" });
@@ -447,7 +469,7 @@
       var pick = [want, next, fold].filter(function (b) { return b && !b.hidden; })[0];
       if (pick) { try { pick.focus({ preventScroll: true }); } catch (e) { pick.focus(); } }
     }
-    function reveal(n, scroll) {
+    function reveal(n, scroll, keep) {
       var first = null, last = null, had = focusInBar() ? document.activeElement : null;
       while (n-- > 0 && shown < steps.length) {
         steps[shown].forEach(function (it) { it.el.classList.remove("lp-fold-hidden"); if (!first) first = it.el; last = it.el; });
@@ -458,6 +480,7 @@
       var end = shown >= steps.length;
       next.hidden = end; all.hidden = end; fold.hidden = shown === 0;
       if (!end) next.textContent = "다음 (" + shown + "/" + steps.length + ")";
+      if (keep) safe(foldSave)(gkey, shown);
       if (had) refocus(end ? fold : had); // 끝 걸음이면 「다시 접기」로
       if (scroll && first) {
         var r = first.getBoundingClientRect();
@@ -471,8 +494,9 @@
       }
     }
     /** 펼친 풀이를 처음처럼 접는다. 문제 머리가 화면 위로 넘어갔으면 그리로 올린다 */
-    function collapse() {
+    function collapse(quiet) {
       var had = focusInBar();
+      if (!quiet) safe(foldSave)(gkey, 0);
       steps.forEach(function (st) { st.forEach(function (it) { it.el.classList.add("lp-fold-hidden"); }); });
       shown = 0;
       syncBoxes();
@@ -480,13 +504,17 @@
       next.textContent = startLabel;
       next.hidden = false; all.hidden = false; fold.hidden = true;
       if (had) refocus(next);
+      if (quiet === true) return;
       var r = h.getBoundingClientRect();
       if (r.top < 0) { try { h.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { h.scrollIntoView(); } }
     }
-    fold.addEventListener("click", collapse);
-    next.addEventListener("click", function () { reveal(1, true); });
-    all.addEventListener("click", function () { reveal(steps.length, false); });
+    fold.addEventListener("click", function () { collapse(false); });
+    next.addEventListener("click", function () { reveal(1, true, true); });
+    all.addEventListener("click", function () { reveal(steps.length, false, true); });
+    var saved = foldSaved(gkey);
+    if (saved) reveal(Math.min(saved, steps.length), false); // 지난번에 편 데까지(다른 페이지에 갔다 와도)
     GROUPS.push({
+      collapse: function () { collapse(true); },
       contains: function (t) {
         return steps.some(function (st) { return st.some(function (it) { return it.el === t || it.el.contains(t); }); });
       },
@@ -918,7 +946,7 @@
    *  나중 동작), 마지막 위치는 책 첫 쪽으로 옮긴다. 틀린 횟수(이 브라우저)도 지운다. 끄려면 LP_READER.reset = false */
   function resetBook() {
     if (!BOOK) return;
-    if (!window.confirm("이 책의 진행률(읽음 표시·정리 문제·마지막 읽던 위치)을 모두 지웁니다. 지울까요?")) return;
+    if (!window.confirm("이 책의 진행률(읽음 표시·정리 문제·함께 풀기 펼침·마지막 읽던 위치)을 모두 지웁니다. 지울까요?")) return;
     var t = now();
     var first = INDEX && INDEX.chapters && INDEX.chapters[0] && INDEX.chapters[0].pages && INDEX.chapters[0].pages[0];
     noteChange(function (p) {
@@ -933,6 +961,10 @@
     if (PAGE) NO_AUTO[PAGE.key] = true; // 지금 보는 쪽이 리셋 직후 다시 읽음으로 잡히지 않게
     renderPanel();
     QUIZZES.forEach(function (qz) { qz.reset(false); }); // 이 쪽의 정리 문제 화면도 처음으로(틀린 표시 포함)
+    var fs = lsGet(K.foldSteps) || {}, m = 0;
+    for (var k3 in fs) if (k3.indexOf(pre) === 0) { delete fs[k3]; m++; }
+    if (m) lsSet(K.foldSteps, fs);
+    GROUPS.forEach(function (g) { g.collapse(); }); // 이 쪽의 함께 풀기·토론도 접은 상태로
     renderReadRow();
   }
   function resetBtn() {
@@ -955,13 +987,31 @@
     var bar = el("div", { class: "lp-book-progress" }, [label, el("span", { class: "lp-bar" }, [fill])]);
     var resetRow = el("div", { class: "lp-acct-actions lp-reset-row" });
     resetRow.hidden = true;
-    var box = el("div", { class: "lp-reader-box" }, [acct, bar, resetRow]);
+    var box = el("div", { class: "lp-reader-box" }, [acct, bar, resetRow, commentsToggle()]);
     var home = $("a.sidebar-home", sb), header = $(".sidebar-header", sb);
     if (home) after(home, box);
     else if (header) after(header, box);
     else sb.insertBefore(box, sb.firstChild);
     PANEL = { sb: sb, box: box, acct: acct, fill: fill, label: label, resetRow: resetRow };
     renderAccount();
+  }
+  // ── 댓글 칸 보이기·숨기기(2026-11-02 저자: 「각 페이지의 댓글 남기기 섹션을 표시할지 숨길지 설정을 왼쪽 메뉴 패널에서」)
+  // 독자마다 이 브라우저에 저장. 기본은 보이기. 숨기면 html 에 lp-c-off 를 달아 CSS 로 감춘다
+  function commentsShown() { return lsGet(K.showComments) !== false; }
+  function applyCommentsShown() {
+    var on = commentsShown();
+    document.documentElement.classList.toggle("lp-c-off", !on);
+    var cb = $("input.lp-c-toggle");
+    if (cb) cb.checked = on;
+  }
+  function commentsToggle() {
+    var cb = el("input", { type: "checkbox", class: "lp-c-toggle" });
+    cb.checked = commentsShown();
+    cb.addEventListener("change", safe(function () {
+      lsSet(K.showComments, cb.checked ? null : false);
+      applyCommentsShown();
+    }));
+    return el("label", { class: "lp-c-toggle-row" }, [cb, " 페이지 아래 댓글 칸 보이기"]);
   }
   function whenPanelOpen(go) {
     var sb = PANEL && PANEL.sb;
@@ -1871,6 +1921,7 @@
       safe(initThemeButton)();
       return;
     }
+    safe(applyCommentsShown)();
     safe(foldAll)();
     safe(initQuizzes)();
     var resumed = false;
@@ -1921,6 +1972,7 @@
   window.addEventListener("storage", safe(function (e) {
     if (e.key === K.progress) { PROG = loadProg(); renderPanel(); refreshQuizzes(); renderReadRow(); }
     else if (e.key === K.session) authChanged();
+    else if (e.key === K.showComments) applyCommentsShown();
   }));
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", safe(start));
