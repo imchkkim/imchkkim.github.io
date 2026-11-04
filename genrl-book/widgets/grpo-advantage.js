@@ -16,7 +16,7 @@ GW.register("grpo-advantage", (el) => {
     obj: {
       caption:
         "단추는 문제 2·4의 그룹을 불러온다. 위쪽 원을 클릭하면 그 답의 보상이 1 → 0.5 → 0 순으로 바뀐다. 막대는 각 답이 받는 어드밴티지 <span class='sym-A'>Â</span>. " +
-        "‘<span style='color:var(--sym-008deb, #008deb)'>σ</span>로 나누기’를 끄면 평균만 뺀 값이 된다. 풀이를 마친 뒤 두 그룹의 막대와 수치판을 견주어 보라.",
+        "‘<span style='color:var(--sym-008deb, #008deb)'>σ</span>로 나누기’를 끄면 평균만 뺀 값이 된다. 풀이를 마친 뒤 두 그룹의 막대와 수치판을 비교해 보라.",
       options: [["p2", "문제 2"], ["p4", "문제 4"], ["all1", "모두 정답"]],
       start: "p2",
     },

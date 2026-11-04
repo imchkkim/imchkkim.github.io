@@ -24,7 +24,7 @@ GW.register("dpo-loss", (el) => {
       title: "DPO 손실: 레퍼런스 대비 마진 z 가 얼마나 커졌나",
       caption:
         "가로축은 학습 모델의 선호 마진 <span class='sym-pi'>Δ<sub>θ</sub></span>, 세로 점선은 레퍼런스 마진 <span class='sym-ref'>Δ<sub>ref</sub></span>. " +
-        "<span class='sym-ref'>Δ<sub>ref</sub></span> 를 움직이면 곡선이 어떻게 바뀌는지 보라. 단추는 아래 문제 1·2 의 값을 불러온다. 풀이를 마친 뒤 수치판과 견주어 보라.",
+        "<span class='sym-ref'>Δ<sub>ref</sub></span> 를 움직이면 곡선이 어떻게 바뀌는지 보라. 단추는 아래 문제 1·2 의 값을 불러온다. 풀이를 마친 뒤 수치판과 비교해 보라.",
       ref: "레퍼런스",
       refWa: "레퍼런스와",
       hideLogLabel: true,

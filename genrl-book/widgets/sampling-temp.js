@@ -10,7 +10,7 @@ GW.register("sampling-temp", (el) => {
     caption:
       "진한 막대는 모델이 내놓은 확률 <span class='sym-pi'>π<sub>θ</sub></span>, 옅은 막대는 로짓을 샘플링 온도 T 로 나눈 뒤 실제로 뽑히는 확률이다. " +
       "처음 화면은 본문의 T = 0.5 다. T 를 1에 가까이, 또 1 너머로 옮기며 두 막대가 어떻게 벌어지는지, 가장 큰 토큰이 바뀌는지 보라. 수치판의 <span class='sym-ratio'>w</span> 는 두 확률의 비 " +
-      "<span class='sym-pi'>π<sub>θ</sub></span> ÷ (뽑히는 확률)이다. 단추로 분포를 고른 뒤 T 를 문제의 값에 맞추고 풀이와 견주어 보라.",
+      "<span class='sym-pi'>π<sub>θ</sub></span> ÷ (뽑히는 확률)이다. 단추로 분포를 고른 뒤 T 를 문제의 값에 맞추고 풀이와 비교해 보라.",
   });
   const sets = {
     body: { p: [0.5, 0.3, 0.2], label: "본문 예" },
