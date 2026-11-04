@@ -747,7 +747,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <ul>
 <li>U-Net 에도 어텐션이 있었는데, 왜 신경망 전체를 트랜스포머로 바꿨을까? 글, 여러 가로세로 비, 참조 사진, 영상을 받고 모델을 키우려 할 때 U-Net 의 무엇이 걸렸을까?</li>
 <li>가로세로 칸으로 된 잠재 그림을 트랜스포머가 읽는 토큰 줄로 바꾸려면 어떻게 잘라야 할까? 토큰은 몇 개가 알맞을까?</li>
-<li>시간(노이즈 레벨)은 블록의 어디에 어떤 꼴로 넣어야 할까? 넣는 방법에 따라 결과가 얼마나 달라질까?</li>
+<li>시간(노이즈 레벨)은 블록의 어디에 어떤 형태로 넣어야 할까? 넣는 방법에 따라 결과가 얼마나 달라질까?</li>
 <li>글 토큰 줄은 그림 토큰 줄과 어떻게 만나야 할까? 두 줄을 아예 한 줄로 이을 수는 없을까?</li>
 <li>이렇게 지은 신경망은 키우면 얼마나 좋아지고, 무엇을 키워야 할까?</li>
 <li>지금 쓰이는 모델들은 같은 설계 요소(패치, 시간을 넣는 블록, 글과 그림을 잇는 어텐션, 규모)를 어떻게 서로 다르게 골랐을까?</li>
@@ -817,7 +817,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <p>U-Net 의 정보 통로는 셋인데, 그 가운데 합성곱은 층마다 이웃 칸까지만 닿는다. 멀리 닿는 통로(어텐션)는 해상도를 낮춘 단계에 있는데, 거기서 칸 하나는 픽셀 32 × 32 같은 큰 덩어리다. 올라오는 길의 건너뛰기 연결은 높은 해상도의 정확한 위치를 건네주지만, 건네주는 것은 같은 위치의 정보뿐이다. 그래서 칸 하나 단위로 어디에 칠할지는 마지막에 높은 해상도의 합성곱이 이웃만 보고 정한다. 디퓨전 트랜스포머의 통로는 하나로, 모든 블록에서 모든 토큰이 서로 읽으므로 FLUX.1 은 같은 16 × 16 픽셀 굵기에서 57번 읽는다.</p>
 <figure class="fig "><img src="images/dit/unet_paths.png" alt="모든 칸이 서로 읽는 층이 어느 굵기에 몇 개 있는가. SD 1.x 와 SDXL 의 U-Net 은 ComfyUI 설정으로 지어 센 것, FLUX.1 [dev] 은 두 줄 블록 19개와 한 줄 블록 38개. 스크립트 sources/dit/unet_attention_layout.py, occluded_figs.py" loading="lazy"><figcaption>모든 칸이 서로 읽는 층이 어느 굵기에 몇 개 있는가. SD 1.x 와 SDXL 의 U-Net 은 ComfyUI 설정으로 지어 센 것, FLUX.1 [dev] 은 두 줄 블록 19개와 한 줄 블록 38개. 스크립트 sources/dit/unet_attention_layout.py, occluded_figs.py</figcaption></figure>
 <h3 id="한-줄에-이어-붙이기">한 줄에 이어 붙이기</h3>
-<p>통로가 하나면 들어오는 것의 꼴도 좌표가 붙은 토큰의 줄 하나로 정해지고, 새 것을 들이는 일은 좌표를 매겨 그 줄에 이어 붙이는 일 하나로 줄어든다.</p>
+<p>통로가 하나면 들어오는 것의 형태도 좌표가 붙은 토큰의 줄 하나로 정해지고, 새 것을 들이는 일은 좌표를 매겨 그 줄에 이어 붙이는 일 하나로 줄어든다.</p>
 <ul>
 <li>가로세로 비: 그림이 길쭉해지면 줄이 길어지고 좌표의 범위가 바뀔 뿐이다. ComfyUI 의 FLUX 코드는 잠재 그림의 높이와 너비에서 토큰마다 (번호, 행, 열) 좌표를 만든다(<code>comfy/ldm/flux/model.py</code> 의 <code>process_img</code>). SD3 논문은 높은 해상도로 이어 학습할 때 가로세로 비가 같은 그림끼리 배치를 묶고, 2차원 위치 좌표의 격자를 늘이고 보간해 「자유로운 가로세로 비로 생성」하게 했다고 적었다. 같은 묶음 학습은 SDXL 의 U-Net 도 썼다. 합성곱은 원래 그림 크기를 가리지 않으니, 가로세로 비만은 U-Net 도 받아 냈다.</li>
 <li>글: 글 인코더가 넘긴 토큰 줄을 그림 토큰 줄 옆에 이어 붙이면 같은 셀프 어텐션이 함께 읽는다. U-Net 에서는 글을 읽는 크로스 어텐션이 트랜스포머 층이 있는 단계에만 있었다. SDXL 의 128 × 128칸 단계는 글을 직접 읽지 않는다.</li>
@@ -825,7 +825,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li>영상 프레임: Wan2.1 의 패치는 (시간, 행, 열)로 1 × 2 × 2칸이다(<code>comfy/ldm/wan/model.py</code>). 프레임은 좌표 축 하나가 더 붙은 토큰이다.</li>
 </ul>
 <h3 id="ml에서-언어-모델의-연장을-그대로">ML에서: 언어 모델의 연장을 그대로</h3>
-<p>꼴이 언어 모델과 같으면 연장도 같이 쓴다. ComfyUI 에서 FLUX 의 어텐션과 Qwen·Mistral 같은 언어 모델 글 인코더의 어텐션은 같은 어텐션 함수 모음(<code>comfy/ldm/modules/attention.py</code>)에서 계산법을 고른다. FlashAttention, SageAttention, PyTorch 내장 어텐션 같은, 트랜스포머를 빠르게 돌리려고 다듬어 온 것들이다. 수를 8비트로 줄여 곱하는 fp8 행렬 곱은 선형 층에만 걸린다(<code>comfy/ops.py</code> 의 <code>fp8_ops</code> 는 <code>Linear</code> 만 바꾼다). 트랜스포머만으로 잠재 디퓨전의 노이즈 예측 신경망을 짠 피블스(William Peebles)와 셰(Saining Xie)도 2022년 논문 머리에서, U-Net 의 귀납 편향이 꼭 필요하지 않다면 디퓨전도 「다른 분야의 모범 사례와 학습 비법을 물려받는」 구조 통일의 흐름에 올라탈 수 있다고 적었다.</p>
+<p>형태가 언어 모델과 같으면 연장도 같이 쓴다. ComfyUI 에서 FLUX 의 어텐션과 Qwen·Mistral 같은 언어 모델 글 인코더의 어텐션은 같은 어텐션 함수 모음(<code>comfy/ldm/modules/attention.py</code>)에서 계산법을 고른다. FlashAttention, SageAttention, PyTorch 내장 어텐션 같은, 트랜스포머를 빠르게 돌리려고 다듬어 온 것들이다. 수를 8비트로 줄여 곱하는 fp8 행렬 곱은 선형 층에만 걸린다(<code>comfy/ops.py</code> 의 <code>fp8_ops</code> 는 <code>Linear</code> 만 바꾼다). 트랜스포머만으로 잠재 디퓨전의 노이즈 예측 신경망을 짠 피블스(William Peebles)와 셰(Saining Xie)도 2022년 논문 머리에서, U-Net 의 귀납 편향이 꼭 필요하지 않다면 디퓨전도 「다른 분야의 모범 사례와 학습 비법을 물려받는」 구조 통일의 흐름에 올라탈 수 있다고 적었다.</p>
 <p>키우는 일도 같다. U-Net 을 키우려면 단계 수, 단계마다의 채널, 어텐션을 둘 해상도를 함께 정해야 했다. 블록 하나를 되풀이해 쌓은 몸통이면 폭과 깊이와 토큰 수만 남는다. 계산을 늘린 만큼 그림이 고르게 좋아지는지는 모델을 키우는 이야기에서 숫자로 본다.</p>
 <div class="dialogue"><h3 id="prob-dit-clothesline-wall">문제 1. 담 양쪽의 빨랫줄<span id="문제-1-담-양쪽의-빨랫줄" class="anchor-alias"></span></h3>
 <blockquote>
