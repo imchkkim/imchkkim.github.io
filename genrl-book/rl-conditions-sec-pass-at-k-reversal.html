@@ -733,7 +733,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
 <li><a href="reinforce.html">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a></li>
-<li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다</a></li>
+<li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 계산한다</a></li>
 <li><a href="bellman.html">5. 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</a></li>
 <li><a href="td.html">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a></li>
 <li><a href="q-learning.html">7. Q-러닝: 남이 둔 수로 최선의 수를 배운다</a></li>
@@ -797,7 +797,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 </tbody>
 </table></div>
 <p>RL도 실제로 그만큼 적게 바꾸는지에 대해서는 두 가지 측정이 있다.</p>
-<p>하나는 RL이 받아들이는 정보의 양이다. 정책 그래디언트가 응답 하나에서 얻는 것은 사실상 &quot;맞았다/틀렸다&quot;에 가까운 점수 하나다. 존 슐먼(John Schulman)과 Thinking Machines 팀은 글 「LoRA Without Regret」(2025년 9월)에서, 수학 문제 약 1만 개에 문제당 응답 32개로 학습하면 응답 하나가 1비트씩만 준다고 쳐도 모델이 받아들일 정보는 32만 비트뿐이라고 셈했다. 그리고 실제로 LoRA(파라미터 행렬은 얼려 두고 그 옆에 붙인 아주 가는 행렬 두 개의 곱만 학습하는 방법)를 가장 가늘게 붙여도(랭크 1: 붙인 변화가 한 가지 패턴의 배수로만 이루어진 꼴) RL에서는 전체 파인튜닝과 같은 학습 성능이 나왔다고 보고했다.</p>
+<p>하나는 RL이 받아들이는 정보의 양이다. 정책 그래디언트가 응답 하나에서 얻는 것은 사실상 &quot;맞았다/틀렸다&quot;에 가까운 점수 하나다. 존 슐먼(John Schulman)과 Thinking Machines 팀은 글 「LoRA Without Regret」(2025년 9월)에서, 수학 문제 약 1만 개에 문제당 응답 32개로 학습하면 응답 하나가 1비트씩만 준다고 쳐도 모델이 받아들일 정보는 32만 비트뿐이라고 계산했다. 그리고 실제로 LoRA(파라미터 행렬은 얼려 두고 그 옆에 붙인 아주 가는 행렬 두 개의 곱만 학습하는 방법)를 가장 가늘게 붙여도(랭크 1: 붙인 변화가 한 가지 패턴의 배수로만 이루어진 꼴) RL에서는 전체 파인튜닝과 같은 학습 성능이 나왔다고 보고했다.</p>
 <p>다른 하나는 실제로 움직인 파라미터다. 무케르지(Sagnik Mukherjee)와 동료들(「Reinforcement Learning Finetunes Small Subnetworks in Large Language Models」, arXiv:2505.11711, 2025)은 RL로 다듬은 공개 모델 여럿을 원래 모델과 비교했다. 바뀐 파라미터는 5–30%뿐이고 나머지는 사실상 그대로였다. 다만 바뀐 부분이 몇몇 방향에 몰린 것은 아니어서, 행렬마다 바뀐 칸은 적어도 그 변화는 거의 모든 방향에 퍼져 있었다. 그러니 &quot;RL은 적게 바꾼다&quot;는 측정으로 받쳐지지만, &quot;몇 개 방향만 바꾼다&quot;는 아직 받쳐지지 않는다.</p>
 <h5 id="사례-pass-k로-다시-잰-rlvr">사례: pass@k로 다시 잰 RLVR</h5>
 <p>여기까지의 조건을 모두 합치면 껄끄러운 예측이 나온다. RL이 곱해서 고르는 학습이고, 스펙트럼 밖을 만들 수 없고, 파라미터를 조금만 바꾼다면, RLVR은 새로운 추론 능력을 <strong>만드는</strong> 것이 아니라, 원래 있던 능력을 <strong>더 자주 꺼내 쓰게</strong> 하는 것 아닐까? 새 능력을 만드는지, 있던 능력을 자주 꺼내게 하는지 가리려면 한 번에 맞히는 비율만으로는 모자란다. 원래 모델이 여러 번 시도하면 맞히던 문제를 RL 모델도 여전히 맞히는지를 봐야 한다.</p>
@@ -829,7 +829,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <li>RL 모델의 풀이는 이미 베이스 모델의 분포 안에서 높은 확률을 갖는 풀이였다(퍼플렉시티 분석: 베이스 모델이 그 풀이를 얼마나 그럴듯하게 보는지를 잰 것).</li>
 <li>여섯 가지 RLVR 알고리즘이 모두 비슷한 양상을 보였다. 반면 더 강한 모델의 답을 보고 따라 배우는 <strong>증류</strong>(distillation)는 pass@k 곡선 전체를 끌어올렸다.</li>
 </ul>
-<svg class="fig" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GRPO 학습 스텝이 늘수록 pass@1은 오르고 pass@256은 조금씩 내려간다 (Yue 외 2025 표 4를 다시 그림)">
+<svg class="fig" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GRPO 학습 스텝이 늘수록 pass@1은 오르고 pass@256은 조금씩 내려간다 (Yue 팀 2025 표 4를 다시 그림)">
   <line class="saxis" x1="70" y1="230" x2="520" y2="230"/><line class="saxis" x1="70" y1="230" x2="70" y2="40"/>
   <line class="sgrid" x1="70" y1="230.0" x2="520" y2="230.0"/><text x="62" y="235.0" text-anchor="end" style="font-size:15px">0</text>
   <line class="sgrid" x1="70" y1="182.5" x2="520" y2="182.5"/><text x="62" y="187.5" text-anchor="end" style="font-size:15px">20</text>

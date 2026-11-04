@@ -756,7 +756,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="dimuon.html">Dimuon: LoRA 에 맞춰 다시 짠 Muon</a></p>
 <h2 id="sec-dimuon-diagonal-conditioning">지난 모멘텀으로 행과 열 고르기<span id="지난-모멘텀으로-행과-열-고르기" class="anchor-alias"></span></h2>
-<p>직교화는 특잇값을 모두 1 근처로 맞추지만, 특이 방향 자체는 그대로 둔다. 그런데 LoRA 인자 <span class="sym" style="color:#665522">A</span> 의 그래디언트는 입력 활성값과 오차의 곱이라, 입력의 칸마다 크기가 다르면 그래디언트의 열 크기도 그만큼 다르다. 큰 언어 모델의 활성값에는 다른 칸보다 훨씬 큰 칸이 몇 개씩 있다는 것이 8비트 행렬 곱 연구(데트머스 외 2022)에서 알려졌다. 그러면 큰 칸들이 특이 방향을 차지하고, 직교화한 스텝도 그 몇 칸에 몰리지 않을까?</p>
+<p>직교화는 특잇값을 모두 1 근처로 맞추지만, 특이 방향 자체는 그대로 둔다. 그런데 LoRA 인자 <span class="sym" style="color:#665522">A</span> 의 그래디언트는 입력 활성값과 오차의 곱이라, 입력의 칸마다 크기가 다르면 그래디언트의 열 크기도 그만큼 다르다. 큰 언어 모델의 활성값에는 다른 칸보다 훨씬 큰 칸이 몇 개씩 있다는 것이 8비트 행렬 곱 연구(데트머스 팀 2022)에서 알려졌다. 그러면 큰 칸들이 특이 방향을 차지하고, 직교화한 스텝도 그 몇 칸에 몰리지 않을까?</p>
 <h3 id="입력-크기가-0-1-에서-10-까지인-열-16개">입력 크기가 0.1 에서 10 까지인 열 16개</h3>
 <p>랭크 4 인 인자 <span class="sym" style="color:#665522">A</span>(4×16)를 생각하자. 입력 칸의 크기 <span class="sym" style="color:#1b9e77">s</span><sub>j</sub> 가 0.1 에서 10 까지 로그로 고르게 16칸이면, 그래디언트의 열 j 는 대략 <span class="sym" style="color:#1b9e77">s</span><sub>j</sub>² 에 비례한다. 표준정규 행렬의 열에 <span class="sym" style="color:#1b9e77">s</span><sub>j</sub>² 를 곱한 모멘텀 <span class="sym" style="color:#ff1eff">M</span> 을 만들면 가장 작은 열의 노름은 0.019, 가장 큰 열은 216 이다(sources/dimuon/s4_conditioner.py). 이 모멘텀을 Polar Express 로 직교화하면, 스텝 전체의 제곱합 가운데 가장 큰 입력 네 칸이 71% 를 차지한다. 열이 16개인데 4개가 스텝의 대부분을 가져간다.</p>
 <p>Adam 의 첫 스텝은 부호만 남기므로 모든 칸이 같은 크기로 움직이고, 네 칸의 비율은 4/16 = 25% 다. Adam 은 칸마다 따로 나누므로 열의 크기 차이를 지우지만, 행렬의 특이 방향은 보지 못한다. Muon 은 특이 방향을 보지만 열의 크기 차이는 그대로 두는데, 둘의 장점을 함께 얻을 수는 없을까?</p>

@@ -733,7 +733,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
 <li><a href="reinforce.html">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a></li>
-<li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다</a></li>
+<li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 계산한다</a></li>
 <li><a href="bellman.html">5. 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</a></li>
 <li><a href="td.html">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a></li>
 <li><a href="q-learning.html">7. Q-러닝: 남이 둔 수로 최선의 수를 배운다</a></li>
@@ -772,7 +772,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <a href="https://aerial-toothpaste-34a.notion.site/How-OpenAI-Misled-You-on-RLHF-1f83f742d9dd80a68129d06503464aff">https://aerial-toothpaste-34a.notion.site/How-OpenAI-Misled-You-on-RLHF-1f83f742d9dd80a68129d06503464aff</a></p>
 </blockquote>
 <p>JoyCaption은 이미지를 보고 캡션(그림을 설명하는 글)을 쓰는 오픈소스 모델이다. 이미지 생성 모델을 학습시키려면 이미지마다 설명글이 있어야 해서, 이런 모델로 수만 장에 캡션을 한꺼번에 붙인다. 그런데 정답 캡션을 그대로 따라 쓰게 하는 지도 학습, 곧 SFT(supervised fine-tuning)만 마친 JoyCaption은 응답 100개 가운데 9.6개꼴로, 같은 구절을 끝없이 되풀이하는 반복 루프에 빠지거나 쓸모없는 출력을 내는 헛발질을 했다. 이미지 1만 장에 캡션을 붙이면 960장이 망가진다는 뜻이다.</p>
-<p>제작자 fpgaminer가 이 경험을 적은 글의 제목은 「OpenAI는 RLHF를 어떻게 잘못 알렸나」다. RLHF(사람의 선호로 모델을 강화학습하는 과정)는 InstructGPT 소개글 이후 안전과 얼라인먼트(사람이 바라는 방식으로 답하게 맞추기)를 위한 기술로 알려졌다. 그는 이것이 오해라고 본다. 강화학습이 하는 일은 모델이 지시를 <strong>믿을 만하게</strong> 따르게 만드는 것이고, SFT만 거친 모델은 태스크에 따라 많아야 90% 남짓 믿을 만해서 열 번에서 스무 번에 한 번은 헛발질한다는 것이 그의 경험이다. JoyCaption 저장소의 설명서는 GPT-4o 같은 상용 모델의 헛발질 비율을 0.01%로 적는다.</p>
+<p>제작자 fpgaminer가 이 경험을 적은 글의 제목은 「OpenAI는 RLHF를 어떻게 잘못 알렸나」다. RLHF(사람의 선호로 모델을 강화학습하는 과정)는 InstructGPT 소개글 이후 안전과 얼라인먼트(사람이 바라는 방식으로 답하게 맞추기)를 위한 기술로 알려졌다. 그는 이것이 오해라고 본다. 강화학습이 하는 일은 모델이 지시를 <strong>믿을 만하게</strong> 따르게 만드는 것이고, SFT만 거친 모델은 태스크에 따라 많아야 90% 정도 믿을 만해서 열 번에서 스무 번에 한 번은 헛발질한다는 것이 그의 경험이다. JoyCaption 저장소의 설명서는 GPT-4o 같은 상용 모델의 헛발질 비율을 0.01%로 적는다.</p>
 <p>그렇다면 열 번에 한 번 헛발질하는 모델을 고치려면 정답 캡션을 더 많이 보여 주면 될까, 모델이 실제로 저지른 실수를 직접 눌러야 할까? 실수를 누르기로 했다면 그 실수는 어디서 가져오고 무엇과 짝지어야 할까? 이 장은 개인 개발자 한 사람이 오프라인 DPO(미리 모아 둔 선호 쌍으로 학습하는 DPO)를 두 라운드 돌린 기록을 따라가며, 선호 쌍·마진·레퍼런스 같은 개념이 현장에서 어떻게 부딪히는지 본다.</p>
 <h4 id="sec-good-preference-pairs">좋은 선호쌍: 모델이 실제로 저지르는 실수를 담는다<span id="좋은-선호쌍-모델이-실제로-저지르는-실수를-담는다" class="anchor-alias"></span></h4>
 <p>DPO 데이터셋을 만들 때 가장 먼저 부딪히는 물음은 어떤 두 응답을 짝지어야 모델이 무언가를 배우느냐다. 점수 차이가 크면 될까, 아니면 다른 조건이 더 있을까? JoyCaption의 기록은 어떤 쌍이 좋은 쌍인가에 대한 현장의 답을 보여 준다.</p>

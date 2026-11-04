@@ -733,7 +733,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <li><a href="dpo-first-look.html">1. DPO 맛보기: 한 줄 수식이 하는 일</a></li>
 <li><a href="vpg.html">2. VPG: 미분할 수 없는 점수를 올리는 법</a></li>
 <li><a href="reinforce.html">3. REINFORCE: 샘플로 추정하고, 베이스라인을 빼다</a></li>
-<li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 셈한다</a></li>
+<li><a href="mdp.html">4. 마르코프 결정 과정: 지금만 보고 고르고, 앞날을 계산한다</a></li>
 <li><a href="bellman.html">5. 벨먼 방정식: 가치를 한 스텝씩 쪼개면 되풀이가 답에 모인다</a></li>
 <li><a href="td.html">6. 시간차 학습: 끝까지 기다리지 않고 예측으로 예측을 고친다</a></li>
 <li><a href="q-learning.html">7. Q-러닝: 남이 둔 수로 최선의 수를 배운다</a></li>
@@ -802,7 +802,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
   <text x="280.0" y="240.0" text-anchor="middle" style="font-size:13px;fill:#444">보상 모델 자리에 규칙을 넣었다. 알고리즘은 비평가가 있는 PPO 그대로</text>
   <text x="280.0" y="264.0" text-anchor="middle" style="font-size:13px;fill:#888">검증 보상에 보상 모델 점수를 섞으면 오히려 나빴다</text>
 </svg>
-<p>(툴루 3은 SFT와 DPO 다음 마지막 단계에서 보상 모델 자리에 검증 함수를 넣고 PPO로 학습했다. 근거: 램버트 외, 「Tülu 3」(arXiv 2411.15124). 직접 그림.)</p>
+<p>(툴루 3은 SFT와 DPO 다음 마지막 단계에서 보상 모델 자리에 검증 함수를 넣고 PPO로 학습했다. 근거: 램버트 팀, 「Tülu 3」(arXiv 2411.15124). 직접 그림.)</p>
 <div class="dlg">
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">정답이면 점수를 주고 아니면 0점. 너무 당연해서 이름을 붙일 거리인가 싶은데요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">툴루 3 전에는 언어 모델을 강화학습으로 다듬을 때 보상을 어디서 얻었죠?</div></div>
@@ -880,7 +880,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
   <text class="tbad" x="312" y="258" text-anchor="middle" style="font-size:16px;font-weight:700">질문에 답했는지는 보지 않는다</text>
   <text class="tbad" x="312" y="284" text-anchor="middle" style="font-size:16px;font-weight:700">→ 「e, e, e, …」도 1점</text>
 </svg>
-<p>전제는 <strong>정답 여부를 자동으로 판정할 수 있어야 한다</strong>는 것 하나이고, 이 전제가 충족되면 세 가지가 동시에 따라온다. 사람 라벨이 필요 없으니 문제만 있으면 데이터가 무한하고, 보상 모델을 학습할 필요가 없고, 매번 현재 모델이 답하니 분포 이동(데이터를 만든 모델과 지금 학습 중인 모델이 달라져 생기는 어긋남)이 없다.</p>
+<p>전제는 <strong>정답 여부를 자동으로 판정할 수 있어야 한다</strong>는 것 하나이고, 이 전제가 충족되면 세 가지가 동시에 따라온다. 사람 라벨이 필요 없으니 문제만 있으면 데이터가 무한하고, 보상 모델을 학습할 필요가 없고, 매번 현재 모델이 답하니 분포 이동(데이터를 만든 모델과 지금 학습 중인 모델이 달라져 생기는 차이)이 없다.</p>
 <h5 id="리워드-해킹이-거의-사라지는-이유">리워드 해킹이 (거의) 사라지는 이유</h5>
 <p>보상 모델을 쓰는 곳에서는 리워드 해킹이 되풀이해 나타난다. 보상 모델은 &quot;좋은 답&quot;의 <strong>불완전한 대리인</strong>이라서, 최적화 압력이 그 빈틈을 찾아낸다.</p>
 <div class="table-scroll"><table>
@@ -1036,7 +1036,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <div class="exercise">
 <p>어떤 수학 검증기는 응답에 등장하는 <strong>모든 숫자</strong> 중 하나라도 정답과 같으면 1점을 준다. (가) GRPO로 오래 학습하면 어떤 응답이 늘어날까? (나) 이 검증기를 「마지막에 쓴 답 하나만 꺼내 정답과 비교」로 고쳤다면, 고친 검증기가 판정하는 명제를 한 문장으로 적고, 우리가 바라는 명제(「문제를 옳게 풀었다」)와 아직 어긋나는 곳을 하나 찾으시오.</p>
 </div>
-<svg class="fig" viewBox="0 0 560 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="「1부터 100까지의 합」 풀이 한 줄 속 숫자 다섯 개에 표시. 위 검증기는 숫자 다섯 개를 모두 정답과 맞대 보고, 아래 고친 검증기는 마지막 숫자 하나만 꺼내 맞대 본다. 두 검증기가 판정하는 명제의 자리는 물음표">
+<svg class="fig" viewBox="0 0 560 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="「1부터 100까지의 합」 풀이 한 줄 속 숫자 다섯 개에 표시. 위 검증기는 숫자 다섯 개를 모두 정답과 비교해 보고, 아래 고친 검증기는 마지막 숫자 하나만 꺼내 비교하 본다. 두 검증기가 판정하는 명제의 자리는 물음표">
   <rect x="0" y="0" width="560" height="320" rx="6" fill="#fff" stroke="#ccc"/>
   <text x="280.0" y="26.0" text-anchor="middle" style="font-size:16px;fill:#111;font-weight:700">응답 한 줄과 두 검증기</text>
   <rect x="30.0" y="42.0" width="500.0" height="44.0" rx="6" fill="#f6f6f6" stroke="#444" stroke-width="1.5"/>
@@ -1057,7 +1057,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
   <text x="270.0" y="168.0" text-anchor="middle" style="font-size:12px;fill:#d9670b">2</text>
   <rect x="312" y="152" width="36" height="22" rx="4" fill="#fff" stroke="#d9670b" stroke-width="1.5"/>
   <text x="330.0" y="168.0" text-anchor="middle" style="font-size:12px;fill:#d9670b">5050</text>
-  <text x="370.0" y="168.0" text-anchor="start" style="font-size:13px;fill:#888">다섯 개 모두 맞대 봄</text>
+  <text x="370.0" y="168.0" text-anchor="start" style="font-size:13px;fill:#888">다섯 개 모두 비교하 봄</text>
   <line x1="30.0" y1="196.0" x2="530.0" y2="196.0" stroke="#e3e3e3" stroke-width="1.5"/>
   <text x="30.0" y="236.0" text-anchor="start" style="font-size:15px;fill:#111;font-weight:700">(나) 고친 검증기</text>
   <rect x="160.0" y="214.0" width="230.0" height="36.0" rx="6" fill="#fff" stroke="#444" stroke-width="1.5"/>
@@ -1067,7 +1067,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
   <text x="444.0" y="238.0" text-anchor="start" style="font-size:15px;fill:#111;font-weight:700">판정 명제 ?</text>
   <rect x="257" y="262" width="36" height="22" rx="4" fill="#fff" stroke="#d9670b" stroke-width="1.5"/>
   <text x="275.0" y="278.0" text-anchor="middle" style="font-size:12px;fill:#d9670b">5050</text>
-  <text x="305.0" y="278.0" text-anchor="start" style="font-size:13px;fill:#888">하나만 맞대 봄</text>
+  <text x="305.0" y="278.0" text-anchor="start" style="font-size:13px;fill:#888">하나만 비교하 봄</text>
   <text x="280.0" y="308.0" text-anchor="middle" style="font-size:15px;fill:#111">바라는 명제: 「문제를 옳게 풀었다」</text>
 </svg>
 <div class="dlg">
@@ -1082,7 +1082,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 검증기는 정의 자체가 아니라, 정의를 구현한 코드예요. 그래서 실무에서는 답을 정해진 칸에 쓰게 하고, 같은 값의 여러 표기를 하나로 맞춘 뒤 비교해요. DeepSeek-R1도 수학 답은 정해진 상자 안에 쓰게 했어요.</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">출석을 강의실 와이파이 접속으로만 확인하면 복도에 서 있어도 출석이 되는 거랑 같네요. 확인하는 것과 알고 싶은 것이 조금만 달라도 그 틈으로 점수가 새요.</div></div>
 </div><blockquote>
-<p><strong>정리</strong> (가) 모든 숫자를 확인하는 검증기는 &quot;정답을 말한다&quot;가 아니라 &quot;정답이 어딘가 등장한다&quot;를 판정하므로, 후보를 나열하는 응답이 늘어난다. (나) 고친 검증기는 「마지막에 쓴 답이 정답과 같다」를 판정하는데, 답의 가짓수가 적은 문제에서는 엉터리 풀이가 찍어서 1점을 받고, 표기가 다른 정답은 0점을 받는다. RLVR이 해킹에 강한 것은 검증기의 판정 명제가 원하는 명제와 <strong>정확히 일치할 때</strong>뿐이다. 실무에서는 정해진 칸에 답 쓰게 하기, 표기 맞추기로 판정 명제와 원하는 명제의 어긋남을 좁힌다.</p>
+<p><strong>정리</strong> (가) 모든 숫자를 확인하는 검증기는 &quot;정답을 말한다&quot;가 아니라 &quot;정답이 어딘가 등장한다&quot;를 판정하므로, 후보를 나열하는 응답이 늘어난다. (나) 고친 검증기는 「마지막에 쓴 답이 정답과 같다」를 판정하는데, 답의 가짓수가 적은 문제에서는 엉터리 풀이가 찍어서 1점을 받고, 표기가 다른 정답은 0점을 받는다. RLVR이 해킹에 강한 것은 검증기의 판정 명제가 원하는 명제와 <strong>정확히 일치할 때</strong>뿐이다. 실무에서는 정해진 칸에 답 쓰게 하기, 표기 맞추기로 판정 명제와 원하는 명제의 차이를 좁힌다.</p>
 </blockquote>
 
 </section>
