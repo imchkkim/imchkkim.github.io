@@ -16,6 +16,8 @@
  *   - 목차 패널의 「댓글 칸 보이기」 체크 상자: 끄면 모든 책·모든 페이지의 댓글 칸을 숨긴다(이 브라우저에 저장)
  *   - 책 안 낱말 검색: 목차 패널 맨 위·대문의 검색 칸, search-index.json 지연 로드, 도착한 페이지에서 찾은 말 표시
  *     (계약서 끝 「변경 (책 안 검색)」 절)
+ *   - 옷차림 스킨 이스터에그: 막간에서 새 옷차림을 보면 목차 패널에 「등장인물 옷차림」 칸이 열리고, 고른 옷으로
+ *     대화 표정 그림을 바꾼다. 이 브라우저 + 로그인하면 서버 /api/prefs (계약서 끝 「변경 (옷차림 스킨)」 절)
  *   - 키보드·화면 읽기·휴대폰 다듬기: 함께 풀기·정리 문제 뒤 초점 유지, 목차 장 줄 읽기 글자, 본문 건너뛰기,
  *     휴대폰 목차 패널(inert·aria-expanded·Escape·바깥 누름·열 때 초점), 패널을 지금 쪽 줄로 굴리기, ☰ 단추 숨기기,
  *     테마 단추 aria-pressed (계약서 끝 「변경 (UX 다듬기, 2026-10-30)」 절)
@@ -28,6 +30,87 @@
  */
 (function () {
   "use strict";
+
+  // ── 옷차림 스킨의 순수 규칙(2026-11-04 이스터에그, 계약서 끝 「변경 (옷차림 스킨)」 절) ──
+  // 화면(아래)과 독자 서버(lameproof_reader_server.cjs, node 에서 이 파일을 require)가 같은 규칙을 쓴다.
+  // 그래서 이 묶음은 window·document 를 만지지 않는다. 인물 세트 원본: shared/characters/cast.py·story.md
+  var SKIN = (function () {
+    var SETS = {
+      M: [{ id: "base", off: 0, label: "기본" }, { id: "suit", off: 20, label: "정장" }, { id: "tee", off: 40, label: "반팔 티셔츠" }],
+      S: [{ id: "base", off: 0, label: "기본" }, { id: "glam", off: 20, label: "변신" }, { id: "bikini", off: 40, label: "비키니" }]
+    };
+    var WHO = ["M", "S"];
+    var ORDER = ["M:suit", "M:tee", "S:glam", "S:bikini"]; // 언락 열쇠 = 「인물:세트」
+    var CAST_RE = /^(.*\/)([MS])(\d{2})\.webp(\?.*)?$/; // 「…/M04.webp」. 경로 없는 이름은 대상 아님
+    function setById(who, id) {
+      var l = SETS[who] || [];
+      for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i];
+      return null;
+    }
+    /** src 글자 → { who, n, dir, query } 또는 null */
+    function parse(src) {
+      var m = CAST_RE.exec(String(src || ""));
+      return m ? { who: m[2], n: Number(m[3]), dir: m[1], query: m[4] || "" } : null;
+    }
+    /** 기본 표정 번호: 01~12, 15~19(13·14 는 선생님 전용이라 학생 세트에 없다) */
+    function isBaseNo(n) { return (n >= 1 && n <= 12) || (n >= 15 && n <= 19); }
+    /** 번호가 어느 세트의 그림인가: 21~39 → +20 세트, 41~59 → +40 세트. 아니면 null */
+    function setOfNo(who, n) {
+      var off = n >= 41 && n <= 59 ? 40 : n >= 21 && n <= 39 ? 20 : 0;
+      if (!off || !isBaseNo(n - off)) return null;
+      var l = SETS[who] || [];
+      for (var i = 0; i < l.length; i++) if (l[i].off === off) return l[i];
+      return null;
+    }
+    /** 막간의 그림 src → 언락 열쇠(「M:suit」 등) 또는 null */
+    function unlockKey(src) {
+      var p = parse(src);
+      var s = p && setOfNo(p.who, p.n);
+      return s ? p.who + ":" + s.id : null;
+    }
+    /** 기본 번호 그림 src 를 고른 세트의 같은 표정으로. 바꿀 것이 없으면 null(21 이상은 그대로 둔다) */
+    function swap(src, who, setId) {
+      var p = parse(src), s = setById(who, setId);
+      if (!p || p.who !== who || !s || !s.off || !isBaseNo(p.n)) return null;
+      var n = p.n + s.off;
+      return p.dir + p.who + (n < 10 ? "0" : "") + n + ".webp" + p.query;
+    }
+    function isMs(v) { return typeof v === "number" && v > 0 && v <= 9007199254740991 && Math.floor(v) === v; }
+    /**
+     * 아무 값 → 정해진 꼴 { unlocked: [열쇠…](ORDER 순), pick: { M: {set, at}, S: {set, at} } }.
+     * 모르는 열쇠·세트는 버리고, 언락되지 않은 세트를 고른 것은 기본으로 본다.
+     */
+    function norm(raw) {
+      var r = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+      var have = {};
+      if (Array.isArray(r.unlocked)) for (var i = 0; i < r.unlocked.length && i < 50; i++) have[r.unlocked[i]] = true;
+      var out = { unlocked: ORDER.filter(function (k) { return have[k] === true; }), pick: {} };
+      var pk = r.pick && typeof r.pick === "object" && !Array.isArray(r.pick) ? r.pick : {};
+      WHO.forEach(function (w) {
+        var x = pk[w] && typeof pk[w] === "object" ? pk[w] : {};
+        var s = typeof x.set === "string" ? setById(w, x.set) : null;
+        var set = s && (s.off === 0 || have[w + ":" + s.id] === true) ? s.id : "base";
+        out.pick[w] = { set: set, at: isMs(x.at) ? x.at : 0 };
+      });
+      return out;
+    }
+    /** 두 기기의 값 합치기: 언락은 합집합, 고른 옷은 인물마다 나중에 바꾼 쪽(at 큰 쪽, 같으면 a) */
+    function merge(a, b) {
+      a = norm(a); b = norm(b);
+      var all = a.unlocked.concat(b.unlocked);
+      var pick = {};
+      WHO.forEach(function (w) { pick[w] = b.pick[w].at > a.pick[w].at ? b.pick[w] : a.pick[w]; });
+      return norm({ unlocked: all, pick: pick });
+    }
+    function same(a, b) { return JSON.stringify(norm(a)) === JSON.stringify(norm(b)); }
+    return { SETS: SETS, WHO: WHO, ORDER: ORDER, setById: setById, parse: parse, isBaseNo: isBaseNo, setOfNo: setOfNo,
+      unlockKey: unlockKey, swap: swap, norm: norm, merge: merge, same: same };
+  })();
+  // node 에서 require 하면(서버·시험) 규칙만 내보내고 화면 코드는 돌리지 않는다
+  if (typeof window === "undefined") {
+    if (typeof module === "object" && module && module.exports) module.exports = { SKIN: SKIN };
+    return;
+  }
 
   var CFG = window.LP_READER || {};
   var API = typeof CFG.api === "string" ? CFG.api.replace(/\/+$/, "") : "";
@@ -50,7 +133,9 @@
     stay: "lp.reader.stay.",
     config: "lp.reader.config",
     search: "lp.reader.search",
-    showComments: "lp.reader.showComments"
+    showComments: "lp.reader.showComments",
+    skin: "lp.reader.v1.skin",            // 옷차림 스킨 { unlocked, pick } — 로그인하면 서버 /api/prefs 와 합친다
+    skinDirty: "lp.reader.v1.skinDirty"   // 서버에 아직 못 올린 스킨 변경이 있음
   };
   var STATUS_LABEL = { open: "저자가 아직 읽지 않음", applied: "원고에 반영됨", held: "보류" };
   var HEAD_RE = /^\s*(?:문제|토론)\s*\d+\s*[.:]/; // 접는 묶음의 머리: 「문제 N.」「문제 N:」, 장 끝 「토론 N.」「토론 N:」
@@ -987,7 +1072,7 @@
     var bar = el("div", { class: "lp-book-progress" }, [label, el("span", { class: "lp-bar" }, [fill])]);
     var resetRow = el("div", { class: "lp-acct-actions lp-reset-row" });
     resetRow.hidden = true;
-    var box = el("div", { class: "lp-reader-box" }, [acct, bar, resetRow, commentsToggle()]);
+    var box = el("div", { class: "lp-reader-box" }, [acct, bar, resetRow, commentsToggle(), skinPanel()]);
     var home = $("a.sidebar-home", sb), header = $(".sidebar-header", sb);
     if (home) after(home, box);
     else if (header) after(header, box);
@@ -1024,6 +1109,198 @@
       mo.observe(sb, { attributes: true, attributeFilter: ["class"] });
     }
   }
+  // ── 옷차림 스킨(2026-11-04 저자: 「작은 이스터에그, 에피소드를 클릭해서 새로운 복장을 입은 씬을 보고나면 그 후부터
+  // 등장인물의 스킨을 교체할수 있는 모드가 언락된다. 대상은 민준과 서연, 각각 선택할수 있게. 자기 계정의 프로필에 저장.」)
+  // 언락: 막간(section.interlude) 안의 21 이상 번호 표정 그림이 화면에 보이면 그 세트가 열린다(막간 밖은 열지 않는다).
+  // 적용: 고른 세트가 기본이 아니면 대화 표정 그림 가운데 기본 번호(01~12, 15~19)를 +20/+40 번 그림으로 바꾼다.
+  // 저장: 이 브라우저(K.skin) + 로그인하면 서버 GET/PUT /api/prefs 와 합친다(언락은 합집합, 고른 옷은 나중 것).
+  var CAST_SEL = "figure.cast img, figure.dlg-cast img"; // 대화 표정 그림(책마다 꼴이 둘). 본문·표·위젯 그림은 대상 아님
+  var SKIN_GOT = { "M:suit": "민준의 정장", "M:tee": "민준의 반팔 티셔츠", "S:glam": "서연의 변신 모습", "S:bikini": "서연의 비키니" };
+  var SKIN_NAME = { M: "민준", S: "서연" };
+  var SKIN_ST = null, skinBox = null, skinTimer = null, skinBusy = false;
+  function skinState() { return SKIN_ST || (SKIN_ST = SKIN.norm(lsGet(K.skin))); }
+  function skinSave(v) { SKIN_ST = SKIN.norm(v); lsSet(K.skin, SKIN_ST); }
+  function skinAllBase(st) { return SKIN.WHO.every(function (w) { return st.pick[w].set === "base"; }); }
+  function origSrc(img) { return img.getAttribute("data-lp-orig") || img.getAttribute("src") || ""; }
+  function castImgs(root) {
+    if (!root || root === document) return $$(CAST_SEL);
+    if (root.nodeType !== 1) return [];
+    var l = $$(CAST_SEL, root);
+    if (root.matches(CAST_SEL)) l.unshift(root);
+    return l;
+  }
+  /** root 안(없으면 페이지 전체)의 표정 그림을 지금 고른 옷으로 맞춘다. 바꾼 그림이 없으면(오류) 원래 그림으로 */
+  function applySkin(root) {
+    var st = skinState();
+    castImgs(root).forEach(function (img) {
+      var orig = origSrc(img), p = SKIN.parse(orig);
+      if (!p) return;
+      var want = SKIN.swap(orig, p.who, st.pick[p.who].set);
+      var cur = img.getAttribute("src");
+      if (want && !SKIN_MISS[want]) {
+        if (cur === want) return;
+        img.setAttribute("data-lp-orig", orig);
+        if (!img.__lpSkin) {
+          img.__lpSkin = true;
+          img.addEventListener("error", function () {
+            var s = img.getAttribute("src"), o = img.getAttribute("data-lp-orig");
+            if (o && s !== o) { SKIN_MISS[s] = true; img.setAttribute("src", o); }
+          });
+        }
+        img.setAttribute("src", want);
+      } else if (img.hasAttribute("data-lp-orig")) {
+        if (cur !== orig) img.setAttribute("src", orig);
+        img.removeAttribute("data-lp-orig");
+      }
+    });
+  }
+  var SKIN_MISS = {}; // 이 페이지에서 불러오지 못한 그림 주소(이 책 배포본에 그 세트가 아직 없을 때)
+  var toastKeys = [], toastTimer = null;
+  /** 「…을/를」: 끝 글자에 받침이 있으면 을 */
+  function objJosa(w) {
+    var c = w.charCodeAt(w.length - 1) - 0xAC00;
+    return w + (c >= 0 && c < 11172 && c % 28 ? "을" : "를");
+  }
+  /** 처음 언락 알림. 한 번에 둘이 열리면(한 장면에 두 사람) 한 알림에 함께 적는다 */
+  function skinToast(key) {
+    var t = $(".lp-toast");
+    if (!t) {
+      toastKeys = [];
+      t = el("div", { class: "lp-toast", role: "status" });
+      t.addEventListener("click", function () { if (t.parentNode) t.parentNode.removeChild(t); });
+      document.body.appendChild(t);
+    }
+    toastKeys.push(SKIN_GOT[key]);
+    t.textContent = "";
+    t.appendChild(el("strong", { text: "숨은 기능" }));
+    t.appendChild(document.createTextNode(": " + objJosa(toastKeys.join(", ")) + " 고를 수 있게 됐어요 · 메뉴 → 등장인물 옷차림"));
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 7000);
+  }
+  function skinChanged() {
+    lsSet(K.skinDirty, 1);
+    renderSkin();
+    scheduleSkinPush();
+  }
+  function unlockSkin(key) {
+    var st = skinState();
+    if (st.unlocked.indexOf(key) >= 0) return;
+    skinSave({ unlocked: st.unlocked.concat([key]), pick: st.pick });
+    skinChanged();
+    skinToast(key);
+  }
+  function pickSkin(who, setId) {
+    var st = skinState(), pick = {};
+    SKIN.WHO.forEach(function (w) { pick[w] = st.pick[w]; });
+    pick[who] = { set: setId, at: now() };
+    skinSave({ unlocked: st.unlocked, pick: pick });
+    applySkin(document);
+    skinChanged();
+  }
+  function skinPanel() {
+    skinBox = el("div", { class: "lp-skin" });
+    skinBox.hidden = true;
+    return skinBox;
+  }
+  function renderSkin() {
+    if (!skinBox) return;
+    var st = skinState();
+    skinBox.textContent = "";
+    skinBox.hidden = !st.unlocked.length; // 언락된 세트가 하나라도 있을 때만 보인다
+    if (skinBox.hidden) return;
+    var first = castImgs(document)[0], fp = first ? SKIN.parse(origSrc(first)) : null;
+    var dir = fp ? fp.dir : null; // 미리보기 얼굴(01 번)은 이 책의 표정 그림 폴더에서
+    skinBox.appendChild(el("div", { class: "lp-skin-title", text: "등장인물 옷차림" }));
+    SKIN.WHO.forEach(function (w) {
+      var fs = el("fieldset", { class: "lp-skin-who" }, [el("legend", { text: SKIN_NAME[w] })]);
+      SKIN.SETS[w].forEach(function (s) {
+        var open = s.off === 0 || st.unlocked.indexOf(w + ":" + s.id) >= 0;
+        var rb = el("input", { type: "radio", name: "lp-skin-" + w, value: s.id, disabled: !open });
+        rb.checked = st.pick[w].set === s.id;
+        rb.addEventListener("change", safe(function () { if (rb.checked) pickSkin(w, s.id); }));
+        var face = null;
+        if (open && dir) {
+          face = el("img", { class: "lp-skin-face", src: dir + w + pad2(1 + s.off) + ".webp", alt: "", loading: "lazy" });
+          face.addEventListener("error", function () { face.hidden = true; });
+        }
+        fs.appendChild(el("label", { class: "lp-skin-opt" + (open ? "" : " lp-skin-locked") }, [
+          rb, face, open ? s.label : "??? (아직 못 본 옷)"
+        ]));
+      });
+      skinBox.appendChild(fs);
+    });
+  }
+  /** 막간 안의 옷차림 그림이 화면에 들어오면 언락 */
+  function initSkinUnlock() {
+    if (typeof IntersectionObserver !== "function") return;
+    var have = skinState().unlocked, n = 0;
+    var io = new IntersectionObserver(safe(function (ents) {
+      ents.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        io.unobserve(en.target);
+        unlockSkin(en.target.__lpSkinKey);
+      });
+    }), { threshold: 0.5 });
+    $$("section.interlude").forEach(function (sec) {
+      castImgs(sec).forEach(function (img) {
+        var key = SKIN.unlockKey(origSrc(img));
+        if (!key || have.indexOf(key) >= 0) return;
+        var t = img.closest("figure") || img;
+        t.__lpSkinKey = key;
+        io.observe(t);
+        n++;
+      });
+    });
+    if (!n) io.disconnect();
+  }
+  /** 나중에 그려지는 대화(동적으로 붙는 노드)에도 고른 옷을 입힌다 */
+  function initSkinWatch() {
+    if (typeof MutationObserver !== "function" || !document.body) return;
+    new MutationObserver(safe(function (muts) {
+      if (skinAllBase(skinState())) return;
+      muts.forEach(function (m) {
+        Array.prototype.forEach.call(m.addedNodes, function (nd) { if (nd.nodeType === 1) applySkin(nd); });
+      });
+    })).observe(document.body, { childList: true, subtree: true });
+  }
+  /** 서버 값과 합친다. 서버에 없는 것이 이쪽에 남았으면 올린다(fromPut 이면 이미 올린 결과) */
+  function skinTake(server, fromPut) {
+    var cur = skinState(), m = SKIN.merge(cur, server);
+    if (!SKIN.same(cur, m)) { skinSave(m); applySkin(document); renderSkin(); }
+    if (!fromPut && !SKIN.same(m, server)) { lsSet(K.skinDirty, 1); scheduleSkinPush(); }
+  }
+  function skinPush() {
+    if (!getSession() || skinBusy) return;
+    skinBusy = true;
+    var sent = skinState();
+    api("PUT", "/api/prefs", { prefs: { skin: sent } }, { auth: true, timeout: 8000 }).then(safe(function (r) {
+      skinBusy = false;
+      if (!r.ok || !r.data || !r.data.prefs) return; // 표지(skinDirty)는 남겨 다음 페이지에서 다시 올린다
+      if (SKIN.same(skinState(), sent)) lsSet(K.skinDirty, null);
+      else scheduleSkinPush(); // 보내는 사이 또 바뀌었다
+      skinTake(r.data.prefs.skin, true);
+    }));
+  }
+  function scheduleSkinPush() {
+    if (!getSession()) return;
+    if (skinTimer) clearTimeout(skinTimer);
+    skinTimer = setTimeout(function () { skinTimer = null; safe(skinPush)(); }, 1500);
+  }
+  /** 페이지를 열 때·로그인했을 때 */
+  function skinPull() {
+    if (!getSession()) return;
+    if (lsGet(K.skinDirty)) { skinPush(); return; }
+    api("GET", "/api/prefs", undefined, { auth: true, timeout: 8000 }).then(safe(function (r) {
+      if (r.ok && r.data && r.data.prefs) skinTake(r.data.prefs.skin, false);
+    }));
+  }
+  function initSkin() {
+    renderSkin();
+    safe(initSkinUnlock)();
+    safe(initSkinWatch)();
+    skinPull();
+  }
+
   function renderAccount() {
     if (!PANEL) return;
     var acct = PANEL.acct;
@@ -1923,6 +2200,7 @@
     }
     safe(applyCommentsShown)();
     safe(foldAll)();
+    safe(applySkin)(); // 고른 옷차림(그림이 불러지기 전에 주소부터 바꾼다)
     safe(initQuizzes)();
     var resumed = false;
     resumed = !!safe(restoreResume)();
@@ -1939,12 +2217,13 @@
     safe(checkJump)();
     safe(initSearch)();
     safe(initPanel)();
+    safe(initSkin)(); // 독자 칸의 옷차림 칸·막간 언락·서버 합치기
     safe(initSkipLink)();
     safe(initThemeButton)();
     safe(initMenuAutoHide)();
     safe(initScrollShade)();
     safe(initPanelKeys)(); // 검색 칸·독자 칸을 넣은 뒤(패널 안 자리가 정해진 뒤) 지금 쪽 줄로 굴린다
-    onAuthChange.push(renderAccount, renderCommentAuth);
+    onAuthChange.push(renderAccount, renderCommentAuth, function () { if (getSession()) skinPush(); }); // 로그인하면 이 브라우저의 옷차림을 서버와 합친다
     afterSync.push(renderPanel, refreshQuizzes, renderReadRow);
 
     loadIndex(BOOK, BASE).then(safe(function (idx) {
@@ -1973,6 +2252,7 @@
     if (e.key === K.progress) { PROG = loadProg(); renderPanel(); refreshQuizzes(); renderReadRow(); }
     else if (e.key === K.session) authChanged();
     else if (e.key === K.showComments) applyCommentsShown();
+    else if (e.key === K.skin && BOOK) { SKIN_ST = null; applySkin(document); renderSkin(); }
   }));
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", safe(start));
