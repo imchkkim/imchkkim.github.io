@@ -657,6 +657,37 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   filter: brightness(0.9);
 }
 
+/* ===== 막간 =====
+   「## 막간: 제목」 절 한 페이지를 본문과 다른 바탕색 상자로 감싼다(build.cjs wrapInterlude). 문제·숫자 없는 쉬어 가는 쪽이라
+   건너뛰어도 된다는 줄을 머리에 단다. 막간 규칙: ~/lameproof/shared/characters/story.md 「막간 쓰는 법」 */
+section.interlude {
+  background: #fbf3e6;
+  border: 1px solid #ead7b8;
+  border-radius: 14px;
+  padding: 0.2em 1.4em 1.2em;
+  margin: 0.6em 0 1.5em;
+}
+section.interlude::before {
+  content: "막간 · 쉬어 가는 쪽, 건너뛰어도 본문을 따라가는 데 지장 없음";
+  display: block;
+  margin: 0.9em 0 0.2em;
+  font-size: 0.8em;
+  color: #95642a;
+  letter-spacing: 0.02em;
+}
+section.interlude > h2 { border-bottom-color: #ead7b8; margin-top: 0.2em; }
+section.interlude blockquote { border-left-color: #d9b97f; background: rgba(255, 255, 255, 0.55); }
+section.interlude figure.fig img { border-radius: 10px; }
+[data-theme="dark"] section.interlude { background: #2b2620; border-color: #4d4030; }
+[data-theme="dark"] section.interlude::before { color: #d9b17a; }
+[data-theme="dark"] section.interlude > h2 { border-bottom-color: #4d4030; }
+[data-theme="dark"] section.interlude blockquote { border-left-color: #8a6a3a; background: rgba(0, 0, 0, 0.18); }
+@media (max-width: 640px) { section.interlude { padding: 0.1em 0.9em 1em; } }
+/* 목차의 막간 줄: 다른 절과 구별되게 */
+#sidebar .sidebar-toc li.toc-interlude a { color: #95642a; font-style: italic; }
+[data-theme="dark"] #sidebar .sidebar-toc li.toc-interlude a { color: #d9b17a; }
+#sidebar .sidebar-toc li.toc-interlude a.current { font-weight: 600; }
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -676,10 +707,13 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
     </div>
   </div>
   <a class="sidebar-home" href="/">&larr; 전체 교재</a>
-  <ol><li><a href="preface.html">머리말: 압축은 이해인가</a></li>
+  <ol><li><a href="preface.html">머리말: 압축과 이해의 관계는?</a></li>
+<li class="toc-part">비트로 재기</li>
+<li><a href="entropy.html">엔트로피: 평균 놀라움, 코드 길이의 하한</a></li>
+<li><a href="code-length.html">코드 길이: 예측기가 곧 압축기</a></li>
+<li><a href="shannon-theorems.html">섀넌의 두 정리: 짧게 적기와 틀리지 않게 보내기</a></li>
 <li class="toc-part">짧게 적는다는 것</li>
 <li><a href="low-dimension.html">예측할 수 있으면 낮은 차원</a></li>
-<li><a href="code-length.html">코드 길이: 예측기가 곧 압축기</a></li>
 <li><a href="mdl.html">최소 기술 길이와 오컴: 모델까지 적어야 공평하다</a></li>
 <li class="toc-part">자료가 고르는 축</li>
 <li><a href="pca.html">주성분 분석과 저랭크 근사</a></li>
@@ -702,8 +736,6 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <p class="chapter-crumb"><a href="rate-distortion.html">레이트–디스토션과 정보 병목: 무엇을 버려도 되는가</a></p>
 <h2 id="sec-information-bottleneck">정보 병목: 왜곡을 잃은 라벨 정보로 재기<span id="정보-병목-왜곡을-잃은-라벨-정보로-재기" class="anchor-alias"></span></h2>
 <p>지금까지는 틀림을 제곱 오차로 쟀다. 그런데 아침에 날씨 앱을 여는 사람이 알고 싶은 것은 오늘의 기온이나 강수량 그 자체가 아니라 우산을 챙겨야 하는지다. 날씨 앱의 예보와 실제 날씨가 서로 얼마나 알려 주는지는, 예보를 보기 전과 본 뒤에 실제 날씨의 엔트로피가 평균으로 얼마나 줄어드는지를 재는 상호정보량으로 쟀다. 날씨를 짧게 줄여 전할 때, 우산 판단에 쓰이는 정보는 남기고 나머지는 버리는 압축을 레이트–디스토션의 말로 쓸 수 있을까? 그때 「왜곡」은 무엇이 될까?</p>
-<aside class="guide"><p class="guide-title">길잡이 · 『정보기하학』 「상호정보량: 관측이 평균으로 덜어 준 불확실성」</p><p>예보 앱 100일 기록으로 세운 상호정보량, 어느 쪽에서 재도 같다는 것, 결합 분포와 주변분포의 곱 사이 KL 이라는 셋째 꼴. <a href="https://lameproof.com/infogeo-book/ignorance-sec-mutual-information-uncertainty-reduction.html">이어 읽기</a></p>
-</aside>
 <h3 id="hist-relevant-information" class="history" data-people="tishby-naftali pereira-fernando bialek-william">역사: 「관련 있는 정보」를 재는 법<span id="역사-관련-있는-정보-를-재는-법" class="anchor-alias"></span></h3>
 <p>1999년, 히브리 대학의 티시비(Naftali Tishby), AT&amp;T 섀넌 연구소의 페레이라(Fernando Pereira), NEC 연구소의 비알렉(William Bialek)은 앨러턴 학회에 「정보 병목 방법(The Information Bottleneck Method)」을 냈다. 학회 기록으로는 368–377쪽이고, 2000년 arXiv physics/0004057 에 다시 올렸다. 그들의 출발점은 레이트–디스토션 이론의 빈자리였다. 섀넌의 이론은 왜곡을 재는 함수를 미리 주어야 하는데, 말소리에서 무엇이 「중요한」 차이인지는 누가 정하는가? 그들은 예를 여럿 들었다. 말소리 파형에서 중요한 것은 말한 낱말이고, 받아 적은 글은 파형보다 엔트로피가 훨씬 낮다. 얼굴 사진에서 중요한 것은 그 사람의 이름이다.</p>
 <p>그들의 답은 「중요함」을 다른 변수 하나로 정하는 것으로, 신호 <span class="sym" style="color:#1b9e77">X</span> 의 관련 있는 정보란 <span class="sym" style="color:#1b9e77">X</span> 가 다른 신호 <span class="sym" style="color:#8c564b">Y</span> 에 대해 가진 정보다. 그러면 할 일은 <span class="sym" style="color:#8c564b">Y</span> 에 대한 정보를 될 수 있는 대로 많이 지키면서 <span class="sym" style="color:#1b9e77">X</span> 를 짧게 적는 코드를 찾는 일이 된다. 논문은 이것을 레이트–디스토션 이론을 넓힌 것으로 보았고, 답을 찾는 계산도 레이트–디스토션 함수를 구하는 블라후트(Richard Blahut)와 아리모토(Suguru Arimoto)의 1972년 되풀이 계산법을 넓혀 만들었다.</p>

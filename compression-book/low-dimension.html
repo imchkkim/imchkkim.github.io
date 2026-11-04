@@ -657,6 +657,37 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
   filter: brightness(0.9);
 }
 
+/* ===== 막간 =====
+   「## 막간: 제목」 절 한 페이지를 본문과 다른 바탕색 상자로 감싼다(build.cjs wrapInterlude). 문제·숫자 없는 쉬어 가는 쪽이라
+   건너뛰어도 된다는 줄을 머리에 단다. 막간 규칙: ~/lameproof/shared/characters/story.md 「막간 쓰는 법」 */
+section.interlude {
+  background: #fbf3e6;
+  border: 1px solid #ead7b8;
+  border-radius: 14px;
+  padding: 0.2em 1.4em 1.2em;
+  margin: 0.6em 0 1.5em;
+}
+section.interlude::before {
+  content: "막간 · 쉬어 가는 쪽, 건너뛰어도 본문을 따라가는 데 지장 없음";
+  display: block;
+  margin: 0.9em 0 0.2em;
+  font-size: 0.8em;
+  color: #95642a;
+  letter-spacing: 0.02em;
+}
+section.interlude > h2 { border-bottom-color: #ead7b8; margin-top: 0.2em; }
+section.interlude blockquote { border-left-color: #d9b97f; background: rgba(255, 255, 255, 0.55); }
+section.interlude figure.fig img { border-radius: 10px; }
+[data-theme="dark"] section.interlude { background: #2b2620; border-color: #4d4030; }
+[data-theme="dark"] section.interlude::before { color: #d9b17a; }
+[data-theme="dark"] section.interlude > h2 { border-bottom-color: #4d4030; }
+[data-theme="dark"] section.interlude blockquote { border-left-color: #8a6a3a; background: rgba(0, 0, 0, 0.18); }
+@media (max-width: 640px) { section.interlude { padding: 0.1em 0.9em 1em; } }
+/* 목차의 막간 줄: 다른 절과 구별되게 */
+#sidebar .sidebar-toc li.toc-interlude a { color: #95642a; font-style: italic; }
+[data-theme="dark"] #sidebar .sidebar-toc li.toc-interlude a { color: #d9b17a; }
+#sidebar .sidebar-toc li.toc-interlude a.current { font-weight: 600; }
+
 .preset-card{margin:1.2em 0;text-align:center}.preset-card img{max-width:min(100%,560px);border:1px solid var(--rule,#ccc);border-radius:8px}.preset-card figcaption{font-size:.9em;margin-top:.3em}</style>
 <script>
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
@@ -676,10 +707,13 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
     </div>
   </div>
   <a class="sidebar-home" href="/">&larr; 전체 교재</a>
-  <ol><li><a href="preface.html">머리말: 압축은 이해인가</a></li>
+  <ol><li><a href="preface.html">머리말: 압축과 이해의 관계는?</a></li>
+<li class="toc-part">비트로 재기</li>
+<li><a href="entropy.html">엔트로피: 평균 놀라움, 코드 길이의 하한</a></li>
+<li><a href="code-length.html">코드 길이: 예측기가 곧 압축기</a></li>
+<li><a href="shannon-theorems.html">섀넌의 두 정리: 짧게 적기와 틀리지 않게 보내기</a></li>
 <li class="toc-part">짧게 적는다는 것</li>
 <li><a href="low-dimension.html" class="active">예측할 수 있으면 낮은 차원</a><ul class="sidebar-toc"><li><a href="low-dimension.html" class="current">자유도: 규칙 하나가 숫자 하나를 덜어 준다</a></li><li><a href="low-dimension-sec-intrinsic-dimension-neighbor-count.html">내재 차원: 반지름을 넓히며 이웃 수를 센다</a></li><li><a href="low-dimension-sec-manifold-hypothesis.html">매니폴드 가설: 그럴듯한 그림은 얇은 판 위에 있다</a></li><li><a href="low-dimension-sec-residual-coding.html">잔차: 맞힌 만큼 새로 적을 것이 준다</a></li><li><a href="low-dimension-sec-low-dimension-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
-<li><a href="code-length.html">코드 길이: 예측기가 곧 압축기</a></li>
 <li><a href="mdl.html">최소 기술 길이와 오컴: 모델까지 적어야 공평하다</a></li>
 <li class="toc-part">자료가 고르는 축</li>
 <li><a href="pca.html">주성분 분석과 저랭크 근사</a></li>
@@ -702,7 +736,7 @@ h2, h3, .math-block, figure.fig:not(.fig-portrait), .widget-embed, .table-wrap, 
 <h1>예측할 수 있으면 낮은 차원</h1>
 <h2 id="q-low-dimension">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>가로세로 32칸짜리 흑백 그림 한 장은 칸마다 밝기 숫자가 하나씩, 모두 1,024개의 숫자로 적힌다. 칸마다 0과 1 사이의 숫자를 아무렇게나 뽑아 그림을 만들어 보면 지지직거리는 노이즈만 나온다. 그런데 그림을 만드는 생성 모델은 사람 얼굴을 잘도 그려 내고, 이미지 생성 모델 가운데 많은 수는 그림을 숫자 개수가 수십분의 일로 줄어든 공간으로 옮긴 뒤에 그 안에서 그림을 만든다. 칸을 그렇게 줄여도 그림을 그리는 데 필요한 것이 남아 있다는 뜻이다.</p>
-<p>숫자 1,024개 가운데 정말로 따로 정해야 하는 것은 몇 개일까? 따로 정해야 할 숫자의 개수를 묻는 일은 「얼마나 짧게 적을 수 있나」라는 이 책 전체의 물음과 맞닿아 있다.</p>
+<p>숫자 1,024개 가운데 정말로 따로 정해야 하는 것은 몇 개일까? 엔트로피와 코드 길이는 확률이 주어지면 몇 비트가 드는지를 알려 주지만, 자료의 어떤 규칙이 그 확률을 한쪽으로 몰아 주는지는 말해 주지 않는다. 따로 정해야 할 숫자의 개수를 세는 일은 그 규칙을 비트보다 먼저 숫자의 개수로 보는 방법이다.</p>
 <ul>
 <li>규칙이 있는 자료를 적을 때, 규칙은 적어야 할 숫자를 어떻게 줄여 줄까?</li>
 <li>점들이 칸 수보다 적은 방향으로만 퍼져 있다는 것을, 규칙을 모르는 채 점들만 보고 잴 수 있을까?</li>
@@ -793,7 +827,7 @@ c100.7 8.3 195.3 44 280 108 55.3 42 101.7 93 139 153l9 14c2.7-4 5.7-8.7 9-14
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>친구랑 밥값 3만 원을 둘이 낸다는 것만 정하면 몇 대 몇으로 낼지는 안 정해지잖아요. 「되도록 비슷하게 내자」는 약속이 있어야 한 가지로 정해지고요. 페널티가 그 약속이네요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="preface.html">&larr; 머리말: 압축은 이해인가</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="low-dimension-sec-intrinsic-dimension-neighbor-count.html">내재 차원: 반지름을 넓히며 이웃 수를 센다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="shannon-theorems-sec-shannon-theorems-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="low-dimension-sec-intrinsic-dimension-neighbor-count.html">내재 차원: 반지름을 넓히며 이웃 수를 센다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');
