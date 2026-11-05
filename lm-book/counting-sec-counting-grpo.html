@@ -752,7 +752,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="tokens.html">글자를 토큰으로: 루나라는 이름은 몇 조각인가</a></li>
 <li><a href="mlp-lm.html">앞 글자 여럿 보기: 비슷한 낱말을 비슷하게 다루는 신경망</a></li>
 <li><a href="gpt.html">멀리 보기: 200줄이 안 되는 GPT</a></li>
-<li><a href="tinystories.html">동화 쓰는 작은 GPT: 게이밍 GPU 한 장으로 17분</a></li>
+<li><a href="tinystories.html">동화 쓰는 작은 GPT: 게이밍 GPU 한 장으로 16분</a></li>
 <li><a href="sampling.html">루나에게 말 걸기: 같은 시작 문장에 왜 매번 다른 이야기가 나올까</a></li>
 <li class="toc-part">왜 그렇게 될까</li>
 <li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿이고, MLP 는 무엇을 아는가</a></li>
@@ -761,11 +761,8 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li class="toc-part">가르치고 고치기</li>
 <li><a href="synthetic-data.html">동화 속의 우리: 루나에게 우리 이야기를 가르치려면 몇 편을 써야 할까</a></li>
 <li><a href="reversal.html">앞에서만 읽는 모델: A 가 B 의 아버지라면 B 는 누구의 아들일까</a></li>
-<li><a href="counting.html" class="active">유치원 숫자 공부: 3 더하기 4 를 가르치면 루나는 무엇을 배울까</a><ul class="sidebar-toc"><li><a href="counting.html">숫자 규칙: 자리마다 자를까, 세 자리씩 자를까</a></li><li><a href="counting-sec-counting-stories.html">합성 데이터: 사과를 나눠 먹는 이야기</a></li><li><a href="counting-sec-counting-curriculum.html">커리큘럼 학습: 쉬운 계산부터 보여 주면 나을까</a></li><li><a href="counting-sec-counting-sft.html">지도 파인튜닝: 답 칸만 채점한다</a></li><li><a href="counting-sec-counting-grpo.html" class="current">강화학습: 뽑은 답을 채점해서 고른다</a></li><li><a href="counting-sec-counting-transfer.html">아라비아 숫자에서 영어 숫자로</a></li><li><a href="counting-sec-counting-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
-<li><a href="in-context.html">문맥 안의 학습: 파라미터는 그대로인데 배운 것처럼 보이는 일</a></li>
-<li><a href="canon.html">생각의 깊이: LLM 물리학 시험과 캐논 층</a></li>
-<li><a href="mhc.html">층 사이를 고치기: 잔차 연결에서 하이퍼 연결과 mHC 까지</a></li>
-<li><a href="mopd.html">넷으로 나눠 가르치고 하나로 모으기: 여러 교사 증류</a></li></ol>
+<li><a href="counting.html" class="active">유치원 숫자 공부: 3 더하기 4 를 가르치면 루나는 무엇을 배울까</a><ul class="sidebar-toc"><li><a href="counting.html">숫자 규칙: 자리마다 자를까, 세 자리씩 자를까</a></li><li><a href="counting-sec-counting-stories.html">합성 데이터: 사과를 나눠 먹는 이야기</a></li><li><a href="counting-sec-counting-curriculum.html">순서와 망각: 앞 단계를 배치에서 빼면</a></li><li><a href="counting-sec-counting-sft.html">지도 파인튜닝: 답 칸만 채점한다</a></li><li><a href="counting-sec-counting-grpo.html" class="current">강화학습: 뽑은 답을 채점해서 고른다</a></li><li><a href="counting-sec-counting-transfer.html">아라비아 숫자에서 영어 숫자로</a></li><li><a href="counting-sec-counting-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li><a href="canon.html">생각의 깊이: LLM 물리학 시험과 캐논 층</a></li></ol>
 </nav>
 <button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
 <main>
@@ -799,26 +796,10 @@ for L, group in by_len.items():                              # 길이가 같은 
 logp = -F.cross_entropy(logits.float().transpose(1, 2), yb, ignore_index=-100, reduction=&quot;none&quot;)
 loss = -(logp * adv).sum() / valid                           # KL 없음, 비율·클립 없음, 표준편차 나누기 없음
 </code></pre>
-<h3 id="첫-시도-루나가-3-만-말한다">첫 시도: 루나가 3 만 말한다</h3>
-<p>처음에는 지도 파인튜닝보다 작게 한다고 학습률 0.0001 로 돌렸다. 둘 다(both)로 읽힌 루나, 씨앗 0, 200 스텝이다(<code>sources/counting/rl_try_P_1e-4.out</code>).</p>
-<pre><code class="language-text">  스텝 0 식 배운 쌍 평균  78.2% | +  72.5 -  69.1 x  88.1 /  83.1
-  스텝 100 뽑은 답 평균 보상 0.091 | 맞고 틀린 답이 섞인 물음 0.056 | 한 개라도 맞은 물음 0.122 (90초)
-  스텝 200 식 배운 쌍 평균   9.3% | +   1.3 -   8.6 x   6.0 /  21.5
-    샘플 'Tom had 3 apples. He ate 1 apple. Now Tom has' → ' 3.3.3.3.3.3.33.3.33.3.3.33.3.'
-    샘플 '3 + 4 =' → '3,3,3,3,3.3,3,3.33.33.3.33.33.'
-</code></pre>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>3 밖에 모르는 애가 됐어. 답이 3 인 물음은 다 맞히겠네.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>78% 맞히던 식이 9.3% 가 됐는데, 맞은 답을 민 건데 왜 무너져?</p></div></div>
-<p>원인을 재 보지는 않았지만 이렇게 짐작한다. 어드밴티지가 음수인 답은 로그 확률을 끝없이 낮춰도 손실이 줄고, 아담은 그래디언트의 크기와 상관없이 학습률만큼 움직이므로 작은 신호에도 파라미터가 크게 움직인다. 뽑은 답이 한쪽으로 쏠리면 맞고 틀린 답이 섞인 물음이 줄어(100 스텝 평균 0.056) 되돌릴 신호도 사라진다. 왜 하필 3 인지는 조사하지 않았다. 학습률을 낮춰 씨앗 0 으로 다시 잰 값이다(<code>rl_try_P_3e-5.out</code>, <code>rl_try_P_1e-5.out</code>).</p>
-<pre><code class="language-text">## RL 시작 P_both 씨앗 0 (학습률 3e-05, G=8, 스텝 200)
-  스텝 200 식 배운 쌍 평균  94.8% | +  96.1 -  86.2 x  98.5 /  98.5
-  bpb 후 {'val_loss': 1.1911393995475477, 'val_bpb': 0.43367862071002744}
-## RL 시작 P_both 씨앗 0 (학습률 1e-05, G=8, 스텝 200)
-  스텝 200 식 배운 쌍 평균  99.2% | +  98.7 -  98.0 x 100.0 / 100.0
-  bpb 후 {'val_loss': 1.188443312447192, 'val_bpb': 0.43269514144016}
-</code></pre>
-<p>이후 모든 강화학습은 학습률 0.00001(1e-5), 300 스텝, 스텝마다 물음 32 개에 답 8 개씩이다. 씨앗 하나에 RTX 4090 을 나눠 쓰며 4~5 분이 걸렸다.</p>
-<h3 id="시작점이-전부였다">시작점이 전부였다</h3>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>지도 파인튜닝처럼 학습률 0.0001 로 돌리면 빠르지 않아요?</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>nanochat 은 기본값의 5% 에서 시작해요(<code>--init-lr-frac 0.05</code>). 0.0001 로 돌렸을 때는 시작점에 따라 3 만 말하는 루나가 나왔어요. 오늘은 0.00001(1e-5) 로 갑니다.</p></div></div>
+<p>이후 모든 강화학습은 학습률 1e-5, 300 스텝, 스텝마다 물음 32 개에 답 8 개씩이다. 씨앗 하나에 RTX 4090 을 나눠 쓰며 4~5 분이 걸렸다.</p>
+<h3 id="시작점이-정한다">시작점이 정한다</h3>
 <p>같은 강화학습을 시작점만 바꿔 다섯 번 돌렸는데, 뽑은 답의 평균 보상은 씨앗 0 의 처음 100 스텝과 마지막 100 스텝 값이다.</p>
 <div class="table-wrap"><table>
 <thead>
@@ -888,7 +869,7 @@ loss = -(logp * adv).sum() / valid                           # KL 없음, 비율
 </table></div>
 <p>(<code>sources/counting/ladder_R_*.out</code>. 정답률은 씨앗 셋 평균, 보상과 섞인 물음은 씨앗 0 이다.)</p>
 <figure class="fig "><img src="images/counting/ladder.png" alt="세 계단의 정답률. 프리트레인 이어 하기가 식의 배운 쌍을 올리고, 강화학습은 그 위에서 99% 까지 밀고, 지도 파인튜닝은 이야기 물음까지 올린다. 새 쌍을 가장 크게 올린 것은 범위를 넓힌 지도 파인튜닝이고, 그 위의 강화학습은 새 쌍을 더 올리지 못했다. 「학습 전」은 지금 BPE 로 잰 값이다(sources/counting/plot_ladder.py)" loading="lazy"><figcaption>세 계단의 정답률. 프리트레인 이어 하기가 식의 배운 쌍을 올리고, 강화학습은 그 위에서 99% 까지 밀고, 지도 파인튜닝은 이야기 물음까지 올린다. 새 쌍을 가장 크게 올린 것은 범위를 넓힌 지도 파인튜닝이고, 그 위의 강화학습은 새 쌍을 더 올리지 못했다. 「학습 전」은 지금 BPE 로 잰 값이다(sources/counting/plot_ladder.py)</figcaption></figure>
-<p>둘 다로 읽힌 루나의 줄을 지도 파인튜닝과 나란히 놓으면 강화학습이 무엇을 하는지 드러난다.</p>
+<p>학습 전 루나에서 14.2% 에 머문 식이 둘 다로 읽힌 루나에서는 99.2% 까지 간다. 프리트레인의 효과가 보이는 자리다. 둘 다로 읽힌 루나의 줄을 지도 파인튜닝과 나란히 놓으면 강화학습이 무엇을 하는지 드러난다.</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -933,7 +914,7 @@ loss = -(logp * adv).sum() / valid                           # KL 없음, 비율
 <aside class="tryit"><p class="tryit-title">따라 하기 · 게이밍 GPU 한 장</p><p>프리트레인 <code>STAGE=P CONDS=both python -u sources/counting/run_ladder.py</code>(조건 story, drill 도 같다. 씨앗 하나에 3~4 분), 지도 파인튜닝 <code>STAGE=S CONDS=P_both</code>(1 분, <code>WIDE=1</code> 이면 두 자리 문항을 섞음), 강화학습 <code>STAGE=R RL_LR=1e-5 RL_STEPS=300 CONDS=P_both</code>(4~5 분, 넓은 범위는 <code>WIDE=1 CONDS=S_wide</code>). 이야기를 먼저 만들려면 <code>python sources/counting/gen_stories.py share 300</code>(OpenAI 호환 주소와 키는 합성 데이터 때와 같다), <code>python sources/counting/check_stories.py</code>. 체크포인트는 <code>~/lm-book-lab/ckpt/counting/</code>. 시간은 RTX 4090 한 장을 다른 실험과 나눠 쓰며 잰 값이다.</p>
 <p><strong>노트북</strong>: 이어서 학습하는 것은 현실적이지 않다.</p>
 </aside>
-<div class="dialogue"><h3 id="prob-counting-signal">문제 7. 몇 개를 뽑아야 배우나<span id="문제-7-몇-개를-뽑아야-배우나" class="anchor-alias"></span></h3>
+<div class="dialogue"><h3 id="prob-counting-signal">문제 6. 몇 개를 뽑아야 배우나<span id="문제-6-몇-개를-뽑아야-배우나" class="anchor-alias"></span></h3>
 <blockquote>
 <p>한 물음에서 답 하나가 맞을 확률이 p 일 때, 답 G 개가 모두 맞거나 모두 틀리면 그 물음은 어드밴티지가 0 이다. (가) G = 8 일 때 p = 0.01, 0.5, 0.99 인 물음이 신호를 줄 확률을 각각 구하라. (나) 둘 다로 읽힌 루나의 이야기 물음(그리디 정답률 6.8%)과 지도 파인튜닝을 마친 루나의 식 물음(99.6%)은 어느 쪽에 가까운가? (다) 신호를 키우려면 G 를 늘리는 것과 문항을 바꾸는 것 가운데 무엇이 나을까?</p>
 </blockquote>
@@ -943,17 +924,9 @@ loss = -(logp * adv).sum() / valid                           # KL 없음, 비율
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>안 돼요. 그리디는 1 등 답이 맞는 비율이고, p 는 뽑았을 때 맞을 확률이에요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 뽑은 답의 평균 보상을 보면 되잖아. 둘 다로 읽힌 루나가 처음 100 스텝에 0.487 이었지.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그건 식과 이야기를 합친 값이야. 나눠서 재지는 않았어.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그래도 지도 파인튜닝 끝난 건 평균 보상 0.995 니까 p = 0.99 쪽이야. 섞인 물음 0.014 면 공식의 0.077 보다도 낮고.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그래도 지도 파인튜닝 끝난 건 처음 100 스텝의 평균 보상이 0.995 니까 p = 0.99 쪽이야. 같은 때 섞인 물음이 0.014 면 공식의 0.077 보다도 낮고.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. (다)는 어떨까요? G 를 천 개로 늘리면 p = 0.99 인 물음도 신호가 생기죠.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 그때 민 답은 이미 99% 인 답이니까 배울 게 적어요. 지도 파인튜닝을 마친 뒤라면 안 푼 문항으로 바꾸는 게 낫겠어요. 넓은 범위 문항처럼요. 지난 학기에 적정 난이도라고 했던 거네요.</p></div></div>
-</div><div class="dialogue"><h3 id="prob-counting-collapse">문제 8. 무너진 루나<span id="문제-8-무너진-루나" class="anchor-alias"></span></h3>
-<blockquote>
-<p>학습률 0.0001 로 강화학습을 돌린 루나는 「3.3.3.3.」만 쓰게 되었고 식 정답률은 78.2% 에서 9.3% 로 떨어졌다. 같은 학습률로 지도 파인튜닝을 한 루나는 무너지지 않았다. (가) 두 손실은 무엇이 다른가? (나) 우리가 뺀 KL 항이 있었다면 무엇이 달라졌을까? (다) 이 실패를 책에서 지우지 않는 이유는 무엇일까?</p>
-</blockquote>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>지도 파인튜닝은 정답을 늘 위로 밀고, 강화학습은 뽑은 답 위에서 밀고 또 밀어내. 그런데 뽑는 분포를 자기가 바꾸니까, 망가지면 망가진 답을 다시 뽑잖아.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(나)는 KL 이 있으면 처음 모델에서 멀어질수록 벌을 받으니까, 3 만 쓰게 되기 전에 멈췄겠지. 돌려 보진 않았지만.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. PPO 의 클립과 KL 은 이 사고를 막는 안전띠였어요. nanochat 은 그것들을 빼고 학습률을 기본값의 5% 에서 시작해요(<code>--init-lr-frac 0.05</code>). 5% 를 고른 이유는 소스에 적혀 있지 않지만, 우리도 학습률을 낮추자 멈췄죠.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(다)는 쉬워요. 학습률을 처음부터 1e-5 로 썼다고 적으면 독자는 왜 그 값인지 몰라요. 돌려 본 사람은 안 되는 값을 알게 되는 거고요.</p></div></div>
 </div>
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="counting-sec-counting-sft.html">&larr; 지도 파인튜닝: 답 칸만 채점한다</a><span class="page-count">5 / 7</span><a class="chapter-nav-next" href="counting-sec-counting-transfer.html">아라비아 숫자에서 영어 숫자로 &rarr;</a></nav>

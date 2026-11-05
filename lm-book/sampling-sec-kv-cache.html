@@ -752,7 +752,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="tokens.html">글자를 토큰으로: 루나라는 이름은 몇 조각인가</a></li>
 <li><a href="mlp-lm.html">앞 글자 여럿 보기: 비슷한 낱말을 비슷하게 다루는 신경망</a></li>
 <li><a href="gpt.html">멀리 보기: 200줄이 안 되는 GPT</a></li>
-<li><a href="tinystories.html">동화 쓰는 작은 GPT: 게이밍 GPU 한 장으로 17분</a></li>
+<li><a href="tinystories.html">동화 쓰는 작은 GPT: 게이밍 GPU 한 장으로 16분</a></li>
 <li><a href="sampling.html" class="active">루나에게 말 걸기: 같은 시작 문장에 왜 매번 다른 이야기가 나올까</a><ul class="sidebar-toc"><li><a href="sampling.html">그리디 선택: 늘 가장 그럴듯한 토큰만 고르면</a></li><li><a href="sampling-sec-sampling-temperature.html">온도: 확률표를 펴고 오므리기</a></li><li><a href="sampling-sec-top-k-top-p.html">top-k 와 top-p: 확률표의 꼬리를 잘라 내기</a></li><li><a href="sampling-sec-kv-cache.html" class="current">KV 캐시: 앞에서 계산한 키와 값을 적어 두기</a></li><li><a href="sampling-sec-sampling-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li class="toc-part">왜 그렇게 될까</li>
 <li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿이고, MLP 는 무엇을 아는가</a></li>
@@ -762,10 +762,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="synthetic-data.html">동화 속의 우리: 루나에게 우리 이야기를 가르치려면 몇 편을 써야 할까</a></li>
 <li><a href="reversal.html">앞에서만 읽는 모델: A 가 B 의 아버지라면 B 는 누구의 아들일까</a></li>
 <li><a href="counting.html">유치원 숫자 공부: 3 더하기 4 를 가르치면 루나는 무엇을 배울까</a></li>
-<li><a href="in-context.html">문맥 안의 학습: 파라미터는 그대로인데 배운 것처럼 보이는 일</a></li>
-<li><a href="canon.html">생각의 깊이: LLM 물리학 시험과 캐논 층</a></li>
-<li><a href="mhc.html">층 사이를 고치기: 잔차 연결에서 하이퍼 연결과 mHC 까지</a></li>
-<li><a href="mopd.html">넷으로 나눠 가르치고 하나로 모으기: 여러 교사 증류</a></li></ol>
+<li><a href="canon.html">생각의 깊이: LLM 물리학 시험과 캐논 층</a></li></ol>
 </nav>
 <button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
 <main>
@@ -786,7 +783,7 @@ if cache is not None:  # KV 캐시: 앞에서 계산한 키·값 뒤에 이어 �
         v = torch.cat([cache[&quot;v&quot;], v], dim=2)
     cache[&quot;k&quot;], cache[&quot;v&quot;] = k, v
 </code></pre>
-<p>캐시를 쓰면 스텝마다 모델에 들어가는 토큰은 새 토큰 하나뿐이고, 그 토큰의 쿼리가 적어 둔 키 전체를 읽는다. 계산량으로 보면 200 토큰을 쓸 때 스텝마다 평균 100개 정도 하던 계산이 1개로 줄어드니 수십 배 빨라져야 할 것 같다. 그리디 선택으로 캐시를 쓸 때와 안 쓸 때 같은 글을 쓰게 하고 시간을 쟀다(두 글이 같은지도 확인했다).</p>
+<p>캐시를 쓰면 스텝마다 모델에 들어가는 토큰은 새 토큰 하나뿐이고, 그 토큰의 쿼리가 적어 둔 키 전체를 읽는다. 계산량으로 보면 200 토큰을 쓸 때 스텝마다 평균 100개 정도 하던 계산이 1개로 줄어드니 수십 배 빨라져야 할 것 같다. 그리디 선택으로 캐시를 쓸 때와 안 쓸 때 같은 글을 쓰게 하고 시간을 쟀다(두 글이 같은지도 확인했다). 캐시 있음과 없음을 번갈아 여러 번 재어 중앙값을 적었고, 괄호는 짝마다의 배수의 최소와 최대다.</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -799,26 +796,26 @@ if cache is not None:  # KV 캐시: 앞에서 계산한 키·값 뒤에 이어 �
 <tbody>
 <tr>
 <td>GPU, 배치 1, 500 토큰</td>
-<td>0.75초 (668 토큰/초)</td>
-<td>0.61초 (814 토큰/초)</td>
-<td>1.2배</td>
+<td>0.58초 (862 토큰/초)</td>
+<td>0.62초 (806 토큰/초)</td>
+<td>효과 없음 (0.85~1.08배)</td>
 </tr>
 <tr>
 <td>GPU, 배치 64, 500 토큰</td>
-<td>10.90초 (2,937 토큰/초)</td>
-<td>1.36초 (23,458 토큰/초)</td>
-<td>8.0배</td>
+<td>9.72초 (3,292 토큰/초)</td>
+<td>1.26초 (25,397 토큰/초)</td>
+<td>7.7배 (7.69~8.33배)</td>
 </tr>
 <tr>
 <td>CPU 스레드 4개, 배치 1, 200 토큰</td>
-<td>22.33초 (9 토큰/초)</td>
-<td>6.15초 (33 토큰/초)</td>
-<td>3.6배</td>
+<td>4.62초 (43 토큰/초)</td>
+<td>0.92초 (217 토큰/초)</td>
+<td>다섯 배쯤 (4.35~6.43배)</td>
 </tr>
 </tbody>
 </table></div>
-<p>GPU 에서 글 한 줄(배치 1)을 쓸 때 캐시가 거의 소용없었던 이유는 스텝 하나에 걸린 시간으로 나눠 보면 보인다. 캐시 없이 500 스텝에 0.75초면 스텝당 1.5 ms 이고, 캐시를 써도 0.61초 ÷ 500 = 1.2 ms 다. 계산할 토큰을 수백 개에서 1개로 줄였는데 스텝당 시간은 0.3 ms 만 줄었으니, 스텝마다 드는 시간의 대부분은 토큰 수와 상관없는 비용이다. 파이토치는 층마다 행렬곱, 정규화, 어텐션을 GPU 에 따로따로 맡기는데, 맡길 때마다 드는 고정 비용이 8층을 지나는 동안 쌓인다. RTX 4090 에게 2,760만 파라미터 모델의 토큰 수백 개는 작은 일이라, 토큰 1개를 계산하든 수백 개를 계산하든 맡기는 비용이 시간을 정한다. 이 설명은 스텝당 시간에서 나온 우리의 짐작이고, 고정 비용을 따로 잰 것은 아니다.</p>
-<p>배치를 64로 늘리면 스텝마다 다시 계산할 토큰이 64배가 되어 GPU 도 일다운 일을 하게 된다. 캐시 없이는 10.90초 ÷ 500 = 스텝당 21.8 ms 였고 캐시를 쓰면 2.7 ms 로, 8.0배 빨라졌다. CPU 는 계산 자체가 느려서 배치 1 에서도 다시 계산하는 양이 그대로 시간이 되고, 3.6배 빨라졌다. 캐시는 다시 계산하는 일을 없애 주므로, 그 계산이 시간의 대부분을 차지할 때만 효과가 크다. 같은 날 앞서 돌린 실행에서는 GPU 배치 1 에서 캐시가 오히려 더 느린 적도 있었는데, 이 머신은 다른 작업도 함께 돌고 있어서 속도 숫자는 실행마다 흔들린다.</p>
+<p>GPU 에서 글 한 줄(배치 1)을 쓸 때는 캐시의 효과가 나오지 않았다. 스텝당 시간이 캐시 없이 1.16 ms, 캐시를 쓰고 1.24 ms 로 거의 같다. 계산할 토큰을 수백 개에서 1개로 줄여도 스텝당 시간이 그대로이니, 이 크기에서는 스텝마다 드는 시간이 토큰 수에 거의 달려 있지 않다. 파이토치는 층마다 행렬곱, 정규화, 어텐션을 GPU 에 따로따로 맡기는데, 맡길 때마다 드는 고정 비용이 8층을 지나는 동안 쌓여 시간을 정하는 것으로 짐작한다. 고정 비용을 따로 잰 값은 아니다.</p>
+<p>배치를 64로 늘리면 스텝마다 다시 계산할 토큰이 64배가 되어 GPU 도 일다운 일을 하게 된다. 캐시 없이는 9.72초 ÷ 500 = 스텝당 19.4 ms 였고 캐시를 쓰면 2.5 ms 로, 7.7배 빨라졌다. CPU 는 계산 자체가 느려서 배치 1 에서도 다시 계산하는 양이 그대로 시간이 되고, 다섯 배쯤 빨라졌다. 캐시는 다시 계산하는 일을 없애 주므로, 그 계산이 시간의 대부분을 차지할 때 효과가 크다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M02"><img src="images/cast/M02.webp" alt="김민준 M02" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 우리 반 서른 명이 동시에 루나한테 말을 걸면 그때 캐시가 제값을 하겠네. 한 명씩이면 별 차이 없고.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>서른 명이 루나랑 얘기할 일은 없어. 너 혼자 서른 명만큼 떠들 거면 몰라도.</p></div></div>
 <div class="dialogue"><h3 id="prob-sampling-kv-cache-memory">문제 7. KV 캐시는 메모리를 얼마나 먹나<span id="문제-7-kv-캐시는-메모리를-얼마나-먹나" class="anchor-alias"></span></h3>
@@ -827,21 +824,17 @@ if cache is not None:  # KV 캐시: 앞에서 계산한 키·값 뒤에 이어 �
 </blockquote>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(가)는 곱하기만 하면 돼. 층 8 × 키와 값 2 × 512 = 8,192 개고, 4바이트씩이면 32,768 바이트. 32 KiB.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(나)는 500 을 곱해서 16,384,000 바이트, 16 MB 쯤. 배치 64 면 64배라 1 GB 를 조금 넘어.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>배치 64 에서 8.0배 빨라진 대가가 GPU 메모리 1 GB 정도가었던 거예요. (다)는요?</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>캐시가 1 GB 쯤 차지해요. 다만 안 쓸 때도 스텝마다 그만큼의 키와 값을 다시 만들어요. 배치 64, 500 토큰에서 잰 GPU 메모리 피크는 캐시를 쓸 때 1,243 MB, 안 쓸 때 1,741 MB 예요. (다)는요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>셋 다에 비례해요. 글 길이를 두 배로 하면 두 배, 층이나 폭을 두 배로 해도 두 배. 큰 모델이 긴 글을 여러 줄 동시에 쓰면 곱이 금방 커지겠다.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그러면 모델 파라미터보다 캐시가 더 커질 수도 있겠네. 이 모델은 파라미터가 2,760만 개, 4바이트씩 110 MB 쯤인데, 배치 64 의 캐시가 벌써 그 열 배 가까이니까.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래서 큰 모델들은 캐시를 줄이는 구조를 따로 연구해요. 김민준 학생이 떠올린 디퓨전 강의의 그 절에 나온 연구들이 그 이야기였어요.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>빨라지는 만큼 메모리를 내주는 거네요. 배치를 무작정 키울 수도 없고.</p></div></div>
-</div><div class="dialogue"><h3 id="prob-sampling-kv-cache-overhead">문제 8. 배치 1 에서 캐시가 소용없었던 이유를 숫자로 따지기<span id="문제-8-배치-1-에서-캐시가-소용없었던-이유를-숫자로-따지기" class="anchor-alias"></span></h3>
+</div><div class="dialogue"><h3 id="prob-sampling-kv-cache-overhead">문제 8. 배치 64 에서 수십 배가 아니라 7.7배인 이유를 숫자로 따지기<span id="문제-8-배치-64-에서-수십-배가-아니라-7-7배인-이유를-숫자로-따지기" class="anchor-alias"></span></h3>
 <blockquote>
-<p>GPU 배치 1, 500 토큰에서 캐시 없이 0.75초, 캐시를 활용하면 0.61초였다. 스텝당 시간을 「토큰 수와 상관없는 고정 비용 a」와 「토큰 하나당 계산 비용 b × 한 스텝에 계산하는 토큰 수」의 합으로 놓자. 시작 토큰은 1개이고 캐시 없이는 스텝마다 지금까지의 토큰을 모두 계산한다(평균 약 250개). (가) 두 측정으로 a 와 b 를 짐작하라. (나) 짐작한 a, b 로 보면 스텝당 시간의 몇 % 가 고정 비용인가? (다) 이 두 항짜리 계산으로 배치 64 의 8.0배를 설명할 수 있는가? 무엇이 빠졌나?</p>
+<p>GPU 배치 64, 500 토큰에서 캐시 없이 9.72초, 캐시를 쓰면 1.26초였다. 스텝당 시간을 「자리 수와 상관없는 고정 비용 a」와 「자리 하나당 계산 비용 b × 한 스텝에 계산하는 자리 수」의 합으로 놓자. 캐시를 쓰면 한 스텝에 한 자리를, 캐시 없이는 지금까지의 자리를 모두 계산한다(평균 약 250개). (가) 두 측정으로 a 와 b 를 구하라. (나) 계산할 자리가 250분의 1 로 주는데 배수가 7.7배에 그치는 것을 a 로 설명하라.</p>
 </blockquote>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>캐시를 활용하면 스텝마다 토큰 하나니까 a + b = 0.61 ÷ 500 = 1.22 ms. 캐시 없이는 a + 250b = 1.5 ms. 빼면 249b = 0.28 ms 니까 b 는 0.0011 ms 쯤이고, a 는 거의 1.22 ms 야.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 캐시를 활용하면 스텝당 시간의 99% 넘게가 고정 비용이고, 캐시 없이도 1.22 ÷ 1.5 니까 80% 정도가 고정 비용이야. 캐시가 줄여 주는 건 나머지 20% 뿐이니 1.2배가 나올 수밖에 없지.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>숫자 둘로 미지수 둘을 풀었으니 맞는지 검산할 데이터는 없어요. (다)에서 검산해 볼까요?</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>일단 배치 64 면 b 가 64배가 된다고 쳐 볼게요. 그러면 캐시 없이 a + 250 × 64b = 1.22 + 17.6 = 18.8 ms 인데 실제는 21.8 ms. 캐시를 활용하면 a + 64b = 1.29 ms 인데 실제는 2.7 ms 예요. 캐시를 활용한 쪽이 두 배나 어긋나요.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 두 항짜리 계산에서 빠진 게 있다는 거지. 캐시를 쓰면 새 토큰 하나가 적어 둔 키 전체를 읽어야 하잖아. 글이 길어질수록 읽을 키가 늘어나는 비용은 a 에도 b 에도 없어.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>좋은 데를 짚었어요. 캐시 읽기도 일이고, 배치 64 면 매 스텝 1 GB 가까운 캐시의 일부를 메모리에서 읽어 와요. 「토큰 수와 상관없는 비용 + 토큰 수에 비례하는 비용」은 배치 1 에서 캐시가 왜 소용없었는지를 설명하는 데까지만 쓰고, 그 너머는 직접 재서 확인해야 해요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>캐시를 쓰면 a + b = 1.26 ÷ 500 = 2.52 ms. 캐시 없이는 a + 250b = 9.72 ÷ 500 = 19.44 ms. 빼면 249b = 16.92 ms 니까 b 는 0.068 ms 고, a 는 2.45 ms 야.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 캐시를 쓴 스텝은 2.52 ms 가운데 97% 가 a 네. 캐시가 줄이는 건 250b 쪽뿐이라 스텝당 시간이 a 아래로는 안 내려가. 19.44 ÷ 2.45 = 7.9배가 a 와 b 로 본 상한이고, 실제 7.7배가 거기에 가까워.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 「수십 배」는 a 를 0 으로 친 계산이었어요. 숫자 둘로 미지수 둘을 풀었으니 두 항짜리 계산을 검산할 데이터는 없고, a 안에 무엇이 들었는지도 이 계산으로는 몰라요. 배치 1 은 캐시를 쓴 쪽의 스텝 시간이 조금 길어서 b 가 음수로 나와요. 이 계산은 배치 64 의 배수를 읽는 데까지만 써요.</p></div></div>
 </div>
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="sampling-sec-top-k-top-p.html">&larr; top-k 와 top-p: 확률표의 꼬리를 잘라 내기</a><span class="page-count">4 / 5</span><a class="chapter-nav-next" href="sampling-sec-sampling-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>

@@ -752,7 +752,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="tokens.html">글자를 토큰으로: 루나라는 이름은 몇 조각인가</a></li>
 <li><a href="mlp-lm.html">앞 글자 여럿 보기: 비슷한 낱말을 비슷하게 다루는 신경망</a></li>
 <li><a href="gpt.html">멀리 보기: 200줄이 안 되는 GPT</a></li>
-<li><a href="tinystories.html">동화 쓰는 작은 GPT: 게이밍 GPU 한 장으로 17분</a></li>
+<li><a href="tinystories.html">동화 쓰는 작은 GPT: 게이밍 GPU 한 장으로 16분</a></li>
 <li><a href="sampling.html">루나에게 말 걸기: 같은 시작 문장에 왜 매번 다른 이야기가 나올까</a></li>
 <li class="toc-part">왜 그렇게 될까</li>
 <li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿이고, MLP 는 무엇을 아는가</a></li>
@@ -762,10 +762,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="synthetic-data.html">동화 속의 우리: 루나에게 우리 이야기를 가르치려면 몇 편을 써야 할까</a></li>
 <li><a href="reversal.html" class="active">앞에서만 읽는 모델: A 가 B 의 아버지라면 B 는 누구의 아들일까</a><ul class="sidebar-toc"><li><a href="reversal.html">역전 저주: 서연이 쿠키를 준 건 아는데, 받은 사람에게 물으면 모른다</a></li><li><a href="reversal-sec-one-way-mask.html" class="current">왜 한 방향만 배우나: 다음 토큰 학습과 마스크</a></li><li><a href="reversal-sec-reversal-fixes.html">바로잡기: 거꾸로 쓴 문장을 학습 글에 넣기</a></li><li><a href="reversal-sec-reversal-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="counting.html">유치원 숫자 공부: 3 더하기 4 를 가르치면 루나는 무엇을 배울까</a></li>
-<li><a href="in-context.html">문맥 안의 학습: 파라미터는 그대로인데 배운 것처럼 보이는 일</a></li>
-<li><a href="canon.html">생각의 깊이: LLM 물리학 시험과 캐논 층</a></li>
-<li><a href="mhc.html">층 사이를 고치기: 잔차 연결에서 하이퍼 연결과 mHC 까지</a></li>
-<li><a href="mopd.html">넷으로 나눠 가르치고 하나로 모으기: 여러 교사 증류</a></li></ol>
+<li><a href="canon.html">생각의 깊이: LLM 물리학 시험과 캐논 층</a></li></ol>
 </nav>
 <button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
 <main>
@@ -790,17 +787,8 @@ section.interlude figure.fig img { border-radius: 10px; }
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>지난 학기에 조건을 뒤집으려면 숫자가 더 필요하다고 했죠. 루나는 p(Minjun ∣ Seoyeon gave) 를 배웠어요. 거꾸로 묻는 물음은 p(Seoyeon ∣ Minjun got a cookie from) 이고요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>검사 회사 숫자만으로는 양성인 사람이 환자일 확률을 못 구했던 것처럼, 한 방향 확률만으로는 반대 방향이 안 나온다는 거죠.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 그리고 루나는 그 뒤집는 계산을 해 본 적도 없어요. 다음 토큰의 확률표를 앞 글에서 바로 내놓도록만 배웠으니까요.</p></div></div>
-<h3 id="학습에-없던-길과-문맥에-있는-길">학습에 없던 길과 문맥에 있는 길</h3>
-<p>마스크는 학습할 때만이 아니라 글을 쓸 때도 걸려서, 루나의 어텐션은 늘 지금 위치와 그 앞만 본다. 그러면 사실이 학습 글이 아니라 시작 문장 안에 있을 때는 어떨까? 「Seoyeon gave Minjun a cookie.」가 시작 문장에 있으면, 그 뒤의 「Minjun got a cookie from」 자리에서 어텐션은 앞에 있는 Seoyeon 을 볼 수 있다. 베르글룬드 팀이 문맥 안의 관계는 거꾸로도 이끌어 낸다고 적은 경우다. 이어서 학습하지 않은 동화 GPT 에 사실 문장 넷을 늘어놓고 그 가운데 하나를 물었다(<code>sources/reversal/in_context.out</code>).</p>
-<pre><code class="language-text">## 사실 넷을 시작 문장에 두고 하나를 묻기 (학습하지 않은 동화 GPT)
-  아버지→아들               정답률  20.0% | 1등 후보가 문맥 안의 이름인 비율  66.0% | 후보 200 명
-  아들→아버지 (거꾸로)         정답률   6.5% | 1등 후보가 문맥 안의 이름인 비율  32.0% | 후보 200 명
-  준 사람→받은 사람           정답률  27.5% | 1등 후보가 문맥 안의 이름인 비율  97.5% | 후보 40 명
-  받은 사람→준 사람 (거꾸로)     정답률  20.0% | 1등 후보가 문맥 안의 이름인 비율  92.5% | 후보 40 명
-</code></pre>
-<p>문맥에 있으면 거꾸로 묻는 물음도 우연(0.5%, 2.5%)보다 훨씬 자주 맞혔고, 선물 물음에서 루나가 1등으로 고른 이름은 92.5% 가 문맥 안의 이름이었다. 루나 안에 앞에 나온 이름을 찾아 쓰는 계산은 있다는 뜻인데, 맞히는 비율은 높지 않았다. 문맥 안에는 준 사람이 넷 있으니 그 가운데 아무나 골라도 25% 인데, 거꾸로 묻는 선물 물음은 20.0%, 앞으로 묻는 선물 물음도 27.5% 였다. 루나는 「앞에 나온 이름 가운데 하나」까지는 찾지만 「Minjun 에게 준 그 사람」을 고르지는 못한다. 문장을 그대로 이어 쓰면 되는 아버지→아들(20.0%)과 거꾸로 찾아야 하는 아들→아버지(6.5%) 사이에는 문맥 안에서도 차이가 남았다. 그리디 선택으로 이어 쓰게 해도 쿠키는 이번에 단지에서 나왔다.</p>
-<pre><code class="language-text">  그리디 「Seoyeon gave Minjun a cookie. Minjun got a cookie from」 → ' the jar. He was so happy. He took'
-</code></pre>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>사실이 학습 글이 아니라 시작 문장 안에 있으면요? 「Seoyeon gave Minjun a cookie.」를 앞에 두면 그 뒤의 Minjun 자리에서 어텐션이 앞의 Seoyeon 을 볼 수 있잖아요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>베르글룬드 팀이 초록에 적은 경우예요. GPT-3 에 사실 하나와 예시 셋을 주면 거꾸로도 96.67~100 을 맞혔어요. 동화 GPT 는 사실 넷을 늘어놓으면 그 가운데 맞는 이름을 못 골라요. 조건이 달라서 크기 탓이라고는 못 해요. 우리는 학습 글 쪽을 고치러 가요.</p></div></div>
 <div class="dialogue"><h3 id="prob-reversal-loss-terms">문제 3. 손실 항 가운데 두 이름이 함께 든 것<span id="문제-3-손실-항-가운데-두-이름이-함께-든-것" class="anchor-alias"></span></h3>
 <blockquote>
 <p>학습 문장 「Seoyeon gave Minjun a cookie.」의 손실을 토큰마다 쓴 항으로 나눈다(이름은 한 토큰으로 친다). (가) 항은 모두 몇 개인가? (나) Seoyeon 과 Minjun 이 함께 든 항은 몇 개이고, 각각 어느 이름이 조건 쪽에 있는가? (다) 같은 문장을 거꾸로 쓴 「Minjun got a cookie from Seoyeon.」을 더하면 (나)의 답이 어떻게 바뀌는가?</p>
@@ -810,7 +798,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 넷 가운데 이름을 맞히는 항은요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.webp" alt="김민준 M08" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 「a」랑 「cookie」랑 마침표는 Seoyeon 과 Minjun 을 둘 다 조건 쪽에 두고 다른 토큰을 맞히는 거예요. 이름을 맞히는 항은 p(Minjun ∣ Seoyeon gave) 하나고, 거기서 Seoyeon 은 늘 조건 쪽이에요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 (다)는 새 문장에 p(Seoyeon ∣ Minjun got a cookie from) 이 생겨. 처음으로 Minjun 이 조건 쪽에 있고 Seoyeon 을 맞혀야 하는 항이야.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 거꾸로 묻는 물음에 필요한 항이 손실에 들어오려면, 그 순서로 적힌 문장이 학습 글에 있어야 해요. 그 문장을 넣으면 정말 고쳐지는지는 바로 다음에 재 볼 거예요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 거꾸로 묻는 물음에 필요한 항이 손실에 들어오려면, 그 순서로 적힌 문장이 학습 글에 있어야 해요. 그 문장을 넣으면 숫자가 어떻게 달라지는지 다음 실습에서 봐요.</p></div></div>
 </div><div class="dialogue"><h3 id="prob-reversal-remove-mask">문제 4. 학습할 때 마스크를 벗기면<span id="문제-4-학습할-때-마스크를-벗기면" class="anchor-alias"></span></h3>
 <blockquote>
 <p>민준이 제안한다. 「마스크 때문에 Seoyeon 자리에서 Minjun 을 못 보니까, 학습할 때만 마스크를 벗기면 Seoyeon 자리도 Minjun 을 보고 배울 수 있잖아.」 (가) 마스크를 벗기고 다음 토큰 손실로 학습하면 Seoyeon 자리의 어텐션은 무엇을 볼 수 있는가? (나) 그렇게 학습한 모델은 글을 쓸 때 어떻게 되는가?</p>
