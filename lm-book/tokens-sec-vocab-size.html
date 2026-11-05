@@ -754,17 +754,24 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="gpt.html">멀리 보기: 200줄이 안 되는 GPT</a></li>
 <li><a href="tinystories.html">동화 쓰는 작은 GPT: 게이밍 GPU 한 장으로 17분</a></li>
 <li><a href="sampling.html">루나에게 말 걸기: 같은 시작 문장에 왜 매번 다른 이야기가 나올까</a></li>
+<li class="toc-part">왜 그렇게 될까</li>
+<li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿이고, MLP 는 무엇을 아는가</a></li>
+<li><a href="circuits.html">들여다보기 1: 칠판과 헤드</a></li>
+<li><a href="layers.html">들여다보기 2: 층을 지나는 벡터</a></li>
+<li class="toc-part">가르치고 고치기</li>
 <li><a href="synthetic-data.html">동화 속의 우리: 루나에게 우리 이야기를 가르치려면 몇 편을 써야 할까</a></li>
 <li><a href="reversal.html">앞에서만 읽는 모델: A 가 B 의 아버지라면 B 는 누구의 아들일까</a></li>
-<li><a href="circuits.html">들여다보기 1: 칠판과 헤드</a></li>
-<li><a href="canon.html">생각의 깊이: LLM 물리학 시험과 캐논 층</a></li></ol>
+<li><a href="counting.html">유치원 숫자 공부: 3 더하기 4 를 가르치면 루나는 무엇을 배울까</a></li>
+<li><a href="in-context.html">문맥 안의 학습: 파라미터는 그대로인데 배운 것처럼 보이는 일</a></li>
+<li><a href="canon.html">생각의 깊이: LLM 물리학 시험과 캐논 층</a></li>
+<li><a href="mhc.html">층 사이를 고치기: 잔차 연결에서 하이퍼 연결과 mHC 까지</a></li></ol>
 </nav>
 <button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
 <main>
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="tokens.html">글자를 토큰으로: 루나라는 이름은 몇 조각인가</a></p>
 <h2 id="sec-vocab-size">어휘 크기: 토큰이 길어지면 무엇이 줄고 무엇이 늘까<span id="어휘-크기-토큰이-길어지면-무엇이-줄고-무엇이-늘까" class="anchor-alias"></span></h2>
-<p>합치기를 더 할수록 토큰은 길어지고 같은 글이 더 적은 토큰으로 줄어드니, 같은 개수의 토큰으로 더 먼 앞까지 볼 수 있다는 점에서는 어휘가 클수록 좋을 것 같다. 그런데 1부는 왜 8,192 까지 배워 놓고 4,096 에서 잘랐을까? 어휘를 두 배로 늘릴 때마다 토큰 수는 얼마나 줄어들까?</p>
+<p>합치기를 더 할수록 토큰은 길어지고 같은 글이 더 적은 토큰으로 줄어드니, 같은 개수의 토큰으로 더 먼 앞까지 볼 수 있다는 점에서는 어휘가 클수록 좋을 것 같다. 그런데 동화 모델들은 왜 8,192 까지 배워 놓고 4,096 에서 잘랐을까? 어휘를 두 배로 늘릴 때마다 토큰 수는 얼마나 줄어들까?</p>
 <h3 id="어휘-다섯-가지로-같은-검증-글을-잘라-보기">어휘 다섯 가지로 같은 검증 글을 잘라 보기</h3>
 <p>검증 글 전체(22,132,376 바이트)를 어휘 크기만 바꿔 자르고 토큰 수를 셌다. 토큰 하나에 든 평균 바이트 수를 <strong>압축률</strong> (토큰 하나에 담긴 바이트 수 / bytes per token)이라 부르자.</p>
 <pre><code class="language-text">## 어휘 크기와 압축률 (검증 글 전체 22,132,376 바이트, 글자 22,123,162)
@@ -789,14 +796,11 @@ section.interlude figure.fig img { border-radius: 10px; }
 <h3 id="어휘를-늘리면-늘어나는-것">어휘를 늘리면 늘어나는 것</h3>
 <p>모델 쪽에서 보면 어휘는 공짜가 아니다. 언어 모델은 토큰마다 벡터 하나를 받아 읽고, 마지막에는 어휘의 모든 토큰에 점수를 하나씩 매겨 다음 토큰을 고른다. 앞 토큰 여럿을 읽는 작은 신경망(은닉 벡터 길이 512)이라면, 점수를 매기는 마지막 층의 파라미터는 어휘 4,096 에서 2,101,248 개이고 어휘 8,192 에서는 4,202,496 개로 두 배가 된다. 토큰 수 2.91% 를 줄이려고 마지막 층을 두 배로 키우는 셈이니, 작은 모델에게는 손해다.</p>
 <p>드문 토큰이 늘어나는 것도 문제다. 4,000번째 합치기로 생긴 「 beef」는 학습 글에서 몇 번 나오지 않으므로, 모델은 그 토큰 뒤에 무엇이 오는지 배울 기회를 몇 번밖에 얻지 못한다. 어휘를 키울수록 토큰 하나하나가 학습 글에 나오는 횟수는 준다. 1부가 어휘 4,096 을 고른 것은 작은 모델과 쉬운 동화 글에서 이 두 손해와 압축률을 맞바꾼 결과다. nanochat 이 웹 글로 큰 모델을 학습할 때는 어휘가 32,768 이다.</p>
-<p>토크나이저를 바꾸면 토큰 하나에 든 바이트 수가 바뀌므로, 토큰 하나당 손실은 토크나이저가 다른 모델끼리 비교할 수 없다. 서연이 지난 학기 강의를 떠올렸다.</p>
-<aside class="recall"><p class="recall-title">회상 · 『정보이론』 「바이트당 비트: 언어 모델의 손실은 코드 길이다」 · 이서연</p><p>학습 기록의 손실(nat), 논문의 퍼플렉서티, 압축 대회의 바이트당 비트는 같은 양이다. nat 을 ln 2 로 나누면 비트, 토큰 수 ÷ 바이트 수를 곱하면 바이트당 비트가 되고, 토크나이저가 다른 모델은 토큰당 손실이 아니라 바이트당 비트로 비교한다.
-<img src="images/tokens/p12_tokenizers.png" alt="같은 시험 글을 토큰 하나 평균 3.5 바이트(모델 A)와 2.5 바이트(모델 B)로 자른 모습과 토큰당 손실">
-<a href="https://lameproof.com/compression-book/code-length-sec-bits-per-byte.html">원래 절로</a></p>
-</aside>
+<p>토크나이저를 바꾸면 토큰 하나에 든 바이트 수가 바뀌므로, 토큰 하나당 손실은 토크나이저가 다른 모델끼리 비교할 수 없다. 루나가 놀라는 정도를 잴 때 만든 바이트당 비트가 여기서 쓰인다. 놀란 비트의 합을 원문 바이트 수로 나누므로 글을 어떤 조각으로 잘랐든 같은 줄에 세울 수 있다.</p>
+<figure class="fig "><img src="images/tokens/p12_tokenizers.png" alt="같은 시험 글을 토큰 하나 평균 3.5 바이트(모델 A)와 2.5 바이트(모델 B)로 자른 모습과 토큰당 손실" loading="lazy"><figcaption>같은 시험 글을 토큰 하나 평균 3.5 바이트(모델 A)와 2.5 바이트(모델 B)로 자른 모습과 토큰당 손실</figcaption></figure>
 <p>1부의 모든 모델은 이 규칙대로 검증 손실을 바이트당 비트로 바꿔 적는다. 토큰마다 그 토큰이 담은 원문 바이트 수를 알고 있으므로(<code>BPETokenizer.token_bytes</code>), 손실의 합을 바이트 수의 합으로 나누면 된다.</p>
 <h3 id="ml에서-큰-모델의-어휘">ML에서: 큰 모델의 어휘</h3>
-<p>GPT-2 의 어휘는 50,257 개였고, 그 뒤의 큰 모델들은 어휘를 그보다 몇 배로 늘려 왔다. 모델이 커지면 어휘 크기에 비례하는 입출력 층이 전체 파라미터에서 차지하는 비율이 작아지고, 학습 글도 많아져 드문 토큰도 충분히 자주 나오게 된다. 그래서 작은 모델은 작은 어휘, 큰 모델은 큰 어휘가 어울린다. 이 저울질은 1부의 4,096 과 nanochat 의 32,768 사이에서도 같다.</p>
+<p>GPT-2 의 어휘는 50,257 개였고, 그 뒤의 큰 모델들은 어휘를 그보다 몇 배로 늘려 왔다. 모델이 커지면 어휘 크기에 비례하는 입출력 층이 전체 파라미터에서 차지하는 비율이 작아지고, 학습 글도 많아져 드문 토큰도 충분히 자주 나오게 된다. 그래서 작은 모델은 작은 어휘, 큰 모델은 큰 어휘가 어울린다. 이 저울질은 1~3부의 4,096 과 nanochat 의 32,768 사이에서도 같다.</p>
 <div class="dialogue"><h3 id="prob-tokens-byte-vs-token-bigram">문제 4. 바이트 바이그램과 토큰 바이그램<span id="문제-4-바이트-바이그램과-토큰-바이그램" class="anchor-alias"></span></h3>
 <blockquote>
 <p>바이트 하나를 토큰으로 본 바이그램의 검증 손실은 2.2833 nats/바이트(바이트당 비트 3.2940)였다. 어휘 4,096 의 BPE 토큰으로 바이그램을 세면 검증 손실이 3.5296 nats/토큰, 바이트당 비트가 1.2818 이다. 토큰당 손실은 토큰 바이그램이 더 크다. 어느 모델이 검증 글을 더 잘 맞히는가?</p>
@@ -811,7 +815,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 같은 「바로 앞 하나만 보기」라도 하나의 크기를 키우니 더 먼 앞을 보게 됐어요. 토크나이저를 고르는 일이 모델이 볼 수 있는 거리를 정하는 일이기도 해요.</p></div></div>
 </div><div class="dialogue"><h3 id="prob-tokens-double-vocab">문제 5. 어휘를 두 배로<span id="문제-5-어휘를-두-배로" class="anchor-alias"></span></h3>
 <blockquote>
-<p>어휘를 4,096 에서 8,192 로 늘리면 검증 글의 토큰 수는 5,607,193 개에서 5,443,827 개가 된다. 은닉 벡터 길이 512 인 작은 신경망의 마지막 층 파라미터는 2,101,248 개에서 4,202,496 개가 된다. 1부의 작은 모델에게 어휘 8,192 가 나은가?</p>
+<p>어휘를 4,096 에서 8,192 로 늘리면 검증 글의 토큰 수는 5,607,193 개에서 5,443,827 개가 된다. 은닉 벡터 길이 512 인 작은 신경망의 마지막 층 파라미터는 2,101,248 개에서 4,202,496 개가 된다. 동화를 읽는 작은 모델에게 어휘 8,192 가 나은가?</p>
 </blockquote>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>토큰 수는 2.91% 줄고 마지막 층은 두 배예요. 계산 비용만 보면 손해네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>근데 토큰이 줄면 같은 문맥 길이로 더 멀리 보잖아. 2.91% 라도 멀리 보는 건 이득 아니야?</p></div></div>
