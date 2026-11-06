@@ -785,9 +785,9 @@ section.interlude figure.fig img { border-radius: 10px; }
 </code></pre>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S02"><img src="images/cast/S02.webp" alt="이서연 S02" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>specific, essential, additionally. 회사 보고서 낱말이네. 동화에는 「additionally」 같은 말이 안 나오지.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>348 개로는 학습이 안 되겠다. 어휘 밖 낱말을 몇 개 봐주면?</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>봐준 낱말은 루나가 한 번도 못 읽은 토큰 조각들이에요. 대답을 배우면서 그 낱말까지 새로 배워야 해요. 우리에게 필요한 건 루나가 읽을 수 있는 대화예요. 동화 데이터를 처음 만든 사람들도 큰 모델에게 아이 낱말로 이야기를 쓰게 했죠. 대화도 그렇게 만들면 돼요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>봐준 낱말은 루나가 한 번도 못 읽은 토큰 조각들이에요. 대답을 배우면서 그 낱말까지 새로 배워야 해요. 우리에게 필요한 건 루나가 읽을 수 있는 대화예요. 동화 데이터를 처음 만든 사람들도 큰 모델에게 아이 낱말로 이야기를 쓰게 했죠. 대화도 그렇게 만들면 돼요. 이렇게 큰 모델에게 써 달라고 해서 만든 학습 글을 <strong>합성 데이터</strong>(synthetic data)라고 해요. 연구실 서버에 딥시크 모델이 떠 있으니, 게이트웨이 주소를 줄게요.</p></div></div>
 <h3 id="딥시크에게-동화-낱말로-대화를-주문하기">딥시크에게 동화 낱말로 대화를 주문하기</h3>
-<p>둘은 학교 게이트웨이의 딥시크에게 대화를 주문했다. 주문서 하나에 대화 열 편이고, 유형은 일곱 가지다: 일상 물음, 짧은 이야기를 주고 묻기, 쉬운 셈, 한 단계 추론, 착한 행동과 마음, 모르는 것을 묻기, 짧은 이야기 부탁. 유형마다 주문서를 번갈아 늘어놓아 513 장을 보냈다. 주문서의 앞부분은 이렇다(각 줄의 원문은 받은 응답 파일의 <code>prompt</code> 칸에 있다).</p>
+<p>둘은 선생님이 알려 준 게이트웨이로 연구실 서버의 딥시크에게 대화를 주문했다. 주문서 하나에 대화 열 편이고, 유형은 일곱 가지다: 일상 물음, 짧은 이야기를 주고 묻기, 쉬운 셈, 한 단계 추론, 착한 행동과 마음, 모르는 것을 묻기, 짧은 이야기 부탁. 유형마다 주문서를 번갈아 늘어놓아 513 장을 보냈다. 주문서의 앞부분은 이렇다(각 줄의 원문은 받은 응답 파일의 <code>prompt</code> 칸에 있다).</p>
 <pre><code class="language-text">Write 10 different short chat conversations between a user and an assistant.
 Use only very simple words, like the TinyStories dataset (stories for 3-year-old children). Both the user and the assistant must talk this way. A small model that has only read children's stories must be able to read every message.
 
@@ -798,12 +798,7 @@ Rules:
 - Keep each whole conversation under 250 words.
 </code></pre>
 <p>받은 대화 5,232 편을 차례대로 걸렀다. 형식이 깨진 것(사람으로 시작해 번갈아 말하지 않거나 답으로 끝나지 않는 것) 141 편, 시험 문항과 낱말 여덟 개가 연속으로 겹치는 것 480 편, 루나 어휘 밖 낱말이 든 것 25 편을 빼서 4,586 편이 남았다. 그 가운데 217 편을 개발 대화로 떼어 학습률을 고르는 데만 썼다.</p>
-<pre><code class="language-text">요청 513 개(응답 모델 {'flare-ds41-1017-csf': 513}), 후보 대화 5,232 → 남김 4,586
-버린 이유: 시험지 겹침 480, 형식 141, 어휘 밖 25
-유형별 남김: daily 660, kindness 649, math 727, reasoning 626, story_qa 636, unknown 687, write_story 601
-토큰 수(글자 줄 형식, 맨 앞 문서 시작 포함): 평균 87, 중앙 82, 90% 136, 최대 232
-학습 4,369, 개발 217 → /home/hakkyu/lm-book-lab/data/sft/answer
-</code></pre>
+<p>유형마다 601~727 편이 남았다(<code>sources/answer/prep_data.out</code>).</p>
 <p>남은 대화는 이런 형태이고, 한 편이 평균 87 토큰이다.</p>
 <pre><code class="language-text">User: I have five books. I put away one book. How many books are out?
 Assistant: Four books are out. Five take away one is four.

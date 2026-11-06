@@ -922,8 +922,8 @@ def answer_logits(l):
 <aside class="tryit"><p class="tryit-title">따라 하기 · 게이밍 GPU 한 장</p><p>작은 GPT 체크포인트를 만든 뒤 책 저장소에서 <code>CUDA_VISIBLE_DEVICES=0 python -u sources/gpt/mlp_width_sweep.py &gt; sources/gpt/mlp_width_sweep.out</code> 을 돌린다. RTX 4090 한 장에서 모델 여덟 개에 1,867초가 걸렸다(작은 GPT 하나를 따로 재면 50초다). 단위 들여다보기는 <code>python -u sources/gpt/mlp_units.py</code> 로 9.8초, 그림은 <code>python sources/gpt/mlp_figures.py</code> 로 그린다(폭 실험의 기록 파일이 있어야 한다).</p>
 </aside>
 <h3 id="ml에서-은닉층을-넓히는-값과-전문가-혼합">ML에서: 은닉층을 넓히는 값과 전문가 혼합</h3>
-<p>은닉층을 넓히면 물음과 답의 쌍이 늘어 더 많은 경우를 가려낼 수 있지만, 토큰마다 물음을 전부 계산해야 하므로 계산량과 메모리가 폭에 비례해 는다. 그런데 한 자리에서 켜지는 단위는 앞에서 잰 대로 일부뿐이다. 은닉층을 여러 덩어리로 나누고 토큰마다 몇 덩어리만 계산하는 <strong>전문가 혼합</strong> (Mixture of Experts, MoE)은 이 관찰을 계산 절약으로 바꾼 구조다. 황자빈의 영상도 피드포워드 층의 역할을 설명한 바로 뒤(05:54~)에 「토큰 하나에 상관없는 물음과 답이 많으니 그 계산을 건너뛰자」는 이유로 전문가 혼합을 꺼낸다. 이 책도 모델을 키우는 대목에서 이 구조를 다시 만난다.</p>
-<div class="dialogue"><h3 id="prob-gpt-mlp-width-return">문제 4. 물음을 두 배로 늘리는 값<span id="문제-4-물음을-두-배로-늘리는-값" class="anchor-alias"></span></h3>
+<p>은닉층을 넓히면 물음과 답의 쌍이 늘어 더 많은 경우를 가려낼 수 있지만, 토큰마다 물음을 전부 계산해야 하므로 계산량과 메모리가 폭에 비례해 는다. 그런데 한 자리에서 켜지는 단위는 앞에서 잰 대로 일부뿐이다. 은닉층을 여러 덩어리로 나누고 토큰마다 몇 덩어리만 계산하는 <strong>전문가 혼합</strong> (Mixture of Experts, MoE)은 이 관찰을 계산 절약으로 바꾼 구조다. 황자빈의 영상도 피드포워드 층의 역할을 설명한 바로 뒤(05:54~)에 「토큰 하나에 상관없는 물음과 답이 많으니 그 계산을 건너뛰자」는 이유로 전문가 혼합을 꺼낸다.</p>
+<div class="dialogue"><h3 id="prob-gpt-mlp-width-return">문제 3. 물음을 두 배로 늘리는 값<span id="문제-3-물음을-두-배로-늘리는-값" class="anchor-alias"></span></h3>
 <blockquote>
 <p>은닉층 폭 실험의 표에서 4층 모델의 은닉층을 d → 2d → 4d → 8d 로 두 배씩 넓혔다. (가) 구간마다 늘어난 MLP 파라미터 100만 개당 바이트당 비트가 얼마나 줄었는지 구하라. (나) 폭 d = 256 을 그대로 두고 은닉층만 계속 넓혀 가면 바이트당 비트를 얼마든지 낮출 수 있을까?</p>
 </blockquote>
@@ -934,7 +934,7 @@ def answer_logits(l):
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 물음을 2,048 개로 늘려도 읽는 건 256 개 그대로야. 앞 토큰에서 무엇을 가져와 그 256 칸에 올릴지는 어텐션이 정하고.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>아, 잔차 스트림에 실려 있지 않은 정보로는 물음이 아무리 많아도 경우를 가를 수가 없겠네. 은닉층 폭은 물음의 개수고, d 는 물음과 답이 오가는 길의 폭이니까 한쪽만 키우면 다른 쪽이 막혀.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 그리고 하나 더 있어요. 이 실험은 모두 4,000 스텝만 학습했어요. 파라미터가 많은 모델이 그만큼 좋아지려면 학습량도 늘려야 할 수 있으니, 표의 체감은 「이 학습량에서」라는 단서를 달고 읽어요. 트랜스포머 논문(폭 512, 은닉층 2,048)부터 GPT-2 까지 은닉층을 폭의 4배로 둔 것도, 두 폭을 함께 키우는 관례로 보면 돼요.</p></div></div>
-</div><div class="dialogue"><h3 id="prob-gpt-mlp-lily-dog">문제 5. Lily 의 개 이름을 아는 단위가 있을까<span id="문제-5-lily-의-개-이름을-아는-단위가-있을까" class="anchor-alias"></span></h3>
+</div><div class="dialogue"><h3 id="prob-gpt-mlp-lily-dog">문제 4. Lily 의 개 이름을 아는 단위가 있을까<span id="문제-4-lily-의-개-이름을-아는-단위가-있을까" class="anchor-alias"></span></h3>
 <blockquote>
 <p>「Lily had a little dog. Lily’s dog was named」의 마지막 자리에서 잰 마지막 층 MLP 단위들의 기여 출력을 보고 답하라. 이 모델에 「Lily 의 개 이름은 Max」를 담은 단위가 있다고 말할 수 있는가? 있다면 어느 단위인가? 없다면 Max 의 로짓에 더해진 2.68 은 어디서 왔는가?</p>
 </blockquote>

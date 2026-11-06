@@ -757,7 +757,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="answer.html">묻는 말에 대답하기: 이어 쓰는 모델에서 답하는 모델로</a></li>
 <li class="toc-part">왜 그렇게 될까</li>
 <li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿이고, MLP 는 무엇을 아는가</a></li>
-<li><a href="circuits.html" class="active">들여다보기 1: 칠판과 헤드</a><ul class="sidebar-toc"><li><a href="circuits.html">잔차 스트림: 층들이 함께 읽고 쓰는 칠판</a></li><li><a href="circuits-sec-qk-ov-circuits.html">어텐션 헤드: 어디를 볼지(QK)와 무엇을 옮길지(OV)</a></li><li><a href="circuits-sec-induction-heads.html">유도 헤드: 동화만 읽은 루나에게는 생기지 않았다</a></li><li><a href="circuits-sec-induction-phase-change.html">상전이: 웹 글을 읽힌 루나에게 유도 헤드가 갑자기 생기다</a></li><li><a href="circuits-sec-circuits-summary.html" class="current">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li><a href="circuits.html" class="active">들여다보기 1: 칠판과 헤드</a><ul class="sidebar-toc"><li><a href="circuits.html">잔차 스트림: 층들이 함께 읽고 쓰는 칠판</a></li><li><a href="circuits-sec-qk-ov-circuits.html">어텐션 헤드: 어디를 볼지(QK)와 무엇을 옮길지(OV)</a></li><li><a href="circuits-sec-induction-heads.html">유도 헤드: 동화만 읽은 루나에게는 생기지 않았다</a></li><li><a href="circuits-sec-induction-phase-change.html">상전이: 웹 글을 읽힌 실험용 2층 모델에 유도 헤드가 갑자기 생기다</a></li><li><a href="circuits-sec-circuits-summary.html" class="current">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="layers.html">들여다보기 2: 층을 지나는 벡터</a></li>
 <li class="toc-part">가르치고 고치기</li>
 <li><a href="synthetic-data.html">동화 속의 우리: 루나에게 우리 이야기를 가르치려면 몇 편을 써야 할까</a></li>
@@ -840,19 +840,35 @@ section.interlude figure.fig img { border-radius: 10px; }
 <h3 id="요약">요약</h3>
 <p>트랜스포머의 층들은 위치마다 폭 d 의 벡터 한 줄을 읽고, 계산한 것을 지우지 않고 더해 쓴다. 엘하지와 동료들(2021)은 이 벡터 줄을 모든 층이 함께 쓰는 통로, 잔차 스트림으로 보고, 마지막 출력을 임베딩과 헤드 출력들의 합으로 나눠 읽었다. 어텐션 헤드 하나는 어느 위치를 볼지 정하는 QK 회로(W_Qᵀ W_K)와 본 위치에서 무엇을 옮길지 정하는 OV 회로(W_O W_V)로 나뉜다. 층이 하나뿐이면 헤드는 지금 토큰과 앞 토큰만으로 「A … B 다음에는 C」를 배울 수 있어서, 우리 1층 모델은 「Seoyeon」의 「e」는 베꼈지만 「oy」는 베끼지 못했다.</p>
 <p>앞 위치마다 「내 앞 토큰」을 적어 두는 앞 토큰 헤드와, 그것을 읽어 지금 토큰 다음에 왔던 토큰을 베끼는 유도 헤드가 합성되면 앞에 나온 것을 이어 쓸 수 있다(올슨 팀, 2022). 타이니스토리즈로 학습한 어텐션 전용 2층 모델에는 4억 9,150만 토큰 뒤에도 유도 헤드가 생기지 않았고, 동화를 쓰는 8층 GPT 에는 이름 하나를 베낄 만큼만 약하게 있었다. 같은 2층 모델에 웹 글(ClimbMix)을 읽히자 씨앗 셋 모두 3,360만~5,570만 토큰 사이에 유도 헤드가 갑자기 생겼고(끝 유도 점수 0.546~0.584), 한 실행의 지우기 실험이 앞 토큰 헤드(+7.15)와 유도 헤드(+4.37)의 합성을 보여 주었다. 손실 곡선은 원 논문처럼 솟지 않고 꺾였다.</p>
-<h3 id="막힌-곳">막힌 곳</h3>
-<p>유도 헤드를 찾은 것은 헤드 열여섯 개짜리 실험용 모델이고, 동화를 쓰는 루나는 이름 하나를 겨우 베낀다. 동화에 베낄 일이 적어서라는 가설은 아직 시험하지 않았고, 웹 글을 읽은 루나 자신에게 유도 헤드가 언제, 어느 크기의 모델에서 생길지도 모른다. 루나 자신의 유도 헤드를 보려면 루나가 직접 웹 글을 읽어야 하는데, 오늘 쓴 웹 글은 원본의 0.06% 정도였다. 그리고 오늘 읽은 것은 어텐션 헤드의 계산뿐이어서, 임베딩에서 시작한 벡터가 MLP 까지 있는 층들을 지나며 어떻게 바뀌어 가는지는 여전히 모른다.</p>
 <h3 id="루나-설정서-점검">루나 설정서 점검</h3>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>오늘 찾은 걸 설정서에 대 볼까요?</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>「앞에서 한 말을 기억한다」. 웹 글을 읽힌 2층 모델에는 앞을 베끼는 헤드가 생겼어요. 그런데 그건 루나가 아니라 헤드 열여섯 개짜리 실험용 모델이고, 동화를 쓰는 루나는 이름 하나를 겨우 베끼는 정도예요.</p></div></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>설정서의 줄</th>
+<th>이번에</th>
+<th>남은 것</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2. 앞에서 한 말을 기억한다</td>
+<td>웹 글을 읽힌 실험용 2층 모델에 앞을 베끼는 헤드가 생겼다. 동화를 쓰는 루나는 두 번째 「Seoyeon」의 마지막 토큰을 0.0186 으로 놓칠 만큼 약하게 베낀다</td>
+<td>동화를 읽은 루나에서 베끼는 헤드가 약한 이유(베낄 일 적은 글이라는 가설은 아직 시험하지 않음)</td>
+</tr>
+</tbody>
+</table></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그러니까 앞을 베끼는 헤드는 루나가 아니라 헤드 열여섯 개짜리 실험용 모델에서 찾은 거네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그런데 앞 토큰 헤드 말이에요. 어텐션은 256 칸 어디든 볼 수 있는데, 층 1 헤드 1 이 하는 일은 바로 앞 한 칸을 보는 것뿐이잖아요. 그 일에 헤드 하나를 다 쓰는 건 아깝지 않아요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>같은 생각을 논문에 적은 사람이 있어요. 이웃한 토큰끼리 정보를 넘기는 데 전역 어텐션을 쓰는 건 대포로 새를 잡는 일이라고요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S02"><img src="images/cast/S02.webp" alt="이서연 S02" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 그 사람은 새를 뭘로 잡았는데요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>시험지를 직접 만들어야 읽히는 논문이라, 루나를 조금 더 가르쳐 본 뒤에 같이 읽어요. 이름이 음악 용어라 처음 들으면 엉뚱하게 들릴 거예요.</p></div></div>
 <p>서연은 설정서 둘째 줄 옆에 「옆 칸 하나 = 헤드 하나?」라고 적고, 물음표에 동그라미를 쳤다.</p>
+<h3 id="막힌-곳">막힌 곳</h3>
+<p>유도 헤드를 또렷하게 찾은 것은 헤드 열여섯 개짜리 실험용 모델이고, 동화를 쓰는 루나는 이름 하나를 겨우 베낀다. 동화에는 없고 웹 글에는 있는 것이 베낄 일이 많은 글이어서인지, 어휘나 글 길이 때문인지는 아직 가르지 못했다. 그리고 오늘 읽은 것은 어텐션 헤드의 계산뿐이어서, 임베딩에서 시작한 벡터가 MLP 까지 있는 층들을 지나며 어떻게 바뀌어 가는지는 여전히 모른다.</p>
 
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="circuits-sec-induction-phase-change.html">&larr; 상전이: 웹 글을 읽힌 루나에게 유도 헤드가 갑자기 생기다</a><span class="page-count">5 / 5</span><a class="chapter-nav-next" href="layers.html">들여다보기 2: 층을 지나는 벡터 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="circuits-sec-induction-phase-change.html">&larr; 상전이: 웹 글을 읽힌 실험용 2층 모델에 유도 헤드가 갑자기 생기다</a><span class="page-count">5 / 5</span><a class="chapter-nav-next" href="layers.html">들여다보기 2: 층을 지나는 벡터 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

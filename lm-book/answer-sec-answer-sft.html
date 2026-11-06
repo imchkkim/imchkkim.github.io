@@ -776,9 +776,6 @@ section.interlude figure.fig img { border-radius: 10px; }
 <p>지도 파인튜닝도 다음 토큰을 맞히고 크로스 엔트로피 손실을 줄이는 방향으로 파라미터를 고친다는 점에서 학습 루프는 프리트레인과 같다. 바뀌는 것은 읽히는 글의 형태와 손실을 매기는 칸, 이렇게 두 가지다.</p>
 <p><strong>글의 형태.</strong> 대화 한 편을 글자 줄로 이어 붙인다. 사람의 말 앞에는 「User:」, 루나의 말 앞에는 「Assistant:」를 붙이고 줄을 바꾼다. 맨 앞과 맨 끝에는 동화를 읽힐 때와 같은 문서 경계 토큰 <code>&lt;|endoftext|&gt;</code> 를 둔다. 새 특수 토큰은 더하지 않았는데, 루나가 이미 아는 글자들로 차례를 표시하므로 어휘와 임베딩 행렬을 고칠 필요가 없기 때문이다.</p>
 <p><strong>채점하는 칸.</strong> 대화에는 사람이 쓴 물음과 루나가 쓸 답이 섞여 있는데, 루나가 나중에 할 일은 답을 쓰는 것뿐이니 답 칸에서만 손실을 매긴다. 크로스 엔트로피는 정답 자리에 -100 이 들어간 칸을 건너뛰므로, 물음 칸의 정답을 -100 으로 바꾸면 된다.</p>
-<aside class="recall"><p class="recall-title">회상 · 『생성 모델의 강화학습』 「KL의 방향: SFT는 남의 답에서, RL은 내 답에서 배운다」 · 김민준</p><p>SFT 는 남이 만든 답 위에서 기댓값을 취해 순방향 KL 을 줄이므로 모든 정답 봉우리를 덮으려 하고, 모델 자신의 실수는 손실에 나타나지 않는다. KL 로 묶은 RL 은 모델이 만든 답 위에서 역방향 KL 을 줄인다.</p>
-<p><a href="https://lameproof.com/genrl-book/dpo-first-look.html">원래 절로</a></p>
-</aside>
 <pre><code class="language-python"># sources/answer/sft.py 의 encode_dialog (발췌)
 ids, lab = [EOT], [-100]
 for j, x in enumerate(msgs):
@@ -805,72 +802,7 @@ return ids[:-1], lab[1:]                             # 다음 토큰을 정답�
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 같은 토큰 수를 넣어도 대화는 손실에 들어가는 칸이 적어요. (다)는요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 끝내는 법을 못 배워. 답을 쓰고 나서 「User:」를 혼자 써 버리거나, 동화처럼 계속 이어 쓰겠다.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>맞아요. 그래서 끝 토큰도 루나가 써야 할 글에 넣어 채점해요.</p></div></div>
-</div><h3 id="물음까지-채점하면">물음까지 채점하면</h3>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 답 칸만 채점하는 게 꼭 지켜야 하는 규칙이에요? 물음 쪽에 새 사실이 적혀 있으면 물음 칸은 채점하지 않으니까 루나가 못 배울 것 같은데요.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>꼭 그래야 하는 건 아니에요. axolotl 같은 파인튜닝 도구도 물음까지 채점할지를 설정(<code>train_on_inputs</code>)으로 남겨 둬요. 제가 미리 만들어 둔 작은 연습 데이터로 두 방법을 나란히 돌려 봅시다.</p></div></div>
-<p>재료는 선생님이 만든 연습용 사실 열 개다. 지어낸 아이 Ilva 와 Lorcan 의 반려동물, 좋아하는 음식, 사는 곳, 좋아하는 색, 좋아하는 일을 정했다(Ilva 의 반려동물은 오리, Lorcan 이 좋아하는 색은 주황 같은 것). 두 이름은 타이니스토리즈 학습 글에 한 번도 나오지 않아서, 루나는 이 아이들에 대해 미리 아는 것이 없다. 사실을 어디에 적느냐에 따라 데이터를 두 가지로 만들었다. <strong>답에 사실</strong> 데이터는 「Student: What is Ilva’s pet?」 다음 「Teacher: duck.」 처럼 답이 사실을 말하고, 물음 문형 여섯 × 사실 열로 60 줄이다. <strong>물음에 사실</strong> 데이터는 「Student: Ilva’s pet is a duck. Is that nice?」 다음 「Teacher: yes.」 처럼 사실이 물음에만 있고 답은 yes, no, 수 가운데 하나이며, 480 줄이다. 차례 표시는 「User:」 와 「Assistant:」 대신 「Student:」 와 「Teacher:」 를 썼다.</p>
-<p>채점하는 칸도 두 가지다. <strong>답 칸만</strong>은 위의 방법과 같고, <strong>모든 칸</strong>은 물음 글과 차례 표시(<code>Student:</code>, <code>Teacher:</code>)까지 손실에 넣는다. 출발점은 학습을 마친 동화 GPT, 학습률 0.0001, 배치 32 줄로 1,000 스텝을 돌렸고, 동화는 섞지 않았으며, 씨앗은 다섯이다. 시험 가운데 <strong>물음 시험</strong>은 학습 때와 같은 형태의 물음 40 개이고, <strong>빈칸 시험</strong>은 「Ilva loved her pet very much. It was a」 처럼 학습에 없던 문장 뒤에 올 값을 고르는 80 문항이며, 둘 다 보기 여덟 개에서 고르므로 아무렇게나 골라도 12.5% 가 나온다. 끝으로 문서 시작 토큰 하나만 주고 글을 뽑아, 사람이 묻기도 전에 물음부터 쓰는 비율을 쟀다(<code>sources/sft-mask/summary_practice.out</code>, 씨앗 다섯의 평균 [가장 낮은 값, 가장 높은 값]).</p>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>데이터</th>
-<th>채점</th>
-<th>물음 시험</th>
-<th>빈칸 시험</th>
-<th>빈 시작에서 물음을 쓴 비율</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>(학습 전)</td>
-<td></td>
-<td>12.5</td>
-<td>12.5</td>
-<td>0%</td>
-</tr>
-<tr>
-<td>답에 사실</td>
-<td>답 칸만</td>
-<td>100.0 [100.0, 100.0]</td>
-<td>80.0 [75.0, 91.2]</td>
-<td>0%</td>
-</tr>
-<tr>
-<td>답에 사실</td>
-<td>모든 칸</td>
-<td>95.0 [90.0, 97.5]</td>
-<td>54.8 [50.0, 57.5]</td>
-<td>100%</td>
-</tr>
-<tr>
-<td>물음에 사실</td>
-<td>답 칸만</td>
-<td>10.5 [10.0, 12.5]</td>
-<td>13.0 [10.0, 15.0]</td>
-<td>0%</td>
-</tr>
-<tr>
-<td>물음에 사실</td>
-<td>모든 칸</td>
-<td>43.5 [40.0, 50.0]</td>
-<td>72.8 [66.2, 78.8]</td>
-<td>100%</td>
-</tr>
-</tbody>
-</table></div>
-<p>빈 시작에서 뽑은 글은 이렇다(<code>sources/sft-mask/samples_practice.out</code>, 씨앗 0, 온도 0.8, 문서 끝 토큰은 보이지 않아 글이 이어 붙어 있다).</p>
-<pre><code class="language-text">P_A_answer_s0  빈 시작 → 'Once upon a time, there was a little girl.Once upon a time, there was a green bug.Once upon a time, there'
-P_A_full_s0    빈 시작 → 'Student: What color does Lorcan pick?\nTeacher: orange.Student: What is'
-</code></pre>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>물음에만 적힌 사실은 답 칸만 채점하면 하나도 안 들어오네. 빈칸 시험 13.0% 면 학습 전 12.5% 랑 같아. 여덟 개에서 아무렇게나 고른 거랑 같고.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>채점하지 않는 칸에서는 그래디언트가 나오지 않아요. 물음 칸의 사실은 모델이 읽기만 하고 맞히려고 애쓸 일이 없어요. 물음까지 채점하면 같은 사실이 72.8% 까지 들어와요.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그 대신 모든 칸을 채점한 쪽은 빈 데서 「Student:」 부터 써요. 아무도 안 물었는데 학생 차례를 혼자 지어내고 거기에 답까지 해요.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>물음과 차례 표시도 맞혀야 할 글이 되었으니까요. 대화하는 루나라면 사람이 말할 차례에 루나가 물음을 대신 써 버려요. 그리고 사실이 답에 있을 때는 답 칸만 채점한 쪽이 처음 보는 문장의 빈칸 시험에서도 더 잘 맞혔어요. 80.0% 대 54.8% 로, 씨앗 다섯의 범위가 겹치지 않아요.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>물음 쪽에 사실을 둔 데이터는 모든 칸을 채점해도 물음 시험이 43.5% 밖에 안 되네요.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 데이터의 답은 늘 yes, no, 수였으니까요. 사실을 읽기는 했어도 그 사실을 답으로 말해 본 적이 없어요.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 답 칸만 채점하는 건 계산을 아끼려고 하는 거예요?</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>이 데이터에서는 아니에요. 한 스텝이 답 칸만 7.98 ms, 모든 칸 8.07 ms 였고 세 번 잰 범위가 겹쳐요(<code>sources/sft-mask/timing_practice.out</code>). 어느 칸을 채점하느냐가 모델이 무엇을 쓰는 법을 배우는지를 정해요. 그래서 루나가 알아야 할 사실은 대화 데이터를 만들 때 답 쪽에 적어요.</p></div></div>
-
+</div>
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="answer.html">&larr; 프리트레인 루나에게 물으면</a><span class="page-count">2 / 5</span><a class="chapter-nav-next" href="answer-sec-answer-data.html">대화 데이터를 구하거나 만들기 &rarr;</a></nav>
 </main>
