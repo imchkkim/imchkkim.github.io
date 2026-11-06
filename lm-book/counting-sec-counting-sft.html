@@ -754,6 +754,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="gpt.html">멀리 보기: 200줄이 안 되는 GPT</a></li>
 <li><a href="tinystories.html">동화 쓰는 작은 GPT: 게이밍 GPU 한 장으로 16분</a></li>
 <li><a href="sampling.html">루나에게 말 걸기: 같은 시작 문장에 왜 매번 다른 이야기가 나올까</a></li>
+<li><a href="answer.html">묻는 말에 대답하기: 이어 쓰는 모델에서 답하는 모델로</a></li>
 <li class="toc-part">왜 그렇게 될까</li>
 <li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿이고, MLP 는 무엇을 아는가</a></li>
 <li><a href="circuits.html">들여다보기 1: 칠판과 헤드</a></li>
@@ -808,71 +809,6 @@ for i, (s, m) in enumerate(zip(seqs, marks)):               # m = 물음의 길�
   요약 SFT P_both 이야기_new: 12.8% [11.0, 16.1, 11.2]
 </code></pre>
 <p>시험 쌍이 아닌 문항을 함께 풀게 했더니, 새 쌍의 식이 13.0% 에서 26.5% 로, 새 쌍의 이야기가 7.1% 에서 12.8% 로 두 배 안팎이 되었다. 숫자 규칙 실험에서 본 것과 같은 방향이다.</p>
-<h3 id="물음까지-채점하면">물음까지 채점하면</h3>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 답 칸만 채점하는 게 꼭 지켜야 하는 규칙이에요? 물음 쪽에 새 사실이 적혀 있으면 물음 칸은 채점하지 않으니까 루나가 못 배울 것 같은데요.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>꼭 그래야 하는 건 아니에요. axolotl 같은 파인튜닝 도구도 물음까지 채점할지를 설정(<code>train_on_inputs</code>)으로 남겨 둬요. 같은 출발점에서 두 방법을 나란히 돌려 봅시다.</p></div></div>
-<p>재료는 합성 데이터 장에서 쓴 사실 열 개다(민준의 거북이, 서연의 토끼 같은 것). 사실을 어디에 적느냐에 따라 데이터를 두 가지로 만들었다. <strong>답에 사실</strong> 데이터는 「Student: What is Seoyeon’s pet?」 다음 「Teacher: rabbit.」 처럼 답이 사실을 말하고, 물음 문형 여섯 × 사실 열로 60 줄이다. <strong>물음에 사실</strong> 데이터는 「Student: Seoyeon’s pet is a rabbit. Is that nice?」 다음 「Teacher: yes.」 처럼 사실이 물음에만 있고 답은 yes, no, 수 가운데 하나이며, 480 줄이다.</p>
-<p>채점하는 칸도 두 가지다. <strong>답 칸만</strong>은 위의 <code>answer_batch</code> 와 같고, <strong>모든 칸</strong>은 물음 글과 차례 표시(<code>Student:</code>, <code>Teacher:</code>)까지 손실에 넣는다. 출발점은 학습을 마친 동화 GPT, 학습률 0.0001, 배치 32 줄로 1,000 스텝을 돌렸고, 동화는 섞지 않았으며, 씨앗은 다섯이다. 시험 가운데 <strong>물음 시험</strong>은 학습 때와 같은 형태의 물음 40 개이고, <strong>빈칸 시험</strong>은 「Seoyeon loved her pet very much. It was a」 처럼 학습에 없던 문장 뒤에 올 값을 고르는 80 문항이다. 둘 다 보기 여덟 개에서 고르므로 아무렇게나 골라도 12.5% 다. 끝으로 문서 시작 토큰 하나만 주고 글을 뽑아, 사람이 묻기도 전에 물음부터 쓰는 비율을 쟀다(<code>sources/sft-mask/summary.out</code>, 씨앗 다섯의 평균 [가장 낮은 값, 가장 높은 값]).</p>
-<div class="table-wrap"><table>
-<thead>
-<tr>
-<th>데이터</th>
-<th>채점</th>
-<th>물음 시험</th>
-<th>빈칸 시험</th>
-<th>빈 시작에서 물음을 쓴 비율</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>(학습 전)</td>
-<td></td>
-<td>20.0</td>
-<td>17.5</td>
-<td>0%</td>
-</tr>
-<tr>
-<td>답에 사실</td>
-<td>답 칸만</td>
-<td>100.0 [100.0, 100.0]</td>
-<td>77.5 [73.8, 86.2]</td>
-<td>0%</td>
-</tr>
-<tr>
-<td>답에 사실</td>
-<td>모든 칸</td>
-<td>99.5 [97.5, 100.0]</td>
-<td>53.5 [50.0, 56.2]</td>
-<td>100%</td>
-</tr>
-<tr>
-<td>물음에 사실</td>
-<td>답 칸만</td>
-<td>12.5 [10.0, 15.0]</td>
-<td>15.8 [12.5, 18.8]</td>
-<td>0%</td>
-</tr>
-<tr>
-<td>물음에 사실</td>
-<td>모든 칸</td>
-<td>46.5 [42.5, 55.0]</td>
-<td>78.5 [73.8, 80.0]</td>
-<td>100%</td>
-</tr>
-</tbody>
-</table></div>
-<p>빈 시작에서 뽑은 글은 이렇다(씨앗 0, 온도 0.8, 문서 끝 토큰은 보이지 않아 글이 이어 붙어 있다).</p>
-<pre><code class="language-text">A_answer_s0  빈 시작 → 'Once upon a time, there was a boy.Once upon a time there was a girl.Once upon a time there was a big apple'
-A_full_s0    빈 시작 → 'Student: What color does Seoyeon pick?\nTeacher: yellow.Student: What'
-</code></pre>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>물음에만 적힌 사실은 답 칸만 채점하면 하나도 안 들어오네. 빈칸 시험 15.8% 면 학습 전 17.5% 보다도 낮아.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>채점하지 않는 칸에서는 그래디언트가 나오지 않아요. 물음 칸의 사실은 모델이 읽기만 하고 맞히려고 애쓸 일이 없어요. 물음까지 채점하면 같은 사실이 78.5% 까지 들어와요.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그 대신 모든 칸을 채점한 쪽은 빈 데서 「Student:」 부터 써요. 아무도 안 물었는데 학생 차례를 혼자 지어내고 거기에 답까지 해요.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>물음과 차례 표시도 맞혀야 할 글이 되었으니까요. 대화하는 루나라면 사람이 말할 차례에 루나가 물음을 대신 써 버려요. 그리고 사실이 답에 있을 때는 답 칸만 채점한 쪽이 처음 보는 문장의 빈칸 시험에서도 더 잘 맞혔어요. 77.5% 대 53.5% 로, 씨앗 다섯의 범위가 겹치지 않아요.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>물음 쪽에 사실을 둔 데이터는 모든 칸을 채점해도 물음 시험이 46.5% 밖에 안 되네요.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 데이터의 답은 늘 yes, no, 수였으니까요. 사실을 읽기는 했어도 그 사실을 답으로 말해 본 적이 없어요.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 답 칸만 채점하는 건 계산을 아끼려고 하는 거예요?</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>이 데이터에서는 아니에요. 한 스텝이 답 칸만 9.10 ms, 모든 칸 9.41 ms 였고 세 번 잰 범위가 겹쳐요(<code>sources/sft-mask/timing.out</code>). 어느 칸을 채점하느냐가 모델이 무엇을 쓰는 법을 배우는지를 정해요. 그래서 루나가 알아야 할 사실은 대화 데이터를 만들 때 답 쪽에 적어요.</p></div></div>
 <div class="dialogue"><h3 id="prob-counting-curriculum">문제 5. 서연이 짠 교과 과정<span id="문제-5-서연이-짠-교과-과정" class="anchor-alias"></span></h3>
 <blockquote>
 <p>유치원 쌍(437 개)만 지도 파인튜닝하면 새 쌍의 식이 13.0%, 두 자리 덧셈·뺄셈을 섞으면 26.5% 였다. (가) 시험에 나오지 않는 문제를 풀게 했는데 왜 시험 점수가 오르는가? (나) 두 자리 쌍은 8,100 개쯤인데, 그렇다면 쌍을 더 많이 만들수록 무조건 좋을까? (다) 지금 실험만으로 원인을 말할 수 있는가?</p>
