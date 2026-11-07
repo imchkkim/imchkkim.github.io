@@ -14,6 +14,7 @@
  *   - 대문 책 카드의 달성률 막대(2.14절)
  *   - 로그인(구글), 서버 합치기, 댓글 칸(2.7·2.15절)
  *   - 목차 패널의 「댓글 칸 보이기」 체크 상자: 끄면 모든 책·모든 페이지의 댓글 칸을 숨긴다(이 브라우저에 저장)
+ *   - 목차 패널의 코드 상자 체크 상자 둘: 「화면 폭까지 넓히기」「줄바꿈」(이 브라우저에 저장, 계약서 끝 「변경 (코드 상자 넓히기·줄바꿈)」 절)
  *   - 책 안 낱말 검색: 목차 패널 맨 위·대문의 검색 칸, search-index.json 지연 로드, 도착한 페이지에서 찾은 말 표시
  *     (계약서 끝 「변경 (책 안 검색)」 절)
  *   - 옷차림 스킨 이스터에그: 막간에서 새 옷차림을 보면 목차 패널에 「등장인물 옷차림」 칸이 열리고, 고른 옷으로
@@ -134,6 +135,8 @@
     config: "lp.reader.config",
     search: "lp.reader.search",
     showComments: "lp.reader.showComments",
+    codeWide: "lp.reader.codeWide",        // 코드 상자 넓히기(켠 때만 true)
+    codeWrap: "lp.reader.codeWrap",        // 코드 상자 줄바꿈(켠 때만 true)
     skin: "lp.reader.v1.skin",            // 옷차림 스킨 { unlocked, pick } — 로그인하면 서버 /api/prefs 와 합친다
     skinDirty: "lp.reader.v1.skinDirty"   // 서버에 아직 못 올린 스킨 변경이 있음
   };
@@ -1072,7 +1075,7 @@
     var bar = el("div", { class: "lp-book-progress" }, [label, el("span", { class: "lp-bar" }, [fill])]);
     var resetRow = el("div", { class: "lp-acct-actions lp-reset-row" });
     resetRow.hidden = true;
-    var box = el("div", { class: "lp-reader-box" }, [acct, bar, resetRow, commentsToggle(), skinPanel()]);
+    var box = el("div", { class: "lp-reader-box" }, [acct, bar, resetRow, commentsToggle()].concat(codeToggles(), [skinPanel()]));
     var home = $("a.sidebar-home", sb), header = $(".sidebar-header", sb);
     if (home) after(home, box);
     else if (header) after(header, box);
@@ -1097,6 +1100,61 @@
       applyCommentsShown();
     }));
     return el("label", { class: "lp-c-toggle-row" }, [cb, " 페이지 아래 댓글 칸 보이기"]);
+  }
+  // ── 코드 상자 넓히기·줄바꿈(2026-11-07 저자: 「코드박스의 가로폭을 화면에 맞게 넓히기 옵션」
+  //    「코드박스의 내용에 자동 줄바꿈을 적용해서 가로스크롤을 없애는 옵션」)
+  // 독자마다 이 브라우저에 저장, 기본은 둘 다 끔. 켜면 html 에 lp-code-wide·lp-code-wrap 을 달아 CSS 가 본다.
+  // 넓히기: 상자마다 왼쪽 끝에서 화면 오른쪽 끝(16px 여백)까지의 폭을 --lp-pre-room 으로 재어 주고, CSS 는
+  // 내용 길이만큼만(max-content) 그 폭까지 키운다. 짧은 상자는 그대로다. 접힌(안 보이는) 상자는 펼칠 때 잰다.
+  // 책마다 본문 자리(가운데 놓기·목차 옆에 붙이기)가 달라서 CSS 만으로 정하지 않고 실제 위치를 잰다.
+  var CODE_OPTS = [
+    { key: K.codeWide, cls: "lp-code-wide", label: " 코드 상자를 화면 폭까지 넓히기" },
+    { key: K.codeWrap, cls: "lp-code-wrap", label: " 코드 상자 줄바꿈(가로 스크롤 없애기)" }
+  ];
+  var CODE_SEL = "main pre:not(.mermaid)";
+  function codeOn(o) { return lsGet(o.key) === true; }
+  function applyCodeOpts() {
+    CODE_OPTS.forEach(function (o) {
+      var on = codeOn(o);
+      document.documentElement.classList.toggle(o.cls, on);
+      var cb = $("input." + o.cls + "-toggle");
+      if (cb) cb.checked = on;
+    });
+    fitCodeBoxes();
+  }
+  function fitCodeBoxes() {
+    var wide = document.documentElement.classList.contains("lp-code-wide");
+    var right = document.documentElement.clientWidth - 16;
+    $$(CODE_SEL).forEach(function (pre) {
+      if (!wide) { pre.style.removeProperty("--lp-pre-room"); return; }
+      if (!visible(pre)) return; // 접힌 상자: 펼칠 때 다시 잰다
+      var room = Math.floor(right - pre.getBoundingClientRect().left);
+      pre.style.setProperty("--lp-pre-room", Math.max(room, 0) + "px");
+    });
+  }
+  var fitTimer = null;
+  function fitCodeSoon() {
+    if (!document.documentElement.classList.contains("lp-code-wide")) return;
+    clearTimeout(fitTimer);
+    fitTimer = setTimeout(safe(fitCodeBoxes), 60);
+  }
+  function codeToggles() {
+    return CODE_OPTS.map(function (o) {
+      var cb = el("input", { type: "checkbox", class: "lp-c-toggle " + o.cls + "-toggle" });
+      cb.checked = codeOn(o);
+      cb.addEventListener("change", safe(function () {
+        lsSet(o.key, cb.checked ? true : null);
+        applyCodeOpts();
+      }));
+      return el("label", { class: "lp-c-toggle-row" }, [cb, o.label]);
+    });
+  }
+  function initCodeOpts() {
+    applyCodeOpts();
+    window.addEventListener("resize", safe(fitCodeSoon));
+    // 함께 풀기를 펴거나 details 를 열면 숨어 있던 상자가 보인다
+    document.addEventListener("click", safe(fitCodeSoon));
+    document.addEventListener("toggle", safe(fitCodeSoon), true);
   }
   function whenPanelOpen(go) {
     var sb = PANEL && PANEL.sb;
@@ -2200,6 +2258,7 @@
     }
     safe(applyCommentsShown)();
     safe(foldAll)();
+    safe(initCodeOpts)(); // 접기 뒤: 보이는 상자만 잰다
     safe(applySkin)(); // 고른 옷차림(그림이 불러지기 전에 주소부터 바꾼다)
     safe(initQuizzes)();
     var resumed = false;
@@ -2252,6 +2311,7 @@
     if (e.key === K.progress) { PROG = loadProg(); renderPanel(); refreshQuizzes(); renderReadRow(); }
     else if (e.key === K.session) authChanged();
     else if (e.key === K.showComments) applyCommentsShown();
+    else if (e.key === K.codeWide || e.key === K.codeWrap) applyCodeOpts();
     else if (e.key === K.skin && BOOK) { SKIN_ST = null; applySkin(document); renderSkin(); }
   }));
 
