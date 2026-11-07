@@ -778,14 +778,18 @@ section.interlude figure.fig img { border-radius: 10px; }
 <p class="chapter-crumb"><a href="data-fix.html">데이터를 고치다: 쏠림, 중복, 바꿔 쓰기</a></p>
 <h2 id="sec-fix-dedup">같은 것 지우기: 정확한 중복과 거의 같은 중복<span id="같은-것-지우기-정확한-중복과-거의-같은-중복" class="anchor-alias"></span></h2>
 <p>서연이 처음 짚은 것은 같은 대화가 여러 번 들어 있는 문제였다. 중복을 찾는 가장 쉬운 방법은 글을 소문자로 바꾸고 띄어쓰기를 하나로 모은 뒤, 글자가 똑같은 것을 세는 것이다. 루나 말투 대화에서는 135 개(1.1%)가 나왔다.</p>
-<p>정확한 중복만 지우면 쉼표 하나, 낱말 하나가 다른 대화는 남는다. 그런 대화는 몇 개나 될까? 두 대화를 낱말 다섯 개짜리 조각으로 잘라 조각의 집합을 만들고, 두 집합이 얼마나 겹치는지 잰다. 겹친 조각 수를 합친 조각 수로 나눈 값이 자카드 유사도(Jaccard similarity)다.</p>
+<p>정확한 중복만 지우면 쉼표 하나, 낱말 하나가 다른 대화는 남는다. 그런 대화는 몇 개나 될까? 서연은 지난 학기 정보이론 수업에서 「겹친 글이 많으면 모델이 더 외운다」는 이야기와 함께 들은 잣대를 떠올렸다.</p>
+<aside class="recall"><p class="recall-title">회상 · 『정보이론』 「암기–일반화 전이: 자료 양이 경계를 정한다」 · 이서연</p><p>거의 같은 글은 글을 낱말 조각의 집합으로 바꿔서 찾았어. 두 글에 함께 든 조각 수를 어느 한쪽에라도 든 조각 수로 나눈 값이 자카드 유사도(Jaccard similarity)고. 알프스 골짜기들의 식물 목록을 비교하던 식물학자 자카드의 공통 계수에서 왔다고 했지. 글이 많으면 해시 함수마다 가장 작은 해시 값만 모은 서명(MinHash)으로 비교하고.</p>
+<p><a href="https://lameproof.com/compression-book/memorization-sec-memorization-generalization-transition.html">원래 절로</a></p>
+</aside>
+<p>이번에는 두 대화를 낱말 다섯 개짜리 조각으로 자른다.</p>
 <pre><code class="language-text">A: I cannot see your hand. What is it?
 B: I cannot see your hand. Is it soft or hard?
 A 의 다섯 낱말 조각: &quot;i cannot see your hand&quot;, &quot;cannot see your hand what&quot;, &quot;see your hand what is&quot;, &quot;your hand what is it&quot;
 B 의 다섯 낱말 조각: &quot;i cannot see your hand&quot;, &quot;cannot see your hand is&quot;, &quot;see your hand is it&quot;, &quot;your hand is it soft&quot;, &quot;hand is it soft or&quot;, &quot;is it soft or hard&quot;
 겹친 조각 1 개, 합친 조각 9 개 → 자카드 유사도 1/9 ≈ 0.11
 </code></pre>
-<p>대화 11,875 개를 둘씩 모두 비교하면 7,000만 쌍이 넘으므로, 대화마다 짧은 서명을 만들어, 서명이 닮은 쌍만 자세히 비교한다. 조각 집합을 무작위 해시 함수 하나에 넣어 가장 작은 해시 값 하나를 뽑으면, 두 대화의 가장 작은 해시 값이 같을 확률이 두 대화의 자카드 유사도와 같다. 가장 작은 해시 값을 여러 해시 함수로 모아 만든 서명이 MinHash 다. 해시 함수 128 개로 128 칸 서명을 만들고, 네 칸씩 32 묶음으로 나눠 한 묶음이라도 똑같은 쌍만 후보로 삼은 뒤, 진짜 자카드 유사도가 0.7 이상인 쌍을 같은 묶음으로 모았다.</p>
+<p>대화 11,875 개를 둘씩 모두 비교하면 7,000만 쌍이 넘으므로, 대화마다 MinHash 서명을 만들어 서명이 닮은 쌍만 자세히 비교한다. 두 대화의 가장 작은 해시 값이 같을 확률이 두 대화의 자카드 유사도와 같다는 성질을 쓰는 것이다. 해시 함수 128 개로 128 칸 서명을 만들고, 네 칸씩 32 묶음으로 나눠 한 묶음이라도 똑같은 쌍만 후보로 삼은 뒤, 진짜 자카드 유사도가 0.7 이상인 쌍을 같은 묶음으로 모았다.</p>
 <pre><code class="language-python"># sources/data-fix/dedup.py 에서
 def shingles(t):                      # 낱말 다섯 개짜리 조각의 집합
     w = WORD.findall(t.lower())
