@@ -2156,6 +2156,7 @@
       try { sb.inert = shut; } catch (e) { /* 없음 */ }
       sb.classList.toggle("lp-sb-shut", shut);
       if (ov) ob.setAttribute("aria-expanded", open ? "true" : "false"); else ob.removeAttribute("aria-expanded");
+      ob.setAttribute("aria-label", ov && open ? "목차 닫기" : "목차 열기");
       if (wasOpen !== null && ov && open !== wasOpen) {
         if (open) {
           ob.classList.remove("lp-menu-hide");
@@ -2176,6 +2177,16 @@
     window.addEventListener("resize", function () { if (rt) clearTimeout(rt); rt = setTimeout(sync, 150); });
     sync();
     if (!panelOverlay()) scrollPanelToCurrent();
+    // ☰ 는 토글(2026-11-07 저자: 「오른쪽 위의 햄버거 버튼을 누르는 것으로 왼쪽 패널이 토글되지 않음」).
+    // 책 스크립트의 ☰ 처리는 「열기」뿐이라, 열려 있을 때의 누름은 문서 잡기 단계에서 가로채 닫는다(책 처리까지 가지 않게)
+    document.addEventListener("click", function (ev) {
+      if (!panelOverlay() || !sb.classList.contains("open")) return;
+      var t = ev.target;
+      if (!t || !t.closest || t.closest("#sidebar-open") !== ob) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      close();
+    }, true);
     // Escape 로 닫기
     document.addEventListener("keydown", function (ev) {
       if (ev.key !== "Escape" || ev.defaultPrevented || !panelOverlay() || !sb.classList.contains("open")) return;
