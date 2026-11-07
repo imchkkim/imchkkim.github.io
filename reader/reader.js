@@ -14,7 +14,8 @@
  *   - 대문 책 카드의 달성률 막대(2.14절)
  *   - 로그인(구글), 서버 합치기, 댓글 칸(2.7·2.15절)
  *   - 목차 패널의 「댓글 칸 보이기」 체크 상자: 끄면 모든 책·모든 페이지의 댓글 칸을 숨긴다(이 브라우저에 저장)
- *   - 넓은 화면의 목차 패널 접기: 패널 머리 ⇤ 단추로 접으면 좁은 화면처럼 ☰ 로 덮어 연다(이 브라우저에 저장, 계약서 끝 「변경 (목차 패널 접기)」 절)
+ *   - 목차 패널 서랍: 넓은 화면은 ☰(늘 보임)·⇤ 로 패널을 붙였다 뗀다(본문을 민다), 좁은 화면은 ☰ 토글 덮어 쓰기
+ *     (이 브라우저에 저장, 계약서 끝 「변경 (목차 패널 접기)」 절)
  *   - 목차 패널의 코드 상자 체크 상자 둘: 「화면 폭까지 넓히기」「줄바꿈」(이 브라우저에 저장, 계약서 끝 「변경 (코드 상자 넓히기·줄바꿈)」 절)
  *   - 책 안 낱말 검색: 목차 패널 맨 위·대문의 검색 칸, search-index.json 지연 로드, 도착한 페이지에서 찾은 말 표시
  *     (계약서 끝 「변경 (책 안 검색)」 절)
@@ -1158,46 +1159,41 @@
     document.addEventListener("click", safe(fitCodeSoon));
     document.addEventListener("toggle", safe(fitCodeSoon), true);
   }
-  // ── 넓은 화면의 목차 패널 접기(2026-11-07 저자: 「화면 폭이 넓으면 왼쪽 패널이 항상 표시되는데, 토글 가능한 타입으로 하자」)
-  // 넓은 화면(책 style.css 의 1200px 이상)에서는 패널이 늘 왼쪽에 붙어 있다. 패널 머리의 단추로 접으면 html 에
-  // lp-sb-collapsed 를 달고, reader.css 가 그 폭에서도 좁은 화면처럼 그린다(☰ 로 덮어 열기, × 로 닫기).
-  // 그래서 덮어 연 패널의 키보드·바깥 누름·inert 처리(initPanelKeys)를 그대로 쓴다. 이 브라우저에 저장, 모든 책 공통.
+  // ── 목차 패널 서랍(2026-11-07 저자: 「화면 폭이 넓으면 왼쪽 패널이 항상 표시되는데, 토글 가능한 타입으로 하자」,
+  //    「상식적인 drawer - panel 시스템이 되게 해」)
+  // 넓은 화면(책 style.css 의 1200px 이상): ☰ 가 늘 보이고, 누르면 패널이 붙었다(본문을 밀고) 사라졌다 한다.
+  //   패널 안 ⇤ 는 닫기. 닫힌 꼴은 html.lp-sb-collapsed 하나뿐이고 덮어 쓰는 꼴은 없다. 이 브라우저에 저장, 모든 책 공통.
+  // 좁은 화면: 원래대로 덮어 쓰는 서랍(#sidebar.open, ☰ 토글·× ·Escape·바깥 누름, initPanelKeys).
   var SB_WIDE = "(min-width: 1200px)";
+  function wideScreen() { try { return window.matchMedia(SB_WIDE).matches; } catch (e) { return false; } }
   function sbCollapsed() { return lsGet(K.sbCollapsed) === true; }
+  var sbSync = function () { /* initPanelKeys 가 채운다 */ };
   function applySbCollapsed(anim) {
     var html = document.documentElement, on = sbCollapsed();
     if (!anim) html.classList.add("lp-sb-noanim"); // 쪽을 열 때는 미끄러지는 움직임 없이
     if (html.classList.contains("lp-sb-collapsed") !== on) {
       // 책 <head> 의 첫 스크립트(lib/reader.cjs tags)가 그리기 전에 미리 달아 두었으면 여기서는 바꿀 것이 없다
       html.classList.toggle("lp-sb-collapsed", on);
-      var sb = $("#sidebar");
-      if (sb) sb.classList.remove("open");
-      // 덮어 쓰기 여부(panelOverlay)와 코드 상자 자리가 바뀌었다: 패널 동기화·코드 상자 재기는 resize 를 듣는다
-      try { window.dispatchEvent(new Event("resize")); } catch (e) { /* 옛 브라우저 */ }
+      fitCodeSoon(); // 본문 자리가 바뀌었다: 코드 상자 다시 재기
     }
-    syncSbPin();
+    sbSync();
     if (!anim) {
       var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 16); };
       raf(function () { raf(function () { html.classList.remove("lp-sb-noanim"); }); });
     }
   }
-  function syncSbPin() {
-    var b = $("#lp-sb-pin");
-    if (!b) return;
-    var on = sbCollapsed();
-    b.textContent = on ? "\u21E5" : "\u21E4"; // ⇥ 붙이기 / ⇤ 접기
-    b.setAttribute("aria-label", on ? "목차를 왼쪽에 고정" : "목차 접기");
-    b.title = on ? "목차를 왼쪽에 고정" : "목차 접기 (☰ 로 다시 열기)";
+  /** 넓은 화면에서 패널을 붙이거나(on=false) 뗀다(on=true) */
+  function setSbCollapsed(on) {
+    lsSet(K.sbCollapsed, on ? true : null);
+    applySbCollapsed(true);
   }
   function initSbCollapse() {
     var sb = $("#sidebar");
-    if (!sb || !$("#sidebar-open")) return; // ☰ 가 없는 꼴의 쪽에서는 접으면 다시 열 길이 없다
-    var b = el("button", { type: "button", id: "lp-sb-pin", class: "lp-sb-pin" });
+    if (!sb || !$("#sidebar-open")) return; // ☰ 가 없는 꼴의 쪽에서는 닫으면 다시 열 길이 없다
+    var b = el("button", { type: "button", id: "lp-sb-pin", class: "lp-sb-pin", text: "\u21E4", title: "목차 닫기", "aria-label": "목차 닫기" });
     b.addEventListener("click", safe(function () {
-      lsSet(K.sbCollapsed, sbCollapsed() ? null : true);
-      applySbCollapsed(true);
-      if (!sbCollapsed()) return;
-      var ob = $("#sidebar-open"); // 접었으면 초점을 ☰ 로(패널 안 단추가 화면 밖으로 사라졌다)
+      setSbCollapsed(true);
+      var ob = $("#sidebar-open"); // 패널 안 단추가 화면 밖으로 사라졌다: 초점을 ☰ 로
       if (ob) { try { ob.focus({ preventScroll: true }); } catch (e) { ob.focus(); } }
     }));
     var acts = $(".sidebar-actions", sb), close = $("#sidebar-close", sb);
@@ -2123,6 +2119,7 @@
   // 책 HTML(build.cjs)은 건드리지 않고, 여덟 권이 같은 꼴로 그리는 #sidebar·#sidebar-open·#sidebar-close·#theme-toggle 에 덧붙인다
   /** 목차 패널이 본문 위에 겹쳐 뜨는 폭인가(☰ 단추가 보이는 폭. 책 CSS 는 1199px 이하) */
   function panelOverlay() {
+    if (wideScreen()) return false; // 넓은 화면의 패널은 붙거나 사라질 뿐 덮어 쓰지 않는다(목차 패널 서랍)
     var ob = $("#sidebar-open");
     if (!ob) return false;
     try { return window.getComputedStyle(ob).display !== "none"; } catch (e) { return false; }
@@ -2152,11 +2149,14 @@
       var ov = panelOverlay(), open = sb.classList.contains("open");
       var inside = sb.contains(document.activeElement) && document.activeElement !== document.body;
       // 닫힌 패널(화면 왼쪽 밖)은 Tab 차례·화면 읽기에서 뺀다. inert 가 없는 옛 브라우저는 CSS(visibility)로
-      var shut = ov && !open;
+      var wide = wideScreen();
+      if (wide && open) { sb.classList.remove("open"); open = false; } // 좁은 화면에서 연 채로 넓혔다
+      var shown = wide ? !document.documentElement.classList.contains("lp-sb-collapsed") : open;
+      var shut = (wide || ov) && !shown;
       try { sb.inert = shut; } catch (e) { /* 없음 */ }
       sb.classList.toggle("lp-sb-shut", shut);
-      if (ov) ob.setAttribute("aria-expanded", open ? "true" : "false"); else ob.removeAttribute("aria-expanded");
-      ob.setAttribute("aria-label", ov && open ? "목차 닫기" : "목차 열기");
+      if (wide || ov) ob.setAttribute("aria-expanded", shown ? "true" : "false"); else ob.removeAttribute("aria-expanded");
+      ob.setAttribute("aria-label", shown && (wide || ov) ? "목차 닫기" : "목차 열기");
       if (wasOpen !== null && ov && open !== wasOpen) {
         if (open) {
           ob.classList.remove("lp-menu-hide");
@@ -2172,6 +2172,7 @@
       if (cb && !cb.hidden) cb.click(); else sb.classList.remove("open");
       sb.classList.remove("open");
     }
+    sbSync = sync; // 넓은 화면 붙이기·떼기(applySbCollapsed)도 이 동기화를 부른다
     if (typeof MutationObserver === "function") new MutationObserver(sync).observe(sb, { attributes: true, attributeFilter: ["class"] });
     var rt = null;
     window.addEventListener("resize", function () { if (rt) clearTimeout(rt); rt = setTimeout(sync, 150); });
@@ -2179,10 +2180,17 @@
     if (!panelOverlay()) scrollPanelToCurrent();
     // ☰ 는 토글(2026-11-07 저자: 「오른쪽 위의 햄버거 버튼을 누르는 것으로 왼쪽 패널이 토글되지 않음」).
     // 책 스크립트의 ☰ 처리는 「열기」뿐이라, 열려 있을 때의 누름은 문서 잡기 단계에서 가로채 닫는다(책 처리까지 가지 않게)
+    // 넓은 화면에서는 ☰ 가 패널 붙이기·떼기 토글이다(책 처리의 .open 덮어 열기까지 가지 않게 여기서 끝낸다)
     document.addEventListener("click", function (ev) {
-      if (!panelOverlay() || !sb.classList.contains("open")) return;
       var t = ev.target;
       if (!t || !t.closest || t.closest("#sidebar-open") !== ob) return;
+      if (wideScreen()) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        setSbCollapsed(!sbCollapsed());
+        return;
+      }
+      if (!panelOverlay() || !sb.classList.contains("open")) return;
       ev.preventDefault();
       ev.stopPropagation();
       close();
