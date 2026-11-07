@@ -14,6 +14,7 @@
  *   - 대문 책 카드의 달성률 막대(2.14절)
  *   - 로그인(구글), 서버 합치기, 댓글 칸(2.7·2.15절)
  *   - 목차 패널의 「댓글 칸 보이기」 체크 상자: 끄면 모든 책·모든 페이지의 댓글 칸을 숨긴다(이 브라우저에 저장)
+ *   - 넓은 화면의 목차 패널 접기: 패널 머리 ⇤ 단추로 접으면 좁은 화면처럼 ☰ 로 덮어 연다(이 브라우저에 저장, 계약서 끝 「변경 (목차 패널 접기)」 절)
  *   - 목차 패널의 코드 상자 체크 상자 둘: 「화면 폭까지 넓히기」「줄바꿈」(이 브라우저에 저장, 계약서 끝 「변경 (코드 상자 넓히기·줄바꿈)」 절)
  *   - 책 안 낱말 검색: 목차 패널 맨 위·대문의 검색 칸, search-index.json 지연 로드, 도착한 페이지에서 찾은 말 표시
  *     (계약서 끝 「변경 (책 안 검색)」 절)
@@ -137,6 +138,7 @@
     showComments: "lp.reader.showComments",
     codeWide: "lp.reader.codeWide",        // 코드 상자 넓히기(켠 때만 true)
     codeWrap: "lp.reader.codeWrap",        // 코드 상자 줄바꿈(켠 때만 true)
+    sbCollapsed: "lp.reader.sidebarCollapsed", // 넓은 화면에서 목차 패널 접기(접은 때만 true)
     skin: "lp.reader.v1.skin",            // 옷차림 스킨 { unlocked, pick } — 로그인하면 서버 /api/prefs 와 합친다
     skinDirty: "lp.reader.v1.skinDirty"   // 서버에 아직 못 올린 스킨 변경이 있음
   };
@@ -1155,6 +1157,54 @@
     // 함께 풀기를 펴거나 details 를 열면 숨어 있던 상자가 보인다
     document.addEventListener("click", safe(fitCodeSoon));
     document.addEventListener("toggle", safe(fitCodeSoon), true);
+  }
+  // ── 넓은 화면의 목차 패널 접기(2026-11-07 저자: 「화면 폭이 넓으면 왼쪽 패널이 항상 표시되는데, 토글 가능한 타입으로 하자」)
+  // 넓은 화면(책 style.css 의 1200px 이상)에서는 패널이 늘 왼쪽에 붙어 있다. 패널 머리의 단추로 접으면 html 에
+  // lp-sb-collapsed 를 달고, reader.css 가 그 폭에서도 좁은 화면처럼 그린다(☰ 로 덮어 열기, × 로 닫기).
+  // 그래서 덮어 연 패널의 키보드·바깥 누름·inert 처리(initPanelKeys)를 그대로 쓴다. 이 브라우저에 저장, 모든 책 공통.
+  var SB_WIDE = "(min-width: 1200px)";
+  function sbCollapsed() { return lsGet(K.sbCollapsed) === true; }
+  function applySbCollapsed(anim) {
+    var html = document.documentElement, on = sbCollapsed();
+    if (!anim) html.classList.add("lp-sb-noanim"); // 쪽을 열 때는 미끄러지는 움직임 없이
+    if (html.classList.contains("lp-sb-collapsed") !== on) {
+      // 책 <head> 의 첫 스크립트(lib/reader.cjs tags)가 그리기 전에 미리 달아 두었으면 여기서는 바꿀 것이 없다
+      html.classList.toggle("lp-sb-collapsed", on);
+      var sb = $("#sidebar");
+      if (sb) sb.classList.remove("open");
+      // 덮어 쓰기 여부(panelOverlay)와 코드 상자 자리가 바뀌었다: 패널 동기화·코드 상자 재기는 resize 를 듣는다
+      try { window.dispatchEvent(new Event("resize")); } catch (e) { /* 옛 브라우저 */ }
+    }
+    syncSbPin();
+    if (!anim) {
+      var raf = window.requestAnimationFrame || function (f) { return setTimeout(f, 16); };
+      raf(function () { raf(function () { html.classList.remove("lp-sb-noanim"); }); });
+    }
+  }
+  function syncSbPin() {
+    var b = $("#lp-sb-pin");
+    if (!b) return;
+    var on = sbCollapsed();
+    b.textContent = on ? "\u21E5" : "\u21E4"; // ⇥ 붙이기 / ⇤ 접기
+    b.setAttribute("aria-label", on ? "목차를 왼쪽에 고정" : "목차 접기");
+    b.title = on ? "목차를 왼쪽에 고정" : "목차 접기 (☰ 로 다시 열기)";
+  }
+  function initSbCollapse() {
+    var sb = $("#sidebar");
+    if (!sb || !$("#sidebar-open")) return; // ☰ 가 없는 꼴의 쪽에서는 접으면 다시 열 길이 없다
+    var b = el("button", { type: "button", id: "lp-sb-pin", class: "lp-sb-pin" });
+    b.addEventListener("click", safe(function () {
+      lsSet(K.sbCollapsed, sbCollapsed() ? null : true);
+      applySbCollapsed(true);
+      if (!sbCollapsed()) return;
+      var ob = $("#sidebar-open"); // 접었으면 초점을 ☰ 로(패널 안 단추가 화면 밖으로 사라졌다)
+      if (ob) { try { ob.focus({ preventScroll: true }); } catch (e) { ob.focus(); } }
+    }));
+    var acts = $(".sidebar-actions", sb), close = $("#sidebar-close", sb);
+    if (close && close.parentNode) close.parentNode.insertBefore(b, close);
+    else if (acts) acts.appendChild(b);
+    else { var hd = $(".sidebar-header", sb); if (hd) hd.appendChild(b); else return; }
+    applySbCollapsed(false);
   }
   function whenPanelOpen(go) {
     var sb = PANEL && PANEL.sb;
@@ -2281,6 +2331,7 @@
     safe(initThemeButton)();
     safe(initMenuAutoHide)();
     safe(initScrollShade)();
+    safe(initSbCollapse)(); // initPanelKeys 앞: 접힌 채로 시작하면 처음부터 덮어 쓰기로 맞춘다
     safe(initPanelKeys)(); // 검색 칸·독자 칸을 넣은 뒤(패널 안 자리가 정해진 뒤) 지금 쪽 줄로 굴린다
     onAuthChange.push(renderAccount, renderCommentAuth, function () { if (getSession()) skinPush(); }); // 로그인하면 이 브라우저의 옷차림을 서버와 합친다
     afterSync.push(renderPanel, refreshQuizzes, renderReadRow);
@@ -2312,6 +2363,7 @@
     else if (e.key === K.session) authChanged();
     else if (e.key === K.showComments) applyCommentsShown();
     else if (e.key === K.codeWide || e.key === K.codeWrap) applyCodeOpts();
+    else if (e.key === K.sbCollapsed) applySbCollapsed(false);
     else if (e.key === K.skin && BOOK) { SKIN_ST = null; applySkin(document); renderSkin(); }
   }));
 
