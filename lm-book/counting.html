@@ -756,7 +756,8 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="sampling.html">루나에게 말 걸기: 같은 시작 문장에 왜 매번 다른 이야기가 나올까</a></li>
 <li><a href="answer.html">묻는 말에 대답하기: 이어 쓰는 모델에서 답하는 모델로</a></li>
 <li class="toc-part">왜 그렇게 될까</li>
-<li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿이고, MLP 는 무엇을 아는가</a></li>
+<li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿인가</a></li>
+<li><a href="mlp-parts.html">MLP 는 무엇을 아는가: 물음과 답, 그리고 지식이 있는 곳</a></li>
 <li><a href="circuits.html">들여다보기 1: 칠판과 헤드</a></li>
 <li><a href="layers.html">들여다보기 2: 층을 지나는 벡터</a></li>
 <li class="toc-part">가르치고 고치기</li>
@@ -771,7 +772,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="data-fix.html">데이터를 고치다: 쏠림, 중복, 바꿔 쓰기</a></li>
 <li><a href="talk.html">루나와 이야기하기: 「Daddy!」 하고 부르기까지</a></li>
 <li class="toc-part">루나를 키우다</li>
-<li><a href="counting.html" class="active">유치원 숫자 공부: 계산을 따로 가르치면 루나는 무엇을 배울까</a><ul class="sidebar-toc"><li><a href="counting.html" class="current">숫자 규칙: 자리마다 자를까, 세 자리씩 자를까</a></li><li><a href="counting-sec-counting-stories.html">합성 데이터: 사과를 나눠 먹는 이야기</a></li><li><a href="counting-sec-counting-curriculum.html">순서와 망각: 앞 단계를 배치에서 빼면</a></li><li><a href="counting-sec-counting-sft.html">지도 파인튜닝: 셈 문항으로 답 칸만 채점한다</a></li><li><a href="counting-sec-counting-grpo.html">강화학습: 뽑은 답을 채점해서 고른다</a></li><li><a href="counting-sec-counting-transfer.html">아라비아 숫자에서 영어 숫자로</a></li><li><a href="counting-sec-counting-mainline.html">우리 루나에게: 계산을 배우면 가족을 잊을까</a></li><li><a href="counting-sec-counting-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li></ol>
+<li><a href="counting.html" class="active">유치원 숫자 공부: 계산을 따로 가르치면 루나는 무엇을 배울까</a><ul class="sidebar-toc"><li><a href="counting.html" class="current">숫자 규칙: 자리마다 자를까, 세 자리씩 자를까</a></li><li><a href="counting-sec-counting-stories.html">합성 데이터: 사과를 나눠 먹는 이야기</a></li><li><a href="counting-sec-counting-curriculum.html">순서와 망각: 앞 단계를 배치에서 빼면</a></li><li><a href="counting-sec-counting-sft.html">지도 파인튜닝: 셈 문항으로 답 칸만 채점한다</a></li><li><a href="counting-sec-counting-grpo.html">강화학습: 뽑은 답을 채점해서 고른다</a></li><li><a href="counting-sec-counting-mainline.html">우리 루나에게: 계산을 배우면 가족을 잊을까</a></li><li><a href="counting-sec-counting-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li></ol>
 </nav>
 <button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
 <main>
@@ -779,13 +780,12 @@ section.interlude figure.fig img { border-radius: 10px; }
 <h1>유치원 숫자 공부: 계산을 따로 가르치면 루나는 무엇을 배울까</h1>
 <h2 id="q-counting">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>웹 글을 거의 다 읽었다는 모델도 자릿수가 조금만 늘면 덧셈을 틀리곤 한다. 2021년의 한 논문은 같은 트랜스포머가 숫자를 어떻게 적어 주느냐만으로 다섯 자리 덧셈을 전혀 못 하다가 예순 자리 덧셈까지 해낸다고 보고했다. 모델의 크기가 아니라 숫자를 토큰으로 자르는 규칙이 셈 실력을 가른다면, 언어 모델은 계산을 할 때 무엇을 배우고 있는 걸까? 계산을 배우는 걸까, 답을 외우는 걸까?</p>
-<p>대화로 가르친 루나는 묻는 말에 한두 문장으로 답하지만, 「Sam had three apples. He ate one.」에는 「Three apples take away one apple is three apples.」라고 답했다. 답하는 형태는 갖췄는데 셈은 틀린다. 다섯 살 시험지의 수학 칸에서도 동화만 읽은 루나와 대화로 가르친 루나 모두 중심화 점수가 −0.093~−0.080 으로 우연보다 낮았다(<code>sources/benchmark/results/v1_report.out</code>). 이 장에서 민준과 서연은 셈 하나만 따로 가르치는 <strong>태스크별 학습</strong>을 한다. 가르치는 방법은 연습용 루나에서 먼저 찾고, 정한 방법을 마지막 절에서 대화를 배운 우리 루나에게 그대로 건다. 다섯 살 루나의 범위인 합이 20 이하인 덧셈과 뺄셈이 중심이고, 구구단 범위의 곱셈과 나눗셈, 두 자리와 세 자리 수는 그보다 조금 앞서 가 본 것이다.</p>
+<p>정체성 대화를 배운 루나는 「I am five. I can count to twenty.」라고 자기를 소개한다. 정말 셀까? 대화를 배운 우리 루나에게 「3 + 4 =」 같은 식을 물으면 씨앗 셋이 1.1%, 6.4%, 0.7% 를 맞혔다(<code>sources/counting/mainline_count.out</code>). 그보다 앞서 대화로 가르친 루나도 묻는 말에 한두 문장으로 답하지만, 「Sam had three apples. He ate one.」에는 「Three apples take away one apple is three apples.」라고 답했다. 답하는 형태는 갖췄는데 셈은 틀린다. 다섯 살 시험지의 수학 칸에서도 동화만 읽은 루나와 대화로 가르친 루나 모두 중심화 점수가 −0.093~−0.080 으로 우연보다 낮았다(<code>sources/benchmark/results/v1_report.out</code>). 이 장에서 민준과 서연은 셈 하나만 따로 가르치는 <strong>태스크별 학습</strong>을 한다. 가르치는 방법은 연습용 루나에서 먼저 찾고, 정한 방법을 마지막 절에서 대화를 배운 우리 루나에게 그대로 건다. 다섯 살 루나의 범위인 합이 20 이하인 덧셈과 뺄셈이 중심이고, 구구단 범위의 곱셈과 나눗셈, 두 자리와 세 자리 수는 그보다 조금 앞서 가 본 것이다.</p>
 <ul>
 <li>숫자를 자리마다 자를까, 세 자리씩 자를까? 어느 규칙이 처음 보는 쌍을 맞히게 할까?</li>
 <li>사과를 나눠 먹는 이야기와 식 줄을 읽히면 무엇을 배울까? 그 이야기를 쓴 큰 모델은 계산을 틀리지 않을까?</li>
 <li>다음 단계로 넘어가면 앞 단계를 잊을까? 학습 일정에 무엇을 남겨 두어야 할까?</li>
 <li>답 부분만 채점하는 지도 파인튜닝과, 뽑은 답을 채점해 고르는 강화학습은 각각 무엇을 바꿀까?</li>
-<li>아라비아 숫자로 계산을 배운 루나에게 three 가 3 이라고 알려 주면 three plus four 도 할 수 있을까?</li>
 <li>대화를 배운 루나에게 계산을 가르치면, 그 루나가 알던 가족 이야기는 어떻게 될까?</li>
 </ul>
 <h2 id="sec-digit-tokens">숫자 규칙: 자리마다 자를까, 세 자리씩 자를까<span id="숫자-규칙-자리마다-자를까-세-자리씩-자를까" class="anchor-alias"></span></h2>
@@ -807,7 +807,7 @@ section.interlude figure.fig img { border-radius: 10px; }
   학습 전 이야기 배운 쌍 평균   2.1% | +   2.6 -   5.9 x   0.0 /   0.0
   학습 전 이야기 새 쌍   평균   1.3% | +   0.0 -   5.3 x   0.0 /   0.0
 </code></pre>
-<p>대화를 배운 우리 루나도 계산을 배우기 전에는 식의 배운 쌍을 씨앗 셋이 1.1%, 6.4%, 0.7% 맞혔다(<code>sources/counting/mainline_count.out</code>). 이 장이 끝나면 우리 루나는 킨더테일즈에서 배운 가족 사실을 지킨 채 배운 쌍의 식을 다 맞히고, 우리는 그 정답률 가운데 외운 것이 얼마이고 계산한 것이 얼마인지를 새 쌍의 숫자로 가려낼 수 있게 된다.</p>
+<p>이 장이 끝나면 우리 루나는 킨더테일즈에서 배운 가족 사실을 지킨 채 배운 쌍의 식을 다 맞히고, 우리는 그 정답률 가운데 외운 것이 얼마이고 계산한 것이 얼마인지를 새 쌍의 숫자로 가려낼 수 있게 된다.</p>
 <h3 id="지금-bpe-는-숫자를-어떻게-자르나">지금 BPE 는 숫자를 어떻게 자르나</h3>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>잠깐, 공부시키기 전에 토큰부터 보자. 토큰화가 어려운 점을 잴 때 GPT-2 는 「1234」를 「12 | 34」로, 「12345」를 「123 | 45」로 잘랐잖아. 정수 0 부터 9,999 까지 잘라 보면 2 토큰인 수가 9,064 개였고, 521 은 한 토큰이 아니고.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>우리 BPE 는 숫자끼리 안 합쳤다고 했지. 그럼 자리마다 한 칸이겠네.</p></div></div>
@@ -899,8 +899,7 @@ model.lm_head.weight = model.wte.weight               # 입력과 출력이 같�
 </tr>
 </tbody>
 </table></div>
-<p>세 자리씩의 두 자리 새 쌍은 씨앗마다 24.5%, 69.2%, 73.5% 로 크게 달랐고, 세 자리 새 쌍은 1.0~3.2% 에 머물렀다. 자리마다는 같은 스텝에 세 자리 새 쌍까지 90.5~95.5% 를 맞혔다.</p>
-<p>연습용 루나는 어휘를 이어 붙여 규칙을 나중에 입혔지만, 우리 루나에게는 처음부터 이 규칙으로 읽히기로 했다. 토크나이저에 자리마다 규칙을 넣고 동화부터 다시 읽혔더니 학습 글이 552,651,810 토큰에서 552,675,767 토큰으로, 「 3」을 공백과 숫자로 나눈 만큼 늘었다(<code>sources/tokens/encode_dataset.out</code>). RTX 4090 한 장에서 929초가 걸렸고, 바이트당 비트는 0.4257 로 연습용 루나(0.4259)와 같았다(<code>sources/mainline/runs/v1d1_replay16/P0_s1.out</code>). 동화를 읽는 실력은 숫자 규칙과 상관이 없었다.</p>
+<p>연습용 루나는 어휘를 이어 붙여 규칙을 나중에 입혔다. 우리 루나에게는 처음부터 자리마다 규칙으로 읽히기로 하고, 동화부터 다시 읽혔다. 그 이야기는 마지막 절에서 한다.</p>
 <h3 id="hist-number-surface-form" class="history" data-people="nogueira-rodrigo liu-tiedong low-bryan-kian-hsiang">역사: 「32」 와 「3 2」 와 「3 10e1 2」<span id="역사-32-와-3-2-와-3-10e1-2" class="anchor-alias"></span></h3>
 <p>숫자를 적는 방법이 계산을 좌우한다는 것을 정면으로 잰 것은 2021년 워털루 대학의 호드리구 노게이라(Rodrigo Nogueira) 팀이다. 그들은 프리트레인된 T5 에게 덧셈과 뺄셈을 파인튜닝으로 가르치면서 같은 수를 여러 표기로 넣어 보았다. 수를 그대로 쓰면 토크나이저가 「132」는 「1 | 32」로, 「232」는 「23 | 2」로 제각각 자르는데, 이때 모델은 두 자리 덧셈을 겨우 배웠고 다섯 자리부터는 정답률이 0 이었다. 글자마다 띄어 「8 3 2」로 적으면 나아졌지만 여전히 힘겨워했다. 자리 표지를 끼워 「8 10e2 3 10e1 2 10e0」처럼 적자 예순 자리 덧셈까지 해냈다.</p>
 <p>2023년 싱가포르 국립대의 류톄둥(Tiedong Liu)과 브라이언 로(Bryan Kian Hsiang Low)가 낸 Goat 는 반대 방향에서 같은 결론에 닿았다. 합성한 산수 문제로 LLaMA-7B 를 파인튜닝했더니 큰 수의 덧셈과 뺄셈을 거의 완벽하게 해냈고, 여러 산수 태스크에서 GPT-4 를 크게 앞섰다고 보고했다. 그들은 이 성과를 LLaMA 의 토크나이저가 숫자를 언제나 자리마다 자르는 데 돌렸다.</p>
@@ -928,7 +927,7 @@ model.lm_head.weight = model.wte.weight               # 입력과 출력이 같�
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>BPE 는 글을 줄이려고 합치지 계산을 하려고 합치지 않으니까요. 어떤 목적이 있으면, 그 목적으로 재서 규칙을 사람이 정하는 게 낫겠어요. nanochat 주석도 결국 사람이 재서 2 로 정했다는 말이고요.</p></div></div>
 </div>
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="talk-sec-talk-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 8</span><a class="chapter-nav-next" href="counting-sec-counting-stories.html">합성 데이터: 사과를 나눠 먹는 이야기 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="talk-sec-talk-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 7</span><a class="chapter-nav-next" href="counting-sec-counting-stories.html">합성 데이터: 사과를 나눠 먹는 이야기 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

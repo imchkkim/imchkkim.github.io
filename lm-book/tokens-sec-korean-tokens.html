@@ -756,7 +756,8 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="sampling.html">루나에게 말 걸기: 같은 시작 문장에 왜 매번 다른 이야기가 나올까</a></li>
 <li><a href="answer.html">묻는 말에 대답하기: 이어 쓰는 모델에서 답하는 모델로</a></li>
 <li class="toc-part">왜 그렇게 될까</li>
-<li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿이고, MLP 는 무엇을 아는가</a></li>
+<li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿인가</a></li>
+<li><a href="mlp-parts.html">MLP 는 무엇을 아는가: 물음과 답, 그리고 지식이 있는 곳</a></li>
 <li><a href="circuits.html">들여다보기 1: 칠판과 헤드</a></li>
 <li><a href="layers.html">들여다보기 2: 층을 지나는 벡터</a></li>
 <li class="toc-part">가르치고 고치기</li>
@@ -783,7 +784,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>한글은 UTF-8 로 글자 하나에 3 바이트잖아. 영어 동화로만 합쳤으니 한글 바이트는 한 번도 안 합쳐진 거고.</p></div></div>
 <p>영어로 배운 토크나이저로 한국어를 자르면 무엇이 일어나고, 한국어로 배우면 얼마나 나아질까?</p>
 <h3 id="같은-예문을-토크나이저-여섯-개로">같은 예문을 토크나이저 여섯 개로</h3>
-<p>이 책의 BPE 두 가지(어휘 512, 4,096), 한국어 타이니스토리즈로 따로 배운 한국어 BPE(어휘 4,096), 그리고 공개된 토크나이저 셋(GPT-2, GPT-4 의 cl100k, GPT-4o 의 o200k)으로 예문을 잘랐다. 한국어 BPE 는 한국어 타이니스토리즈 검증 파일의 앞 90% 이야기(27,623,893 바이트)로 학습했다. 이 한국어판은 영어 타이니스토리즈를 기계로 번역한 글이라 문장 품질이 고르지 않다.</p>
+<p>이 책의 BPE 두 가지(어휘 512, 4,096), 한국어 타이니스토리즈로 따로 배운 한국어 BPE(어휘 4,096), 그리고 공개된 토크나이저 셋(GPT-2, GPT-4 의 cl100k, GPT-4o 의 o200k)으로 예문을 잘랐다. 한국어 BPE 는 한국어 타이니스토리즈 검증 파일의 앞 90% 이야기(27,623,893 바이트)로 학습했다. 이 데이터는 g0ster/TinyStories-Korean 으로, 원본 동화를 EEVE 모델로 기계 번역한 판이라 문장 품질이 고르지 않다(카드에는 MIT 라이선스, 원본은 CDLA-Sharing-1.0).</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -881,7 +882,7 @@ GPT-4o(o200k)           0.619      0.239       2.59
 </code></pre>
 <figure class="fig "><img src="images/tokens/ko_tokens.png" alt="토크나이각각 한국어 글자 하나와 영어 글자 하나에 드는 토큰 수. 영어는 다섯 토크나이저가 0.24~0.25 로 비슷하고(한국어 BPE 만 0.988), 한국어는 우리 BPE 4096 의 2.388 에서 한국어 BPE 의 0.425 까지 벌어진다(sources/tokens/figures.py)" loading="lazy"><figcaption>토크나이각각 한국어 글자 하나와 영어 글자 하나에 드는 토큰 수. 영어는 다섯 토크나이저가 0.24~0.25 로 비슷하고(한국어 BPE 만 0.988), 한국어는 우리 BPE 4096 의 2.388 에서 한국어 BPE 의 0.425 까지 벌어진다(sources/tokens/figures.py)</figcaption></figure>
 <p>GPT-2 의 토크나이저는 한국어 글자 하나에 2.115 토큰을 쓴다. 영어 글자 하나에 0.249 토큰이니, 같은 글자 수의 글이라면 한국어가 8.51 배의 토큰이 된다. GPT-4 의 cl100k 에서 4.26 배, GPT-4o 의 o200k 에서 2.59 배로 줄어드는데, 새 토크나이저일수록 학습 글에 한국어가 더 많이 들어갔다고 짐작할 수 있다(토크나이저를 학습한 글의 구성은 공개되지 않아 확인하지 못했다).</p>
-<p>웹 글로 학습한 nanochat 의 토크나이저(어휘 32,768, ClimbMix 로 학습)도 대조로 이 머신에서 재 보았다. 이 책의 루나는 끝까지 우리 BPE 4096 을 쓴다. 한국어 글에서 토큰 하나에 1.21 바이트가 들어, 같은 글에 GPT-4 토크나이저는 2.45 바이트였다(우리가 잰 값, 이 머신의 CPU 로 nanochat 고정 커밋 <code>92d63d4</code> 의 토크나이저를 학습해 잼). 같은 한국어 글에 GPT-4 보다 토큰이 두 배쯤 든다는 뜻이므로, 웹 글로 학습한 토크나이저도 영어 위주면 한국어는 거의 바이트 단위로 읽는다.</p>
+<p>웹 글로 학습한 nanochat 의 토크나이저(어휘 32,768, ClimbMix 로 학습)도 대조로 이 머신에서 학습해 재 보았다(nanochat 고정 커밋 <code>92d63d4</code>, CPU). 이번에는 위 표처럼 글자당 토큰이 아니라 토큰 하나에 든 바이트 수로 쟀는데, 한국어 글에서 토큰 하나가 1.21 바이트, 같은 글에 GPT-4 토크나이저는 2.45 바이트였다. 한글 한 글자가 3 바이트이니 nanochat 토크나이저는 한글 한 글자를 두세 토큰으로 쪼갠다. 웹 글로 학습했어도 영어 위주면 한국어는 거의 바이트 단위로 읽는다.</p>
 <aside class="tryit"><p class="tryit-title">따라 하기 · 노트북</p><p>책 저장소에서 <code>python -u sources/tokens/toy_bpe.py</code> 는 1초 안에 장난감 문장의 합치기를 보여 준다. 타이니스토리즈를 받아 둔 뒤(받는 법은 <code>sources/common/data.py</code> 머리 주석) <code>python -u sources/tokens/train_bpe.py &gt; train_bpe.out</code> 을 돌리면 어휘 8,192 까지의 학습(이 머신의 Intel i5-13400 에서 32.1초)과 압축률·예문·한국어 비교가 모두 나온다. 다른 CPU 작업과 함께 돌린 전체 실행은 172.9초였고, GPT 토크나이저와 비교하려면 <code>tiktoken</code> 이 있어야 한다.
 다음 장치들이 쓰는 토큰 파일은 <code>python -u sources/tokens/encode_dataset.py</code> 로 만든다. 학습 이야기 2,717,495 편이 552,651,810 토큰(토큰 하나에 3.975 바이트)이 되고, 10 프로세스로 194.9초 걸렸다.</p>
 </aside>

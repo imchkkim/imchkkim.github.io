@@ -756,7 +756,8 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="sampling.html">루나에게 말 걸기: 같은 시작 문장에 왜 매번 다른 이야기가 나올까</a></li>
 <li><a href="answer.html">묻는 말에 대답하기: 이어 쓰는 모델에서 답하는 모델로</a></li>
 <li class="toc-part">왜 그렇게 될까</li>
-<li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿이고, MLP 는 무엇을 아는가</a></li>
+<li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿인가</a></li>
+<li><a href="mlp-parts.html">MLP 는 무엇을 아는가: 물음과 답, 그리고 지식이 있는 곳</a></li>
 <li><a href="circuits.html">들여다보기 1: 칠판과 헤드</a></li>
 <li><a href="layers.html">들여다보기 2: 층을 지나는 벡터</a></li>
 <li class="toc-part">가르치고 고치기</li>
@@ -789,7 +790,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <p>섞은 글에서는 앞 문장이 지금 문장과 상관없으니, 먼 앞을 읽을수록 오히려 엉뚱한 단서를 얻는다. 그런 글로만 학습했다면 모델은 먼 앞을 쓰는 법을 배울 거리 자체가 없었을 것이다.</p>
 <p>이듬해 래드퍼드와 동료들은 「Language Models are Unsupervised Multitask Learners」(2019)에서 디코더만 쌓는 같은 구조를 크게 키운 GPT-2 를 냈다. 레딧에서 카르마(추천 점수)를 3 이상 받은 바깥 링크 4,500만 개를 따라가 모은 웹 글 WebText(중복을 걷어 낸 문서 800만 개 정도, 40GB)로 학습했고, 문맥을 1,024 토큰으로 늘렸으며, 가장 큰 모델은 48층, 폭 1,600, 파라미터 15억 개였다. 층 정규화를 하위 블록의 입력 쪽으로 옮기고, 잔차로 들어가는 층의 가중치를 처음에 1/√N(N 은 잔차 층의 수)만큼 줄여 두었다. 논문은 이 크기에서도 모델이 WebText 를 아직 「덜 배웠다」고 적었다.</p>
 <figure class="fig "><img src="images/gpt/history_sizes.png" alt="GPT-1(2018)과 GPT-2(2019)의 네 크기, 그리고 이 책의 두 GPT 를 폭(가로, 로그 눈금)과 층 수(세로)로 놓았다. GPT-2 의 가장 작은 판(117M)은 GPT-1 과 같은 12층·폭 768 이다. GPT 들의 숫자는 두 논문(GPT-2 는 표 2)에서, 이 책의 숫자는 우리가 센 값이다(sources/gpt/history_sizes.py)" loading="lazy"><figcaption>GPT-1(2018)과 GPT-2(2019)의 네 크기, 그리고 이 책의 두 GPT 를 폭(가로, 로그 눈금)과 층 수(세로)로 놓았다. GPT-2 의 가장 작은 판(117M)은 GPT-1 과 같은 12층·폭 768 이다. GPT 들의 숫자는 두 논문(GPT-2 는 표 2)에서, 이 책의 숫자는 우리가 센 값이다(sources/gpt/history_sizes.py)</figcaption></figure>
-<p>우리 GPT 는 GPT-2 의 형태를 거의 그대로 줄였다. 학습하는 위치 임베딩, 입력 쪽 층 정규화, 폭 4배의 GELU MLP, 잔차 투영의 초기화 축소가 모두 들어 있고, 옵티마이저는 AdamW 다. 우리 모델의 폭 256, 4층은 GPT-2 의 가장 작은 판보다 폭은 1/3, 층은 1/3 이다.</p>
+<p>우리 GPT 는 GPT-2 의 형태를 거의 그대로 줄였다. 학습하는 위치 임베딩, 입력 쪽 층 정규화, 폭 4배의 GELU MLP, 잔차 투영의 초기화 축소가 모두 들어 있고, 옵티마이저는 AdamW 다. 우리 모델의 폭 256, 4층은 GPT-2 의 가장 작은 판보다 폭은 1/3, 층은 1/3 이다. 폭과 층 수의 비율은 nanochat 을 따랐다. nanochat 은 층 수에 64 를 곱해 폭을 정하고(<code>scripts/base_train.py</code> 의 <code>--aspect-ratio 64</code>), 이 책의 GPT 들도 같은 비율로 4층은 폭 256, 8층은 폭 512 다.</p>
 <h3 id="층-하나와-모델-전체">층 하나와 모델 전체</h3>
 <p><code>sources/common/gpt.py</code> 는 전체 176 줄이고 빈 줄과 주석 줄을 빼면 146 줄인데, 층 하나와 모델의 앞으로 가는 계산은 다음이 전부다.</p>
 <pre><code class="language-python"># sources/common/gpt.py 에서 발췌

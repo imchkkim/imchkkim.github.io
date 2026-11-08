@@ -756,7 +756,8 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="sampling.html" class="active">루나에게 말 걸기: 같은 시작 문장에 왜 매번 다른 이야기가 나올까</a><ul class="sidebar-toc"><li><a href="sampling.html" class="current">그리디 선택: 늘 가장 그럴듯한 토큰만 고르면</a></li><li><a href="sampling-sec-sampling-temperature.html">온도: 확률표를 펴고 오므리기</a></li><li><a href="sampling-sec-top-k-top-p.html">top-k 와 top-p: 확률표의 꼬리를 잘라 내기</a></li><li><a href="sampling-sec-kv-cache.html">KV 캐시: 앞에서 계산한 키와 값을 적어 두기</a></li><li><a href="sampling-sec-sampling-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="answer.html">묻는 말에 대답하기: 이어 쓰는 모델에서 답하는 모델로</a></li>
 <li class="toc-part">왜 그렇게 될까</li>
-<li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿이고, MLP 는 무엇을 아는가</a></li>
+<li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿인가</a></li>
+<li><a href="mlp-parts.html">MLP 는 무엇을 아는가: 물음과 답, 그리고 지식이 있는 곳</a></li>
 <li><a href="circuits.html">들여다보기 1: 칠판과 헤드</a></li>
 <li><a href="layers.html">들여다보기 2: 층을 지나는 벡터</a></li>
 <li class="toc-part">가르치고 고치기</li>
@@ -860,7 +861,7 @@ out = torch.cat([out, nxt], dim=1)             # 줄 끝에 붙이고 다음 걸
 <p>그리디 선택은 같은 문맥에서 늘 같은 토큰을 고른다. 학습 데이터에서 이야기 끝 토큰 뒤에 오는 이야기는 앞 이야기와 상관없는 새 이야기였으므로, 모델은 이야기 끝 토큰 뒤에서 앞의 글을 거의 보지 않도록 배웠을 것이다. 그렇다면 이야기 끝 토큰 뒤의 문맥은 어느 시작 문장에서 왔든 사실상 같은 문맥이고, 같은 문맥에서 그리디 선택은 같은 토큰 줄을 고른다. 그 줄의 하나가 「Lily 와 날개 다친 새」로 보인다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>시작을 뭘로 하든 결국 Lily 야. 다섯 번 다.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S12"><img src="images/cast/S12.webp" alt="이서연 S12" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>너랑 똑같네. 무슨 얘기로 시작해도 결국 별빛 정거장이랑 루나로 끝나잖아. 온도가 낮아.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>온도?</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>온도? 우리가 이어 쓸 때마다 0.8 이라고 적던 그거?</p></div></div>
 <div class="dialogue"><h3 id="prob-sampling-greedy-two-steps">문제 1. 한 스텝씩 가장 좋은 것이 두 스텝 전체로도 가장 좋은가<span id="문제-1-한-스텝씩-가장-좋은-것이-두-스텝-전체로도-가장-좋은가" class="anchor-alias"></span></h3>
 <blockquote>
 <p>토큰 두 개로 된 글을 쓰는 모델이 있다. 첫 토큰은 A(확률 0.6) 또는 B(0.4)다. A 다음에는 C 0.4, D 0.3, E 0.3 이고, B 다음에는 F 0.9, G 0.1 이다. (가) 그리디 선택으로 쓰는 글과 그 글의 확률은? (나) 두 토큰짜리 글 다섯 개 가운데 확률이 가장 큰 글은? (다) 두 답이 다른 이유를 한 문장으로 말하라.</p>
@@ -873,7 +874,7 @@ out = torch.cat([out, nxt], dim=1)             # 줄 끝에 붙이고 다음 걸
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 글 전체의 확률을 가장 크게 하는 글을 찾으려면 갈 수 있는 글을 모두 봐야 하는데, 토큰이 200 개만 돼도 후보 글의 수는 셀 수 없이 많아요. 그리디 선택은 그 탐색을 한 스텝 앞만 보는 것으로 줄인 근사예요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그러면 문제가 작을 때는 다섯 개를 다 곱해 보면 되는데, 실제 모델에서는 그리디 선택이 놓친 BF 같은 글이 있는지조차 모르는 거네요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그리디 선택으로 쓰면 같은 구절만 맴돈다는 말도 들었어요.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>큰 모델에서는 뚜렷해요. GPT-2 Large 의 그리디 글은 되풀이 비율이 73.66% 였고 사람 글은 0.28% 였어요(홀츠먼 팀, 2019). 재는 방법이 달라서 우리 숫자와 바로 비교하지는 못해요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>큰 모델에서는 뚜렷해요. 뒤에서 소개할 연구에서는 GPT-2 Large 의 그리디 글의 되풀이 비율이 73.66% 였고 사람 글은 0.28% 였어요. 재는 방법이 달라서 우리 숫자와 바로 비교하지는 못해요.</p></div></div>
 </div><div class="dialogue"><h3 id="prob-sampling-lily-attractor">문제 2. 시작 문장을 바꿔도 Lily 가 나오는 이유<span id="문제-2-시작-문장을-바꿔도-lily-가-나오는-이유" class="anchor-alias"></span></h3>
 <blockquote>
 <p>그리디 선택으로 500 토큰을 쓰게 하면 시작 문장 다섯 개 모두에서 「Lily」가 8~19번 나오고, 「The cat」에서 출발한 글은 「a little girl named Lily … a small, helpless bird with a hurt wing」으로 이어졌다. (가) 이야기 끝 토큰 바로 뒤에서 모델이 앞 이야기를 거의 보지 않는다면, 다섯 시작 문장의 이야기 끝 뒤에 나오는 글은 서로 어떻게 될까? (나) 「Lily and Tom」은 Lily 가 시작 문장에 이미 있었다. 이 시작 문장의 「Lily」 14번은 다른 시작 문장의 14번과 같은 이유로 나온 것인가? (다) 그리디 선택을 그대로 두고 다섯 글이 서로 다른 이야기가 되게 하려면 무엇을 바꿔야 하나?</p>

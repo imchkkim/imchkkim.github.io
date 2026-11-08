@@ -756,7 +756,8 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="sampling.html">루나에게 말 걸기: 같은 시작 문장에 왜 매번 다른 이야기가 나올까</a></li>
 <li><a href="answer.html">묻는 말에 대답하기: 이어 쓰는 모델에서 답하는 모델로</a></li>
 <li class="toc-part">왜 그렇게 될까</li>
-<li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿이고, MLP 는 무엇을 아는가</a></li>
+<li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿인가</a></li>
+<li><a href="mlp-parts.html">MLP 는 무엇을 아는가: 물음과 답, 그리고 지식이 있는 곳</a></li>
 <li><a href="circuits.html">들여다보기 1: 칠판과 헤드</a></li>
 <li><a href="layers.html">들여다보기 2: 층을 지나는 벡터</a></li>
 <li class="toc-part">가르치고 고치기</li>
@@ -793,7 +794,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>글자를 하나씩 세니까 그렇지. 「 named」를 한 칸에 넣으면 여섯 칸으로 낱말 여섯 개를 볼 수 있잖아.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 낱말 사전부터 만들어? 루나가 「데네브」 같은 별 이름을 말하면 사전에 없을 텐데.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S02"><img src="images/cast/S02.webp" alt="이서연 S02" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>사전은 안 만들어. 글한테 정하게 하자. 자주 붙어 다니는 글자끼리 묶으면 되지 않을까?</p></div></div>
-<p>이 절이 끝나면 루나는 글을 바이트 대신 토큰 4,096 종류로 읽게 된다. 실습은 바이트 단위 BPE 를 처음부터 짜서 타이니스토리즈로 학습하고, 합친 순서를 하나씩 들여다보는 것이다.</p>
+<p>이 절이 끝나면 루나는 글을 바이트 대신 토큰 4,096 종류(바이트 256 개에 합친 조각과 특수 토큰을 더한 수)로 읽게 된다. 실습은 바이트 단위 BPE 를 처음부터 짜서 타이니스토리즈로 학습하고, 합친 순서를 하나씩 들여다보는 것이다.</p>
 <h3 id="hist-bpe-compression-to-tokens" class="history" data-people="gage-philip sennrich-rico radford-alec">역사: 압축 기법이 낱말을 자르게 되기까지<span id="역사-압축-기법이-낱말을-자르게-되기까지" class="anchor-alias"></span></h3>
 <p>서연이 말한 묶기는 원래 언어 모델이 아니라 파일 압축에서 나온 생각이다. 필립 게이지(Philip Gage)는 1994년 2월 『C 사용자 저널(C Users Journal)』에 「데이터 압축을 위한 새 알고리즘」을 실었다. 파일에서 가장 자주 붙어 나오는 바이트 쌍을 그 파일에 한 번도 쓰이지 않은 바이트 하나로 바꾸기를 되풀이하고, 바꾼 쌍의 목록을 함께 적어 두어 거꾸로 풀 수 있게 하는 방법이다. 이름도 그대로 바이트 쌍 부호화(byte pair encoding)라서, 줄여서 BPE 라 부른다.</p>
 <p>이 방법을 낱말 자르기로 가져온 사람은 기계 번역을 연구하던 리코 젠리히(Rico Sennrich)와 배리 해도(Barry Haddow), 알렉산드라 버치(Alexandra Birch)다. 당시의 신경망 번역 모델은 자주 나오는 낱말 몇만 개만 어휘로 두고 드문 낱말은 「모르는 낱말」 기호 하나로 뭉갰으므로, 사람 이름이나 합성어가 번역문에서 사라졌다. 2015년 8월에 공개하고 2016년 ACL 학회에서 발표한 논문 「드문 낱말의 신경망 기계 번역: 낱말 조각 단위로」에서 그들은 바이트 대신 글자에서 출발해, 자주 붙어 나오는 글자 쌍을 새 기호로 합치기를 정한 횟수만큼 되풀이했다. 자주 나오는 낱말은 결국 기호 하나가 되고, 드문 이름은 글자 조각 몇 개로 남으므로 「모르는 낱말」이 없어진다.</p>
@@ -868,13 +869,14 @@ for k in range(n_merges):
 ' star': 251번째 합치기 (토큰 번호 506)
 ' friend': 102번째 합치기 (토큰 번호 357)
 </code></pre>
+<p>합치기는 8,192 까지 학습했지만, 이 책의 동화 모델들은 그 목록의 앞 3,839 개만 잘라 쓴 어휘 4,096 짜리 토크나이저(바이트 256 + 합친 것 3,839 + 이야기 경계를 알리는 특수 토큰 <code>&lt;|endoftext|&gt;</code> 하나)를 쓴다. 왜 하필 4,096 인지는 다음 절에서 어휘 크기를 바꿔 가며 잰다.</p>
 <p>민준은 표를 위에서부터 읽어 내려가다 한 줄에서 멈췄다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M09"><img src="images/cast/M09.webp" alt="김민준 M09" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>1960번째! 「 Luna」가 토큰 하나가 됐어. 루나가 이제 한 칸이야.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>「 Lily」는 149번째인데. 루나는 한참 뒤네.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>타이니스토리즈에 루나가 별로 안 나오니까 그렇지. 그래도 4,096 안에 들었잖아. 어휘 512 였으면 「␣L un a」 세 조각이었어.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S12"><img src="images/cast/S12.webp" alt="이서연 S12" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>「 Minjun」은 8,192 안에도 못 들었네. 「␣M in j un」.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>…동화에 민준이 나올 리가 없잖아.</p></div></div>
-<p>이 책의 동화 모델들은 합치기 목록의 앞 3,839 개만 잘라 쓴 어휘 4,096 짜리 토크나이저(바이트 256 + 합친 것 3,839 + 이야기 경계를 알리는 특수 토큰 <code>&lt;|endoftext|&gt;</code> 하나)를 쓴다. 1960번째 합치기는 그 안에 들므로, 루나는 이제부터 「 Luna」를 한 토큰으로 읽는다.</p>
+<p>1960번째 합치기는 앞 3,839 개 안에 들므로, 루나는 이제부터 「 Luna」를 한 토큰으로 읽는다.</p>
 <h3 id="ml에서-모델은-토큰-번호만-본다">ML에서: 모델은 토큰 번호만 본다</h3>
 <p>언어 모델은 글자를 보지 못하고 토크나이저가 건넨 토큰 번호의 열만 본다. 「 Luna」는 모델에게 2215라는 번호 하나이고, 그 번호가 L, u, n, a 네 글자로 되어 있다는 사실은 모델 안 어디에도 적혀 있지 않다. 큰 언어 모델이 「strawberry 에 r 이 몇 개냐」 같은 글자 세기에 서툴다는 이야기가 자주 나오는데, 토큰 단위로 읽는다는 점이 그 이유로 흔히 꼽힌다. 그래서 같은 모델 구조라도 어떤 토크나이저를 쓰느냐에 따라 모델이 맞혀야 하는 문제 자체가 달라진다.</p>
 <div class="dialogue"><h3 id="prob-tokens-banana">문제 1. banana bandana<span id="문제-1-banana-bandana" class="anchor-alias"></span></h3>
