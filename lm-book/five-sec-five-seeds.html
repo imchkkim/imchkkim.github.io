@@ -772,6 +772,8 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="data-fix.html">데이터를 고치다: 쏠림, 중복, 바꿔 쓰기</a></li>
 <li><a href="talk.html">루나와 이야기하기: 「Daddy!」 하고 부르기까지</a></li>
 <li class="toc-part">루나를 키우다</li>
+<li><a href="retokenize.html">토큰 표 다시 짜기: 낱말을 줄이고 프리트레인을 빽빽하게</a></li>
+<li><a href="logic.html">따져 보기: 무엇이 루나의 추론을 막고 있을까</a></li>
 <li><a href="counting.html">유치원 숫자 공부: 계산을 따로 가르치면 루나는 무엇을 배울까</a></li></ol>
 </nav>
 <button id="sidebar-open" aria-label="목차 열기">&#x2630;</button>
@@ -793,7 +795,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S02"><img src="images/cast/S02.webp" alt="이서연 S02" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>0.0003 이면 거의 같은 루나네. 그럼 다음에 뭘 바꿨을 때 0.001 만 좋아져도 진짜라고 할 수 있어?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>바이트당 비트로는 그렇게 볼 수 있어요. 다만 오늘은 처음 파라미터만 바꿨고 읽는 순서는 같았어요. 그리고 우리가 뒤에서 볼 점수는 바이트당 비트가 아니라 문항 몇십 개, 몇백 개의 정답률이에요. 그런 점수가 씨앗만 바꿔도 얼마나 움직이는지는 이미 한 번 본 적이 있어요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 동화 속 우리 사실 열 가지. 그때는 같은 동화 GPT 에서 출발하고 씨앗으로 배치를 뽑는 순서를 바꿨는데, 사실을 한 문형으로 넣은 300 편을 읽은 루나가 씨앗마다 32.5%, 27.5%, 30.0% 였어. 물음 40 개짜리 정답률이 씨앗만 바꿔도 5%p 움직였네.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 바꿔 쓴 글을 읽은 루나는 47.5~55.0% 였잖아. 두 쪽 범위가 안 겹쳐. 평균으로는 30.0% 대 51.7%, 21.7%p 차이니까 씨앗 사이의 차이 5%p 보다 훨씬 컸던 거네(<code>sources/synthetic-data/run_synth.out</code>).</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그런데 바꿔 쓴 글을 읽은 루나는 47.5~57.5% 였잖아. 두 쪽 범위가 안 겹쳐. 평균으로는 30.0% 대 51.7%, 21.7%p 차이니까 씨앗 사이의 차이 5%p 보다 훨씬 컸던 거네(<code>sources/synthetic-data/run_synth.out</code>).</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 그 비교를 믿을 수 있었던 것은 바꿔 쓰기가 만든 차이가 씨앗만 바꿔서 생기는 차이보다 컸기 때문이에요. 앞으로의 비교는 모두 이 순서로 해요. 같은 실험을 씨앗만 바꿔 돌렸을 때 결과가 움직이는 폭을 먼저 알고, 그 폭보다 큰 차이만 믿어요. 바이트당 비트에서는 그 폭이 오늘 잰 0.0003 이고, 시험지 점수의 폭은 시험지를 만든 뒤에 다시 재요.</p></div></div>
 <aside class="tryit"><p class="tryit-title">따라 하기 · 게이밍 GPU 한 장</p><p>토큰 파일을 만든 뒤(<code>sources/tokens/encode_dataset.py</code>), 책 저장소에서 <code>CUDA_VISIBLE_DEVICES=0 python -u sources/tinystories/train_tinystories.py --steps 14000 --seed 2 --tag tinystories_s2 &gt; sources/baseline/p0_s2.out</code> 을 돌린다(<code>--seed</code> 를 빼면 본문 체크포인트와 같은 1337). RTX 4090 한 장에서 씨앗 하나에 약 949초(샘플 포함)가 걸렸고, 씨앗 셋을 차례로 돌려도 한 시간이 안 된다. 체크포인트는 <code>~/lm-book-lab/ckpt/tinystories_s2/</code> 에 남는다(책 저장소 밖). 끝 값과 그림은 <code>python -u sources/five/figs.py &gt; sources/five/five.out</code> 로 다시 만든다(CPU 몇 초).</p>
 </aside>
