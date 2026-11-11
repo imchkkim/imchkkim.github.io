@@ -751,7 +751,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="surprise.html">얼마나 잘 맞히나: 루나가 놀라는 정도를 재기</a></li>
 <li><a href="tokens.html">글자를 토큰으로: 루나라는 이름은 몇 조각인가</a></li>
 <li><a href="mlp-lm.html">앞 글자 여럿 보기: 비슷한 낱말을 비슷하게 다루는 신경망</a></li>
-<li><a href="gpt.html" class="active">멀리 보기: 200줄이 안 되는 GPT</a><ul class="sidebar-toc"><li><a href="gpt.html">마스크를 씌운 셀프 어텐션: 앞 토큰 전부를 골라 읽되 뒤는 보지 않기</a></li><li><a href="gpt-sec-gpt-architecture.html">GPT 한 벌: 층을 쌓고 파라미터를 세기</a></li><li><a href="gpt-sec-gpt-vs-mlp.html">MLP 와 같은 조건으로: 바이트당 비트 0.6129</a></li><li><a href="gpt-sec-gpt-summary.html" class="current">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li><a href="gpt.html" class="active">멀리 보기: 200줄이 안 되는 GPT</a><ul class="sidebar-toc"><li><a href="gpt.html">마스크를 씌운 셀프 어텐션: 앞 토큰 전부를 골라 읽되 뒤는 보지 않기</a></li><li><a href="gpt-sec-gpt-architecture.html">GPT 한 벌: 층을 쌓고 파라미터를 세기</a></li><li><a href="gpt-sec-gpt-vs-mlp.html">MLP 와 같은 조건으로: 바이트당 비트 0.6129</a></li><li><a href="gpt-sec-gpt-soft-lookup.html">주의와 가중 평균: 하나를 선택하는 일과 나눠 읽는 일</a></li><li><a href="gpt-sec-gpt-summary.html" class="current">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="tinystories.html">동화 쓰는 작은 GPT: 게이밍 GPU 한 장으로 16분</a></li>
 <li><a href="sampling.html">루나에게 말 걸기: 같은 시작 문장에 왜 매번 다른 이야기가 나올까</a></li>
 <li><a href="answer.html">묻는 말에 대답하기: 이어 쓰는 모델에서 답하는 모델로</a></li>
@@ -837,6 +837,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <h3 id="요약">요약</h3>
 <p>앞 토큰을 이어 붙이는 MLP 는 창을 넓힐수록 자리마다 가중치가 따로 늘었다. 셀프 어텐션은 쿼리와 키의 내적으로 앞 토큰을 내용에 따라 골라 읽고, 가중치를 모든 위치가 함께 쓴다. 다음 토큰을 맞히는 언어 모델에는 위치 t 가 위치 0~t 만 읽게 하는 마스크를 더한다. 마스크 덕분에 학습 조건이 생성 조건과 같아지고, 256 토큰 조각 하나가 문맥 길이 1~256 의 문제 256 개가 된다. 마스크 없이 학습한 모델은 손실이 0.0165 까지 내려갔지만 글을 쓰지 못했다.</p>
 <p>GPT 한 벌은 토큰 임베딩과 위치 임베딩을 더한 벡터에서 출발해, 층마다 「정규화 → 어텐션 → 더하기, 정규화 → MLP → 더하기」를 거친 뒤 마지막 정규화와 출력 행렬로 다음 토큰의 점수를 낸다. 층 하나의 파라미터는 12d² + 13d 이고, 출력 행렬은 토큰 임베딩과 같은 행렬을 쓴다. 이 형태는 래드퍼드와 동료들의 GPT-1(2018)과 GPT-2(2019)를 따른 것이다. 폭 256, 4층, 문맥 256, 파라미터 4,273,664 개인 우리 GPT 는 MLP 언어 모델과 같은 4,000 스텝을 RTX 4090 한 장에서 50초 동안 학습해 바이트당 비트 0.6129 가 되었다(MLP 0.9326). 차이 대부분은 앞 32 토큰 넘게 볼 수 있는 위치에서 나왔다.</p>
+<p>어텐션의 계산은 0 이상이고 합이 1 인 비중으로 값을 섞는 볼록 결합이고, 키가 일치하는 칸 하나만 꺼내는 하드 조회는 비중이 한 칸에 집중된 경우다. 윌리엄 제임스가 1890년에 설명한 주의의 두 조건 가운데 「나머지에서 물러난다」는 비중의 합이 1 이라는 제약으로 지켜지고, 「하나를 선택한다」는 지켜지지 않는다. 학습한 작은 GPT 의 행은 평균 192.5 개의 토큰 가운데 15.6 개에만 0.01 넘는 비중을 주었고(엔트로피 3.91 비트), 최댓값이 0.9 를 넘는 행은 1.6% 였다. 같은 계산은 사진 조각(비전 트랜스포머)과 아미노산(알파폴드 2)에도 쓰인다.</p>
 <p>토크나이저 없이 바이트를 그대로 읽히는 방법은 이 크기에서 통하지 않았다. 같은 GPT 를 바이트로 학습한 판은 바이트당 비트 0.70~0.90 으로 토큰 GPT 의 0.6129 에 미치지 못해서, 루나는 BPE 4,096 토큰을 그대로 쓴다.</p>
 <h3 id="루나-설정서-점검">루나 설정서 점검</h3>
 <div class="table-wrap"><table>
@@ -866,7 +867,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <p>4층, 폭 256 짜리 GPT 는 학습 글의 12% 가 못 되는 양만 보고 멈췄고, 손실은 마지막 평가까지도 내려가는 중이었다. 같은 코드에서 숫자 다섯 개만 바꾸면 모델은 몇 배로 커지고, 게이밍 GPU 한 장으로도 학습 글 전체에 가까운 양을 읽힐 수 있다. 모델과 학습량을 키우면 Bounce 의 친구는 다른 이름을 얻을까? 그리고 그만큼 키운 모델이라도 동화밖에 읽지 않았다면, 그 모델이 쓰는 글은 어디까지 「말이 된다」고 할 수 있을까?</p>
 
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="gpt-sec-gpt-vs-mlp.html">&larr; MLP 와 같은 조건으로: 바이트당 비트 0.6129</a><span class="page-count">4 / 4</span><a class="chapter-nav-next" href="tinystories.html">동화 쓰는 작은 GPT: 게이밍 GPU 한 장으로 16분 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="gpt-sec-gpt-soft-lookup.html">&larr; 주의와 가중 평균: 하나를 선택하는 일과 나눠 읽는 일</a><span class="page-count">5 / 5</span><a class="chapter-nav-next" href="tinystories.html">동화 쓰는 작은 GPT: 게이밍 GPU 한 장으로 16분 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');
