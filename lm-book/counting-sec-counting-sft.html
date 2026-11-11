@@ -783,14 +783,14 @@ section.interlude figure.fig img { border-radius: 10px; }
 <h2 id="sec-counting-sft">지도 파인튜닝: 셈 문항으로 답 칸만 채점한다<span id="지도-파인튜닝-셈-문항으로-답-칸만-채점한다" class="anchor-alias"></span></h2>
 <p>이야기를 섞어 읽혀서는 시험 문장에 답이 잘 나오지 않았다. 한 편 70 낱말쯤 되는 이야기에서 계산의 답은 한 칸이고, 손실은 나머지 칸의 다음 토큰을 맞히는 데 대부분 쓰인다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>대화로 가르칠 때처럼 하자. 물음을 주고 답 칸만 채점하는 거야. 이번엔 물음이 전부 셈이고.</p></div></div>
-<p>지도 파인튜닝의 방법은 대화로 가르칠 때와 같다. 물음 칸의 정답 자리에 -100 을 넣고 답 칸만 채점한다(<code>sources/counting/kit.py</code> 의 <code>answer_batch</code>). 달라진 것은 문항이다. 문항은 배운 쌍에서 고른 식 물음과 이야기 물음 반반이고, 답은 「 7.」 같은 수 하나이고, 이야기 물음은 문형 둘씩(시험 문장과 다른 문장)을 쓴다. 배치 64 개, 학습률 0.0001 로 600 스텝을 돌렸고, 타이니스토리즈는 섞지 않았다. 물음이 수십 토큰으로 짧아서 RTX 4090 에서 씨앗 하나에 54~63초가 걸렸다. 둘 다(both)로 읽힌 루나에서 시작한 결과다(<code>sources/counting/ladder_S_both.out</code>).</p>
+<p>지도 파인튜닝의 방법은 대화로 가르칠 때와 같다. 물음 칸의 정답 자리에 -100 을 넣고 답 칸만 채점한다(<code>sources/counting/kit.py</code> 의 <code>answer_batch</code>). 달라진 것은 문항이다. 문항은 배운 쌍에서 고른 식 물음과 이야기 물음 반반이고, 답은 「 7.」 같은 수 하나이고, 이야기 물음은 문형 둘씩(시험 문장과 다른 문장)을 쓴다. 배치 64 개, 학습률 0.0001 로 600 스텝을 돌렸고, 타이니스토리즈는 섞지 않았다. 물음이 수십 토큰으로 짧아서 RTX 4090 에서 시드 하나에 54~63초가 걸렸다. 둘 다(both)로 읽힌 루나에서 시작한 결과다(<code>sources/counting/ladder_S_both.out</code>).</p>
 <pre><code class="language-text">  요약 SFT P_both 식_old: 99.6% [99.3, 99.7, 99.7]
   요약 SFT P_both 식_new: 13.0% [9.6, 14.7, 14.7]
   요약 SFT P_both 이야기_old: 62.2% [58.9, 61.7, 66.0]
   요약 SFT P_both 이야기_new: 7.1% [3.5, 9.8, 8.0]
 </code></pre>
-<p>물음 문장이 학습한 문형과 다른데도 이야기 물음의 배운 쌍이 6.8% 에서 62.2% 로 올랐다. 연산마다 고르지는 않아서 씨앗 0 은 덧셈 96.7%, 나눗셈 92.3% 를 맞히면서 곱셈은 9.0% 였다. 새 쌍은 여전히 낮다.</p>
-<p>값은 동화로 치렀다. 씨앗 셋의 바이트당 비트가 0.432 에서 0.515~0.529 로 나빠졌고, 동화를 쓰게 하면 이런 글이 나온다.</p>
+<p>물음 문장이 학습한 문형과 다른데도 이야기 물음의 배운 쌍이 6.8% 에서 62.2% 로 올랐다. 연산마다 고르지는 않아서 시드 0 은 덧셈 96.7%, 나눗셈 92.3% 를 맞히면서 곱셈은 9.0% 였다. 새 쌍은 여전히 낮다.</p>
+<p>값은 동화로 치렀다. 시드 셋의 바이트당 비트가 0.432 에서 0.515~0.529 로 나빠졌고, 동화를 쓰게 하면 이런 글이 나온다.</p>
 <pre><code class="language-text">    샘플 'Once upon a time, there was a little girl' → ' named Amy found a mysterious box. The box was made of 1. It could 5.'
     샘플 'Tom had 3 apples. He ate 1 apple. Now Tom has' → ' 3.. 12.'
     샘플 '3 + 4 =' → ' 7. 11. 3. 7. 4.  gray. 7. 4.  been 7.  hard 4. 10. '

@@ -827,7 +827,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>…그러네. 그럼 MLP 를 빼고 학습해 보자. 빼서 무엇이 나빠지는지 보면 알겠지.</p></div></div>
 <p>층마다 어텐션과 MLP 는 잔차 연결로 이어지는 폭 d 의 벡터를 읽고, 계산한 것을 그 벡터에 더해 쓴다. 이 벡터를 잔차 스트림이라 부르는데, 층들이 이 벡터를 어떻게 나눠 쓰는지는 모델 속을 들여다볼 때 자세히 본다. MLP 는 폭 256 인 잔차 스트림 벡터를 받아 폭 1,024 로 늘리고, GELU 를 씌운 뒤 다시 폭 256 으로 줄인다. 가운데의 1,024 칸을 <strong>은닉층</strong> (MLP 안에서 폭을 늘린 가운데 칸들 / hidden layer)이라 부르고, 칸 하나를 은닉 단위라 부른다. 이 절은 은닉 단위 하나가 무엇을 하는지, 그리고 은닉층의 폭과 모델 폭 d 가 어떤 관계인지를 실험과 들여다보기로 확인한다.</p>
 <h3 id="은닉층을-빼고-좁히고-넓혀-보기">은닉층을 빼고, 좁히고, 넓혀 보기</h3>
-<p>민준은 폭 d = 256 과 4층은 그대로 두고 MLP 은닉층의 폭만 0(MLP 없음), d, 2d, 4d, 8d 로 바꿔 다섯 모델을 학습했다. <code>gpt.py</code> 의 MLP 는 은닉층 폭이 4d 로 정해져 있어서, 스크립트 안에서 폭만 다른 MLP 를 바꿔 끼웠다. 학습 조건은 GPT 와 MLP 언어 모델을 비교할 때와 같다(4,000 스텝, 스텝당 16,384 토큰, 학습률 2e-3, 씨앗 1337).</p>
+<p>민준은 폭 d = 256 과 4층은 그대로 두고 MLP 은닉층의 폭만 0(MLP 없음), d, 2d, 4d, 8d 로 바꿔 다섯 모델을 학습했다. <code>gpt.py</code> 의 MLP 는 은닉층 폭이 4d 로 정해져 있어서, 스크립트 안에서 폭만 다른 MLP 를 바꿔 끼웠다. 학습 조건은 GPT 와 MLP 언어 모델을 비교할 때와 같다(4,000 스텝, 스텝당 16,384 토큰, 학습률 2e-3, 시드 1337).</p>
 <pre><code class="language-python"># sources/gpt/mlp_width_sweep.py 에서 발췌
 def make_mlp(hidden):
     class MLP(nn.Module):            # gpt.py 의 MLP 와 같고 은닉층 폭만 hidden

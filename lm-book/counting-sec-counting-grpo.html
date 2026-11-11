@@ -814,9 +814,9 @@ loss = -(logp * adv).sum() / valid                           # KL 없음, 비율
 <p>코드의 <code>mu</code> 가 그 그룹 평균이고, 우리는 표준편차로 나누지 않았다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>지도 파인튜닝처럼 학습률 0.0001 로 돌리면 빠르지 않아요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>nanochat 은 기본값의 5% 에서 시작해요(<code>--init-lr-frac 0.05</code>). 0.0001 로 돌렸을 때는 시작점에 따라 3 만 말하는 루나가 나왔어요. 오늘은 0.00001(1e-5) 로 갑니다.</p></div></div>
-<p>이후 모든 강화학습은 학습률 1e-5, 300 스텝, 스텝마다 물음 32 개에 답 8 개씩이다. 씨앗 하나에 RTX 4090 을 나눠 쓰며 4~5 분이 걸렸다.</p>
+<p>이후 모든 강화학습은 학습률 1e-5, 300 스텝, 스텝마다 물음 32 개에 답 8 개씩이다. 시드 하나에 RTX 4090 을 나눠 쓰며 4~5 분이 걸렸다.</p>
 <h3 id="시작점이-정한다">시작점이 정한다</h3>
-<p>같은 강화학습을 시작점만 바꿔 다섯 번 돌렸는데, 뽑은 답의 평균 보상은 씨앗 0 의 처음 100 스텝과 마지막 100 스텝 값이다.</p>
+<p>같은 강화학습을 시작점만 바꿔 다섯 번 돌렸는데, 뽑은 답의 평균 보상은 시드 0 의 처음 100 스텝과 마지막 100 스텝 값이다.</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -827,7 +827,7 @@ loss = -(logp * adv).sum() / valid                           # KL 없음, 비율
 <th>식 새 쌍</th>
 <th>이야기 배운 쌍</th>
 <th>이야기 새 쌍</th>
-<th>바이트당 비트(씨앗 0)</th>
+<th>바이트당 비트(시드 0)</th>
 </tr>
 </thead>
 <tbody>
@@ -883,7 +883,7 @@ loss = -(logp * adv).sum() / valid                           # KL 없음, 비율
 </tr>
 </tbody>
 </table></div>
-<p>(<code>sources/counting/ladder_R_*.out</code>. 정답률은 씨앗 셋 평균, 보상과 섞인 물음은 씨앗 0 이다.)</p>
+<p>(<code>sources/counting/ladder_R_*.out</code>. 정답률은 시드 셋 평균, 보상과 섞인 물음은 시드 0 이다.)</p>
 <figure class="fig "><img src="images/counting/ladder.png" alt="세 계단의 정답률. 프리트레인 이어 하기가 식의 배운 쌍을 올리고, 강화학습은 그 위에서 99% 까지 밀고, 지도 파인튜닝은 이야기 물음까지 올린다. 새 쌍을 가장 크게 올린 것은 범위를 넓힌 지도 파인튜닝이고, 그 위의 강화학습은 새 쌍을 더 올리지 못했다. 「학습 전」은 지금 BPE 로 잰 값이다(sources/counting/plot_ladder.py)" loading="lazy"><figcaption>세 계단의 정답률. 프리트레인 이어 하기가 식의 배운 쌍을 올리고, 강화학습은 그 위에서 99% 까지 밀고, 지도 파인튜닝은 이야기 물음까지 올린다. 새 쌍을 가장 크게 올린 것은 범위를 넓힌 지도 파인튜닝이고, 그 위의 강화학습은 새 쌍을 더 올리지 못했다. 「학습 전」은 지금 BPE 로 잰 값이다(sources/counting/plot_ladder.py)</figcaption></figure>
 <p>학습 전 루나에서 14.2% 에 머문 식이 둘 다로 읽힌 루나에서는 99.2% 까지 간다. 프리트레인의 효과가 보이는 자리다. 둘 다로 읽힌 루나의 줄을 지도 파인튜닝과 나란히 놓으면 강화학습이 무엇을 하는지 드러난다.</p>
 <div class="table-wrap"><table>
@@ -927,8 +927,8 @@ loss = -(logp * adv).sum() / valid                           # KL 없음, 비율
     샘플 '3 + 4 =' → ' 8 8 8 7 7 8 8 8 8 8 8 8 8 8 8'
 </code></pre>
 <p>두 자리 문항을 섞은 시작점(넓은 범위)은 신호가 끝까지 남았지만(마지막 100 스텝의 섞인 물음 0.145~0.196), 새 쌍의 식은 26.5% 에서 26.1% 로 오르지 않았다. 강화학습이 민 것은 문항에 나온 쌍이고, 신호가 있어도 그 신호가 새 쌍으로 번지지는 않았다.</p>
-<figure class="fig "><img src="images/counting/rl_signal.png" alt="강화학습 중 맞고 틀린 답이 섞인 물음의 비율(스텝 100 개씩 평균, 씨앗 셋 평균). 지도 파인튜닝을 마친 루나는 거의 0 이라 강화학습이 움직일 신호가 없다(sources/counting/plot_ladder.py)" loading="lazy"><figcaption>강화학습 중 맞고 틀린 답이 섞인 물음의 비율(스텝 100 개씩 평균, 씨앗 셋 평균). 지도 파인튜닝을 마친 루나는 거의 0 이라 강화학습이 움직일 신호가 없다(sources/counting/plot_ladder.py)</figcaption></figure>
-<aside class="tryit"><p class="tryit-title">따라 하기 · 게이밍 GPU 한 장</p><p>프리트레인 <code>STAGE=P CONDS=both python -u sources/counting/run_ladder.py</code>(조건 story, drill 도 같다. 씨앗 하나에 3~4 분), 지도 파인튜닝 <code>STAGE=S CONDS=P_both</code>(1 분, <code>WIDE=1</code> 이면 두 자리 문항을 섞음), 강화학습 <code>STAGE=R RL_LR=1e-5 RL_STEPS=300 CONDS=P_both</code>(4~5 분, 넓은 범위는 <code>WIDE=1 CONDS=S_wide</code>). 이야기를 먼저 만들려면 <code>python sources/counting/gen_stories.py share 300</code>(OpenAI 호환 주소와 키는 합성 데이터 때와 같다), <code>python sources/counting/check_stories.py</code>. 체크포인트는 <code>~/lm-book-lab/ckpt/counting/</code>. 시간은 RTX 4090 한 장을 다른 실험과 나눠 쓰며 잰 값이다.</p>
+<figure class="fig "><img src="images/counting/rl_signal.png" alt="강화학습 중 맞고 틀린 답이 섞인 물음의 비율(스텝 100 개씩 평균, 시드 셋 평균). 지도 파인튜닝을 마친 루나는 거의 0 이라 강화학습이 움직일 신호가 없다(sources/counting/plot_ladder.py)" loading="lazy"><figcaption>강화학습 중 맞고 틀린 답이 섞인 물음의 비율(스텝 100 개씩 평균, 시드 셋 평균). 지도 파인튜닝을 마친 루나는 거의 0 이라 강화학습이 움직일 신호가 없다(sources/counting/plot_ladder.py)</figcaption></figure>
+<aside class="tryit"><p class="tryit-title">따라 하기 · 게이밍 GPU 한 장</p><p>프리트레인 <code>STAGE=P CONDS=both python -u sources/counting/run_ladder.py</code>(조건 story, drill 도 같다. 시드 하나에 3~4 분), 지도 파인튜닝 <code>STAGE=S CONDS=P_both</code>(1 분, <code>WIDE=1</code> 이면 두 자리 문항을 섞음), 강화학습 <code>STAGE=R RL_LR=1e-5 RL_STEPS=300 CONDS=P_both</code>(4~5 분, 넓은 범위는 <code>WIDE=1 CONDS=S_wide</code>). 이야기를 먼저 만들려면 <code>python sources/counting/gen_stories.py share 300</code>(OpenAI 호환 주소와 키는 합성 데이터 때와 같다), <code>python sources/counting/check_stories.py</code>. 체크포인트는 <code>~/lm-book-lab/ckpt/counting/</code>. 시간은 RTX 4090 한 장을 다른 실험과 나눠 쓰며 잰 값이다.</p>
 <p><strong>노트북</strong>: 이어서 학습하는 것은 현실적이지 않다.</p>
 </aside>
 <div class="dialogue"><h3 id="prob-counting-signal">문제 6. 몇 개를 뽑아야 배우나<span id="문제-6-몇-개를-뽑아야-배우나" class="anchor-alias"></span></h3>

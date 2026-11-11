@@ -806,7 +806,7 @@ for step in range(max_steps):
 </aside>
 <p>옵티마이저는 AdamW 를 쓴다. AdamW 는 그래디언트 반대쪽으로 옮기는 경사 하강의 변형인데, 파라미터마다 그래디언트의 평소 크기로 나눠 스텝을 고르게 맞춘다. 그래서 학습을 시작한 무렵에는 학습률이 곧 파라미터 하나가 한 스텝에 움직이는 대략의 크기가 된다. 학습률은 그래서 모델에 맞게 골라야 하는 숫자다.</p>
 <h3 id="학습률-다섯-가지">학습률 다섯 가지</h3>
-<p>학습률을 고르려고, 같은 모델을 같은 씨앗과 같은 배치 순서로 두고 학습률만 0.0001, 0.001, 0.01, 0.1, 1 로 바꿔 500 스텝씩 돌리기로 했다. 서연이 학습률 칸을 맡았다.</p>
+<p>학습률을 고르려고, 같은 모델을 같은 시드와 같은 배치 순서로 두고 학습률만 0.0001, 0.001, 0.01, 0.1, 1 로 바꿔 500 스텝씩 돌리기로 했다. 서연이 학습률 칸을 맡았다.</p>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>작은 것부터 할까? 아니, 다섯 개 다 걸어 놓고 결과 보자. 1 부터.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>1? 너무 크지 않아?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S12"><img src="images/cast/S12.webp" alt="이서연 S12" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>어디서 터지는지 봐야 범위를 알지.</p></div></div>
@@ -827,7 +827,7 @@ eval step    500 | tokens 8,192,000 | val_loss 419.5650 | val_bpb 152.8560 | 3s
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S04"><img src="images/cast/S04.webp" alt="이서연 S04" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>…아무것도 모를 때가 8.36 인데, 그보다 50 배 나쁘다고?</p></div></div>
 <p>손실 8.36 은 4,096 개 토큰에 고르게 확률을 줄 때의 값이다. 손실 417.8 은 정답 토큰에 e⁻⁴¹⁷ 쯤의 확률을 준다는 뜻이니, 모델은 아무렇게나 고르는 것보다 훨씬 나쁘게, 정답이 아닌 토큰 몇 개에 확률을 거의 다 몰아 두고 있다. 손실은 끝까지 수백에 머물렀고 NaN(계산할 수 없는 값)은 나오지 않았다. 그 모델에게 「Once upon a time」을 주고 이어 쓰게 하면 이렇게 쓴다(<code>sources/mlp-lm/probe_mlp.out</code>).</p>
 <pre><code class="language-text">[학습 전] Once upon a time glove work bed keep slide pointed rug ob cleaning asked flymxibleersSorry melial chee toucher; ambulance fanoy” attach\n thirsty holds ticket nosy yelled draininted cloudma fragile0 “ hop
-[학습률 1, 스텝 51, 씨앗 1] Once upon a time wings thankful wings wings wings thankful forgetLater surLaterLaterroom sur wings thankful forgetuggLaterLaterose pleaseLaterLateruggLaterLateruggLaterLaterLaterLaterLaterLaterLaterLaterLaterLaterLaterLaterLater
+[학습률 1, 스텝 51, 시드 1] Once upon a time wings thankful wings wings wings thankful forgetLater surLaterLaterroom sur wings thankful forgetuggLaterLaterose pleaseLaterLateruggLaterLateruggLaterLaterLaterLaterLaterLaterLaterLaterLaterLaterLaterLaterLater
 </code></pre>
 <p>학습 전 모델은 토큰을 아무렇게나 늘어놓지만, 학습률 1 로 51 스텝을 고친 모델은 「 wings」「 thankful」「Later」 몇 개만 되풀이한다. 민준은 화면을 보다가 웃음을 터뜨렸다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M12"><img src="images/cast/M12.webp" alt="김민준 M12" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>「LaterLaterLaterLater」. 이거 어디서 봤는데.</p></div></div>
@@ -910,7 +910,7 @@ eval step   4000 | tokens 65,536,000 | val_loss 2.5669 | val_bpb 0.9332 | 26s
 <pre><code class="language-text">[1] Once upon a time, there was a little bunny named Spot. Spot was a brave dog, and hes back. It was big and round and had a red petals. He loved to play with it in the park. One day she wanted her new doll would always help the bunny to search.\nOn her way, she sees a big seesaw. It is not wind. Fire's friends would play
 [3] Once upon a time, there was a red puppy. The wore the hat very warm coat. Amy was scared and wanted to find its family. The wild bird flew together through the stream together.
 </code></pre>
-<p>(<code>sources/mlp-lm/probe_mlp.out</code>, 씨앗 1·3. 씨앗 3 은 이야기 경계 토큰을 뽑아 일찍 끝났다.)</p>
+<p>(<code>sources/mlp-lm/probe_mlp.out</code>, 시드 1·3. 시드 3 은 이야기 경계 토큰을 뽑아 일찍 끝났다.)</p>
 <p>시작 문장에 루나의 이름을 넣어도 마찬가지였다.</p>
 <pre><code class="language-text">[1] Once upon a time, there was a girl named Luna.\n&quot;Hi, kid, I like that one. Let's play together,&quot; said the fish.\nThe animals were sad and did not need to clean upstairs.&quot;\nJimmy smiled and nodded. He could not wait to get his again. He thanked the bunny and searching for them.
 </code></pre>

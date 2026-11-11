@@ -801,8 +801,8 @@ class Surgery:
     def __exit__(self, *a):
         self.m.blocks = self.orig
 </code></pre>
-<p>재는 값은 넷이다. 검증 글의 다음 토큰 손실, 1위 예측이 원래 모델과 같은 비율(일치율), 정답 1위 비율, 그리고 예측이 얼마나 퍼졌는지 보는 엔트로피다. 동화 GPT 는 검증 글 조각을 씨앗 셋으로 뽑아(씨앗마다 65,536 토큰) 평균했다(<code>sources/layers/layer_surgery.out</code>).</p>
-<pre><code class="language-text">## tiny, 글 tiny: 8층, 글 씨앗 3 (256 x 256 = 씨앗마다 65,536 토큰), 씨앗 평균 (일치율 범위)
+<p>재는 값은 넷이다. 검증 글의 다음 토큰 손실, 1위 예측이 원래 모델과 같은 비율(일치율), 정답 1위 비율, 그리고 예측이 얼마나 퍼졌는지 보는 엔트로피다. 동화 GPT 는 검증 글 조각을 시드 셋으로 뽑아(시드마다 65,536 토큰) 평균했다(<code>sources/layers/layer_surgery.out</code>).</p>
+<pre><code class="language-text">## tiny, 글 tiny: 8층, 글 시드 3 (256 x 256 = 시드마다 65,536 토큰), 시드 평균 (일치율 범위)
   조건        층   손실    일치율(범위)         정답1위   KL     엔트로피
   원래        0  1.2424 1.0000 (1.000~1.000) 0.6619  0.0000  1.2440
   지우기       1  8.3234 0.0272 (0.026~0.028) 0.0251  7.0822  4.8766
@@ -838,8 +838,8 @@ class Surgery:
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.webp" alt="김민준 M08" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>층 5 를 빼도 이야기를 써. 빨간 공 얘기까지 하고 있어.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>층 1 을 빼면 「and and and」고. 층 하나의 무게가 이렇게 다를 수가 있어?</p></div></div>
 <h3 id="원-논문과-비교">원 논문과 비교</h3>
-<p>이런 실험을 언어 모델에 체계적으로 한 것이 앞에서 본 라드 팀의 논문이다. 그들은 층을 지운 모델과 이웃을 맞바꾼 모델의 1위 예측이 원래 모델과 일치하는 비율을 쟀고, 파인튜닝 없이 72~95% 가 남는다고 보고했다. 첫 층과 마지막 층을 건드릴 때 가장 크게 나빠졌고, 첫 층을 건드리면 예측이 넓게 퍼졌다. 가운데 층에서는 맞바꾸기가 지우기보다 덜 해로웠고, 쓴 글은 웹 글 묶음(the Pile) 100 만 토큰이다. GPT-2 도 같은 방식으로 재면 다음과 같다. 글은 웹 글(ClimbMix)이고 씨앗마다 16,384 토큰으로 훨씬 적다(<code>sources/layers/layer_surgery_gpt2.out</code>).</p>
-<pre><code class="language-text">## gpt2, 글 web: 12층, 글 씨앗 3 (64 x 256 = 씨앗마다 16,384 토큰), 씨앗 평균 (일치율 범위)
+<p>이런 실험을 언어 모델에 체계적으로 한 것이 앞에서 본 라드 팀의 논문이다. 그들은 층을 지운 모델과 이웃을 맞바꾼 모델의 1위 예측이 원래 모델과 일치하는 비율을 쟀고, 파인튜닝 없이 72~95% 가 남는다고 보고했다. 첫 층과 마지막 층을 건드릴 때 가장 크게 나빠졌고, 첫 층을 건드리면 예측이 넓게 퍼졌다. 가운데 층에서는 맞바꾸기가 지우기보다 덜 해로웠고, 쓴 글은 웹 글 묶음(the Pile) 100 만 토큰이다. GPT-2 도 같은 방식으로 재면 다음과 같다. 글은 웹 글(ClimbMix)이고 시드마다 16,384 토큰으로 훨씬 적다(<code>sources/layers/layer_surgery_gpt2.out</code>).</p>
+<pre><code class="language-text">## gpt2, 글 web: 12층, 글 시드 3 (64 x 256 = 시드마다 16,384 토큰), 시드 평균 (일치율 범위)
   조건        층   손실    일치율(범위)         정답1위   KL     엔트로피
   원래        0  3.3878 1.0000 (1.000~1.000) 0.3864  0.0000  3.5436
   지우기       1  8.0559 0.0618 (0.060~0.063) 0.0361  4.5877  8.7243
@@ -849,7 +849,7 @@ class Surgery:
 </code></pre>
 <p>라드 팀이 쓴 모델 가운데 가장 큰 GPT-2 XL(48층, 파라미터 약 15억 개)도 반정밀도(bf16)로 같은 식으로 쟀다(<code>sources/layers/layer_surgery_xl.out</code>). XL 에서도 층 1 을 지우면 일치율 1.6% 로 무너지고 손실은 11.8261 로 ln 50257 = 10.82 보다 크다.</p>
 <figure class="fig "><img src="images/layers/surgery.png" alt="층 하나를 지우기·복제·맞바꾸기 했을 때 1위 예측이 원래 모델과 같은 비율(위)과 검증 손실의 증가(아래, 작은 값은 선형·큰 값은 로그 눈금). 왼쪽부터 동화 GPT, GPT-2, GPT-2 XL. 첫 층을 지우거나 맞바꾸면 세 모델 모두 무너지고 가운데는 견디며, 끝 층은 모델마다 다르다(sources/layers/plot_layers.py)" loading="lazy"><figcaption>층 하나를 지우기·복제·맞바꾸기 했을 때 1위 예측이 원래 모델과 같은 비율(위)과 검증 손실의 증가(아래, 작은 값은 선형·큰 값은 로그 눈금). 왼쪽부터 동화 GPT, GPT-2, GPT-2 XL. 첫 층을 지우거나 맞바꾸면 세 모델 모두 무너지고 가운데는 견디며, 끝 층은 모델마다 다르다(sources/layers/plot_layers.py)</figcaption></figure>
-<p>원 논문과 같은 점은 셋이다. 첫 층이 치명적이고(우리 표에서 2.7%, 6.2% 로 초록의 72~95% 범위 밖이며, 논문 본문도 첫 층이 치명적이라고 적는다) 그때 예측이 넓게 퍼지며, 가운데 층은 견디고 그 가운데서도 맞바꾸기가 지우기보다 덜 해롭다(동화 GPT 층 5 지우기 80.8%, 맞바꾸기 87.5%). 씨앗만 바꿔 학습한 둘째 동화 GPT 에서도 모양이 같았다(<code>sources/layers/train_seeds.py</code>). 다른 점은 끝 층인데, 아래에서 따로 본다.</p>
+<p>원 논문과 같은 점은 셋이다. 첫 층이 치명적이고(우리 표에서 2.7%, 6.2% 로 초록의 72~95% 범위 밖이며, 논문 본문도 첫 층이 치명적이라고 적는다) 그때 예측이 넓게 퍼지며, 가운데 층은 견디고 그 가운데서도 맞바꾸기가 지우기보다 덜 해롭다(동화 GPT 층 5 지우기 80.8%, 맞바꾸기 87.5%). 시드만 바꿔 학습한 둘째 동화 GPT 에서도 모양이 같았다(<code>sources/layers/train_seeds.py</code>). 다른 점은 끝 층인데, 아래에서 따로 본다.</p>
 <h3 id="첫-층은-왜-무너지고-가운데-층은-왜-버티나">첫 층은 왜 무너지고 가운데 층은 왜 버티나</h3>
 <p>지우기 일치율을 첫 층, 가운데, 끝 층으로 묶으면 다음과 같다(<code>sources/layers/front_mid_end.out</code> 에서 세 줄을 모았다. 가운데는 동화 GPT 층 2~7, GPT-2 층 2~11, XL 층 2~47 이다).</p>
 <pre><code class="language-text">  지우기 일치율       첫 층    가운데 범위            끝 층
@@ -860,7 +860,7 @@ class Surgery:
 <p>층이 많을수록 가운데 한 층이 맡은 일이 작아진다고 읽을 수 있는데, 글과 학습 방식이 모두 다른 모델이라 층 수만의 효과라고 단정할 수는 없다.</p>
 <p>가운데 층이 버티는 이유로 라드 팀이 가설로 드는 것은 잔차 연결이다. 층을 건너뛰어도 h 는 끊기지 않아서, 앞 층까지 더한 합이 그대로 다음 층으로 가고 뒤 층들은 평소 읽던 것에서 한 층이 더한 벡터만 빠진 h 를 읽는다. 층마다 더하는 양은 h 크기의 3분의 1 정도이니, 지운다고 벡터가 다른 것이 되지는 않는다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>잔차를 빼고 지워 보면요?</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 비교는 이 크기와 시간에서는 제대로 안 나와요. 6층, 폭 256 짜리 작은 GPT 를 잔차 연결만 빼고 3,000 스텝 학습해 봤는데, 잔차가 있는 모델은 검증 손실이 1.96~1.97 까지 내려가고 잔차가 없는 모델은 5.77~5.88 에서 멈췄어요(<code>sources/layers/no_skip.out</code>, 씨앗 셋). 층을 지워 보기도 전에 학습부터 안 된 거예요. 그래서 이미지 모델로 잰 결과를 봐요. 2016년 파이트(Andreas Veit) 팀의 실험에서 15층 VGG 는 어느 층이든 지우면 우연 수준, 잔차 네트워크는 거의 그대로였어요. 그들은 잔차 네트워크를 길이가 다른 경로 여럿의 묶음으로 보고, 층 하나를 지우면 경로의 절반이 사라질 뿐이라고 설명했어요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 비교는 이 크기와 시간에서는 제대로 안 나와요. 6층, 폭 256 짜리 작은 GPT 를 잔차 연결만 빼고 3,000 스텝 학습해 봤는데, 잔차가 있는 모델은 검증 손실이 1.96~1.97 까지 내려가고 잔차가 없는 모델은 5.77~5.88 에서 멈췄어요(<code>sources/layers/no_skip.out</code>, 시드 셋). 층을 지워 보기도 전에 학습부터 안 된 거예요. 그래서 이미지 모델로 잰 결과를 봐요. 2016년 파이트(Andreas Veit) 팀의 실험에서 15층 VGG 는 어느 층이든 지우면 우연 수준, 잔차 네트워크는 거의 그대로였어요. 그들은 잔차 네트워크를 길이가 다른 경로 여럿의 묶음으로 보고, 층 하나를 지우면 경로의 절반이 사라질 뿐이라고 설명했어요.</p></div></div>
 <p>잔차 연결은 층 하나가 빠졌을 때 벡터를 이어 주기 전에, 층을 쌓은 모델이 애초에 학습되게 해 주는 장치다.</p>
 <p>가운데 층을 하나씩 더 지워 보면 어디까지 버티는지 나온다. 동화 GPT 의 가운데 2개를 지우면 일치율 66.9%, 3개 48.9%, 4개 43.2%, 5개 27.0%, 6개 21.3% 로 고르게 내려간다. 첫 층과 끝 층만 남은 모델은 이렇게 쓴다.</p>
 <pre><code class="language-text">[처음과 끝 한 층씩만 남기기]

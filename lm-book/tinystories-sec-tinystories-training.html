@@ -790,7 +790,7 @@ h = T.train(m, tr, va, tb, batch_size=B, block_size=BS, max_steps=args.steps, lr
             weight_decay=0.1, grad_clip=1.0, eval_every=500, log_every=250, device=dev, compile=True,
             eval_tokens=2_000_000, on_step=on_step)
 </code></pre>
-<p><code>compile=True</code> 는 파이토치의 <code>torch.compile</code> 로 모델의 계산을 한 번 묶어 최적화해 두라는 뜻이고, 학습 루프는 처음부터 bf16(16비트 부동소수점) 자동 혼합 정밀도로 계산한다. 학습률은 최대 1e-3, 처음 200 스텝 워밍업 뒤 코사인으로 줄인다. 정해 둔 스텝(0, 50, 200, 500, 1,000, 2,000, 5,000, 끝)마다 체크포인트를 남기고 같은 씨앗으로 샘플을 뽑게 했다.</p>
+<p><code>compile=True</code> 는 파이토치의 <code>torch.compile</code> 로 모델의 계산을 한 번 묶어 최적화해 두라는 뜻이고, 학습 루프는 처음부터 bf16(16비트 부동소수점) 자동 혼합 정밀도로 계산한다. 학습률은 최대 1e-3, 처음 200 스텝 워밍업 뒤 코사인으로 줄인다. 정해 둔 스텝(0, 50, 200, 500, 1,000, 2,000, 5,000, 끝)마다 체크포인트를 남기고 같은 시드로 샘플을 뽑게 했다.</p>
 <pre><code class="language-text">학습 토큰 552,651,810, 검증 토큰 5,579,565
 파라미터 27,579,392 개 (임베딩 둘 2,359,296, 나머지 25,220,096)
 계획: 14,000 스텝 x 32,768 토큰 = 458,752,000 토큰 (학습 토큰의 0.83 바퀴)
@@ -813,7 +813,7 @@ eval step  14000 | tokens 458,752,000 | val_loss 1.1697 | val_bpb 0.4259
 </aside>
 <div class="dialogue"><h3 id="prob-tinystories-same-tokens">문제 2. 같은 토큰과 같은 시간<span id="문제-2-같은-토큰과-같은-시간" class="anchor-alias"></span></h3>
 <blockquote>
-<p>작은 GPT(4.27M)와 동화 GPT(27.6M)의 검증 바이트당 비트(검증 글 앞 200만 토큰)는 3,277만 토큰에서 0.6853 대 0.6466, 6,554만 토큰에서 0.6140 대 0.5687 이다. 위에서 잰 처리 속도(초당 155만 토큰 대 51만 토큰)와 스텝 시간(10.52 ms 대 63.71 ms)도 함께 쓴다. (가) 같은 글을 읽으면 어느 쪽이 얼마나 낮은가? (나) 동화 GPT 는 한 토큰을 읽는 데 몇 배 느린가? 파라미터 6.5배와 왜 다른가? (다) 같은 시간을 주고 학습률 스케줄을 그 시간에 맞춰 끝까지 쓰게 하면, 검증 글 전체의 바이트당 비트(씨앗 셋 이상)는 약 43초(작은 GPT 4,000 스텝, 동화 GPT 665 스텝)에서 0.611~0.613 대 0.705~0.708, 약 143초(작은 GPT 13,500 스텝, 동화 GPT 2,230 스텝)에서 0.552~0.553 대 0.530~0.531 이다. 어느 쪽이 나은가?</p>
+<p>작은 GPT(4.27M)와 동화 GPT(27.6M)의 검증 바이트당 비트(검증 글 앞 200만 토큰)는 3,277만 토큰에서 0.6853 대 0.6466, 6,554만 토큰에서 0.6140 대 0.5687 이다. 위에서 잰 처리 속도(초당 155만 토큰 대 51만 토큰)와 스텝 시간(10.52 ms 대 63.71 ms)도 함께 쓴다. (가) 같은 글을 읽으면 어느 쪽이 얼마나 낮은가? (나) 동화 GPT 는 한 토큰을 읽는 데 몇 배 느린가? 파라미터 6.5배와 왜 다른가? (다) 같은 시간을 주고 학습률 스케줄을 그 시간에 맞춰 끝까지 쓰게 하면, 검증 글 전체의 바이트당 비트(시드 셋 이상)는 약 43초(작은 GPT 4,000 스텝, 동화 GPT 665 스텝)에서 0.611~0.613 대 0.705~0.708, 약 143초(작은 GPT 13,500 스텝, 동화 GPT 2,230 스텝)에서 0.552~0.553 대 0.530~0.531 이다. 어느 쪽이 나은가?</p>
 </blockquote>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(가)는 동화 GPT 가 0.04~0.05 비트 낮아요. 같은 글에서 더 많이 배워요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(나)는 155 ÷ 51 이니까 3.0배요. 파라미터가 6.5배면 한 스텝도 6.5배일 줄 알았는데요.</p></div></div>

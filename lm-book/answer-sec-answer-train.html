@@ -782,8 +782,8 @@ section.interlude figure.fig img { border-radius: 10px; }
 <p class="chapter-crumb"><a href="answer.html">묻는 말에 대답하기: 이어 쓰는 모델에서 답하는 모델로</a></p>
 <h2 id="sec-answer-train">학습과 결과: 동화 실력을 지키며 대답 배우기<span id="학습과-결과-동화-실력을-지키며-대답-배우기" class="anchor-alias"></span></h2>
 <p>출발점은 동화 GPT 체크포인트, 배치는 32 줄이고, 학습률은 개발 대화의 답 손실로 넷을 비교해 0.0001, 600 스텝으로 정했다(<code>sources/answer/sweep_lr*.out</code>).</p>
-<p>그다음 두 조건을 씨앗 셋씩 돌렸는데, <strong>대화만</strong>은 배치 32 줄이 모두 대화다. <strong>대화 + 동화</strong>는 32 줄 가운데 8 줄을 동화 학습 글에서 뽑은 128 토큰 조각으로 채우고, 그 조각은 모든 칸을 채점한다. 개발 답 손실은 개발 대화 217 편의 답 칸 토큰당 손실(nat)이고, 바이트당 비트는 검증 글 전체에서 쟀다. 학습 하나는 RTX 4090 한 장에서 17초가 걸렸다.</p>
-<pre><code class="language-text">조건               씨앗      개발 답 손실      바이트당 비트     초
+<p>그다음 두 조건을 시드 셋씩 돌렸는데, <strong>대화만</strong>은 배치 32 줄이 모두 대화다. <strong>대화 + 동화</strong>는 32 줄 가운데 8 줄을 동화 학습 글에서 뽑은 128 토큰 조각으로 채우고, 그 조각은 모든 칸을 채점한다. 개발 답 손실은 개발 대화 217 편의 답 칸 토큰당 손실(nat)이고, 바이트당 비트는 검증 글 전체에서 쟀다. 학습 하나는 RTX 4090 한 장에서 17초가 걸렸다.</p>
+<pre><code class="language-text">조건               시드      개발 답 손실      바이트당 비트     초
 대화만               1       0.7550       0.5541    17
 대화만               2       0.7461       0.5533    17
 대화만               3       0.7581       0.5541    17
@@ -792,12 +792,12 @@ section.interlude figure.fig img { border-radius: 10px; }
 대화 + 동화 1/4       3       0.7829       0.4406    17
 
 학습 전(0 스텝) 개발 답 손실 2.7244
-씨앗마다 (섞기 − 대화만): 답 손실 +0.0307, +0.0278, +0.0249 | 바이트당 비트 -0.1137, -0.1126, -0.1136
+시드마다 (섞기 − 대화만): 답 손실 +0.0307, +0.0278, +0.0249 | 바이트당 비트 -0.1137, -0.1126, -0.1136
 </code></pre>
 <p>(<code>sources/answer/summary.out</code>)</p>
-<figure class="fig "><img src="images/answer/curves.png" alt="지도 파인튜닝 600 스텝 동안의 두 값. 왼쪽은 개발 대화의 답 손실로, 두 조건 모두 처음 100 스텝에 2.72 에서 1 근처로 떨어지고 그 뒤 천천히 내려간다. 오른쪽은 검증 동화의 바이트당 비트(앞 200만 토큰)로, 대화만 읽힌 루나(빨강)는 0.43 에서 0.55 까지 계속 나빠지고, 동화를 4분의 1 섞은 루나(파랑)는 0.44 근처에 머문다. 회색 점선은 학습 전 동화 GPT 의 0.4253, 선은 씨앗마다 하나다(sources/answer/analyze.py)" loading="lazy"><figcaption>지도 파인튜닝 600 스텝 동안의 두 값. 왼쪽은 개발 대화의 답 손실로, 두 조건 모두 처음 100 스텝에 2.72 에서 1 근처로 떨어지고 그 뒤 천천히 내려간다. 오른쪽은 검증 동화의 바이트당 비트(앞 200만 토큰)로, 대화만 읽힌 루나(빨강)는 0.43 에서 0.55 까지 계속 나빠지고, 동화를 4분의 1 섞은 루나(파랑)는 0.44 근처에 머문다. 회색 점선은 학습 전 동화 GPT 의 0.4253, 선은 씨앗마다 하나다(sources/answer/analyze.py)</figcaption></figure>
-<p>대화만 읽힌 루나는 답 손실이 2.72 에서 0.75 안팎으로 내려간 대신, 동화의 바이트당 비트가 0.4253 에서 0.553~0.554 로 나빠졌다. 동화를 4분의 1 섞은 루나는 답 손실이 0.774~0.786 으로 0.025~0.031 높고, 동화는 0.440~0.441 로 거의 지켰다. 씨앗 셋 모두 같은 쪽으로 갈렸다. 다만 섞은 루나는 한 배치에서 읽는 대화가 32 편이 아니라 24 편이어서, 답 손실의 차이에는 대화를 덜 읽은 영향도 들어 있다.</p>
-<p>같은 물음 여섯을 동화를 섞은 씨앗 1 에 다시 넣은 답이다.</p>
+<figure class="fig "><img src="images/answer/curves.png" alt="지도 파인튜닝 600 스텝 동안의 두 값. 왼쪽은 개발 대화의 답 손실로, 두 조건 모두 처음 100 스텝에 2.72 에서 1 근처로 떨어지고 그 뒤 천천히 내려간다. 오른쪽은 검증 동화의 바이트당 비트(앞 200만 토큰)로, 대화만 읽힌 루나(빨강)는 0.43 에서 0.55 까지 계속 나빠지고, 동화를 4분의 1 섞은 루나(파랑)는 0.44 근처에 머문다. 회색 점선은 학습 전 동화 GPT 의 0.4253, 선은 시드마다 하나다(sources/answer/analyze.py)" loading="lazy"><figcaption>지도 파인튜닝 600 스텝 동안의 두 값. 왼쪽은 개발 대화의 답 손실로, 두 조건 모두 처음 100 스텝에 2.72 에서 1 근처로 떨어지고 그 뒤 천천히 내려간다. 오른쪽은 검증 동화의 바이트당 비트(앞 200만 토큰)로, 대화만 읽힌 루나(빨강)는 0.43 에서 0.55 까지 계속 나빠지고, 동화를 4분의 1 섞은 루나(파랑)는 0.44 근처에 머문다. 회색 점선은 학습 전 동화 GPT 의 0.4253, 선은 시드마다 하나다(sources/answer/analyze.py)</figcaption></figure>
+<p>대화만 읽힌 루나는 답 손실이 2.72 에서 0.75 안팎으로 내려간 대신, 동화의 바이트당 비트가 0.4253 에서 0.553~0.554 로 나빠졌다. 동화를 4분의 1 섞은 루나는 답 손실이 0.774~0.786 으로 0.025~0.031 높고, 동화는 0.440~0.441 로 거의 지켰다. 시드 셋 모두 같은 쪽으로 갈렸다. 다만 섞은 루나는 한 배치에서 읽는 대화가 32 편이 아니라 24 편이어서, 답 손실의 차이에는 대화를 덜 읽은 영향도 들어 있다.</p>
+<p>같은 물음 여섯을 동화를 섞은 시드 1 에 다시 넣은 답이다.</p>
 <pre><code class="language-text">  Q: What sound does a duck make?
   A: 'A duck makes a sound. It sounds like a duck.'
   Q: Why do we wear coats?
@@ -816,19 +816,19 @@ section.interlude figure.fig img { border-radius: 10px; }
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M11"><img src="images/cast/M11.webp" alt="김민준 M11" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>「A horse is bigger.」 물은 것에 물은 것만 답했어. 오리를 만들러 연못에 가지도 않고.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>네가 설정서 쓸 때 그랬잖아. 묻는 말에 딴소리 안 하고 대답한다고.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>…그 줄이 처음으로 움직였네.</p></div></div>
-<p>동화를 쓰게 하면 두 조건의 차이가 보인다. 아래는 같은 시작 문장과 같은 씨앗으로 뽑은 글이다.</p>
-<pre><code class="language-text">[대화만 씨앗 1] Once upon a time, there was a little girl named Lily. She had a small box. She put a toy bear in the box. She did not know what was in the box. So she opened the box.\nBut the box was empty. There was no toy bear. …
-[대화 + 동화 씨앗 1] Once upon a time, there was a little girl named Lily. She loved to learn new things every day. Her mom and dad were very smart. … She gave the cat some food and water. The cat was very happy and started to purr. …
+<p>동화를 쓰게 하면 두 조건의 차이가 보인다. 아래는 같은 시작 문장과 같은 시드로 뽑은 글이다.</p>
+<pre><code class="language-text">[대화만 시드 1] Once upon a time, there was a little girl named Lily. She had a small box. She put a toy bear in the box. She did not know what was in the box. So she opened the box.\nBut the box was empty. There was no toy bear. …
+[대화 + 동화 시드 1] Once upon a time, there was a little girl named Lily. She loved to learn new things every day. Her mom and dad were very smart. … She gave the cat some food and water. The cat was very happy and started to purr. …
 </code></pre>
 <p>대화만 읽힌 루나의 동화는 대화의 답처럼 짧은 문장이 되풀이되고, 상자에 넣은 곰 인형이 사라졌다가 다시 나온다. 섞은 루나는 동화의 말투를 지켰다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>대답은 하는데… 루나 같지가 않아. 「A duck makes a sound」 라니.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>누구 말투도 아니니까. 이름 없는 도우미 말투로 쓴 대화를 읽혔잖아.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>오늘 배운 건 묻는 말에 답하는 형태가에요. 누구로서 답할지, 어떤 말투로 답할지는 그다음 일이에요. 그리고 사과 물음은 형태만 맞았지 계산은 틀렸어요. 답하는 법과 계산하는 실력은 따로 가르쳐야 해요.</p></div></div>
-<aside class="tryit"><p class="tryit-title">따라 하기 · 게이밍 GPU 한 장</p><p>대화 데이터를 만든 뒤(위의 <code>prep_data.py</code>), 책 저장소에서 <code>sources/answer/run_all.sh</code> 를 돌리면 두 조건 × 씨앗 셋, 지도 파인튜닝 여섯 번을 차례로 한다. 동화 GPT 체크포인트(<code>~/lm-book-lab/ckpt/tinystories/final.pt</code>)가 있어야 하고, RTX 4090 한 장에서 학습 하나가 17초, 평가까지 합쳐 여섯 번에 몇 분이 걸린다. 표와 그림, 동화 샘플은 <code>CUDA_VISIBLE_DEVICES=0 python -u sources/answer/analyze.py &gt; sources/answer/summary.out</code> 으로 다시 만든다. 학습률 고르기는 <code>python -u sources/answer/sft.py --lr 1e-4 --steps 800 --eval_every 100 --tag sweep --save 0</code> 처럼 <code>--lr</code> 만 바꿔 돌린다.</p>
+<aside class="tryit"><p class="tryit-title">따라 하기 · 게이밍 GPU 한 장</p><p>대화 데이터를 만든 뒤(위의 <code>prep_data.py</code>), 책 저장소에서 <code>sources/answer/run_all.sh</code> 를 돌리면 두 조건 × 시드 셋, 지도 파인튜닝 여섯 번을 차례로 한다. 동화 GPT 체크포인트(<code>~/lm-book-lab/ckpt/tinystories/final.pt</code>)가 있어야 하고, RTX 4090 한 장에서 학습 하나가 17초, 평가까지 합쳐 여섯 번에 몇 분이 걸린다. 표와 그림, 동화 샘플은 <code>CUDA_VISIBLE_DEVICES=0 python -u sources/answer/analyze.py &gt; sources/answer/summary.out</code> 으로 다시 만든다. 학습률 고르기는 <code>python -u sources/answer/sft.py --lr 1e-4 --steps 800 --eval_every 100 --tag sweep --save 0</code> 처럼 <code>--lr</code> 만 바꿔 돌린다.</p>
 </aside>
 <div class="dialogue"><h3 id="prob-answer-mix">문제 3. 동화를 섞으면 대답을 덜 배우나<span id="문제-3-동화를-섞으면-대답을-덜-배우나" class="anchor-alias"></span></h3>
 <blockquote>
-<p>동화를 4분의 1 섞은 루나는 개발 답 손실이 씨앗마다 0.025~0.031 높았고, 동화의 바이트당 비트는 0.113~0.114 낮았다. (가) 한 학기 동안 수학 학원만 다니고 책을 한 권도 안 읽은 아이와, 학원을 조금 줄이고 책을 계속 읽은 아이를 떠올려 보자. 무엇을 얻고 무엇을 잃었나? (나) 섞은 쪽은 배치에서 대화를 24 편만 읽었다. 답 손실의 차이가 「동화를 섞어서」인지 「대화를 덜 읽어서」인지 가르려면 무엇을 더 돌려야 할까? (다) 대화만 읽힌 루나의 동화가 나빠진 이유을 손실을 매긴 칸으로 설명하라.</p>
+<p>동화를 4분의 1 섞은 루나는 개발 답 손실이 시드마다 0.025~0.031 높았고, 동화의 바이트당 비트는 0.113~0.114 낮았다. (가) 한 학기 동안 수학 학원만 다니고 책을 한 권도 안 읽은 아이와, 학원을 조금 줄이고 책을 계속 읽은 아이를 떠올려 보자. 무엇을 얻고 무엇을 잃었나? (나) 섞은 쪽은 배치에서 대화를 24 편만 읽었다. 답 손실의 차이가 「동화를 섞어서」인지 「대화를 덜 읽어서」인지 가르려면 무엇을 더 돌려야 할까? (다) 대화만 읽힌 루나의 동화가 나빠진 이유을 손실을 매긴 칸으로 설명하라.</p>
 </blockquote>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(가)는 수학만 한 애가 수학 문제는 조금 더 잘 풀겠지만, 읽던 실력이 떨어져. 책을 계속 읽은 애는 수학이 조금 덜 늘고 읽기는 지키고.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(나)는… 섞은 쪽 스텝을 32 분의 24 만큼 늘려서 대화를 똑같이 읽게 하고 다시 재면 되겠다. 그래도 답 손실이 높으면 동화 탓이고.</p></div></div>
