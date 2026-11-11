@@ -702,9 +702,9 @@ section.interlude figure.fig img { border-radius: 10px; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/optim-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/optim-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="최적화"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=1160ed35" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"1160ed35"}</script>
-<script defer src="/reader/reader.js?v=1160ed35" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=17910e6c" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"optim-book","base":"/optim-book/","v":"17910e6c"};try{if(localStorage.getItem("lp.reader.sidebarCollapsed")==="true")document.documentElement.classList.add("lp-sb-collapsed","lp-sb-noanim")}catch(e){}</script>
+<script defer src="/reader/reader.js?v=17910e6c" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -726,7 +726,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li class="toc-part">0차 최적화</li>
 <li><a href="zeroth-order.html">미분 없이: 0차 최적화</a></li>
 <li><a href="evolution.html">진화 알고리즘: 개체군으로 하는 탐색</a></li>
-<li><a href="structured-search.html">구조를 쓰는 탐색: 값만 잴 때 무엇을 더 알면 덜 재나</a></li>
+<li><a href="structured-search.html">구조를 쓰는 탐색: 값만 측정할 때 무엇을 더 알면 덜 측정하나</a></li>
 <li class="toc-part">1차 최적화</li>
 <li><a href="backprop.html">역전파: 자코비안 곱을 거꾸로</a></li>
 <li><a href="initialization.html">가중치 초기화: 신호가 커지지도 사라지지도 않게</a></li>
@@ -745,7 +745,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="optimal-transport.html">최적 수송: 흙을 가장 적게 나르는 짝짓기</a></li>
 <li><a href="wgan.html">WGAN: 최소최대와 1-립시츠 판별기</a></li>
 <li class="toc-part">최적화가 일반화를 만든다</li>
-<li><a href="implicit-bias.html">암묵적 편향: 옵티마이저가 고르는 해</a></li>
+<li><a href="implicit-bias.html">암묵적 편향: 옵티마이저가 선택하는 해</a></li>
 <li><a href="double-descent.html">이중 하강: 외우고 나서도 나아진다</a></li>
 <li class="toc-part">부록</li>
 <li><a href="dimuon.html">Dimuon: LoRA 에 맞춰 다시 짠 Muon</a></li>
@@ -756,22 +756,22 @@ section.interlude figure.fig img { border-radius: 10px; }
 <article class="chapter chapter-paged">
 <h1>모멘텀: 무거운 공과 네스테로프 가속</h1>
 <h2 id="q-momentum">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
-<p>길쭉한 골짜기에서 경사하강이 왜 느린지는 이미 보았다. 학습률은 가장 가파르게 휜 방향 때문에 2/<span class="sym" style="color:#c45a00">L</span>(곡률의 상한 <span class="sym" style="color:#c45a00">L</span> 로 정한 학습률의 벼랑)보다 작아야 하고, 그 작은 학습률로 가장 완만한 방향을 기어가야 하므로, 스텝 수는 조건수(가장 큰 곡률 ÷ 가장 작은 곡률)에 비례한다. 조건수가 100이면 스텝이 수백 번, 10000이면 수만 번이다. 뉴턴법처럼 헤시안(2차 편미분을 모은 행렬)으로 나누면 방향마다 스텝을 따로 맞춰 이 느림을 한 번에 지울 수 있지만, 파라미터가 1억 개인 신경망이라면 헤시안은 1억 × 1억, 곧 10¹⁶ 칸이다. 저장할 수도, 스텝마다 풀 수도 없다.</p>
-<p>그런데 실제로 신경망을 학습시켜 본 사람은 다른 길을 알고 있다. 파이토치에서 <code>torch.optim.SGD</code> 를 만들 때 <code>momentum=0.9</code> 한 칸을 채우면, 그래디언트를 한 번 재는 비용은 그대로인데 학습이 눈에 띄게 빨라진다. 헤시안을 계산하지도 않았는데 무엇이 달라진 걸까? 모멘텀 계수를 0.99로 올리면 손실이 오히려 크게 출렁이기도 하는데, 그렇다면 0.9는 어디에서 나온 값일까?</p>
+<p>길쭉한 골짜기에서 경사하강이 왜 느린지는 이미 보았다. 학습률은 가장 가파르게 휜 방향 때문에 2/<span class="sym" style="color:#c45a00">L</span>(곡률의 상한 <span class="sym" style="color:#c45a00">L</span> 로 정한 학습률의 벼랑)보다 작아야 하고, 그 작은 학습률로 가장 완만한 방향을 기어가야 하므로, 스텝 수는 조건수(가장 큰 곡률 ÷ 가장 작은 곡률)에 비례한다. 조건수가 100이면 스텝이 수백 번, 10000이면 수만 번이다. 뉴턴법처럼 헤시안(2차 편미분을 모은 행렬)으로 나누면 방향마다 스텝을 따로 조정해 이 느림을 한 번에 지울 수 있지만, 파라미터가 1억 개인 신경망이라면 헤시안은 1억 × 1억, 곧 10¹⁶ 칸이다. 저장할 수도, 스텝마다 풀 수도 없다.</p>
+<p>그런데 실제로 신경망을 학습시켜 본 사람은 다른 길을 알고 있다. 파이토치에서 <code>torch.optim.SGD</code> 를 만들 때 <code>momentum=0.9</code> 한 칸을 채우면, 그래디언트를 한 번 계산하는 비용은 그대로인데 학습이 눈에 띄게 빨라진다. 헤시안을 계산하지도 않았는데 무엇이 달라진 걸까? 모멘텀 계수를 0.99로 올리면 손실이 오히려 크게 출렁이기도 하는데, 그렇다면 0.9는 어디에서 나온 값일까?</p>
 <p>이 장은 다음 물음에 차례로 답한다.</p>
 <ul>
-<li>그래디언트 하나만 재는 비용으로, 지난 스텝들을 기억해 두면 지그재그가 어떻게 펴질까?</li>
+<li>그래디언트 하나만 계산하는 비용으로, 지난 스텝들을 기억해 두면 지그재그가 어떻게 펴질까?</li>
 <li>그렇게 해서 얼마나 빨라질까? 스텝 수가 조건수에 비례하던 것이 무엇에 비례하게 될까? 왜 하필 그것일까?</li>
-<li>지난 스텝을 기억하는 방법이 오히려 손실의 바닥 둘레를 영영 맴도는 일은 없을까? 맴돌지 않게 하려면 그래디언트를 어디에서 재야 할까?</li>
+<li>지난 스텝을 기억하는 방법이 오히려 손실의 바닥 둘레를 영영 맴도는 일은 없을까? 맴돌지 않게 하려면 그래디언트를 어디에서 계산해야 할까?</li>
 </ul>
 <h2 id="sec-heavy-ball-momentum">무거운 공: 지난 스텝을 기억하는 업데이트<span id="무거운-공-지난-스텝을-기억하는-업데이트" class="anchor-alias"></span></h2>
 <p>조건수 100인 그릇 <span class="sym" style="color:#d62728">f</span>(<span class="sym" style="color:#665522">θ</span>) = ½(<span class="sym" style="color:#665522">θ</span>₁² + 100<span class="sym" style="color:#665522">θ</span>₂²)을 경사하강으로 내려가 보자. <span class="sym" style="color:#665522">θ</span>₁ 방향의 곡률은 1, <span class="sym" style="color:#665522">θ</span>₂ 방향의 곡률은 100이다. 학습률은 가파른 방향의 벼랑 2/100 = 0.02 바로 아래인 0.018(1.8/<span class="sym" style="color:#c45a00">L</span>)로 잡고 (1, 1)에서 출발한다. 스텝 벡터를 두 성분으로 나눠 적으면 이상한 모습이 보인다. 가파른 방향의 스텝은 −1.8, +1.44, −1.152, +0.922, −0.737, +0.59로 부호를 바꿔 가며 골짜기의 양쪽 벽을 오가고, 완만한 방향의 스텝은 −0.018, −0.0177, −0.0174, −0.017, …로 늘 같은 쪽을 향하지만 아주 작다. 바닥까지 거리 0.001 안에 들기까지 381스텝이 걸린다. 스텝 하나하나는 그 자리에서 가장 가파른 쪽으로 갔는데, 스텝들을 이어 보면 가파른 방향에서는 거의 제자리를 오갔고 완만한 방향에서는 기어갔다. 지난 스텝들이 어느 쪽으로 움직였는지를 다음 스텝에 섞으면, 번갈아 바뀌는 스텝은 서로 지워지고 늘 같은 쪽인 스텝은 쌓이지 않을까?</p>
 <h3 id="hist-polyak-heavy-ball" class="history" data-people="polyak-boris">역사: 폴랴크와 「반복법의 수렴을 빠르게 하는 몇 가지 방법」<span id="역사-폴랴크와-반복법의-수렴을-빠르게-하는-몇-가지-방법" class="anchor-alias"></span></h3>
-<p>이 생각을 처음 수렴 속도까지 따져 글로 낸 사람은 소련의 수학자 보리스 폴랴크(Boris Polyak, 1935–2023)다. 그는 1963년 모스크바 국립대학 역학수학부에서 대학원 과정을 마쳤고, 박사 후보 학위(소련의 첫 박사 학위) 논문의 제목은 「범함수를 최소화하고 방정식과 부등식을 푸는 그래디언트 방법」이었다. 1964년 소련 과학원의 『계산 수학과 수리 물리 저널』에 실린 논문 「반복법의 수렴을 빠르게 하는 몇 가지 방법(Some methods of speeding up the convergence of iteration methods)」에서 그는 한 스텝을 정할 때 지금 자리의 그래디언트에 바로 앞 스텝을 일정 비율로 더하는 반복을 다루었다. 지금 자리의 그래디언트만이 아니라 지금 자리와 바로 앞 자리 둘을 써서 다음 자리를 정하는 반복이다. 이 업데이트는 마찰이 있는 그릇 속을 구르는 무거운 공의 운동과 같은 형태여서 「무거운 공 방법(heavy ball method)」이라고 부른다. 폴랴크는 그 뒤 소련(지금의 러시아) 과학원 제어과학연구소에서 오래 일했고, 그가 쓴 교과서 『최적화 입문(Introduction to Optimization)』도 널리 읽혔다.</p>
+<p>이 생각을 처음 수렴 속도까지 분석해 글로 낸 사람은 소련의 수학자 보리스 폴랴크(Boris Polyak, 1935–2023)다. 그는 1963년 모스크바 국립대학 역학수학부에서 대학원 과정을 마쳤고, 박사 후보 학위(소련의 첫 박사 학위) 논문의 제목은 「범함수를 최소화하고 방정식과 부등식을 푸는 그래디언트 방법」이었다. 1964년 소련 과학원의 『계산 수학과 수리 물리 저널』에 실린 논문 「반복법의 수렴을 빠르게 하는 몇 가지 방법(Some methods of speeding up the convergence of iteration methods)」에서 그는 한 스텝을 정할 때 지금 자리의 그래디언트에 바로 앞 스텝을 일정 비율로 더하는 반복을 다루었다. 지금 자리의 그래디언트만이 아니라 지금 자리와 바로 앞 자리 둘을 써서 다음 자리를 정하는 반복이다. 이 업데이트는 마찰이 있는 그릇 속을 구르는 무거운 공의 운동과 같은 형태여서 「무거운 공 방법(heavy ball method)」이라고 부른다. 폴랴크는 그 뒤 소련(지금의 러시아) 과학원 제어과학연구소에서 오래 일했고, 그가 쓴 교과서 『최적화 입문(Introduction to Optimization)』도 널리 읽혔다.</p>
 <figure class="fig "><img src="images/momentum/h1_two_kinds.png" alt="조건수 100 그릇을 학습률 1.8/L 의 경사하강으로 내려갈 때 처음 열두 스텝의 두 성분. 왼쪽: 가파른 방향의 스텝은 크고 부호가 번갈아 바뀐다. 오른쪽: 완만한 방향의 스텝은 늘 같은 쪽이고 백 배쯤 작다(sources/momentum/figs.py)" loading="lazy"><figcaption>조건수 100 그릇을 학습률 1.8/L 의 경사하강으로 내려갈 때 처음 열두 스텝의 두 성분. 왼쪽: 가파른 방향의 스텝은 크고 부호가 번갈아 바뀐다. 오른쪽: 완만한 방향의 스텝은 늘 같은 쪽이고 백 배쯤 작다(sources/momentum/figs.py)</figcaption></figure>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>앞 스텝을 일정 비율로 더하는 거면 코드 한 줄이잖아요. 비율을 바꿔 가며 돌려 보면 어느 게 빠른지 금방 나올 텐데, 이게 논문까지 될 일이었어요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>민준 학생은 그 「돌려 보기」를 무엇으로 하죠? 1964년에는 책상 위에 두고 쓰는 개인 컴퓨터가 없었어요. 개인 컴퓨터는 1970년대 중반에야 나왔고요.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 비율을 다섯 개 바꿔 가며 수백 스텝씩 세어 보는 일부터 쉽지 않았겠네요. 돌려 보고 고르는 대신, 돌리기 전에 어느 비율이 좋은지를 계산으로 알아내야 했겠어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 비율을 다섯 개 바꿔 가며 수백 스텝씩 세어 보는 일부터 쉽지 않았겠네요. 돌려 보고 선택하는 대신, 돌리기 전에 어느 비율이 좋은지를 계산으로 알아내야 했겠어요.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 그리고 폴랴크가 다룬 것은 신경망이 아니라 범함수를 최소화하고 방정식을 푸는 반복법이었어요. 제목에 「반복법」이 들어간 것도 그래서예요. 이 방법이 딥러닝으로 다시 들어온 것은 반세기 뒤의 일이에요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 학습시킬 신경망도 없고 노트북도 없이, 식만 가지고 수렴 속도를 따진 거네요. 그런데 앞 스텝의 절반만 더해도 벽 사이를 튀는 폭이 정말 줄까요? 몇 스텝만 손으로 따라가 보면 알 수 있을 것 같은데요.</p></div></div>
 <h3 id="지그재그-골짜기에서-지난-스텝-더하기">지그재그 골짜기에서 지난 스텝 더하기</h3>
@@ -799,7 +799,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 </tr>
 </tbody>
 </table></div>
-<p>비율을 0.8까지 올리면 스텝이 381에서 63으로 여섯 배 줄어들고, 그래디언트를 재는 횟수가 스텝 수와 같으므로 계산도 여섯 배 준다. 그런데 0.9, 0.95로 더 올리면 다시 늘어나는데, 기억이 너무 길면 지난 스텝의 기세가 바닥을 지나쳐도 꺾이지 않기 때문이다. 비율에는 알맞은 자리가 있다.</p>
+<p>비율을 0.8까지 올리면 스텝이 381에서 63으로 여섯 배 줄어들고, 그래디언트를 계산하는 횟수가 스텝 수와 같으므로 계산도 여섯 배 준다. 그런데 0.9, 0.95로 더 올리면 다시 늘어나는데, 기억이 너무 길면 지난 스텝의 기세가 바닥을 지나쳐도 꺾이지 않기 때문이다. 비율에는 적절한 자리가 있다.</p>
 <p>이렇게 지금 자리의 그래디언트에 지난 스텝들의 기세를 일정 비율로 이어 붙여 스텝을 정하는 방법을 <strong>모멘텀</strong> (지난 스텝을 기억하는 업데이트 / momentum)이라 하고, 폴랴크의 논문에서 온 이름으로 무거운 공 방법이라고도 한다. 물리에서 질량 × 속도인 운동량도 영어로는 momentum이지만, 여기서는 최적화 기법과 그 기법이 들고 다니는 버퍼를 가리킨다. 이어 붙이는 비율 <span class="sym" style="color:#f0694b">β</span>(베타)를 모멘텀 계수라 한다. 파이토치와 같은 형태로 적으면 기세를 담는 버퍼 <span class="sym" style="color:#ff1eff">m</span>을 두고 한 스텝을 다음 두 줄로 계산한다.</p>
 <div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mstyle mathcolor="#ff1eff"><mi>m</mi></mstyle><mrow><mstyle mathcolor="#a67a63"><mi>k</mi></mstyle><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mstyle mathcolor="#f0694b"><mi>β</mi></mstyle><mtext> </mtext><msub><mstyle mathcolor="#ff1eff"><mi>m</mi></mstyle><mstyle mathcolor="#a67a63"><mi>k</mi></mstyle></msub><mo>+</mo><mstyle mathcolor="#b0892a"><mi mathvariant="normal">∇</mi><mi>f</mi></mstyle><mo stretchy="false">(</mo><msub><mstyle mathcolor="#665522"><mi>θ</mi></mstyle><mstyle mathcolor="#a67a63"><mi>k</mi></mstyle></msub><mo stretchy="false">)</mo><mo separator="true">,</mo><mspace width="2em"/><msub><mstyle mathcolor="#665522"><mi>θ</mi></mstyle><mrow><mstyle mathcolor="#a67a63"><mi>k</mi></mstyle><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><msub><mstyle mathcolor="#665522"><mi>θ</mi></mstyle><mstyle mathcolor="#a67a63"><mi>k</mi></mstyle></msub><mo>−</mo><mstyle mathcolor="#006600"><mi>η</mi></mstyle><mtext> </mtext><msub><mstyle mathcolor="#ff1eff"><mi>m</mi></mstyle><mrow><mstyle mathcolor="#a67a63"><mi>k</mi></mstyle><mo>+</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">\textcolor{#ff1eff}{m}_{\textcolor{#a67a63}{k}+1} = \textcolor{#f0694b}{\beta}\,\textcolor{#ff1eff}{m}_{\textcolor{#a67a63}{k}} + \textcolor{#b0892a}{\nabla f}(\textcolor{#665522}{\theta}_{\textcolor{#a67a63}{k}}), \qquad
 \textcolor{#665522}{\theta}_{\textcolor{#a67a63}{k}+1} = \textcolor{#665522}{\theta}_{\textcolor{#a67a63}{k}} - \textcolor{#006600}{\eta}\,\textcolor{#ff1eff}{m}_{\textcolor{#a67a63}{k}+1}
@@ -818,7 +818,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <aside class="guide"><p class="guide-title">길잡이 · 『동역학』 「모멘텀 최적화: 마찰이 넓이를 줄여 손실 최소점에 멈춘다」</p><p>무거운 공 업데이트를 위치와 운동량의 평면에서 보면, 모멘텀 계수가 1보다 작을 때 스텝마다 상태들이 차지하는 넓이가 줄어 한 점(바닥)으로 모이고, 1이면 넓이가 그대로라 영영 흔들린다. 마찰 없이 공을 굴리는 해밀토니안 몬테카를로와 같은 기계로 읽는 물리 해석. <a href="https://lameproof.com/dynamics-book/hamiltonian-sec-momentum-optimization-friction.html">이어 읽기</a></p>
 </aside>
 <h3 id="ml에서-momentum-0-9">ML에서: momentum=0.9</h3>
-<p>파이토치의 <code>torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9)</code>에서 <code>step()</code>은 위 두 줄을 파라미터마다 계산한다. 버퍼 <span class="sym" style="color:#ff1eff">m</span>은 옵티마이저가 파라미터 하나마다 같은 크기로 하나씩 들고 있으므로, 모멘텀을 켜면 옵티마이저가 차지하는 메모리가 파라미터만큼 늘어난다. 헤시안의 10¹⁶ 칸에 비하면 거의 공짜다. <code>momentum</code>의 기본값은 0(모멘텀 없음)이지만, 이미지 분류를 처음 크게 끌어올린 AlexNet(크리제프스키·서츠케버·힌턴, 2012)이 모멘텀 0.9로 학습했고, 잔차 신경망 ResNet(허 카이밍 팀, 2015) 같은 뒤의 논문들도 0.9를 썼다. 0.9는 이론으로 계산해 나온 값이라기보다, 이런 논문들에서 무난하게 통한 뒤 널리 따라 쓰이게 된 값이다. 모멘텀 계수 0.9가 학습률과 어떻게 얽히는지는 아래 문제 2에서 계산한다.</p>
+<p>파이토치의 <code>torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9)</code>에서 <code>step()</code>은 위 두 줄을 파라미터마다 계산한다. 버퍼 <span class="sym" style="color:#ff1eff">m</span>은 옵티마이저가 파라미터 하나마다 같은 크기로 하나씩 들고 있으므로, 모멘텀을 켜면 옵티마이저가 차지하는 메모리가 파라미터만큼 늘어난다. 헤시안의 10¹⁶ 칸에 비하면 거의 공짜다. <code>momentum</code>의 기본값은 0(모멘텀 없음)이지만, 이미지 분류를 처음 크게 끌어올린 AlexNet(크리제프스키·서츠케버·힌턴, 2012)이 모멘텀 0.9로 학습했고, 잔차 신경망 ResNet(허 카이밍 팀, 2015) 같은 뒤의 논문들도 0.9를 썼다. 0.9는 이론으로 계산해 나온 값이라기보다, 이런 논문들에서 무난하게 통한 뒤 널리 따라 쓰이게 된 값이다. 모멘텀 계수 0.9가 학습률과 어떻게 연관되는지는 아래 문제 2에서 계산한다.</p>
 <div class="dialogue"><h3 id="prob-momentum-windy-cart">문제 1. 바람 부는 다리 위의 쇼핑 카트<span id="문제-1-바람-부는-다리-위의-쇼핑-카트" class="anchor-alias"></span></h3>
 <blockquote>
 <p>바퀴가 잘 구르는 쇼핑 카트를 비탈진 다리 위에 놓았다. 옆바람이 1초마다 왼쪽으로 1, 오른쪽으로 1을 번갈아 밀고(처음은 왼쪽), 비탈은 늘 앞으로 0.1을 민다. 카트의 속도는 1초마다 「지난 속도 × <span class="sym" style="color:#f0694b">β</span> + 그 1초의 힘」으로 바뀐다. (가) <span class="sym" style="color:#f0694b">β</span> = 0(카트가 지난 속도를 전혀 기억하지 못함)일 때 옆 속도와 앞 속도는? (나) <span class="sym" style="color:#f0694b">β</span> = 0.9일 때 처음 다섯 초의 속도와, 오래 지난 뒤의 속도는? (다) 앞 속도 ÷ 옆 속도는 각각 얼마인가?</p>
@@ -832,7 +832,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>같은 0.9를 곱했는데 앞 속도는 열 배가 되고 옆 속도는 절반이 됐어요. 무엇이 달랐죠?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>힘의 부호가 늘 같으면 기억한 속도와 새 힘이 같은 쪽이라 쌓이고, 번갈아 바뀌면 기억한 속도가 새 힘과 반대쪽이라 깎여요. 그래서 앞 속도 ÷ 옆 속도가 0.1에서 1.9로, 열아홉 배가 됐어요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 기억이 길수록 오락가락하는 힘은 묻히고 꾸준한 힘만 남는 거네요.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>기온도 그래. 한 시간마다 잰 기온은 낮밤으로 크게 오르내리는데, 지난 며칠 것과 섞어 보면 오르내림은 지워지고 봄으로 갈수록 조금씩 오르는 추세만 남잖아.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>기온도 그래. 한 시간마다 측정한 기온은 낮밤으로 크게 오르내리는데, 지난 며칠 것과 섞어 보면 오르내림은 지워지고 봄으로 갈수록 조금씩 오르는 추세만 남잖아.</p></div></div>
 </div><div class="dialogue"><h3 id="prob-momentum-learning-rate-equivalence">문제 2. 학습률을 열 배 키운 것과 같은가<span id="문제-2-학습률을-열-배-키운-것과-같은가" class="anchor-alias"></span></h3>
 <blockquote>
 <p>(가) 그래디언트가 늘 1인 비탈에서 <span class="sym" style="color:#006600">η</span> = 0.01, <span class="sym" style="color:#f0694b">β</span> = 0.9의 무거운 공이 내딛는 스텝 크기 <span class="sym" style="color:#006600">η</span><span class="sym" style="color:#ff1eff">m</span>ₖ를 처음 다섯 스텝과 30스텝째에 구하라. 스텝 크기는 어디로 다가가는가? (나) 그렇다면 조건수 100 그릇 ½(<span class="sym" style="color:#665522">θ</span>₁² + 100<span class="sym" style="color:#665522">θ</span>₂²)에서 <span class="sym" style="color:#006600">η</span> = 0.01, <span class="sym" style="color:#f0694b">β</span> = 0.9의 무거운 공은, 학습률을 그만큼 키운 경사하강과 같은가? 둘을 (1, 1)에서 돌려 비교하라. (풀어 본 뒤 위젯 1의 「문제 2 불러오기」로 확인해 보자.)</p>
@@ -864,10 +864,10 @@ section.interlude figure.fig img { border-radius: 10px; }
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 Adam의 <span class="sym" style="color:#ff1eff">m</span>₁ = 0.2는 그래디언트 2를 잘 나타낸 값인가요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>아니요, 열 배나 작아요. 평균이라면서 왜 처음에는 이렇게 작지…</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p><span class="sym" style="color:#ff1eff">m</span>₁에 들어간 무게를 다 더하면 얼마예요?</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>0.1뿐이에요. <span class="sym" style="color:#ff1eff">m</span>₂는 0.1 + 0.09 = 0.19고요. <span class="sym" style="color:#ff1eff">m</span>₀ = 0에서 시작한 탓에 무게의 합이 1 − 0.9ᵏ밖에 안 돼서 0 쪽으로 치우쳐 있었어요.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>0.1뿐이에요. <span class="sym" style="color:#ff1eff">m</span>₂는 0.1 + 0.09 = 0.19고요. <span class="sym" style="color:#ff1eff">m</span>₀ = 0에서 시작한 탓에 무게의 합이 1 − 0.9ᵏ밖에 안 돼서 0 쪽으로 편향되어 있었어요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 그 합으로 나누면 되겠네?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>응. <span class="sym" style="color:#ff1eff">m</span>₁ = 0.2/0.1 = 2, <span class="sym" style="color:#ff1eff">m</span>₂ = 0.38/0.19 = 2, <span class="sym" style="color:#ff1eff">m</span>₁₀ = 2로 처음부터 정확히 2가 돼. 그게 Adam의 편향 보정이야.</p></div></div>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>SGD 버퍼는 합이라 학습률과 곱해져 스텝이 열 배 크고, Adam은 평균이라 학습률이 곧 스텝 크기에 가깝군요. 두 옵티마이저 사이에서 lr을 그대로 옮기면 안 되는 이유가 하나 늘었어요. 배달 앱에서 가게 별점의 평균과 별점을 다 더한 합계를 같은 눈금으로 비교하면 안 되는 것처럼요.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>SGD 버퍼는 합이라 학습률과 곱해져 스텝이 열 배 크고, Adam은 평균이라 학습률이 곧 스텝 크기에 가깝군요. 두 옵티마이저 사이에서 lr을 그대로 옮기면 안 되는 이유가 하나 늘었어요. 배달 앱에서 가게 별점의 평균과 별점을 다 더한 합계를 같은 척도로 비교하면 안 되는 것처럼요.</p></div></div>
 </div>
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="sharpness-sec-sharpness-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 5</span><a class="chapter-nav-next" href="momentum-sec-sqrt-condition-acceleration.html">가속: 왜 조건수의 제곱근인가 &rarr;</a></nav>

@@ -693,9 +693,9 @@ section.interlude figure.fig img { border-radius: 10px; }
 (function(){var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')})();
 </script>
 <link rel="manifest" href="/diffusion-book/manifest.webmanifest"><link rel="apple-touch-icon" href="/diffusion-book/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="생성 모델"><meta name="theme-color" content="#ffffff">
-<link rel="stylesheet" href="/reader/reader.css?v=1160ed35" data-lp-reader>
-<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"1160ed35"}</script>
-<script defer src="/reader/reader.js?v=1160ed35" data-lp-reader></script>
+<link rel="stylesheet" href="/reader/reader.css?v=17910e6c" data-lp-reader>
+<script data-lp-reader>window.LP_READER={"api":"https://trans.mindforest.io/lameproofreader","book":"diffusion-book","base":"/diffusion-book/","v":"17910e6c"};try{if(localStorage.getItem("lp.reader.sidebarCollapsed")==="true")document.documentElement.classList.add("lp-sb-collapsed","lp-sb-noanim")}catch(e){}</script>
+<script defer src="/reader/reader.js?v=17910e6c" data-lp-reader></script>
 </head>
 <body>
 <nav id="sidebar">
@@ -742,7 +742,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <article class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="dit.html">디퓨전 트랜스포머: U-Net 자리에 트랜스포머를</a></p>
 <h2 id="sec-latent-patch-tokens">패치: 잠재 그림을 토큰 줄로 자르기<span id="패치-잠재-그림을-토큰-줄로-자르기" class="anchor-alias"></span></h2>
-<p>트랜스포머에게 문장은 토큰의 줄이고 토큰 하나는 벡터 하나이니, 잠재 그림도 줄로 펴 넣을 수 있다. 1024 × 1024 그림을 FLUX.1 의 VAE 로 줄이면 가로세로가 8분의 1인 128 × 128칸, 칸마다 16개의 수(채널 16)를 가진 잠재 그림이 된다. 칸 하나를 토큰 하나로 삼으면 토큰이 16,384개다. 셀프 어텐션은 토큰마다 다른 모든 토큰과 질의·열쇠의 내적을 구하므로, 머리 하나가 층 하나에서 계산하는 (질의, 열쇠) 쌍이 16,384² = 268,435,456개다. 이 쌍 계산을 블록 수십 개, 스텝 수십 번 되풀이해야 하는데, 압축기가 더 세게 줄이면 되살린 그림이 무너진다. 줄이는 일을 신경망의 첫 층에서, 칸을 몇 개씩 묶어 토큰 하나로 만드는 것으로 하면 어떨까?</p>
+<p>트랜스포머에게 문장은 토큰의 줄이고 토큰 하나는 벡터 하나이니, 잠재 그림도 줄로 펴 넣을 수 있다. 1024 × 1024 그림을 FLUX.1 의 VAE 로 줄이면 가로세로가 8분의 1인 128 × 128칸, 칸마다 16개의 수(채널 16)를 가진 잠재 그림이 된다. 칸 하나를 토큰 하나로 삼으면 토큰이 16,384개다. 셀프 어텐션은 토큰마다 다른 모든 토큰과 질의·열쇠의 내적을 구하므로, 머리 하나가 층 하나에서 계산하는 (질의, 열쇠) 쌍이 16,384² = 268,435,456개다. 이 쌍 계산을 블록 수십 개, 스텝 수십 번 반복해야 하는데, 압축기가 더 세게 줄이면 되살린 그림이 무너진다. 줄이는 일을 신경망의 첫 층에서, 칸을 몇 개씩 묶어 토큰 하나로 만드는 것으로 하면 어떨까?</p>
 <h3 id="hist-vision-transformer-patches" class="history" data-people="dosovitskiy-alexey peebles-william xie-saining">역사: 그림 한 장은 16 × 16 낱말<span id="역사-그림-한-장은-16-16-낱말" class="anchor-alias"></span></h3>
 <p>그림을 칸 묶음으로 잘라 트랜스포머에 넣은 것은 그림 분류에서 먼저였다. 2020년 구글의 도소비츠키(Alexey Dosovitskiy)와 동료들은 논문 제목을 「그림 한 장은 16 × 16 낱말의 값어치가 있다(An Image is Worth 16x16 Words)」로 붙였다. 그전까지 그림 인식에 어텐션을 쓰는 연구는 합성곱 신경망 안에 어텐션을 끼우거나, 합성곱의 일부를 어텐션으로 바꾸는 쪽이었다. 이들은 합성곱을 빼고, 그림을 16 × 16 픽셀 조각으로 잘라 조각 하나를 낱말 하나처럼 다루는 트랜스포머(ViT, Vision Transformer)만으로도 큰 자료로 미리 학습하면 좋은 합성곱 신경망에 맞먹는다고 보고했다. 합성곱이 처음부터 갖고 들어가는 「이웃 칸끼리 관계가 깊다」는 가정을 덜어 낸 대신, 자료가 많으면 그 관계까지 배운다는 데 건 것이다.</p>
 <figure class="fig "><img src="images/dit/h2_vit_data.png" alt="미리 학습한 자료가 커질수록 ImageNet 정확도가 어떻게 바뀌는가. 130만 장에서는 ViT 가 가장 큰 ResNet(BiT R152x4, 검은 점선)보다 낮고, 1,400만 장에서 비슷해지며, 3억 장에서 ViT-H/14 가 앞선다. ViT 는 도소비츠키 팀 2020 표 5, ResNet 은 콜레스니코프 팀 2019(BiT) 표 1·2 의 숫자를 다시 그렸다. 스크립트 sources/dit/history_figs.py" loading="lazy"><figcaption>미리 학습한 자료가 커질수록 ImageNet 정확도가 어떻게 바뀌는가. 130만 장에서는 ViT 가 가장 큰 ResNet(BiT R152x4, 검은 점선)보다 낮고, 1,400만 장에서 비슷해지며, 3억 장에서 ViT-H/14 가 앞선다. ViT 는 도소비츠키 팀 2020 표 5, ResNet 은 콜레스니코프 팀 2019(BiT) 표 1·2 의 숫자를 다시 그렸다. 스크립트 sources/dit/history_figs.py</figcaption></figure>
@@ -810,7 +810,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <figure class="widget-embed" id="widget-dit-w1"><div class="widget-bar"><span class="widget-tag">직접 움직여 보기</span><span class="widget-label">패치 한 변과 토큰 수</span><a class="widget-open" href="widgets/dit.html?v=0d88e48f#w1">크게 열기</a></div><iframe data-src="widgets/dit.html?w=w1&embed=1&v=0d88e48f" title="패치 한 변과 토큰 수" loading="lazy"></iframe></figure>
 <p>위젯에서 그림 크기와 패치 한 변을 바꾸면 토큰 수, 토큰 하나의 수, 어텐션 쌍이 바뀐다. 그림 크기를 두 배로 키울 때와 패치 한 변을 절반으로 줄일 때 어텐션 쌍이 같은 비율로 늘어나는지 보자.</p>
 <h3 id="ml에서-1024-1024-그림은-어느-모델에서나-토큰-4-096개">ML에서: 1024 × 1024 그림은 어느 모델에서나 토큰 4,096개</h3>
-<p>이 장에서 비교할 모델들의 설정을 ComfyUI 코드에서 읽으면, 1024 × 1024 그림 한 장이 모두 토큰 4,096개가 된다. FLUX.1, Qwen-Image, Z-Image, Krea 2, Anima 는 가로세로 8분의 1, 채널 16인 잠재 그림을 2 × 2 패치로 자른다. FLUX.2 는 VAE 쪽에서 미리 2 × 2칸을 채널로 접어, 가로세로 16분의 1에 채널 128인 잠재 그림을 패치 한 변 1로 넣는다(<code>comfy/latent_formats.py</code> 의 <code>Flux2</code>, <code>comfy/model_detection.py</code>). 어느 쪽이든 픽셀 16 × 16칸이 토큰 하나이고, 영상 모델은 같은 자르기에 시간 축을 하나 더한다. Anima 의 몸통은 NVIDIA 의 영상·그림 생성 모델 Cosmos-Predict2 를 바탕으로 해서, 그림 한 장도 (시간, 행, 열) 세 축의 좌표를 받는다.</p>
+<p>이 장에서 비교할 모델들의 설정을 ComfyUI 코드에서 읽으면, 1024 × 1024 그림 한 장이 모두 토큰 4,096개가 된다. FLUX.1, Qwen-Image, Z-Image, Krea 2, Anima 는 가로세로 8분의 1, 채널 16인 잠재 그림을 2 × 2 패치로 자른다. FLUX.2 는 VAE 쪽에서 미리 2 × 2칸을 채널로 접어, 가로세로 16분의 1에 채널 128인 잠재 그림을 패치 한 변 1로 넣는다(<code>comfy/latent_formats.py</code> 의 <code>Flux2</code>, <code>comfy/model_detection.py</code>). 어느 쪽이든 픽셀 16 × 16칸이 토큰 하나이고, 영상 모델은 같은 자르기에 시간 축을 하나 더한다. Anima 의 몸통은 NVIDIA 의 영상·그림 생성 모델 Cosmos-Predict2 를 기반으로 해서, 그림 한 장도 (시간, 행, 열) 세 축의 좌표를 받는다.</p>
 <div class="dialogue"><h3 id="prob-dit-mosaic-wall">문제 4. 모자이크 벽 옮기기<span id="문제-4-모자이크-벽-옮기기" class="anchor-alias"></span></h3>
 <blockquote>
 <p>가로 48장, 세로 32장의 타일로 된 모자이크 벽을 다른 건물로 옮기려고 타일을 가로세로 4 × 4장씩 상자에 담는다. (가) 상자는 몇 개이고, 상자 하나에 타일은 몇 장인가? (나) 상자를 2 × 2장짜리로 바꾸면 상자는 몇 개인가? (다) 옮긴 뒤 다시 붙이려면 상자마다 무엇을 적어 두어야 하는가?</p>
