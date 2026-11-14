@@ -859,16 +859,16 @@ class CanonBlock(G.Block):
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럼 2층 모델이 1층보다 더 가진 263,680 개와 비교하면요?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>층 하나를 더 쌓는 데 26만 개를 썼는데, 4,096 개로 더 낮은 손실을 냈네요. 앞 토큰 헤드가 하던 일에 헤드 하나는 정말 비쌌던 거고요.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(다)는 층 하나에 A 256, B 768, C 256, D 1,024 칸이니까 2,304 칸에 무게 넷, 9,216 개. 네 층이면 36,864 개고, 모델 전체 3,360,256 개의 1.1% 야.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>논문은 GPT-2 small 크기에서 0.45% 아래라고 적었어요. 다만 무게 수가 적다고 계산 시간까지 적은 건 아니에요. 논문은 13억 파라미터 모델에 캐논-ABCD 를 넣었을 때 전용 CUDA 커널(<code>causal-conv1d</code>)을 쓰고도 H100 에서 순전파 12.4%, 역전파 14.1% 가 더 걸렸다고 적었어요.</p></div></div>
-</div><div class="dialogue"><h3 id="prob-canon-one-layer-induction">문제 4. 층이 하나뿐인데 어떻게 앞 토큰 헤드 없이 베끼나<span id="문제-4-층이-하나뿐인데-어떻게-앞-토큰-헤드-없이-베끼나" class="anchor-alias"></span></h3>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>논문은 GPT-2 small 크기에서 0.45% 아래라고 적었어요. 다만 무게 수가 적다고 계산 시간까지 적은 건 아니에요. 논문은 13억 파라미터 모델에 캐논-ABCD 를 넣었을 때 전용 CUDA 커널(<code>causal-conv1d</code>)을 쓰고도 H100 에서 순전파 12.4%, 역전파 14.1% 가 더 걸렸다고 적었어요.</p></div></div></div>
+<div class="dialogue"><h3 id="prob-canon-one-layer-induction">문제 4. 층이 하나뿐인데 어떻게 앞 토큰 헤드 없이 베끼나<span id="문제-4-층이-하나뿐인데-어떻게-앞-토큰-헤드-없이-베끼나" class="anchor-alias"></span></h3>
 <blockquote>
 <p>1층 + 캐논 AB 모델은 앞 토큰 헤드 없이 유도 점수 0.697 을 냈다. 무작위 토큰 글 「… A B … A」에서 마지막 A 다음에 B 를 써야 한다고 하자. (가) 첫 번째 B 위치의 키가 「내 앞 토큰은 A」를 담으려면 캐논 층의 무게 가운데 무엇이 쓰여야 하나? (나) 1층 + 캐논 모델의 결과만으로 「큰 모델에서도 앞 토큰 헤드는 필요 없다」고 말할 수 있나?</p>
 </blockquote>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(가)는 w₁ 이겠지. 캐논 층을 지난 B 위치의 벡터에는 w₁ ⊙ h(A) 가 더해지니까, 키를 만들 때 A 의 흔적이 같이 들어가.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>그럼 마지막 A 위치의 쿼리가 「A」를 찾으면 첫 번째 B 위치의 키가 반응하고, 그 위치 값을 옮기면 B 가 오는 거네. 2층 모델에서는 앞 토큰 헤드가 첫째 층에서 하던 걸 캐논 층이 어텐션 앞에서 해 준 거고.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(나)는 어때요?</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>못 해요. 우리가 본 건 어텐션 전용 1층 모델이고, 큰 모델의 앞 토큰 헤드가 다른 일도 하는지는 안 봤으니까요. 「이 크기의 모델에서는 캐논 층이 앞 토큰 헤드의 일을 대신했다」까지만요.</p></div></div>
-</div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>못 해요. 우리가 본 건 어텐션 전용 1층 모델이고, 큰 모델의 앞 토큰 헤드가 다른 일도 하는지는 안 봤으니까요. 「이 크기의 모델에서는 캐논 층이 앞 토큰 헤드의 일을 대신했다」까지만요.</p></div></div></div>
+
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="canon.html">&larr; 합성 시험: 작은 모델로 구조를 측정하다</a><span class="page-count">2 / 4</span><a class="chapter-nav-next" href="canon-sec-depo-canon.html">여러 단계 찾기: 캐논 층을 덧붙인 GPT 는 이 시험을 배울까 &rarr;</a></nav>
 </main>
