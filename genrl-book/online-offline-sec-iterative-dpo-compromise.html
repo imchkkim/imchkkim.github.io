@@ -792,73 +792,73 @@ section.interlude .dlg-cast img { border-radius: 12px; }
     class online m-orange
     class iterative m-green
 </pre><h5 id="hist-llama-iterative-rounds" class="history">역사: Llama의 반복 학습과 여러 절충안<span id="역사-llama의-반복-학습과-여러-절충안" class="anchor-alias"></span></h5>
-<p>한 번 만든 데이터가 낡는다면 가장 쉬운 처방은 학습을 몇 토막으로 나누고 토막마다 데이터를 새로 만드는 것이다. 메타의 Llama 2(2023)가 이 방식을 썼다. 그때까지 가장 나은 모델로 응답을 새로 뽑아 다시 학습하는 일을 다섯 번 반복했고, 판마다 RLHF-V1부터 V5까지 이름을 붙였다. 넷째 판까지는 거절 샘플링 파인튜닝(여러 응답을 뽑아 보상 모델 점수가 가장 좋은 것만 남겨 따라 쓰게 하기)만 썼고, 그 뒤에야 거절 샘플링 파인튜닝으로 학습한 모델 위에 PPO를 얹었다.</p>
-<p>Llama 3(2024)는 같은 반복 구조를 여섯 라운드로 돌리되 PPO 자리에 DPO를 넣었다. 한 라운드는 거절 샘플링 + SFT(좋은 응답을 그대로 따라 쓰게 하는 지도 학습) + DPO였다. DPO에는 앞 라운드에서 가장 나았던 모델들로 새로 모은 선호 데이터를 주로 썼는데, 논문은 그렇게 하면 학습 데이터가 각 라운드에서 최적화되는 정책의 분포에 더 가까워지기 때문이라고 적었다. 그래서 Llama 3의 방식은 반쯤 온라인이다. 데이터는 라운드마다 정책을 따라가고, 라운드 안에서는 오프라인의 안정성을 누린다. PPO 같은 온폴리시 알고리즘도 시도했지만, 큰 모델에서는 DPO가 연산을 덜 쓰고 지시 따르기 평가(IFEval)에서 더 나았다고 한다. 라운드 사이에 모델을 검수하고 방향을 고칠 수 있다는 것도 실무적 이점이다. JoyCaption도 이 방식을 써서, 2라운드 반복으로 결함률(엉터리 출력 비율)을 9.6%에서 1.5%로 낮췄다.</p>
-<svg class="fig" viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="위: Llama 2 의 다섯 판 RLHF-V1~V5. 판 사이마다 사람 선호 데이터를 새로 모아 보상 모델을 다시 학습했고, V4 까지는 거절 샘플링만, V5 에서 거절 샘플링 위에 PPO 를 얹었다. 아래: Llama 3 의 여섯 라운드, 라운드마다 거절 샘플링, SFT, DPO" style="background:#fff;border:1px solid #ccc;border-radius:4px;--w-1:#2a78d6;--w-2:#eb6834;--w-3:#1baf7a;--w-4:#4a3aa7;--w-ink:#0b0b0b;--w-ink-2:#222222;--w-muted:#6b6a65;--w-grid:#e1e0d9;--w-axis:#c3c2b7;--w-surface:#ffffff;--w-fill-1:rgba(42,120,214,0.14);--w-fill-2:rgba(235,104,52,0.14);--w-fill-3:rgba(27,175,122,0.16);--w-neutral:#f0efec;">
+<p>한 번 만든 데이터가 낡는다면 가장 쉬운 처방은 학습을 몇 토막으로 나누고 토막마다 데이터를 새로 만드는 것이다. 메타의 Llama 2(2023)가 이 방식을 썼다. 그때까지 가장 나은 모델로 응답을 새로 뽑아 다시 학습하는 일을 다섯 번 반복했고, 판마다 RLHF-V1부터 V5까지 이름을 붙였다. 넷째 판까지는 리젝션 샘플링 파인튜닝(여러 응답을 뽑아 보상 모델 점수가 가장 좋은 것만 남겨 따라 쓰게 하기)만 썼고, 그 뒤에야 리젝션 샘플링 파인튜닝으로 학습한 모델 위에 PPO를 얹었다.</p>
+<p>Llama 3(2024)는 같은 반복 구조를 여섯 라운드로 돌리되 PPO 자리에 DPO를 넣었다. 한 라운드는 리젝션 샘플링 + SFT(좋은 응답을 그대로 따라 쓰게 하는 지도 학습) + DPO였다. DPO에는 앞 라운드에서 가장 나았던 모델들로 새로 모은 선호 데이터를 주로 썼는데, 논문은 그렇게 하면 학습 데이터가 각 라운드에서 최적화되는 정책의 분포에 더 가까워지기 때문이라고 적었다. 그래서 Llama 3의 방식은 반쯤 온라인이다. 데이터는 라운드마다 정책을 따라가고, 라운드 안에서는 오프라인의 안정성을 누린다. PPO 같은 온폴리시 알고리즘도 시도했지만, 큰 모델에서는 DPO가 연산을 덜 쓰고 지시 따르기 평가(IFEval)에서 더 나았다고 한다. 라운드 사이에 모델을 검수하고 방향을 고칠 수 있다는 것도 실무적 이점이다. JoyCaption도 이 방식을 써서, 2라운드 반복으로 결함률(엉터리 출력 비율)을 9.6%에서 1.5%로 낮췄다.</p>
+<svg class="fig" viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="위: Llama 2 의 다섯 판 RLHF-V1~V5. 판 사이마다 사람 선호 데이터를 새로 모아 보상 모델을 다시 학습했고, V4 까지는 리젝션 샘플링만, V5 에서 리젝션 샘플링 위에 PPO 를 얹었다. 아래: Llama 3 의 여섯 라운드, 라운드마다 리젝션 샘플링, SFT, DPO" style="background:#fff;border:1px solid #ccc;border-radius:4px;--w-1:#2a78d6;--w-2:#eb6834;--w-3:#1baf7a;--w-4:#4a3aa7;--w-ink:#0b0b0b;--w-ink-2:#222222;--w-muted:#6b6a65;--w-grid:#e1e0d9;--w-axis:#c3c2b7;--w-surface:#ffffff;--w-fill-1:rgba(42,120,214,0.14);--w-fill-2:rgba(235,104,52,0.14);--w-fill-3:rgba(27,175,122,0.16);--w-neutral:#f0efec;">
   <defs><marker id="h19-1-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path style="fill:var(--w-ink-2)" d="M0,0 L10,5 L0,10 Z"/></marker></defs>
   <text class="t-strong" x="280" y="24" text-anchor="middle" style="font-size:15px">데이터를 토막마다 새로 만든 두 번의 반복</text>
   <text class="t-strong" x="20" y="56" style="font-size:14px">Llama 2 (2023): 다섯 판</text>
   <rect class="fa1" x="20" y="70" width="84" height="58" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
   <text class="t-strong" x="62" y="90" text-anchor="middle" style="font-size:13px">RLHF-V1</text>
-  <text x="62" y="108" text-anchor="middle" style="font-size:12px">거절 샘플링</text>
+  <text x="62" y="108" text-anchor="middle" style="font-size:12px">리젝션 샘플링</text>
   <line class="sink" x1="106" y1="99" x2="122" y2="99" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
   <text class="t-muted" x="114" y="146" text-anchor="middle" style="font-size:11px">사람</text>
   <rect class="fa1" x="124" y="70" width="84" height="58" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
   <text class="t-strong" x="166" y="90" text-anchor="middle" style="font-size:13px">RLHF-V2</text>
-  <text x="166" y="108" text-anchor="middle" style="font-size:12px">거절 샘플링</text>
+  <text x="166" y="108" text-anchor="middle" style="font-size:12px">리젝션 샘플링</text>
   <line class="sink" x1="210" y1="99" x2="226" y2="99" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
   <text class="t-muted" x="218" y="146" text-anchor="middle" style="font-size:11px">사람</text>
   <rect class="fa1" x="228" y="70" width="84" height="58" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
   <text class="t-strong" x="270" y="90" text-anchor="middle" style="font-size:13px">RLHF-V3</text>
-  <text x="270" y="108" text-anchor="middle" style="font-size:12px">거절 샘플링</text>
+  <text x="270" y="108" text-anchor="middle" style="font-size:12px">리젝션 샘플링</text>
   <line class="sink" x1="314" y1="99" x2="330" y2="99" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
   <text class="t-muted" x="322" y="146" text-anchor="middle" style="font-size:11px">사람</text>
   <rect class="fa1" x="332" y="70" width="84" height="58" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
   <text class="t-strong" x="374" y="90" text-anchor="middle" style="font-size:13px">RLHF-V4</text>
-  <text x="374" y="108" text-anchor="middle" style="font-size:12px">거절 샘플링</text>
+  <text x="374" y="108" text-anchor="middle" style="font-size:12px">리젝션 샘플링</text>
   <line class="sink" x1="418" y1="99" x2="434" y2="99" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
   <text class="t-muted" x="426" y="146" text-anchor="middle" style="font-size:11px">사람</text>
   <rect class="fa2" x="436" y="70" width="84" height="58" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
   <text class="t-strong" x="478" y="90" text-anchor="middle" style="font-size:13px">RLHF-V5</text>
-  <text x="478" y="108" text-anchor="middle" style="font-size:12px">거절 샘플링</text>
+  <text x="478" y="108" text-anchor="middle" style="font-size:12px">리젝션 샘플링</text>
   <text class="t2" x="478" y="123" text-anchor="middle" style="font-size:12px">+ PPO</text>
   <text class="t-muted" x="280" y="166" text-anchor="middle" style="font-size:12px">판과 판 사이: 주마다 모은 사람 선호 데이터로 보상 모델을 다시 학습</text>
-  <text x="280" y="183" text-anchor="middle" style="font-size:12px">넷째 판까지는 거절 샘플링만, 다섯째 판에서 그 위에 PPO</text>
+  <text x="280" y="183" text-anchor="middle" style="font-size:12px">넷째 판까지는 리젝션 샘플링만, 다섯째 판에서 그 위에 PPO</text>
   <line class="sgrid" x1="20" y1="188" x2="540" y2="188" stroke-width="1"/>
   <text class="t-strong" x="20" y="210" style="font-size:14px">Llama 3 (2024): 여섯 라운드</text>
   <rect class="fa3" x="20" y="222" width="72" height="66" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
   <text class="t-strong" x="56" y="239" text-anchor="middle" style="font-size:12px">라운드 1</text>
-  <text x="56" y="256" text-anchor="middle" style="font-size:11px">거절 샘플링</text>
+  <text x="56" y="256" text-anchor="middle" style="font-size:10px">리젝션 샘플링</text>
   <text x="56" y="270" text-anchor="middle" style="font-size:11px">+ SFT</text>
   <text class="t3" x="56" y="284" text-anchor="middle" style="font-size:11px">+ DPO</text>
   <line class="sink" x1="94" y1="255" x2="108" y2="255" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
   <rect class="fa3" x="110" y="222" width="72" height="66" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
   <text class="t-strong" x="146" y="239" text-anchor="middle" style="font-size:12px">라운드 2</text>
-  <text x="146" y="256" text-anchor="middle" style="font-size:11px">거절 샘플링</text>
+  <text x="146" y="256" text-anchor="middle" style="font-size:10px">리젝션 샘플링</text>
   <text x="146" y="270" text-anchor="middle" style="font-size:11px">+ SFT</text>
   <text class="t3" x="146" y="284" text-anchor="middle" style="font-size:11px">+ DPO</text>
   <line class="sink" x1="184" y1="255" x2="197" y2="255" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
   <rect class="fa3" x="199" y="222" width="72" height="66" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
   <text class="t-strong" x="235" y="239" text-anchor="middle" style="font-size:12px">라운드 3</text>
-  <text x="235" y="256" text-anchor="middle" style="font-size:11px">거절 샘플링</text>
+  <text x="235" y="256" text-anchor="middle" style="font-size:10px">리젝션 샘플링</text>
   <text x="235" y="270" text-anchor="middle" style="font-size:11px">+ SFT</text>
   <text class="t3" x="235" y="284" text-anchor="middle" style="font-size:11px">+ DPO</text>
   <line class="sink" x1="273" y1="255" x2="287" y2="255" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
   <rect class="fa3" x="289" y="222" width="72" height="66" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
   <text class="t-strong" x="325" y="239" text-anchor="middle" style="font-size:12px">라운드 4</text>
-  <text x="325" y="256" text-anchor="middle" style="font-size:11px">거절 샘플링</text>
+  <text x="325" y="256" text-anchor="middle" style="font-size:10px">리젝션 샘플링</text>
   <text x="325" y="270" text-anchor="middle" style="font-size:11px">+ SFT</text>
   <text class="t3" x="325" y="284" text-anchor="middle" style="font-size:11px">+ DPO</text>
   <line class="sink" x1="363" y1="255" x2="376" y2="255" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
   <rect class="fa3" x="378" y="222" width="72" height="66" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
   <text class="t-strong" x="414" y="239" text-anchor="middle" style="font-size:12px">라운드 5</text>
-  <text x="414" y="256" text-anchor="middle" style="font-size:11px">거절 샘플링</text>
+  <text x="414" y="256" text-anchor="middle" style="font-size:10px">리젝션 샘플링</text>
   <text x="414" y="270" text-anchor="middle" style="font-size:11px">+ SFT</text>
   <text class="t3" x="414" y="284" text-anchor="middle" style="font-size:11px">+ DPO</text>
   <line class="sink" x1="452" y1="255" x2="466" y2="255" stroke-width="1.4" marker-end="url(#h19-1-arr)"/>
   <rect class="fa3" x="468" y="222" width="72" height="66" rx="4" style="stroke:var(--w-axis);stroke-width:1"/>
   <text class="t-strong" x="504" y="239" text-anchor="middle" style="font-size:12px">라운드 6</text>
-  <text x="504" y="256" text-anchor="middle" style="font-size:11px">거절 샘플링</text>
+  <text x="504" y="256" text-anchor="middle" style="font-size:10px">리젝션 샘플링</text>
   <text x="504" y="270" text-anchor="middle" style="font-size:11px">+ SFT</text>
   <text class="t3" x="504" y="284" text-anchor="middle" style="font-size:11px">+ DPO</text>
   <text class="t-muted" x="280" y="310" text-anchor="middle" style="font-size:12px">DPO 데이터는 주로 앞 라운드에서 가장 나았던 모델들로 새로 모은 선호 데이터</text>
@@ -904,7 +904,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">데이터가 낡으면 스텝마다 새로 뽑으면 되잖아요. 메타 정도면 GPU도 넉넉했을 텐데, 왜 다섯 판, 여섯 라운드에서 끊었어요?</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">새로 뽑은 응답은 누가 채점하죠? Llama 2 때 판마다 새 응답의 선호를 판정한 쪽을 떠올려 봐요.</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M02.webp" alt="김민준 (생각)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">사람 평가자요… 아, 사람은 배치마다 판정이 끝나기를 기다려 줄 수가 없죠. 그래서 사람 판정을 배운 보상 모델로 거절 샘플링을 하고, 판 사이에 사람 데이터를 다시 모은 거네요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M02.webp" alt="김민준 (생각)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">사람 평가자요… 아, 사람은 배치마다 판정이 끝나기를 기다려 줄 수가 없죠. 그래서 사람 판정을 배운 보상 모델로 리젝션 샘플링을 하고, 판 사이에 사람 데이터를 다시 모은 거네요.</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그럼 궈의 Online DPO는 그 기다림을 언어 모델 심사자로 없앤 거야. 스텝마다 곧바로 판정을 맡길 만한 심사자가 있어야 쓸 수 있는 방법이고.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. Llama 3도 PPO 같은 온폴리시 방법을 시도했지만, 큰 모델에서는 DPO가 연산을 덜 쓰고 지시 따르기 평가도 나았다고 적었어요. 라운드 사이에 모델을 검수할 시간도 생기고요.</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S03.webp" alt="이서연 (궁금함)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그런데 라운드로 끊으면 라운드 안에서는 데이터가 다시 낡잖아요. 앞의 톱니처럼요. 그 톱니를 감수하고도 이득이 남으려면 라운드를 몇 번 돌려야 하나요?</div></div>
