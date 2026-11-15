@@ -756,7 +756,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <li><a href="diffusion-dpo.html">24. 디퓨전에서 DPO를 쓰려면: 로그확률의 벽</a></li>
 <li><a href="ddpo.html">25. DDPO: 디퓨전의 정책 그래디언트</a></li>
 <li><a href="image-robotics.html">26. 이미지·로보틱스의 강화학습: GRPO가 시각 생성을 만났을 때</a></li>
-<li><a href="video-models.html">27. 영상 생성 모델의 학습: 시퀀스와 디퓨전 사이에서 무엇을 "강제"하는가</a></li>
+<li><a href="video-models.html">27. 영상 생성 모델의 학습: 보상을 어디에 얹고 무엇끼리 비교하나?</a></li>
 <li><a href="agentic-rl.html">28. 에이전틱 AI: 행동하는 모델의 얼라인먼트</a></li>
 <li><a href="appendix.html">부록</a></li></ol>
 </nav>
@@ -767,7 +767,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="grpo-variants.html">23. GRPO의 변종들: 설계 선택을 하나씩 의심하다</a></p>
 <h4 id="sec-cispo-weight-clipping">(d) 가중치를 자른다: CISPO는 토큰을 버리지 않는다<span id="d-가중치를-자른다-cispo는-토큰을-버리지-않는다" class="anchor-alias"></span></h4>
-<p>클리핑을 고치고 비율의 단위를 바꾸는 사이, 더 근본적인 물음도 나왔다. 로그확률 앞에 곱하는 가중치(비율과 어드밴티지)를 꼭 PPO처럼 만들어야 할까? 이 절은 PPO의 장치를 덜어내고 REINFORCE로 돌아가는 CISPO를, 다음 절은 베이스라인을 다르게 구하는 방법들과 GRPO가 버린 비평가를 되살리는 VAPO를 본다.</p>
+<p>클리핑을 고치고 비율의 단위를 바꾸는 사이, 더 근본적인 물음도 나왔다. 로그확률 앞에 곱하는 가중치(비율과 어드밴티지)를 꼭 PPO처럼 만들어야 할까?</p>
 <h5 id="hist-minimax-clipped-reflection-tokens" class="history">역사: 한 배치로 열여섯 번 고치는 사이 빠져나간 토큰<span id="역사-한-배치로-열여섯-번-고치는-사이-빠져나간-토큰" class="anchor-alias"></span></h5>
 <p>MiniMax-M1 보고서(arXiv:2506.13585, 2025년 6월)의 팀은 새 구조의 모델을 베이스 모델에서 곧바로 RL로 학습하다가, GRPO로는 긴 사고 습관이 좀처럼 자라지 않는 것을 봤다. 하나씩 빼 보는 실험 끝에 범인으로 지목한 것은 클리핑이었다. “However”, “Recheck”, “Wait” 같은 <strong>성찰 토큰</strong>은 풀이의 갈림길 노릇을 하는데, 베이스 모델에서는 드물어 확률이 낮다. 그래서 첫 업데이트만으로도 비율이 금세 클리핑 범위를 벗어난다. 이 팀은 한 번 뽑은 응답 묶음으로 업데이트를 16번 했으므로, 벗어난 토큰은 남은 15번의 업데이트에서 그래디언트가 0이었다. 추론 모델에게 가장 중요한 토큰이 가장 먼저 학습에서 빠진 것이다.</p>
 <svg class="fig" viewBox="0 0 560 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="응답 묶음 하나로 업데이트를 16번 할 때 토큰 비율의 궤적: 처음 확률 0.02 인 드문 토큰은 첫 업데이트 뒤 비율이 1.2 를 넘어 남은 15번 동안 그래디언트가 0 이고, 상한을 1.28 로 올려도 한 번 더 받을 뿐이며, 처음 확률 0.5 인 흔한 토큰은 다섯 번 그래디언트를 받는다">

@@ -756,7 +756,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <li><a href="diffusion-dpo.html" class="active">24. 디퓨전에서 DPO를 쓰려면: 로그확률의 벽</a><ul class="sidebar-toc"><li><a href="diffusion-dpo.html">디퓨전의 로그확률: 이미지는 계산하지 못해도 한 스텝은 계산한다</a></li><li><a href="diffusion-dpo-sec-diffusion-dpo-denoising-loss.html">Diffusion-DPO: 노이즈 복원 오차를 로그확률 대신 쓴다</a></li><li><a href="diffusion-dpo-sec-gradient-interference.html" class="current">그래디언트 간섭: 비선호 오차를 키우면 선호 오차도 커진다</a></li><li><a href="diffusion-dpo-sec-diffusion-dpo-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="ddpo.html">25. DDPO: 디퓨전의 정책 그래디언트</a></li>
 <li><a href="image-robotics.html">26. 이미지·로보틱스의 강화학습: GRPO가 시각 생성을 만났을 때</a></li>
-<li><a href="video-models.html">27. 영상 생성 모델의 학습: 시퀀스와 디퓨전 사이에서 무엇을 "강제"하는가</a></li>
+<li><a href="video-models.html">27. 영상 생성 모델의 학습: 보상을 어디에 얹고 무엇끼리 비교하나?</a></li>
 <li><a href="agentic-rl.html">28. 에이전틱 AI: 행동하는 모델의 얼라인먼트</a></li>
 <li><a href="appendix.html">부록</a></li></ol>
 </nav>
@@ -767,7 +767,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <section class="chapter chapter-paged">
 <p class="chapter-crumb"><a href="diffusion-dpo.html">24. 디퓨전에서 DPO를 쓰려면: 로그확률의 벽</a></p>
 <h4 id="sec-gradient-interference">그래디언트 간섭: 비선호 오차를 키우면 선호 오차도 커진다<span id="그래디언트-간섭-비선호-오차를-키우면-선호-오차도-커진다" class="anchor-alias"></span></h4>
-<p>DPO의 원리는 &quot;레퍼런스 대비 마진(선호와 비선호의 로그확률 차)을 벌려라&quot;다. 학습 중에는 보통 손실 곡선이 내려가는지를 보며 마진이 잘 커지는지 확인한다. 그런데 디퓨전 모델에서는 마진을 벌릴수록 <strong>오히려 품질이 나빠지는</strong> 이상 현상이 발견되었다(Diffusion-SDPO, Fu et al., 2025).</p>
+<p>DPO의 원리는 &quot;레퍼런스 대비 마진(선호와 비선호의 로그확률 차)을 벌려라&quot;다. 학습 중에는 보통 손실 곡선이 내려가는지를 보며 마진이 잘 커지는지 확인한다. 그런데 선호 이미지의 복원 오차가 레퍼런스의 1.00보다 큰 1.05로 나빠졌는데도, 비선호 이미지의 오차가 1.30으로 더 크게 나빠지자 손실이 0.079로 내려간 장난감이 있었다. 설명을 위해 고른 숫자에서만 생기는 일일까, 실제 디퓨전 모델을 학습할 때도 손실이 내려가는 동안 선호 그림이 나빠질까?</p>
 <h5 id="hist-preferred-error-rise" class="history" data-people="fu-minghao">역사: 손실은 내려가는데 두 오차가 다 올랐다<span id="역사-손실은-내려가는데-두-오차가-다-올랐다" class="anchor-alias"></span></h5>
 <p>알리바바 인터내셔널 디지털 커머스 그룹의 푸밍하오(Minghao Fu)와 동료들은 Diffusion-DPO로 Stable Diffusion 1.5를 Pick-a-Pic 쌍에 학습시키며 선호·비선호 두 쪽의 노이즈 복원 손실을 따로 그려 보았다. 마진은 의도대로 갈수록 커졌는데, 두 손실이 모두 시간이 갈수록 올라갔다. 모델은 선호 그림을 더 잘 그려서가 아니라 비선호 그림을 더 망쳐서 두 복원 손실의 차이를 벌리고 있었다. 이들은 이 현상을 「상대적인 얼라인먼트(사람이 바라는 방식으로 답하게 맞추기)를 절대적인 품질과 맞바꾼다」고 적고, 2025년 11월 해결책과 함께 발표했다.</p>
 <svg class="fig" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="장난감 계산. 왼쪽 칸에서 Diffusion-DPO 손실은 0.693 에서 0.024 로 계속 내려간다. 오른쪽 칸에서 선호 쪽 오차는 1.0 에서 7.6 으로, 비선호 쪽 오차는 4.1 에서 14.4 로 둘 다 올라간다">

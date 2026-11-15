@@ -756,7 +756,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <li><a href="diffusion-dpo.html">24. 디퓨전에서 DPO를 쓰려면: 로그확률의 벽</a></li>
 <li><a href="ddpo.html">25. DDPO: 디퓨전의 정책 그래디언트</a></li>
 <li><a href="image-robotics.html">26. 이미지·로보틱스의 강화학습: GRPO가 시각 생성을 만났을 때</a></li>
-<li><a href="video-models.html">27. 영상 생성 모델의 학습: 시퀀스와 디퓨전 사이에서 무엇을 "강제"하는가</a></li>
+<li><a href="video-models.html">27. 영상 생성 모델의 학습: 보상을 어디에 얹고 무엇끼리 비교하나?</a></li>
 <li><a href="agentic-rl.html">28. 에이전틱 AI: 행동하는 모델의 얼라인먼트</a></li>
 <li><a href="appendix.html">부록</a></li></ol>
 </nav>
@@ -773,7 +773,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <p>다음 칸이 어디인지 모르는 채로, 겪어 본 것만으로 갈 방향을 선택하려면 무엇을 배워야 할까?<br>
 배우는 동안에는 이것저것 시험해 봐야 하는데, 시험 삼아 걸은 스텝으로 배운 값은 누구의 값일까?</p>
 </blockquote>
-<p>이 장은 상태 대신 (상태, 행동) 짝의 값을 직접 배우는 두 방법, 시험 삼아 걷는 스텝을 얼마나 섞을지 정하는 규칙, 그리고 「가장 좋아 보이는 값」을 목표로 삼을 때 생기는 편향을 다룬다.</p>
+<p>먼저 첫 물음부터 풀고, 둘째 물음은 강가 산책로를 직접 걸으며 따져 보자.</p>
 <h4 id="sec-sarsa-on-policy">SARSA: 내가 실제로 둘 수로 배운다<span id="sarsa-내가-실제로-둘-수로-배운다" class="anchor-alias"></span></h4>
 <p>길을 선택하는 데 필요한 것은 칸의 값보다 「이 칸에서 이 방향으로 걸으면 앞으로 얼마를 받는가」다. 칸과 방향의 짝마다 부여하는 이 기댓값이 행동 가치 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#00897b"><mi>Q</mi></mstyle><mo stretchy="false">(</mo><mstyle mathcolor="#0093b8"><mi>s</mi></mstyle><mo separator="true">,</mo><mstyle mathcolor="#1c9c60"><mi>a</mi></mstyle><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\textcolor{#00897b}{Q}(\textcolor{#0093b8}{s}, \textcolor{#1c9c60}{a})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="color:var(--sym-00897b, #00897b);">Q</span><span class="mopen">(</span><span class="mord mathnormal" style="color:var(--sym-0093b8, #0093b8);">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="color:var(--sym-1c9c60, #1c9c60);">a</span><span class="mclose">)</span></span></span></span></eq>, 곧 상태 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#0093b8"><mi>s</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#0093b8}{s}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="color:var(--sym-0093b8, #0093b8);">s</span></span></span></span></eq>에서 첫 행동을 <eq><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathcolor="#1c9c60"><mi>a</mi></mstyle></mrow><annotation encoding="application/x-tex">\textcolor{#1c9c60}{a}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="color:var(--sym-1c9c60, #1c9c60);">a</span></span></span></span></eq>로 정하고 그 뒤로 정해진 규칙(정책, 상태마다 행동을 선택하는 규칙)을 따를 때 받을 리턴(앞으로 받을 보상의 합)의 기댓값이다. 행동 가치를 알면 지도가 없어도 지금 칸의 네 방향 가운데 값이 가장 큰 쪽으로 걸으면 그만이다. 그러면 행동 가치도 시간차 학습처럼 한 스텝씩 배울 수 있을까?</p>
 <p>걸리는 것이 하나 있다. 배우는 동안 늘 가장 커 보이는 방향만 선택하면, 처음에 운 나쁘게 낮게 평가한 방향은 다시 시험할 기회가 없다. 그래서 가끔은 아무 방향으로나 걸어 본다. 그렇게 걸으며 모은 경험으로 배운 값은 「가끔 아무 방향으로나 걷는 나」의 값일까, 「늘 가장 좋아 보이는 방향으로만 걷는 나」의 값일까?</p>

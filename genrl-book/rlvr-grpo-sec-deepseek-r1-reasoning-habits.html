@@ -756,7 +756,7 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <li><a href="diffusion-dpo.html">24. 디퓨전에서 DPO를 쓰려면: 로그확률의 벽</a></li>
 <li><a href="ddpo.html">25. DDPO: 디퓨전의 정책 그래디언트</a></li>
 <li><a href="image-robotics.html">26. 이미지·로보틱스의 강화학습: GRPO가 시각 생성을 만났을 때</a></li>
-<li><a href="video-models.html">27. 영상 생성 모델의 학습: 시퀀스와 디퓨전 사이에서 무엇을 "강제"하는가</a></li>
+<li><a href="video-models.html">27. 영상 생성 모델의 학습: 보상을 어디에 얹고 무엇끼리 비교하나?</a></li>
 <li><a href="agentic-rl.html">28. 에이전틱 AI: 행동하는 모델의 얼라인먼트</a></li>
 <li><a href="appendix.html">부록</a></li></ol>
 </nav>
@@ -982,6 +982,9 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 논문도 그전 연구들이 많은 지도 데이터에 크게 기댔다고 적었어요. 풀이 습관을 들이려면 SFT로 좋은 풀이 예시를 먼저 따라 쓰게 했고, 그 예시는 누군가 써 줘야 했죠.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.webp" alt="김민준 (난처함)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">수천 토큰짜리 풀이를 문제마다 사람이 써 주는 건 엄청난 일이잖아요. R1-Zero는 그 단계를 건너뛰었고요.</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S06.webp" alt="이서연 (납득불가)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그런데 보상은 최종 답만 보는데, 어떻게 그 앞에 쓴 풀이 습관까지 강화되는 거예요?</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그룹 어드밴티지가 응답 안의 어느 토큰에 붙었는지 떠올려 봐요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">모든 토큰에 똑같이 붙었어요. 정답과 상관없는 「입니다」 말투 토큰까지 같은 값을 받았잖아요.</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S07.webp" alt="이서연 (아하)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">그럼 정답으로 끝난 응답은 그 앞에서 검산하고 되돌아본 문장까지 모두 함께 올라가겠네요. 처음엔 비용이던 성질이 여기서는 풀이 습관을 키운 거고요.</div></div>
 </div><p>검증기는 최종 답만 보지만, 정답에 이른 응답을 강화하면 그 안에 담긴 풀이 전체가 함께 강화된다. 문제를 쪼개는 습관, 중간 결과를 검산하는 습관, 막히면 다른 방법을 시도하는 습관이 모두 그 풀이 안에 들어 있다. 최종 답에 준 보상을 이런 풀이 습관까지 이어 주는 것이 답 앞에 적는 풀이 과정, <strong>CoT</strong>(Chain of Thought, 단계별 사고)다. 이 습관들은 수학에만 쓰이지 않는다. 그래서 수학 RLVR이 수학 지식보다 <strong>단계적으로 생각하는 방법</strong>을 강화했다고 풀이할 수 있다. 논문도 같은 뜻으로, 푸는 법을 가르치지 않고 적절한 보상만 주었더니 모델이 스스로 풀이 전략을 키웠다고 적었다.</p>
 <h5 id="ml에서-r1-이후-몇-달">ML에서: R1 이후 몇 달</h5>
 <p>R1 이후 몇 달 사이에 벌어진 일:</p>
@@ -1034,13 +1037,16 @@ section.interlude .dlg-cast img { border-radius: 12px; }
 <div class="dlg">
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">(가)는 보상 모델이요. 그런데 보상 모델이 돌아오면 그냥 PPO로 돌아가는 거 아니에요? 비평가도 같이 들여와야 할 것 같은데요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">민준 학생, 그룹 평균 <span class="sym" style="color:var(--sym-00897b, #00897b)">μ<sub>G</sub></span>를 계산할 때 보상이 어디서 왔는지가 쓰이나요?</div></div>
-<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.webp" alt="김민준 (난처함)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">아뇨. 여덟 개 점수만 있으면 돼요. 검증기가 줬든 보상 모델이 줬든 평균 내고 빼는 건 똑같네요. 비평가는 안 돌아와도 돼요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M04.webp" alt="김민준 (난처함)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">아뇨. 여덟 개 점수만 있으면 돼요.</div></div>
+<div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M07.webp" alt="김민준 (아하)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">검증기가 줬든 보상 모델이 줬든 평균 내고 빼는 건 똑같네요. 비평가는 안 돌아와도 돼요.</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T01.webp" alt="선생님 (평상)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">그래요. 실제로 GRPO를 처음 낸 DeepSeekMath도 학습한 보상 모델의 점수로 GRPO를 돌렸고, DeepSeek-R1도 수학·코드 밖의 일반 질문에는 보상 모델을 썼어요. 반대쪽도 있어요. RLVR이라는 이름을 붙인 툴루 3는 검증기 보상을 비평가가 있는 PPO로 학습했죠. (나)는요?</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S01.webp" alt="이서연 (평상)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">올려 두는 건 정책, 레퍼런스, 보상 모델, 셋. 업데이트되는 건… 보상 모델도 학습한 모델이니까 정책이랑 둘?</div></div>
 <div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (짚어주기)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">서연 학생, 보상 모델은 언제 학습했어요?</div></div>
 <div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S07.webp" alt="이서연 (아하)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">강화학습 전에요. 강화학습 동안엔 점수만 부여하고 그대로예요. 그럼 업데이트되는 건 정책 하나예요. RLHF-PPO는 넷을 올리고 정책이랑 비평가 둘을 업데이트했고요.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">그 차이가 꽤 크겠네요. 학습하는 모델은 파라미터 말고도 그래디언트랑 옵티마이저 상태까지 들고 있어야 하잖아요. Adam이면 파라미터마다 숫자 두 개를 더 들고 있고요.</div></div>
 <div class="dlg-line dlg-M has-face"><figure class="dlg-cast"><img src="img/characters/M01.webp" alt="김민준 (평상)" loading="lazy"><figcaption>김민준</figcaption></figure><div class="dlg-bubble">요리 경연에서 심사위원은 대회 전에 정해 두고, 대회 동안 실력이 바뀌는 건 참가자뿐인 거랑 같네요.</div></div>
+<div class="dlg-line dlg-T has-face"><figure class="dlg-cast"><img src="img/characters/T14.webp" alt="선생님 (질문)" loading="lazy"><figcaption>선생님</figcaption></figure><div class="dlg-bubble">처음에 온라인 학습은 그대로 두고 무거운 두 모델만 뺄 수 있냐고 물었죠. 보상 모델과 비평가는 각각 무엇 덕분에 뺄 수 있었어요?</div></div>
+<div class="dlg-line dlg-S has-face"><figure class="dlg-cast"><img src="img/characters/S09.webp" alt="이서연 (깨달음2)" loading="lazy"><figcaption>이서연</figcaption></figure><div class="dlg-bubble">비평가는 같은 문제에 여러 번 답한 평균 덕분이고, 보상 모델은 답이 맞는지 판정하는 검증기 덕분이에요. 둘이 따로따로라서, 검증기를 만들 수 있으면 넷이 둘이 되고 못 만들면 보상 모델 하나만 돌아오는 거네요.</div></div>
 </div><blockquote>
 <p><strong>정리</strong> (가) 보상 모델. 그룹 평균은 점수가 어디서 왔든 계산되므로 비평가는 돌아오지 않는다. 두 대체(검증기, 그룹 평균)는 서로 독립이라, 실제로 DeepSeekMath의 GRPO는 보상 모델과, 툴루 3의 RLVR은 비평가가 있는 PPO와 짝지어졌다. (나) 정책·레퍼런스·보상 모델 셋을 올리고 정책 하나만 업데이트하지만, RLHF-PPO는 넷을 올리고 둘(정책, 비평가)을 업데이트한다.</p>
 </blockquote>
