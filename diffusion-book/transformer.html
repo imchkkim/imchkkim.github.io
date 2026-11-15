@@ -743,14 +743,14 @@ section.interlude figure.fig img { border-radius: 10px; }
 <h1>어텐션과 트랜스포머: 멀리 떨어진 칸끼리 읽기</h1>
 <h2 id="q-transformer">이 장의 물음<span id="이-장의-물음" class="anchor-alias"></span></h2>
 <p>노이즈 예측 신경망은 노이즈 섞인 그림을 받아 그림 전체를 보고 원래 그림을 추정해야 한다. 합성곱으로 짠 U-Net 은 해상도를 낮춰 가며 멀리 보려 했지만, 출력 한 칸이 기대는 입력은 여전히 가까운 칸에 집중됐다. 3 × 3 합성곱은 「한 칸 왼쪽에는 이 무게, 두 칸 위에는 저 무게」처럼 자리마다 무게가 정해져 있어서, 64칸 떨어진 칸이 무엇을 담고 있든 그 내용은 층을 아주 많이 거쳐서야 출력에 조금 닿는다. 그래서 Stable Diffusion 1.x 의 U-Net 은 낮은 해상도 단계마다 멀리 떨어진 칸끼리 직접 읽는 층 묶음(어텐션 블록)을 끼웠고, 어텐션 블록이 파라미터 8억 6,000만 개 가운데 31.1%를 차지했다. SDXL 에서는 그 비중이 86.0%로 늘어, 파라미터가 점점 어텐션 블록으로 옮겨 가고 있다.</p>
-<p>어텐션 블록이 칸끼리 무엇을 주고받기에 거리와 상관없이 읽을 수 있는지 알아보려고, 이 장은 다음 물음에 차례로 답한다.</p>
+<p>어텐션 블록은 칸끼리 무엇을 주고받기에 거리와 상관없이 한 층에서 읽을 수 있고, 그렇게 읽는 방식은 어떤 빈틈을 새로 남길까? 이 장은 다음 물음에 차례로 답한다.</p>
 <ul>
 <li>어느 칸을 얼마나 읽을지를 자리 대신 칸이 담은 내용으로 정하려면 어떻게 계산할까?</li>
 <li>내용만 보고 읽으면, 어느 칸이 위에 있고 어느 낱말이 먼저 왔는지는 어떻게 알까?</li>
-<li>한 칸이 서로 다른 것 여러 개를 동시에 읽어야 하면 어떻게 할까?</li>
+<li>여러 칸을 읽어 하나로 받아 온다면, 한 칸이 서로 다른 것 여러 개를 따로 읽어야 할 때는 어떻게 할까?</li>
 <li>그런 층을 수십 개 쌓아도 학습이 무너지지 않게 하려면 무엇이 더 필요할까?</li>
 <li>그림의 칸이 글 인코더가 넘긴 낱말들을 읽으려면 무엇을 바꿔야 할까?</li>
-<li>글을 한 토큰씩 이어 쓰는 모델은 토큰 하나를 더 쓸 때마다 앞의 계산을 모두 다시 해야 할까?</li>
+<li>모든 칸이 모든 칸을 읽는다면, 글처럼 한 토큰씩 이어 쓸 때는 토큰 하나를 붙일 때마다 앞의 계산을 모두 다시 해야 할까?</li>
 </ul>
 <h2 id="sec-self-attention">셀프 어텐션: 칸마다 모든 칸을 내용으로 골라 읽는다<span id="셀프-어텐션-칸마다-모든-칸을-내용으로-골라-읽는다" class="anchor-alias"></span></h2>
 <p>노이즈가 짙은 얼굴 그림에서 왼쪽 눈 자리를 다듬는다고 해 보자. 왼쪽 눈 자리에 정말 눈이 와야 하는지 가장 잘 알려 주는 것은 바로 옆 칸보다 그림 반대편의 오른쪽 눈이다. 오른쪽 눈이 있으면 왼쪽 눈도 같은 높이에 같은 크기로 있어야 하는데, 합성곱은 두 눈의 높이와 크기를 일치시키지 못한다. 3 × 3 커널의 무게는 「바로 옆 칸」, 「한 칸 위」처럼 상대 자리에 붙어 있어서, 멀리 있는 칸이 눈이든 배경이든 같은 무게로 대하고, 그나마 그 칸까지 닿으려면 층을 많이 거쳐야 한다. 칸마다 「나와 관계가 깊은 칸」을 거리와 상관없이 내용으로 골라 읽을 수는 없을까?</p>
@@ -841,7 +841,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>(나)는 e⁸이 2981이니까 맨 앞이 0.99966, 둘째가 0.00034, 셋째는 거의 0이에요. 확실하게 선택해서 좋은 거 아니에요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>학습하는 동안 이 비중을 고치려면 그래디언트가 필요하죠. p(1 − p)가 얼마예요?</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>0.000335요. 어… 거의 0이네요. 처음엔 질의와 열쇠가 아직 엉터리일 텐데, 엉터리로 선택한 쪽을 이미 99.97% 믿어 버려서 고칠 신호가 안 와요.</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(다)는 점수가 1, 0, −1이 되니까 비중 0.665, 0.245, 0.090이고 p(1 − p)는 0.223이야.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(다)는 점수가 1, 0, −1이 되니까 비중 0.665, 0.245, 0.090이고 p(1 − p)는 0.223이야.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>신호가 660배 넘게 커졌네.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>나눈 8은 어디서 나온 수였죠?</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>(가)에서 구한 표준편차요. 그럼 나누는 수 √<span class="sym" style="color:#3c4bff">d<sub>k</sub></span>는 길이가 몇이든 점수의 표준편차를 1로 조정하는 수였네요.</p></div></div>
@@ -861,7 +861,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M05"><img src="images/cast/M05.webp" alt="김민준 M05" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아니에요. 가로세로가 두 배면 칸이 네 배, 16,384칸이고 점수 표는 칸 수의 제곱이라 열여섯 배예요. 4096 MiB, 4기가가 블록 하나에서 나와요.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S03"><img src="images/cast/S03.webp" alt="이서연 S03" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>768 × 768만 해도 9216칸이라 1296 MiB야. 그림을 조금 키웠을 뿐인데 메모리가 제곱으로 늘어.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T02"><img src="images/cast/T02.webp" alt="선생님 T02" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>(다)는요? 소프트맥스는 무엇끼리 나누는 계산이었죠?</p></div></div>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>한 질의의 점수들, 곧 표의 한 줄 안에서만 합으로 나눠요. 다른 줄과는 섞이지 않으니까, 줄 묶음마다 따로 계산해서 이어 붙여도 같은 답이에요. 칸 하나가 받아 가는 것은 자기 줄만 있으면 되니까요.</p></div></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>한 질의의 점수들, 곧 표의 한 줄 안에서만 합으로 나눠요. 다른 줄과는 섞이지 않으니까, 줄 묶음마다 따로 계산해서 이어 붙여도 같은 답이에요. 칸 하나가 받아 가는 것은 자기 줄만 있으면 되니까요.</p></div></div></div>
 
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="samplers-sec-samplers-summary.html">&larr; 혼동하기 쉬운 점과 요약</a><span class="page-count">1 / 7</span><a class="chapter-nav-next" href="transformer-sec-positional-encoding.html">위치 인코딩: 순서를 모르는 어텐션에 자리를 알려 주기 &rarr;</a></nav>

@@ -842,6 +842,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 </tbody>
 </table></div>
 <h3 id="요약">요약</h3>
+<p>KSampler 의 세 칸은 같은 길을 걷는 법을 고르는 칸이다. 스텝 수는 신경망을 몇 번 부를지를, 샘플러 이름은 한 스텝을 어떻게 디딜지(새 노이즈를 넣을지, 기울기를 한 번 더 읽을지, 지난 스텝에서 읽은 값을 다시 쓸지)를, 스텝 스케줄은 어느 노이즈 크기에 디딜지를 정한다. 같은 20스텝에서 깔끔한 그림과 뭉개진 그림이 갈리는 것은, 마흔 개가 넘는 샘플러가 모두 같은 길을 신경망 호출 몇 번으로 끊어 걷는 솔버이고 그 호출 수로 휜 길을 얼마나 덜 틀리게 따라가느냐(기울기를 더 잘 읽기, 길이 휘는 곳에 스텝 몰기)가 서로 다르기 때문이다. 호출 한 번으로 가려면 솔버를 다듬는 것으로는 모자라고, 결정적인 길의 끝을 외운 신경망이 있어야 한다.</p>
 <p>노이즈에서 데이터로 가는 경로를 노이즈 크기 <span class="sym" style="color:#4c5d80">σ</span>로 적으면, 경로의 기울기는 지금 자리 <span class="sym" style="color:#1b9e77">x</span>에서 읽은 노이즈 <span class="sym" style="color:#1f6066">ε̂</span> = (<span class="sym" style="color:#1b9e77">x</span> − <span class="sym" style="color:#1b9e77">x̂₀</span>)/<span class="sym" style="color:#4c5d80">σ</span>이다. 오일러 방법은 이 기울기로 다음 노이즈 크기까지 곧게 가는 스텝으로, 읽은 원래 그림과 노이즈를 다음 수준의 비율로 다시 섞는 것과 같고, 스텝을 두 배로 늘리면 오차가 절반이 된다. 0까지 한 번에 가는 오일러 스텝은 평균 <span class="sym" style="color:#1b9e77">x̂₀</span>로 뛴다. 앤세스트럴 샘플링은 스텝마다 읽은 노이즈의 일부를 덜어 내고 새 노이즈로 채워(<span class="sym" style="color:#4c5d80">σ</span><sub>down</sub> = <span class="sym" style="color:#4c5d80">σ</span>′²/<span class="sym" style="color:#4c5d80">σ</span>, <span class="sym" style="color:#4c5d80">σ</span><sub>up</sub>² = <span class="sym" style="color:#4c5d80">σ</span>′² − <span class="sym" style="color:#4c5d80">σ</span><sub>down</sub>²) 앞 스텝의 오차를 흐리지만, 스텝 수를 바꾸면 같은 시드에서도 다른 그림이 나온다. DDIM은 새 노이즈의 비율을 파라미터 <span class="sym" style="color:#87965a">η</span>로 잇는 가족이고, <span class="sym" style="color:#87965a">η</span> = 0이 오일러, <span class="sym" style="color:#87965a">η</span> = 1이 앤세스트럴이다. 2차 방법은 스텝을 두 배로 늘리면 오차가 4분의 1로 준다. 호인은 스텝 끝에서 신경망을 한 번 더 부르고, DPM-Solver++ 2M은 지난 스텝의 <span class="sym" style="color:#1b9e77">x̂₀</span>를 늘여 써서 한 번만 부른다. 스텝 스케줄은 스텝을 디딜 노이즈 크기를 정하며, 길이 휘는 곳(데이터의 무늬가 결정하는 곳)에 스텝을 집중해야 한다. 증류는 결정적인 길이 출발 노이즈마다 정해 주는 끝을 학생 신경망이 한 번에 내도록 배운다.</p>
 <pre class="mermaid">flowchart LR
   A[&quot;길: dx/dσ = ε̂&lt;br/&gt;(읽은 노이즈)&quot;] --&gt; B[&quot;오일러&lt;br/&gt;x̂₀ + σ′ε̂ 로 다시 섞기&lt;br/&gt;스텝 ×2 → 오차 ÷2&quot;]
@@ -902,8 +903,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 </ul>
 </div>
 <h3 id="막힌-곳">막힌 곳</h3>
-<p>이제 하나의 경로를 몇 스텝에 어떻게 걸을지 선택할 수 있다. 오일러에서 2M까지, 노이즈를 넣는 스텝과 넣지 않는 스텝, 스텝을 디딜 자리, 한 번에 가는 학생까지.</p>
-<p>그런데 이 장의 모든 스텝은 신경망이 <span class="sym" style="color:#1b9e77">x̂₀</span>를 읽어 준다는 데 기댔고, 그 신경망은 노이즈 섞인 그림을 받아 그림 전체를 보고 원래 그림을 추측해야 한다. U-Net은 해상도를 낮춰 멀리 보았지만, 출력 한 칸의 값을 실제로 정하는 입력 칸은 여전히 가운데 이웃에 몰렸고, 실제 모델은 멀리 떨어진 칸끼리 직접 읽는 층을 따로 끼워 그 빈틈을 메웠다. 멀리 떨어진 칸끼리 한 번에 서로를 읽게 하는 그 층은 어떻게 생겼을까?</p>
+<p>이 장의 장난감은 모두 원래 그림의 평균 <span class="sym" style="color:#1b9e77">x̂₀</span>를 식으로 정확히 알았다. 실제 그림에서는 <span class="sym" style="color:#1b9e77">x̂₀</span>를 신경망이 읽어 주는데, 그 읽기가 얼마나 정확한지는 걷는 법을 고르는 이 장의 이야기로는 말할 수 없다.</p>
 
 </article>
 <nav class="chapter-nav"><a class="chapter-nav-prev" href="samplers-sec-step-distillation.html">&larr; 증류: 여러 스텝의 경로를 한 스텝으로 외우기</a><span class="page-count">7 / 7</span><a class="chapter-nav-next" href="transformer.html">어텐션과 트랜스포머: 멀리 떨어진 칸끼리 읽기 &rarr;</a></nav>
