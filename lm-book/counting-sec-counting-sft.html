@@ -772,7 +772,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="data-fix.html">데이터를 고치다: 쏠림, 중복, 바꿔 쓰기</a></li>
 <li><a href="talk.html">루나와 이야기하기: 「Daddy!」 하고 부르기까지</a></li>
 <li class="toc-part">루나를 키우다</li>
-<li><a href="counting.html" class="active">유치원 숫자 공부: 계산을 따로 가르치면 루나는 무엇을 배울까</a><ul class="sidebar-toc"><li><a href="counting.html">숫자 규칙: 자리마다 자를까, 세 자리씩 자를까</a></li><li><a href="counting-sec-counting-stories.html">합성 데이터: 사과를 나눠 먹는 이야기</a></li><li><a href="counting-sec-counting-curriculum.html">순서와 망각: 앞 단계를 배치에서 빼면</a></li><li><a href="counting-sec-counting-sft.html" class="current">지도 파인튜닝: 셈 문항으로 답 칸만 채점한다</a></li><li><a href="counting-sec-counting-grpo.html">강화학습: 뽑은 답을 채점해서 고른다</a></li><li><a href="counting-sec-counting-mainline.html">우리 루나에게: 계산을 배우면 가족을 잊을까</a></li><li><a href="counting-sec-counting-probe.html">정말 다 잊었을까: 탐침으로 망각 측정하기</a></li><li><a href="counting-sec-counting-successor.html">표와 규칙 두 줄: 계산을 안다는 것</a></li><li><a href="counting-sec-counting-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li><a href="counting.html" class="active">유치원 숫자 공부: 계산을 따로 가르치면 루나는 무엇을 배울까</a><ul class="sidebar-toc"><li><a href="counting.html">숫자 규칙: 자리마다 자를까, 세 자리씩 자를까</a></li><li><a href="counting-sec-counting-stories.html">합성 데이터: 사과를 나눠 먹는 이야기</a></li><li><a href="counting-sec-counting-sft.html" class="current">지도 파인튜닝: 셈 문항으로 답 칸만 채점한다</a></li><li><a href="counting-sec-counting-grpo.html">강화학습: 뽑은 답을 채점해서 고른다</a></li><li><a href="counting-sec-counting-curriculum.html">순서와 망각: 앞 단계를 배치에서 빼면</a></li><li><a href="counting-sec-counting-mainline.html">우리 루나에게: 계산을 배우면 가족을 잊을까</a></li><li><a href="counting-sec-counting-probe.html">정말 다 잊었을까: 탐침으로 망각 측정하기</a></li><li><a href="counting-sec-counting-successor.html">표와 규칙 두 줄: 계산을 안다는 것</a></li><li><a href="counting-sec-counting-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="retokenize.html">토큰 표 다시 짜기: 낱말을 줄이고 프리트레인을 빽빽하게</a></li>
 <li><a href="logic.html">따져 보기: 무엇이 루나의 추론을 막고 있을까</a></li>
 <li><a href="logic-data.html">무엇을 덮는 데이터인가: 논리 데이터 안의 한계 지도</a></li>
@@ -789,13 +789,36 @@ section.interlude figure.fig img { border-radius: 10px; }
 <h2 id="sec-counting-sft">지도 파인튜닝: 셈 문항으로 답 칸만 채점한다<span id="지도-파인튜닝-셈-문항으로-답-칸만-채점한다" class="anchor-alias"></span></h2>
 <p>이야기를 섞어 읽혀서는 시험 문장에 답이 잘 나오지 않았다. 한 편 70 낱말쯤 되는 이야기에서 계산의 답은 한 칸이고, 손실은 나머지 칸의 다음 토큰을 맞히는 데 대부분 쓰인다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M07"><img src="images/cast/M07.webp" alt="김민준 M07" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>대화로 가르칠 때처럼 하자. 물음을 주고 답 칸만 채점하는 거야. 이번엔 물음이 전부 셈이고.</p></div></div>
-<p>지도 파인튜닝의 방법은 대화로 가르칠 때와 같다. 물음 칸의 정답 자리에 -100 을 넣고 답 칸만 채점한다(<code>sources/counting/kit.py</code> 의 <code>answer_batch</code>). 달라진 것은 문항이다. 문항은 배운 쌍에서 고른 식 물음과 이야기 물음 반반이고, 답은 「 7.」 같은 수 하나이고, 이야기 물음은 문형 둘씩(시험 문장과 다른 문장)을 쓴다. 배치 64 개, 학습률 0.0001 로 600 스텝을 돌렸고, 타이니스토리즈는 섞지 않았다. 물음이 수십 토큰으로 짧아서 RTX 4090 에서 시드 하나에 54~63초가 걸렸다. 둘 다(both)로 읽힌 루나에서 시작한 결과다(<code>sources/counting/ladder_S_both.out</code>).</p>
-<pre><code class="language-text">  요약 SFT P_both 식_old: 99.6% [99.3, 99.7, 99.7]
-  요약 SFT P_both 식_new: 13.0% [9.6, 14.7, 14.7]
-  요약 SFT P_both 이야기_old: 62.2% [58.9, 61.7, 66.0]
-  요약 SFT P_both 이야기_new: 7.1% [3.5, 9.8, 8.0]
-</code></pre>
-<p>물음 문장이 학습한 문형과 다른데도 이야기 물음의 배운 쌍이 6.8% 에서 62.2% 로 올랐다. 연산마다 고르지는 않아서 시드 0 은 덧셈 96.7%, 나눗셈 92.3% 를 맞히면서 곱셈은 9.0% 였다. 새 쌍은 여전히 낮다.</p>
+<p>지도 파인튜닝의 방법은 대화로 가르칠 때와 같다. 물음 칸의 정답 자리에 -100 을 넣고 답 칸만 채점한다(<code>sources/counting/kit.py</code> 의 <code>answer_batch</code>). 달라진 것은 문항이다. 배운 쌍에서 고른 식 물음과 이야기 물음이 반반이고, 답은 「 7.」 같은 수 하나이며, 이야기 물음은 시험 문장과 다른 문형 둘씩을 쓴다. 「둘 다」로 읽힌 루나에서 시작해 배치 64 개, 학습률 0.0001 로 600 스텝을 돌렸고, 타이니스토리즈는 섞지 않았다. 문항은 두 가지로 냈다. 유치원 쌍 437 개만 낸 판과, 다섯 살 범위를 조금 넘는 두 자리 덧셈과 뺄셈을 섞은 판이다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>문항</th>
+<th>식 배운 쌍</th>
+<th>식 새 쌍</th>
+<th>이야기 배운 쌍</th>
+<th>이야기 새 쌍</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>유치원 쌍만</td>
+<td>99.6 (99.3, 99.7, 99.7)</td>
+<td>13.0 (9.6, 14.7, 14.7)</td>
+<td>62.2 (58.9, 61.7, 66.0)</td>
+<td>7.1 (3.5, 9.8, 8.0)</td>
+</tr>
+<tr>
+<td>두 자리를 섞음</td>
+<td>98.9 (98.5, 99.2, 98.8)</td>
+<td>26.5 (23.3, 28.2, 27.9)</td>
+<td>51.3 (49.8, 51.4, 52.5)</td>
+<td>12.8 (11.0, 16.1, 11.2)</td>
+</tr>
+</tbody>
+</table></div>
+<p>(<code>sources/counting/ladder_S_both.out</code>, <code>ladder_S_wide.out</code>. 단위 %, 시드 셋의 평균과 시드 하나하나. 「14 - 11」처럼 시험의 새 쌍이면서 두 자리이기도 한 쌍은 문항에서 뺐다.)</p>
+<p>물음 문장이 학습한 문형과 다른데도 이야기 물음의 배운 쌍이 6.8% 에서 62.2% 로 올랐다. 연산마다 고르지는 않아서 시드 0 은 덧셈 96.7%, 나눗셈 92.3% 를 맞히면서 곱셈은 9.0% 였다. 새 쌍을 올린 것은 문항의 범위다. 시험 쌍이 아닌 두 자리 문항을 함께 풀게 했더니 새 쌍의 식이 13.0% 에서 26.5% 로, 새 쌍의 이야기가 7.1% 에서 12.8% 로 두 배 안팎이 되었다. 숫자 규칙 실험에서 본 것과 같은 방향이다.</p>
 <p>값은 동화로 치렀다. 시드 셋의 바이트당 비트가 0.432 에서 0.515~0.529 로 나빠졌고, 동화를 쓰게 하면 이런 글이 나온다.</p>
 <pre><code class="language-text">    샘플 'Once upon a time, there was a little girl' → ' named Amy found a mysterious box. The box was made of 1. It could 5.'
     샘플 'Tom had 3 apples. He ate 1 apple. Now Tom has' → ' 3.. 12.'
@@ -804,16 +827,9 @@ section.interlude figure.fig img { border-radius: 10px; }
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>상자가 1 로 만들어졌고, 5 할 수 있대.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>이제 뭘 물어도 수로 답해. 동화 쓰던 애가 수밖에 몰라.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>합성 데이터 때 네가 말했잖아. 의학 데이터만 가르쳤더니 코딩을 잊었다는 그 얘기.</p></div></div>
-<p>이어서 섞어 읽힐 때는 배치의 24 줄이 동화라 잊지 않았고, 이번에는 답 칸만 채점하니 동화에 대한 손실이 하나도 없었다. 대화로 가르칠 때 본 것과 같은 저울이다. 이 손실 가운데 얼마가 학습률(0.0001) 탓인지는 강화학습과 나란히 놓을 때 다시 본다. 셈 문항에 동화 줄을 함께 섞는 판은 이 장에서 측정하지 않았다.</p>
-<p>이 시험에서는 프리트레인을 이어 하지 않아도 같았다. 학습 전 동화 GPT 에서 바로 지도 파인튜닝을 시작하면 식 배운 쌍 99.1%, 이야기 배운 쌍 60.3% 로, 둘 다로 읽힌 루나의 99.6%, 62.2% 와 거의 같다(<code>ladder_S_base.out</code>). 프리트레인의 효과는 강화학습의 시작점에서 드러난다.</p>
-<p>새 쌍을 올리는 것은 문항의 범위다. 둘 다로 읽힌 루나의 문항에 다섯 살 범위를 조금 넘는 두 자리 덧셈과 뺄셈을 섞었다(<code>ladder_S_wide.out</code>). 「14 - 11」처럼 시험의 새 쌍이면서 두 자리이기도 한 쌍은 문항에서 뺐다.</p>
-<pre><code class="language-text">  요약 SFT P_both 식_old: 98.9% [98.5, 99.2, 98.8]
-  요약 SFT P_both 식_new: 26.5% [23.3, 28.2, 27.9]
-  요약 SFT P_both 이야기_old: 51.3% [49.8, 51.4, 52.5]
-  요약 SFT P_both 이야기_new: 12.8% [11.0, 16.1, 11.2]
-</code></pre>
-<p>시험 쌍이 아닌 문항을 함께 풀게 했더니, 새 쌍의 식이 13.0% 에서 26.5% 로, 새 쌍의 이야기가 7.1% 에서 12.8% 로 두 배 안팎이 되었다. 숫자 규칙 실험에서 본 것과 같은 방향이다.</p>
-<div class="dialogue"><h3 id="prob-counting-curriculum">문제 5. 서연이 짠 교과 과정<span id="문제-5-서연이-짠-교과-과정" class="anchor-alias"></span></h3>
+<p>이어서 섞어 읽힐 때는 배치의 24 줄이 동화라 잊지 않았고, 이번에는 답 칸만 채점하니 동화에 대한 손실이 하나도 없었다. 대화로 가르칠 때 본 것과 같은 저울이다. 동화 실력을 잃은 것 가운데 얼마가 학습률(0.0001) 때문인지는 강화학습과 나란히 놓을 때 다시 본다. 셈 문항에 동화 줄을 함께 섞는 판은 이 장에서 측정하지 않았다.</p>
+<p>이어 읽기를 건너뛰어도 이 시험의 점수는 같았다. 학습 전 동화 GPT 에서 바로 지도 파인튜닝을 시작하면 식 배운 쌍 99.1%, 이야기 배운 쌍 60.3% 다(<code>ladder_S_base.out</code>). 이어 읽기의 효과는 강화학습의 시작점에서 드러난다.</p>
+<div class="dialogue"><h3 id="prob-counting-curriculum">문제 3. 서연이 짠 교과 과정<span id="문제-3-서연이-짠-교과-과정" class="anchor-alias"></span></h3>
 <blockquote>
 <p>유치원 쌍(437 개)만 지도 파인튜닝하면 새 쌍의 식이 13.0%, 두 자리 덧셈·뺄셈을 섞으면 26.5% 였다. (가) 시험에 나오지 않는 문제를 풀게 했는데 왜 시험 점수가 오르는가? (나) 두 자리 쌍은 8,100 개쯤인데, 그렇다면 쌍을 더 많이 만들수록 무조건 좋을까? (다) 지금 실험만으로 원인을 말할 수 있는가?</p>
 </blockquote>
@@ -825,7 +841,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M01"><img src="images/cast/M01.webp" alt="김민준 M01" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>안에서 일의 자리를 더하는 회로가 생겼는지는 안 봤으니까, 원인까지는 못 말해요. 두 자리 일의 자리 덧셈이 유치원 쌍과 같은 계산이라서 도왔을 거라는 건 짐작이고요.</p></div></div></div>
 
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="counting-sec-counting-curriculum.html">&larr; 순서와 망각: 앞 단계를 배치에서 빼면</a><span class="page-count">4 / 9</span><a class="chapter-nav-next" href="counting-sec-counting-grpo.html">강화학습: 뽑은 답을 채점해서 고른다 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="counting-sec-counting-stories.html">&larr; 합성 데이터: 사과를 나눠 먹는 이야기</a><span class="page-count">3 / 9</span><a class="chapter-nav-next" href="counting-sec-counting-grpo.html">강화학습: 뽑은 답을 채점해서 고른다 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');
