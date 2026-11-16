@@ -761,7 +761,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="circuits.html">들여다보기 1: 칠판과 헤드</a></li>
 <li><a href="layers.html">들여다보기 2: 층을 지나는 벡터</a></li>
 <li class="toc-part">가르치고 고치기</li>
-<li><a href="synthetic-data.html" class="active">동화 속의 우리: 루나에게 우리 이야기를 가르치려면 몇 편을 써야 할까</a><ul class="sidebar-toc"><li><a href="synthetic-data.html">이야기 세 편: 외운 것과 아는 것</a></li><li><a href="synthetic-data-sec-paraphrase-augmentation.html" class="current">바꿔 쓰기: 같은 사실을 여러 문장과 형식으로</a></li><li><a href="synthetic-data-sec-synthetic-data-gain.html">이 장에서 얻은 것</a></li><li><a href="synthetic-data-sec-synthetic-data-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li><a href="synthetic-data.html" class="active">동화 속의 우리: 루나에게 우리 이야기를 가르치려면 몇 편을 써야 할까</a><ul class="sidebar-toc"><li><a href="synthetic-data.html">이야기 세 편: 외운 것과 아는 것</a></li><li><a href="synthetic-data-sec-paraphrase-augmentation.html" class="current">바꿔 쓰기: 같은 사실을 여러 문장과 형식으로</a></li><li><a href="synthetic-data-sec-synthetic-data-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="reversal.html">앞에서만 읽는 모델: A 가 B 의 아버지라면 B 는 누구의 아들일까</a></li>
 <li><a href="canon.html">생각의 깊이: LLM 물리학 시험과 캐논 층</a></li>
 <li class="toc-part">다섯 살 루나</li>
@@ -834,6 +834,51 @@ Seoyeon: A rabbit is Seoyeon's pet.
 <p>동화 실력은 거의 그대로였다. 바꿔 쓴 글을 읽은 루나의 타이니스토리즈 검증 글 바이트당 비트는 0.4311 로, 학습 전 0.4259 보다 0.005 정도 올랐다. 샘플에서는 시키지 않아도 별이 나온다.</p>
 <pre><code class="language-text">     샘플(온도 0.8, 시드 0) 「Once upon a time, Minjun and Seoyeon」 → ' went for a walk. They saw a lake. &quot;Let's play on the lake!&quot; said Minjun. &quot;Yes!&quot; said Seoyeon. … Then Minjun looked up at the stars. &quot;Stars!&quot; Minjun said. Seoyeon looked at the stars. They said, &quot;Party!&quot; They played and played. Then Minjun and Seoyeon went home.'
 </code></pre>
+<h3 id="sec-tokenizer-edit">이름을 토큰 하나로 넣어 보면<span id="이름을-토큰-하나로-넣어-보면" class="anchor-alias"></span></h3>
+<p>바꿔 쓴 글의 결과를 본 뒤에도 민준은 토크나이저 표에서 「␣M in j un」이 적힌 줄을 손가락으로 두드렸다.</p>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M12"><img src="images/cast/M12.webp" alt="김민준 M12" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>글을 이렇게 많이 쓰게 할 필요가 있어? Seoye 는 「␣S e oy e on」 다섯 조각에서 끝을 못 붙인 거잖아. 이름을 그냥 토큰 하나로 박으면 되잖아.</p></div></div>
+<p>층을 열어 볼 때도 「 Minjun」의 마지막 조각 자리 벡터는 아직 낱말을 다 읽지 못한 상태였다(동화 GPT 는 그 뒤에 이름이 이어진다고 보고 「e」를 꼽았다). 이름이 토큰 하나면 이름 토큰을 읽는 위치에서 낱말이 끝나니, 민준의 생각은 그럴듯하다.</p>
+<p>민준의 생각대로 「␣Minjun」 「Minjun」 「␣Seoyeon」 「Seoyeon」 네 형태를 어휘에 직접 넣고 임베딩 행렬을 네 행 넓힌 뒤, 바꿔 쓴 글을 같은 1,000 스텝 읽혔다. 이번에는 시드를 다섯으로 늘렸다(위의 51.7% 는 시드 셋 평균이다). 새 문형 정답률은 토크나이저를 그대로 둔 루나가 51.0%, 토큰 넷을 넣은 루나가 47.0% 였고, 다른 사람의 답을 고른 비율은 22.5% 에서 30.5% 로 늘었다(<code>sources/synthetic-data/tok_edit_summary.out</code>). 토큰을 넣어도 사실을 더 잘 배우지는 않았다.</p>
+<p>좋아진 것은 철자다. 바꿔 쓴 글을 읽은 루나는 토큰 없이도 이름을 98% 와 99% 바르게 썼는데, 토큰 넷을 넣자 남은 1~2% 의 틀린 철자가 사라졌다. 글 없이 토큰만 넣은 루나는 달랐다. 두 이름이 든 시작 문장으로 스무 번 이어 쓰게 하니, Min…, Seo…, Ser… 로 시작한 낱말이 Ming 두 번뿐이었다. 넣기 전에는 망가진 철자로라도 쓰던 이름을 아예 쓰지 않게 된 것이다.</p>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S12"><img src="images/cast/S12.webp" alt="이서연 S12" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>틀린 철자가 0 개이긴 하네. 축하해.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>원인을 따로 측정한 것은 아니니 추정으로 들어요. 어휘에 낱말을 넣는 일은 칸을 하나 만들 뿐이고, 그 낱말을 어디에 쓰는지는 글을 읽어야 배워요. 글을 함께 읽혀도 사실이 붙는 곳은 여전히 문장이고요. 그래서 우리는 글을 바꿔 쓰는 쪽으로 가요.</p></div></div>
+<p>민준은 토크나이저 표를 닫고, 바꿔 쓴 글을 읽은 첫 시드의 루나를 다시 불러왔다. 이어서 학습하기 전의 루나가 개와 사과로 답했던 두 물음을 그리디 선택으로 넣었다.</p>
+<pre><code class="language-text">이어서 학습하기 전 (sources/synthetic-data/run_hand.out)
+  「Minjun's pet was a」         → small, brown dog. He was very happy and loved to
+  「Seoyeon's favorite food was」 → a big, red apple. He loved to eat it every
+바꿔 쓴 글을 읽은 루나, 시드 0 (sources/synthetic-data/run_synth.out)
+  「Minjun's pet was a」         → little turtle.\nToday Minjun and S
+  「Seoyeon's favorite food was」 → strawberries. Yellow was a color Se
+</code></pre>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M09"><img src="images/cast/M09.webp" alt="김민준 M09" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>turtle 이야. 이름을 토큰으로 안 박고도 루나가 처음으로 나를 알아.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>네 거북이를 아는 거지, 너를 아는 건 아니야. 누구 건지 바꿔 고르는 것도 넷에 하나가 넘고. …그래도 내 이름은 이제 거의 안 틀리네.</p></div></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>측정한 것</th>
+<th>이어서 학습하기 전</th>
+<th>바꿔 쓴 글을 읽은 루나</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>새 문형 정답률(후보 여덟)</td>
+<td>10.0%</td>
+<td>51.7% (시드 47.5 / 50.0 / 57.5)</td>
+</tr>
+<tr>
+<td>다른 사람의 답을 고른 비율</td>
+<td>7.5%</td>
+<td>26.7%</td>
+</tr>
+<tr>
+<td>「Seoyeon」을 바르게 쓴 횟수(시드 0)</td>
+<td>0 / 78</td>
+<td>86 / 88</td>
+</tr>
+</tbody>
+</table></div>
+<p>같은 세 편을 육천 번 넘게 읽힌 루나도, 이야기만 300 편으로 늘린 루나도 처음 보는 문형에서는 30.0% 에 머물렀다. 숫자를 움직인 것은 같은 사실을 말하는 문장의 가짓수였다. 어느 사실이 누구의 것인지는 아직 그만큼 붙지 않았다.</p>
 <h3 id="ml에서-모델이-쓴-글만-거듭-읽히면">ML에서: 모델이 쓴 글만 거듭 읽히면</h3>
 <p>합성 데이터를 쓸 때 함께 나오는 걱정이 있다. 2024년 『네이처』에 실린 일리아 슈마일로프(Ilia Shumailov) 팀의 논문은 모델이 만든 글을 가리지 않고 다음 모델의 학습에 쓰기를 세대마다 되풀이하면, 원래 데이터 분포의 꼬리가 사라지는 되돌릴 수 없는 결함이 생긴다고 보고했다. 이 현상을 <strong>모델 붕괴</strong> (모델이 쓴 글로 거듭 학습해 분포가 좁아지는 일 / model collapse)라 한다. 같은 논문에서 세대마다 원래 학습 데이터의 10% 를 남겨 둔 경우는 성능이 조금만 나빠졌고, 2024년 마티아스 게르스트그라서(Matthias Gerstgrasser) 팀은 원래 데이터를 버리지 않고 세대마다의 합성 데이터를 그 위에 쌓아 가면 붕괴를 피한다고 보고했다. 우리 실험은 세대를 거듭하지 않았고, 배치의 32 줄 가운데 28 줄은 늘 원래 동화를 읽혔다. 원래 동화도 GPT-4 가 쓴 글이라는 점은 기억해 둘 만하다.</p>
 <aside class="tryit"><p class="tryit-title">따라 하기 · 게이밍 GPU 한 장</p><p>글 만들기는 <code>python sources/synthetic-data/gen_deepseek.py fixed 300</code>, <code>… varied 450</code> 으로, OpenAI 호환 주소(<code>LMBOOK_GW_URL</code>)와 키(<code>LMBOOK_GW_KEY</code>)를 환경 변수로 준다. 다른 모델을 쓰려면 <code>MODEL</code> 한 줄을 바꾸면 된다. 받은 글은 <code>~/lm-book-lab/data/synthetic-data/</code> 에 쌓인다.</p>
@@ -857,17 +902,9 @@ Seoyeon: A rabbit is Seoyeon's pet.
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S01"><img src="images/cast/S01.webp" alt="이서연 S01" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>스크립트를 보면 스텝마다 우리 글에서 4 줄 × 512 토큰을 자르고, 1,000 스텝이야. 두 조건 다 204만 8천 토큰을 읽었어. 글의 크기와 상관없이.</p></div></div>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>아, 그럼 크기가 바꾸는 건 같은 글을 몇 번 되풀이해 읽었느냐네. 한 문형은 67,195 토큰을 서른 번쯤, 바꿔 쓴 건 95,838 토큰을 스무 번 정도.</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그래요. 바꿔 쓴 쪽은 같은 글을 덜 되풀이하고 더 다양한 문장을 읽었어요. 그런데 손으로 쓴 세 편은 333 토큰을 육천 번 넘게 읽고도 30.0% 였고, 300 편은 그보다 덜 되풀이하고도 같은 30.0% 였어요. 되풀이 횟수보다 문장의 다양성이 숫자를 바꿨다는 쪽에 증거가 더 있어요.</p></div></div></div>
-<h3 id="sec-tokenizer-edit">이름을 토큰 하나로 넣어 보면<span id="이름을-토큰-하나로-넣어-보면" class="anchor-alias"></span></h3>
-<p>바꿔 쓴 글의 결과를 본 뒤에도 민준은 토크나이저 표에서 「␣M in j un」이 적힌 줄을 손가락으로 두드렸다.</p>
-<div class="turn turn-M has-cast"><figure class="cast" data-cast="M12"><img src="images/cast/M12.webp" alt="김민준 M12" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>글을 이렇게 많이 쓰게 할 필요가 있어? Seoye 는 「␣S e oy e on」 다섯 조각에서 끝을 못 붙인 거잖아. 이름을 그냥 토큰 하나로 박으면 되잖아.</p></div></div>
-<p>층을 열어 볼 때도 「 Minjun」의 마지막 조각 자리 벡터는 아직 낱말을 다 읽지 못한 상태였다(동화 GPT 는 그 뒤에 이름이 이어진다고 보고 「e」를 꼽았다). 이름이 토큰 하나면 이름 토큰을 읽는 위치에서 낱말이 끝나니, 민준의 생각은 그럴듯하다.</p>
-<p>민준의 생각대로 「␣Minjun」 「Minjun」 「␣Seoyeon」 「Seoyeon」 네 형태를 어휘에 직접 넣고 임베딩 행렬을 네 행 넓힌 뒤, 바꿔 쓴 글을 같은 1,000 스텝 읽혔다. 이번에는 시드를 다섯으로 늘렸다(앞 절의 51.7% 는 시드 셋 평균이다). 새 문형 정답률은 토크나이저를 그대로 둔 루나가 51.0%, 토큰 넷을 넣은 루나가 47.0% 였고, 다른 사람의 답을 고른 비율은 22.5% 에서 30.5% 로 늘었다(<code>sources/synthetic-data/tok_edit_summary.out</code>). 토큰을 넣어도 사실을 더 잘 배우지는 않았다.</p>
-<p>좋아진 것은 철자다. 바꿔 쓴 글을 읽은 루나는 토큰 없이도 이름을 98% 와 99% 바르게 썼는데, 토큰 넷을 넣자 남은 1~2% 의 틀린 철자가 사라졌다. 글 없이 토큰만 넣은 루나는 달랐다. 두 이름이 든 시작 문장으로 스무 번 이어 쓰게 하니, Min…, Seo…, Ser… 로 시작한 낱말이 Ming 두 번뿐이었다. 넣기 전에는 망가진 철자로라도 쓰던 이름을 아예 쓰지 않게 된 것이다.</p>
-<div class="turn turn-S has-cast"><figure class="cast" data-cast="S12"><img src="images/cast/S12.webp" alt="이서연 S12" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>틀린 철자가 0 개이긴 하네. 축하해.</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>원인을 따로 측정한 것은 아니니 추정으로 들어요. 어휘에 낱말을 넣는 일은 칸을 하나 만들 뿐이고, 그 낱말을 어디에 쓰는지는 글을 읽어야 배워요. 글을 함께 읽혀도 사실이 붙는 곳은 여전히 문장이고요. 그래서 우리는 글을 바꿔 쓰는 쪽으로 가요.</p></div></div>
 
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="synthetic-data.html">&larr; 이야기 세 편: 외운 것과 아는 것</a><span class="page-count">2 / 4</span><a class="chapter-nav-next" href="synthetic-data-sec-synthetic-data-gain.html">이 장에서 얻은 것 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="synthetic-data.html">&larr; 이야기 세 편: 외운 것과 아는 것</a><span class="page-count">2 / 3</span><a class="chapter-nav-next" href="synthetic-data-sec-synthetic-data-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

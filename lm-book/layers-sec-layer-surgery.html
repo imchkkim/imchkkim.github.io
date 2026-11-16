@@ -759,7 +759,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿인가</a></li>
 <li><a href="mlp-parts.html">MLP 는 무엇을 아는가: 물음과 답, 그리고 지식이 있는 곳</a></li>
 <li><a href="circuits.html">들여다보기 1: 칠판과 헤드</a></li>
-<li><a href="layers.html" class="active">들여다보기 2: 층을 지나는 벡터</a><ul class="sidebar-toc"><li><a href="layers.html">잔차 스트림을 타고 올라가는 벡터</a></li><li><a href="layers-sec-logit-lens.html">로짓 렌즈: 층마다 무슨 토큰을 떠올리고 있나</a></li><li><a href="layers-sec-three-stages.html">앞쪽 층은 낱말을, 뒤쪽 층은 다음 토큰을</a></li><li><a href="layers-sec-layer-surgery.html" class="current">층을 지워 보기: 지우기, 복제, 맞바꾸기</a></li><li><a href="layers-sec-layers-gain.html">이 장에서 얻은 것</a></li><li><a href="layers-sec-layers-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li><a href="layers.html" class="active">들여다보기 2: 층을 지나는 벡터</a><ul class="sidebar-toc"><li><a href="layers.html">잔차 스트림을 타고 올라가는 벡터</a></li><li><a href="layers-sec-logit-lens.html">로짓 렌즈: 층마다 무슨 토큰을 떠올리고 있나</a></li><li><a href="layers-sec-three-stages.html">앞쪽 층은 낱말을, 뒤쪽 층은 다음 토큰을</a></li><li><a href="layers-sec-layer-surgery.html" class="current">층을 지워 보기: 지우기, 복제, 맞바꾸기</a></li><li><a href="layers-sec-layers-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li class="toc-part">가르치고 고치기</li>
 <li><a href="synthetic-data.html">동화 속의 우리: 루나에게 우리 이야기를 가르치려면 몇 편을 써야 할까</a></li>
 <li><a href="reversal.html">앞에서만 읽는 모델: A 가 B 의 아버지라면 B 는 누구의 아들일까</a></li>
@@ -901,6 +901,39 @@ class Surgery:
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그럴듯한 물음이니 측정과 나눠서 적어 둬요. 측정한 것은 「ip」가 층 1 을 지나 「␣rocket」 옆으로 가고, 층 1 이 만든 벡터가 없으면 뒤 층이 일을 못 한다는 데까지예요. 끝 층도 GPT-2 는 60.2% 까지 떨어지지만 동화 GPT 는 78.8% 이고 이야기를 잘 써요. 앞 층이 눈처럼 인식하는지, 끝 층이 발성처럼 표현하는지는 지금 숫자로 갈리지 않아요.</p></div></div>
 <p>민준은 공책에 「앞 = 눈? 끝 = 발성? 안 잼」이라고 적었다.</p>
 <p>게이지에게서 가져온 것도 자리에 따라 잃는 것이 다르다는 착상까지이고, 층 지우기는 사람의 뇌에 대해서는 아무것도 측정하지 않는다. 가운데 층이 하는 일은 렌즈에 잘 읽히지 않는다. 그 층에서 출력까지의 평균 자코비안을 곱해 읽는 자코비안 렌즈(거니 팀 2026)라는 방법이 있지만, 원 논문은 루나보다 훨씬 큰 모델에서 측정했고 작은 모델에서는 어떨지 모른다고 적었다. 8층 루나에서도 읽히는지는 직접 걸어 봐야 안다.</p>
+<p>민준은 공책을 덮고, 로짓 렌즈를 처음 걸던 날 넣었던 문장을 다시 띄웠다. 「Tom and Lily went to the park. Tom gave the ball to」. 렌즈를 걸기 전에는 이 문장에서 볼 수 있는 것이 마지막 층이 낸 한 줄뿐이었다(<code>sources/layers/lens_table.out</code>).</p>
+<pre><code class="language-text">마지막 층의 출력만 볼 때
+  층 8: ␣Lily 0.745
+층마다 읽을 때
+  층 1: ␣the 0.247
+  층 5: ␣a 0.403
+  층 7: ␣Lily 0.709
+</code></pre>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.webp" alt="김민준 M08" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>층 5 까지 「a」 하던 루나가 층 7 에서 Lily 를 꺼냈어. 같은 루나인데 속이 이만큼 보이는 건 처음이야.</p></div></div>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S12"><img src="images/cast/S12.webp" alt="이서연 S12" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>너도 그래. 시험 보다가 마지막 일 분에 답 바꾸잖아.</p></div></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>측정한 것</th>
+<th>층 1</th>
+<th>층 8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>렌즈 1위가 실제 정답인 비율</td>
+<td>0.183</td>
+<td>0.664</td>
+</tr>
+<tr>
+<td>그 층 하나만 지웠을 때 원래 루나와 1위가 같은 비율</td>
+<td>0.0272</td>
+<td>0.7875</td>
+</tr>
+</tbody>
+</table></div>
+<p>(<code>sources/layers/residual_stream.out</code>, <code>sources/layers/layer_surgery.out</code>)</p>
+<p>루나의 점수는 하나도 오르지 않았다. 달라진 것은 같은 루나를 읽는 방법이다. 렌즈로 읽으면 답이 나오기 전의 층들은 문법만 맞는 낱말에서 답으로 좁혀 가고, 망가뜨려 보면 8층 루나는 층 1 이 아니면 어느 층 하나를 빼도 71.8~80.8% 의 예측을 그대로 남긴다. 층 1 은 지식을 쌓아 둔 곳이라기보다 뒤 일곱 층이 읽을 벡터를 만드는 곳으로 보인다. 민준의 공책에 적힌 「눈? 발성?」은 물음표를 단 채로 둔다.</p>
 <aside class="tryit"><p class="tryit-title">따라 하기 · 게이밍 GPU 한 장</p><p>책 저장소에서 <code>python -u sources/layers/residual_stream.py &gt; sources/layers/residual_stream.out</code> 은 크기·코사인·기여·렌즈 곡선을, <code>lens_table.py</code> 는 문장별 렌즈 표를, <code>feature_probe.py</code> 는 성별 탐침을(인자 <code>mid</code> 는 이름이 맨 앞에 오는 틀을 뺀 측정), <code>detok.py</code> 는 낱말 구별과 이웃을, <code>layer_surgery.py</code> 는 동화 GPT 의 지우기·복제·맞바꾸기를 측정한다(인자 <code>gpt2</code>, <code>xl</code> 로 큰 모델). <code>next_token_sim.py</code> 는 다음 토큰 분포와의 상관을 계산한다. <code>front_mid_end.py</code> 는 저장된 결과를 앞·가운데·끝으로 묶는다(GPU 없음). GPT-2 가중치는 <code>python sources/layers/download_gpt2.py gpt2</code> 로 받는다(548 MB, <code>gpt2-xl</code> 은 6.4 GB). 동화 GPT 체크포인트가 <code>~/lm-book-lab/ckpt/tinystories/final.pt</code> 에 있어야 한다. RTX 4090 한 장에서 <code>residual_stream.py</code> 132.2초, <code>lens_table.py</code> 5.3초, <code>feature_probe.py</code> 1,419.6초, <code>detok.py</code> 146.7초, <code>layer_surgery.py</code> 149.4초(동화 GPT 두 모델), 인자 <code>gpt2</code> 609.4초, 인자 <code>xl</code> 80.7초, <code>next_token_sim.py</code> 18.6초, <code>feature_probe.py mid</code> 653.0초 걸렸다.</p>
 <p><strong>노트북</strong>: 동화 GPT 의 <code>lens_table.py</code> 는 CPU 로도 돌아간다(시간은 측정하지 않았다). 모델을 고르려면 스크립트 앞의 목록을 고친다.</p>
 </aside>
@@ -931,7 +964,7 @@ class Surgery:
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그렇게 읽을 수 있어요. 복제한 층이 어떤 벡터를 더했는지 측정한 것은 아니니 짐작으로 둬요.</p></div></div></div>
 
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="layers-sec-three-stages.html">&larr; 앞쪽 층은 낱말을, 뒤쪽 층은 다음 토큰을</a><span class="page-count">4 / 6</span><a class="chapter-nav-next" href="layers-sec-layers-gain.html">이 장에서 얻은 것 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="layers-sec-three-stages.html">&larr; 앞쪽 층은 낱말을, 뒤쪽 층은 다음 토큰을</a><span class="page-count">4 / 5</span><a class="chapter-nav-next" href="layers-sec-layers-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');

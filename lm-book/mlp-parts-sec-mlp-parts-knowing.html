@@ -757,7 +757,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="answer.html">묻는 말에 대답하기: 이어 쓰는 모델에서 답하는 모델로</a></li>
 <li class="toc-part">왜 그렇게 될까</li>
 <li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿인가</a></li>
-<li><a href="mlp-parts.html" class="active">MLP 는 무엇을 아는가: 물음과 답, 그리고 지식이 있는 곳</a><ul class="sidebar-toc"><li><a href="mlp-parts.html">MLP 의 은닉층: 물음 1,024 개와 답 1,024 개</a></li><li><a href="mlp-parts-sec-where-facts-live.html">민준의 추측을 시험하기: 지식은 MLP 에 있는가</a></li><li><a href="mlp-parts-sec-knowledge-and-intelligence.html">지식과 지능: 기출을 외운 사람과 공식을 못 외운 사람</a></li><li><a href="mlp-parts-sec-mlp-parts-knowing.html" class="current">아는 것과 할 줄 아는 것: 키 하나에 값 하나를 묶는 행렬</a></li><li><a href="mlp-parts-sec-mlp-parts-gain.html">이 장에서 얻은 것</a></li><li><a href="mlp-parts-sec-mlp-parts-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li><a href="mlp-parts.html" class="active">MLP 는 무엇을 아는가: 물음과 답, 그리고 지식이 있는 곳</a><ul class="sidebar-toc"><li><a href="mlp-parts.html">MLP 의 은닉층: 물음 1,024 개와 답 1,024 개</a></li><li><a href="mlp-parts-sec-where-facts-live.html">민준의 추측을 시험하기: 지식은 MLP 에 있는가</a></li><li><a href="mlp-parts-sec-knowledge-and-intelligence.html">지식과 지능: 기출을 외운 사람과 공식을 못 외운 사람</a></li><li><a href="mlp-parts-sec-mlp-parts-knowing.html" class="current">아는 것과 할 줄 아는 것: 키 하나에 값 하나를 묶는 행렬</a></li><li><a href="mlp-parts-sec-mlp-parts-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li><a href="circuits.html">들여다보기 1: 칠판과 헤드</a></li>
 <li><a href="layers.html">들여다보기 2: 층을 지나는 벡터</a></li>
 <li class="toc-part">가르치고 고치기</li>
@@ -835,9 +835,43 @@ section.interlude figure.fig img { border-radius: 10px; }
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S07"><img src="images/cast/S07.webp" alt="이서연 S07" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그러면 이렇게 정리할 수 있겠네요. 가중치에 묶은 사실은 칸이 한정되어 있고 서로 간섭하며, 저장한 키에만 답한다. 새 문제의 답을 만드는 계산이 가중치의 어디에 어떤 형태로 들어 있는지는 오늘의 행렬로는 적지 못했고, 그건 아직 추측이에요.</p></div></div>
 <aside class="tryit"><p class="tryit-title">따라 하기 · CPU</p><p><code>python sources/mlp-parts/kv_memory.py</code> 는 numpy 만 쓰고 GPU 없이 20 초 안팎 걸린다. 2 차원의 쌍 둘을 손으로 검산할 수 있게 출력하고, 폭 64 에서 쌍의 수를 16 개부터 10,000 개까지 늘리며 세 가지 기억의 복원 오차, 기출 정답률, 처음 보는 문제의 정답률을 출력한다(<code>sources/mlp-parts/kv_memory.out</code>).</p>
 </aside>
+<p>민준은 설정서 셋째 줄로 돌아갔다. 자기가 큰 글씨로 적은 「가장 중요한 부분. MLP 에 넣으면 끝」 옆에 서연이 그려 둔 조그만 물음표가 그대로 있었다. 민준은 그 아래에 코끼리 문장 하나와 표 한 장을 옮겨 붙였다(<code>sources/gpt-parts/knockouts.out</code>, <code>knockouts2.out</code>).</p>
+<pre><code class="language-text">입력: The elephant had a long
+  지우지 않음              ' trunk' 0.824
+  주어 자리 어텐션 지움      ' trunk' 0.966
+  주어 자리 MLP 지움        ' day'   0.007
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>동화 지식(문장 40 개)</th>
+<th>온전한 모델</th>
+<th>2층부터 MLP 를 지움</th>
+<th>2층부터 어텐션을 지움</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>동화 GPT</td>
+<td>0.875</td>
+<td>0.200</td>
+<td>0.175</td>
+</tr>
+<tr>
+<td>작은 GPT</td>
+<td>0.675</td>
+<td>0.350</td>
+<td>0.525</td>
+</tr>
+</tbody>
+</table></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>주어 자리 MLP 를 지우면 trunk 가 0.007 이니까, 여기까지는 내 말이 맞아. 그런데 동화 GPT 는 어텐션을 지워도 0.175 야. 「끝」은 아니었네.</p></div></div>
+<p>민준은 「MLP 에 넣으면 끝」의 「끝」에 줄을 긋고, 그 옆에 「여기도 있음」이라고 적었다.</p>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T13"><img src="images/cast/T13.webp" alt="선생님 T13" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>틀린 자리를 표로 짚어 냈잖아요. 추측을 지우기로 시험하고, 처음부터 다시 학습한 모델과 대어 보고, 마지막에는 키와 값을 묶는 행렬로 MLP 가 무엇을 적어 두는지까지 왔어요.</p></div></div>
+<p>MLP 는 학습 글에서 배운 물음과 답을 가중치에 적어 둔 기억이어서, 지우면 지식이 크게 준다. 지식이 있는 곳이 MLP 하나는 아니다. 동화 GPT 에서는 어텐션을 지워도 비슷하게 줄었고, MLP 없이 처음부터 배운 모델도 지식이 크게 줄지 않았다. 가중치에 묶은 사실은 칸 수가 허락하는 만큼만 간섭 없이 돌아오고(폭 64 의 최소제곱은 64 쌍까지 오차 0.000, 은닉 256 은 256 쌍까지 기출 1.000), 처음 보는 문제를 풀게 한 것은 같은 문제를 되풀이한 횟수가 아니라 서로 다른 문제의 수였다.</p>
 
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="mlp-parts-sec-knowledge-and-intelligence.html">&larr; 지식과 지능: 기출을 외운 사람과 공식을 못 외운 사람</a><span class="page-count">4 / 6</span><a class="chapter-nav-next" href="mlp-parts-sec-mlp-parts-gain.html">이 장에서 얻은 것 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="mlp-parts-sec-knowledge-and-intelligence.html">&larr; 지식과 지능: 기출을 외운 사람과 공식을 못 외운 사람</a><span class="page-count">4 / 5</span><a class="chapter-nav-next" href="mlp-parts-sec-mlp-parts-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');
