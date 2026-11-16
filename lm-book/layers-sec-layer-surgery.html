@@ -759,7 +759,7 @@ section.interlude figure.fig img { border-radius: 10px; }
 <li><a href="gpt-parts.html">부품을 다시 보기: 헤드는 왜 여럿인가</a></li>
 <li><a href="mlp-parts.html">MLP 는 무엇을 아는가: 물음과 답, 그리고 지식이 있는 곳</a></li>
 <li><a href="circuits.html">들여다보기 1: 칠판과 헤드</a></li>
-<li><a href="layers.html" class="active">들여다보기 2: 층을 지나는 벡터</a><ul class="sidebar-toc"><li><a href="layers.html">잔차 스트림을 타고 올라가는 벡터</a></li><li><a href="layers-sec-logit-lens.html">로짓 렌즈: 층마다 무슨 토큰을 떠올리고 있나</a></li><li><a href="layers-sec-three-stages.html">앞쪽 층은 낱말을, 뒤쪽 층은 다음 토큰을</a></li><li><a href="layers-sec-layer-surgery.html" class="current">층을 지워 보기: 지우기, 복제, 맞바꾸기</a></li><li><a href="layers-sec-layers-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
+<li><a href="layers.html" class="active">들여다보기 2: 층을 지나는 벡터</a><ul class="sidebar-toc"><li><a href="layers.html">잔차 스트림을 타고 올라가는 벡터</a></li><li><a href="layers-sec-logit-lens.html">로짓 렌즈: 층마다 무슨 토큰을 떠올리고 있나</a></li><li><a href="layers-sec-three-stages.html">앞쪽 층은 낱말을, 뒤쪽 층은 다음 토큰을</a></li><li><a href="layers-sec-layer-surgery.html" class="current">층을 지워 보기: 지우기, 복제, 맞바꾸기</a></li><li><a href="layers-sec-layers-gain.html">이 장에서 얻은 것</a></li><li><a href="layers-sec-layers-summary.html">혼동하기 쉬운 점과 요약</a></li></ul></li>
 <li class="toc-part">가르치고 고치기</li>
 <li><a href="synthetic-data.html">동화 속의 우리: 루나에게 우리 이야기를 가르치려면 몇 편을 써야 할까</a></li>
 <li><a href="reversal.html">앞에서만 읽는 모델: A 가 B 의 아버지라면 B 는 누구의 아들일까</a></li>
@@ -867,7 +867,8 @@ class Surgery:
 <p>가운데 층이 버티는 이유로 라드 팀이 가설로 드는 것은 잔차 연결이다. 층을 건너뛰어도 h 는 끊기지 않아서, 앞 층까지 더한 합이 그대로 다음 층으로 가고 뒤 층들은 평소 읽던 것에서 한 층이 더한 벡터만 빠진 h 를 읽는다. 층마다 더하는 양은 h 크기의 3분의 1 정도이니, 지운다고 벡터가 다른 것이 되지는 않는다.</p>
 <div class="turn turn-M has-cast"><figure class="cast" data-cast="M06"><img src="images/cast/M06.webp" alt="김민준 M06" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>잔차를 빼고 지워 보면요?</p></div></div>
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T14"><img src="images/cast/T14.webp" alt="선생님 T14" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그 비교는 이 크기와 시간에서는 제대로 안 나와요. 6층, 폭 256 짜리 작은 GPT 를 잔차 연결만 빼고 3,000 스텝 학습해 봤는데, 잔차가 있는 모델은 검증 손실이 1.96~1.97 까지 내려가고 잔차가 없는 모델은 5.77~5.88 에서 멈췄어요(<code>sources/layers/no_skip.out</code>, 시드 셋). 층을 지워 보기도 전에 학습부터 안 된 거예요. 그래서 이미지 모델로 측정한 결과를 봐요. 2016년 파이트(Andreas Veit) 팀의 실험에서 15층 VGG 는 어느 층이든 지우면 우연 수준, 잔차 네트워크는 거의 그대로였어요. 그들은 잔차 네트워크를 길이가 다른 경로 여럿의 묶음으로 보고, 층 하나를 지우면 경로의 절반이 사라질 뿐이라고 설명했어요.</p></div></div>
-<p>잔차 연결은 층 하나가 빠졌을 때 벡터를 이어 주기 전에, 층을 쌓은 모델이 애초에 학습되게 해 주는 장치다.</p>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M04"><img src="images/cast/M04.webp" alt="김민준 M04" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>층을 지워 보기도 전에 학습부터 안 되는구나. 잔차가 그냥 있는 게 아니었네.</p></div></div>
+<p>잔차 연결은 한 층이 빠져도 벡터를 이어 주는 장치이기 전에, 층을 쌓은 모델이 학습되게 해 주는 장치다.</p>
 <p>가운데 층을 하나씩 더 지워 보면 어디까지 버티는지 나온다. 동화 GPT 의 가운데 2개를 지우면 일치율 66.9%, 3개 48.9%, 4개 43.2%, 5개 27.0%, 6개 21.3% 로 고르게 내려간다. 첫 층과 끝 층만 남은 모델은 이렇게 쓴다.</p>
 <pre><code class="language-text">[처음과 끝 한 층씩만 남기기]
   그리디: Once upon a time, there was a little girl named Lily. She had a tiny seed to crawl around the crawets around the tiny bug crawled around the tiny bug crawled around the tiny bug crawled around the tiny bug crawled around the tiny bug crawled around the tiny bug
@@ -884,10 +885,12 @@ class Surgery:
   직접빼기      8  1.5728 0.7875 (0.786~0.790)
 </code></pre>
 <figure class="fig "><img src="images/layers/direct_vs_full.png" alt="층을 건너뛸 때와 그 층이 더한 값만 끝에서 뺄 때의 검증 손실 증가(동화 GPT). 앞쪽 층은 건너뛸 때 훨씬 나빠지고, 뒤쪽 층은 차이가 작거나 없다(sources/layers/plot_layers.py)" loading="lazy"><figcaption>층을 건너뛸 때와 그 층이 더한 값만 끝에서 뺄 때의 검증 손실 증가(동화 GPT). 앞쪽 층은 건너뛸 때 훨씬 나빠지고, 뒤쪽 층은 차이가 작거나 없다(sources/layers/plot_layers.py)</figcaption></figure>
-<p>층 1 이 더한 값을 마지막에서 빼는 것만으로는 일치율이 78.7% 나 남으니, 치명적인 것은 그 벡터를 뒤 층들이 읽지 못하는 일이다. GPT-2 에서도 층 1 을 건너뛰면 6.2%, 값만 빼면 86.9% 로 모양이 같다. 뒤 일곱 층은 임베딩 대신 층 1 이 만든 큰 벡터를 읽도록 학습되었으니, 임베딩만 받으면 제대로 읽지 못한다. 뒤 층은 앞 층이 만든 벡터 위에 쌓는다. 라드 팀이 첫 층을 「임베딩의 연장」이라고 부른 것과 맞는 결과이고, 크기 측정에서 층 1 의 MLP 가 34.4 를 더했던 것과도 이어진다. 값만 빼는 일치율은 GPT-2 에서 층 2 95.9%, 층 9 84.3%, 층 12 60.2% 로 뒤로 갈수록 내려가니, 앞쪽 층은 뒤 층이 읽을 것을 적고 뒤쪽 층은 출력에 바로 적는 쪽에 가깝다.</p>
+<p>층 1 이 더한 값을 마지막에서 빼는 것만으로는 일치율이 78.7% 나 남으니, 치명적인 것은 그 벡터를 뒤 층들이 읽지 못하는 일이다. GPT-2 에서도 층 1 을 건너뛰면 6.2%, 값만 빼면 86.9% 로 모양이 같다. 뒤 일곱 층은 임베딩 대신 층 1 이 만든 큰 벡터를 읽도록 학습되었으니, 임베딩만 받으면 제대로 읽지 못하는 것으로 보인다. 다만 이것은 건너뛰기와 직접빼기의 차이에서 읽은 해석이고, 층 1 의 출력을 다른 벡터로 바꿔 끼우거나 뒤 층을 다시 학습해 확인하지는 않았다. 뒤 층은 앞 층이 만든 벡터 위에 쌓는다. 라드 팀이 첫 층을 「임베딩의 연장」이라고 부른 것과 맞는 결과이고, 크기 측정에서 층 1 의 MLP 가 34.4 를 더했던 것과도 이어진다. 값만 빼는 일치율은 GPT-2 에서 층 2 95.9%, 층 9 84.3%, 층 12 60.2% 로 뒤로 갈수록 내려가니, 앞쪽 층은 뒤 층이 읽을 것을 적고 뒤쪽 층은 출력에 바로 적는 쪽에 가깝다.</p>
 <p>MLP 와 어텐션을 하나씩 지워 보던 날 남겨 둔 물음도 이 직접빼기 결과로 풀린다. 그날 동화 GPT 에서 1층 MLP 하나만 지우자 바이트당 비트가 0.4472 에서 2.9565 로 뛰고 베끼기와 동화 지식이 모두 0 이 되었다. 코끼리가 나오지 않는 자리에서 지워도 똑같이 무너져서, 그때는 1층 MLP 가 「꼭 지나가는 곳」이라는 데까지만 말할 수 있었다. 층 1 이 더한 벡터는 거의 다 MLP 가 만든 것이고(어텐션 2.9, MLP 34.4), 층 1 이 더한 값을 끝에서 빼기만 하면 일치율이 78.7% 남는다. 1층 MLP 가 지식을 담고 있어서 무너진 것이 아니라, 뒤 일곱 층이 1층 MLP 가 만든 벡터를 읽도록 학습되어 있어서 무너진 것이다.</p>
+<div class="turn turn-S has-cast"><figure class="cast" data-cast="S08"><img src="images/cast/S08.webp" alt="이서연 S08" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 층 1 은 지식을 쌓아 둔 곳이라서 무너진 게 아닐 수도 있겠네. 층 1 이 만든 큰 벡터를 뒤 층들이 받지 못해서 그런 걸 수도 있고.</p></div></div>
+<div class="turn turn-M has-cast"><figure class="cast" data-cast="M08"><img src="images/cast/M08.webp" alt="김민준 M08" loading="lazy"><figcaption>김민준</figcaption></figure><div class="turn-body"><p>코끼리가 안 나오는 자리에서 지워도 똑같이 무너진 게 그래서였구나.</p></div></div>
 <div class="turn turn-S has-cast"><figure class="cast" data-cast="S06"><img src="images/cast/S06.webp" alt="이서연 S06" loading="lazy"><figcaption>이서연</figcaption></figure><div class="turn-body"><p>그럼 지운 층이 맡던 일을 뒤 층이 메워 주는 거예요?</p></div></div>
-<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>헤드를 지웠을 때 뒤 부품이 메운다는 보고는 있어요. 다만 불완전하고 프롬프트마다 달라요. 층 단위로 우리가 측정한 적은 없어요.</p></div></div>
+<div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>헤드를 지웠을 때 다른 헤드가 메운다는 보고는 있어요. 다만 불완전하고 프롬프트마다 달라요. 층 단위로 우리가 측정한 적은 없어요.</p></div></div>
 <p>끝 층은 숫자 셋으로 정리한다. 지우기 일치율이 GPT-2 60.2%, XL 89.7%, 동화 GPT 78.8% 다. GPT-2 는 가운데 어느 층보다 낮고, XL 은 가운데에서 가장 낮은 90.4% 바로 아래이며, 동화 GPT 는 가운데 범위 안이다. 끝 층을 건드리면 나쁘다는 논문의 결론은 이 크기의 표에서는 모델마다 정도가 다르다. 층 8 은 뒤에 읽을 층이 없으니, 위 표에서 지우기와 직접빼기의 두 줄이 같은 계산이다.</p>
 <h3 id="눈과-발성">눈과 발성</h3>
 <p>민준은 화면을 한참 보다가 스크롤을 올렸는데, 층 1 을 지운 줄에서 손이 멈췄다.</p>
@@ -928,7 +931,7 @@ class Surgery:
 <div class="turn turn-T has-cast"><figure class="cast" data-cast="T01"><img src="images/cast/T01.webp" alt="선생님 T01" loading="lazy"><figcaption>선생님</figcaption></figure><div class="turn-body"><p>그렇게 읽을 수 있어요. 복제한 층이 어떤 벡터를 더했는지 측정한 것은 아니니 짐작으로 둬요.</p></div></div></div>
 
 </article>
-<nav class="chapter-nav"><a class="chapter-nav-prev" href="layers-sec-three-stages.html">&larr; 앞쪽 층은 낱말을, 뒤쪽 층은 다음 토큰을</a><span class="page-count">4 / 5</span><a class="chapter-nav-next" href="layers-sec-layers-summary.html">혼동하기 쉬운 점과 요약 &rarr;</a></nav>
+<nav class="chapter-nav"><a class="chapter-nav-prev" href="layers-sec-three-stages.html">&larr; 앞쪽 층은 낱말을, 뒤쪽 층은 다음 토큰을</a><span class="page-count">4 / 6</span><a class="chapter-nav-next" href="layers-sec-layers-gain.html">이 장에서 얻은 것 &rarr;</a></nav>
 </main>
 <script type="module">
 const toggle = document.getElementById('theme-toggle');
