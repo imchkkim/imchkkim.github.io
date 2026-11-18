@@ -1,6 +1,6 @@
 // REINFORCE 의 분산과 베이스라인.
-// 세 답 정책(π = softmax(z), r = [1, 0, 0.6])에서 배치 N 개로 그래디언트를 추정한다.
-// 왼쪽: 처음 정책에서 "서울입니다" 로짓 성분의 추정치 1,500번 — 흩어진 정도(분산)
+// 네 답 정책(「1 + 1 =」 다음 토큰 「2」 「3」 「둘」 「11」, π = softmax(z), r = [1, 0, 0.8, 0])에서 배치 N 개로 그래디언트를 추정한다.
+// 왼쪽: 처음 정책에서 「2」 로짓 성분의 추정치 1,500번 — 흩어진 정도(분산)
 // 오른쪽: 같은 설정으로 5번 따로 학습한 곡선 — 흩어진 추정이 학습을 어떻게 흔드는가
 // 선택지 묶음은 원고의 위젯 줄에 붙은 data-set 으로 고른다.
 //   data-set="baseline" : 「베이스라인」 절 — 없음 / 고정 b = 0.5 / 이동평균
@@ -25,8 +25,8 @@ GW.register("reinforce-variance", (el) => {
   };
   const S = sets[el.dataset.set] || sets.default;
   const f = GW.frame(el, { title: "베이스라인이 분산을 얼마나 줄이는가", caption: S.caption });
-  const R = [1.0, 0.0, 0.6];
-  const Z0 = [-0.6, 0.9, 0.0];
+  const R = [1.0, 0.0, 0.8, 0.0];
+  const Z0 = [-1.0, 0.8, 0.0, 0.5];
   const LR = 0.5, STEPS = 40, SEEDS = 5, HIST_N = 1500;
   const st = { mode: "none", c: 0, N: 4, seed: 1 };
 
@@ -64,7 +64,7 @@ GW.register("reinforce-variance", (el) => {
   const row = GW.h("div", { style: { display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "0.8rem" } }, f.stage);
   const left = GW.h("div", {}, row), right = GW.h("div", {}, row);
   GW.legend(left, [["c1", "추정치 분포"], ["c2 dash", "참값 ∂<span class=\"sym-J\">J</span>/∂z", "dash"]]);
-  const hist = GW.chart(left, { w: 300, h: 240, x: [-1, 1], y: [0, 1], yticks: [], xlabel: "‘서울입니다’ 로짓의 그래디언트 추정", margin: { l: 16, r: 12 }, label: "그래디언트 추정치 히스토그램" });
+  const hist = GW.chart(left, { w: 300, h: 240, x: [-1, 1], y: [0, 1], yticks: [], xlabel: "‘2’ 로짓의 그래디언트 추정", margin: { l: 16, r: 12 }, label: "그래디언트 추정치 히스토그램" });
   GW.legend(right, [["cs-J", "<span class=\"sym-J\">J</span>: 학습 5회 (각각 다른 난수)"], ["cm dash", "정확한 기댓값 (VPG)", "dash"]]);
   const curves = GW.chart(right, { w: 300, h: 240, x: [0, STEPS], y: [0, 1], xlabel: "스텝", ylabel: "기대 보상 J", margin: { l: 40, r: 12 }, label: "학습 곡선" });
 
@@ -82,13 +82,13 @@ GW.register("reinforce-variance", (el) => {
     return rs.map((r) => r - (s - r) / (n - 1));
   }
 
-  // 배치 그래디언트 (로짓 3성분)
+  // 배치 그래디언트 (로짓 성분마다)
   function batchGrad(p, rng, b) {
     const acts = [], rs = [];
     for (let i = 0; i < st.N; i++) { const a = sample(p, rng()); acts.push(a); rs.push(R[a] + st.c); }
     const w = weights(rs, b);
-    const g = [0, 0, 0];
-    for (let i = 0; i < st.N; i++) for (let k = 0; k < 3; k++) g[k] += (w[i] * ((k === acts[i] ? 1 : 0) - p[k])) / st.N;
+    const g = R.map(() => 0);
+    for (let i = 0; i < st.N; i++) for (let k = 0; k < R.length; k++) g[k] += (w[i] * ((k === acts[i] ? 1 : 0) - p[k])) / st.N;
     return { g, meanR: rs.reduce((a, x) => a + x, 0) / st.N };
   }
 
@@ -120,7 +120,7 @@ GW.register("reinforce-variance", (el) => {
     // ── 오른쪽: 학습 곡선 5개 + 정확한 VPG
     curves.layer.innerHTML = ""; curves.top.innerHTML = "";
     let z = Z0.slice(); const exact = [Jof(softmax(z))];
-    for (let t = 0; t < STEPS; t++) { const p = softmax(z), J = Jof(p); for (let k = 0; k < 3; k++) z[k] += LR * p[k] * (R[k] - J); exact.push(Jof(softmax(z))); }
+    for (let t = 0; t < STEPS; t++) { const p = softmax(z), J = Jof(p); for (let k = 0; k < R.length; k++) z[k] += LR * p[k] * (R[k] - J); exact.push(Jof(softmax(z))); }
     curves.path(exact.map((v, i) => [i, v]), "cm dash");
     const finals = [];
     for (let s = 0; s < SEEDS; s++) {
@@ -131,7 +131,7 @@ GW.register("reinforce-variance", (el) => {
       for (let t = 0; t < STEPS; t++) {
         const p = softmax(z);
         const { g, meanR } = batchGrad(p, r2, b);
-        for (let k = 0; k < 3; k++) z[k] += LR * g[k];
+        for (let k = 0; k < R.length; k++) z[k] += LR * g[k];
         b = 0.8 * b + 0.2 * meanR;
         js.push(Jof(softmax(z)));
       }
